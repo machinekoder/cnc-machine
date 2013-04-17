@@ -1,0 +1,47 @@
+# Object files
+*.o
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# µC
+*.hex
+*.bin
+*.lst
+*.map
+*.elf
+
+# Temporary files
+*~*
+
+# Build folder
+./code/build/
+./code/doxygen/
+
+# Linux
+.directory
+
+# Qt
+*.pro.user
+*moc*
+
+# Kdevelop
+.kdev_include_paths
+
+# Tex
+*.backup
+
+# Other
+./code/DbgCfg/LPC1758_OOCD_CMARM.cfg
