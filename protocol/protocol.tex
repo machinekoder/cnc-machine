@@ -28,6 +28,7 @@
 \usepackage{xcolor}
 \usepackage{calc}
 \usepackage{caption}
+\usepackage{float}
 %tabellen
 
 % Kopfzeilen frei gestaltbar
@@ -102,10 +103,10 @@
 % Name der Autorin/des Autors eingeben:
 \put(-30,-450){\large Ausgeführt von:\ Alexander Rössler }
 \put(+54,-470){\large \ Johannes Wimmer}
-\put(+204,-450){\large \ Koorosh Pirghaibi}
+\put(+204,-450){\large \ Koroosh }
 \put(+204,-470){\large \ }
 \put(-30,-490){\large Matrikelnummer: 1110254020}
-\put(+63,-510){\large 1110254003}
+\put(+63,-510){\large 11102540??}
 \put(+210,-490){\large 1110254002}
 \put(+210,-510){\large }
 
@@ -128,99 +129,44 @@
 
 %=====================================================================================================================%
 \section{Ziel}
-Ziel des Projekts ist es ein Gerät zu entwickeln welches Infrarot-Signale von Fernbediehnungen aufzeichnen und wiedergeben kann.
-Das Gerät soll per WLAN über Computer oder Handy bediehnt werden können.
+Ziel des Projekts ist es sowohl Steuer als auch Embedded Software für eine CNC-Maschine zu entwickeln.
 
 \section{Funktionsweise}
-Handelsübliche Infrarot-Fernbediehnungen senden digital codierte Signale per Sende-Diode aus 
-welche am Empfänger wieder decodiert werden.
-Die Signale werden in 30-40kHz PWM Pulsen gesendet und am Empfänger gefiltert. 
-Die meist verbreitete Freqzenz liegt bei 38kHz, deshalb haben wir den Empfänger auch so gewählt. 
-Da viele verschiedene Codierungsformate verbreitet sind, entschiedene wird uns dafür die Signale nicht zu 
-decodieren sondern ``analog'' aufzunehmen und wiederzugeben, somit können beliebige Geräte ferngesteurt werden 
-ohne die Codierung zu kennen (auch etwaige zukünfitge Codierungen sind somit steuerbar).
 
 \chapter{Umsetzung}
 
-\section{Infrarot Sender und Empfänger}
-Als Empfänger verwenden wir einen TSOP. Dieser nimmt uns die Filterung und Entstörung der IR-Signale ab,
-am Ausgang wird Logisch 1 oder 0 ausgegeben. Die TSOP Module haben eine sehr hohe Empfindlichkeit und werden 
-vor allem in hochwertigeren Produkten verwendet.
-
-Als Sender werden herkömliche 950nm IR-Dioden verwendet. Diese sind auf Puls-Betrieb ausgelegt und erfordern somit 
-sehr hohe Ströme (200mA-1A). Da die Stromversorgung über USB erfolgen soll und dieser maximal für 500mA ausgelegt 
-ist, brauchen wir einen Kondensator um kurzzeitig den benötigten Strom bereitzustellen. Um die Diode zu Schalten
-wurden verschiedene Varianten probiert. Zuerst versuchten wir dies mit eine FET zu realisieren, aus uns
-nicht erklärlichen Gründen funktionierte dies nicht konsistent. Am Ende erwies siche eine Darlington-Schaltung als
-am brauchbarsten (da der µC nur wenige mA Ausgangstrom liefert ist eine direkte Ansteuerung des Leistungstransistors
-nicht möglich).
-
-\section{WLAN}
-Für die Anknüpfung an WLAN Netwerke haben wir ein WLAN-Modul von Roving Networks gewählt. Die Ansteuerung erfolgt über
-UART.
-
-\section{Software}
-Die Software wurde strukturiert aufgebaut. Die Hardware Interfaces werden jeweils per Library angesteuert
-welche in einen Systemunabhängigen und einen Treiberpart besteht. Umgesetzt wurden dabei Libraries für
-Timer, UART, PWM, LEDs, Button, GPIO, Pincon, IAP und WiFly Modul. Die Entwicklung der Libraries stellte somit
-einen großen Part der Entwicklung der gesamten Anwendung dar.
-
-Die Aufzeichnung der Signale erfolgt über eine Kombination aus GPIO-Interrupt und Timer, da die Timer-interne
-Capture Compare Schnittstelle nicht funktionieren wollte. Die Wiedergabe der Daten erfolgt über eine Kombination aus PWM und
-Timer, mit dem Timer wird das PWM-Signal aus- und eingeschalten.
-
-Um Einstellungen im Mikrocontroller internen Flash-Speicher speichern zu können musst auch eine IAP-Library 
-implementiert werden.
-
-Die Interaktion mit dem Benutzer erfolgt zum einen über die Software am Computer und zum Anderen über die Buttons
-am Gerät. Zum Beispiel ist mit diesen ein Wechseln zwischen Adhoc und Infrastructure-Modus möglich.
-
-\section{Desktop-Anwendung}
-Die Desktop Anwendung wurde mit Qt/C++ geschrieben und ist in 2 Teile gesplittet: Einen GUI-Part und einer Library welche die
-Komunikation zum µC übernimmt. Der GUI-Part diehnt vor allem Testzwecken, hierbei wurde unter anderem die Simulation
-einer echten Fernbediehnungen umgesetzt. 
-
-Die Library kommuniziert mit dem µC per Textbefehlen, somit wäre eine Steuerung auch ohne Library ohne Probleme möglich.
-Signale können gesendet und aufgezeichnet werden, wahlweise per WLAN oder serieller Verbindung. Das Senden von Daten über die 
-Serielle Schnittstelle ist Aufgrund eines Bugs in der Bibliothek für die Serielle Schnittstelle nicht möglich.
-
-\section{Schaltung}
-Aufbau auf Lochrasterplatine:
-  \begin{figure}[!ht]
+\section{Desktop Server}
+\subsection{Funktionalität}
+    \begin{figure}[H]
     \centering
-        \includegraphics[width=260pt]{./picture/front.png}
-        \caption{\label{lm324}{Vorderseite}}
+        \includegraphics[width=200pt]{./picture/process1.pdf}
+        \caption{\label{main}{Processing a GCode-file}}
     \end{figure}
     
-    \begin{figure}[!ht]
+        \begin{figure}[H]
     \centering
-        \includegraphics[width=260pt]{./picture/back.png}
-        \caption{\label{lm324}{Rückseite}}
+        \includegraphics[width=200pt]{./picture/process2.pdf}
+        \caption{\label{main}{Server-side communication}}
     \end{figure}
 
-
-\section{Gehäuse}
-Aufgrund eines vorhandenen 3D-Druckers konnte auch ein Gehäuse für den Prototypen umgesetzt werden.
-
-\chapter{Kommunikation}
-\begin{figure}[!ht]
+\subsection{GUI}
+Die GUI wird in zwei Fenstern implementiert. Das Hauptfenster enthält alle Elemente um die Maschine anzusteuern und Ausgaben zu loggen.
+Das Preview Window diehnt nur zur Visualisierung des Pfades.
+\subsubsection{Mockup}
+    \begin{figure}[H]
     \centering
-        \includegraphics[width=360pt]{./picture/Kommunikation.pdf}
-        \caption{\label{lm324}{Kommunikation}}
-\end{figure}
-\section{Kommunikation zwischen dem PC und dem Microcontroller}
-\section{Kommunikation zwischen dem Microcontroller und der Fräsmaschine}
+        \includegraphics[width=260pt]{./picture/gui_main.png}
+        \caption{\label{main}{Main Window}}
+    \end{figure}
+    
+    \begin{figure}[H]
+    \centering
+        \includegraphics[width=200pt]{./picture/gui_preview.png}
+        \caption{\label{main}{Preview Window}}
+    \end{figure}
 
-\chapter{Zukunft}
-
-\section{Software}
-Eine anwenderfreundlichere Bediehnoberfläche ist zwingend notwendig. Weiters sollte eine Anwendung für die
-mobile Benutzung entwickelt werden. Auch ein Command-Line Client wäre sinnvoll.
-
-\section{Hardware}
-Eine Erweiterung mit Funkmodulen für das 433kHz und das 844kHz Band wäre denkbar um auch die zahlreich vorhandenen
-Geräte aus diesen Bereich steuern zu können. Nach dem Motto: ``One remote to control them all''
-
+\section{Kommunikationstask}
+Bla bla.... fsdfdsfds
 
 
  %\begin{figure}[!ht]
