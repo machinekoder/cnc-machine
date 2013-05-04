@@ -84,7 +84,7 @@ void QGCodeParser::loadExpression(QString fileName)
 
 bool QGCodeParser::evaluateExpression(QString text)
 {
-    text = stripComments(text);
+    text = stripComments(text).trimmed();
     //text = removeWhitespace(text, &expressionWhitespaceList);
     return earleyParser->parseWord(text);
 }
@@ -115,6 +115,8 @@ QString QGCodeParser::stripComments(QString text)
     pos = text.indexOf(")");
     if (pos != -1)
         text = text.mid(pos+1);
+
+    qDebug() << text;
     return text;
 }
 
@@ -148,9 +150,9 @@ void QGCodeParser::evaluateCode()
 
     for (int i = 0; i < newLines.count(); ++i)
     {
-        if ((oldLines.count() > i) && (newLines.at(i) != oldLines.at(i)))
+        if ((oldLines.count() != newLines.count()) || ((oldLines.count() > i) && (newLines.at(i) != oldLines.at(i))))
         {
-            bool result = evaluateExpression(newLines.at(i).trimmed());
+            bool result = evaluateExpression(newLines.at(i));
             codeEditor->setLineError(i, !result);
 
             if (result != true)

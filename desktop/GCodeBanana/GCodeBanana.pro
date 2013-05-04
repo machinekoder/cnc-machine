@@ -27,3 +27,6 @@ FORMS    += mainwindow.ui
 
 RESOURCES += \
     resource.qrc
+
+OTHER_FILES += \
+    settings/grammar.txt
