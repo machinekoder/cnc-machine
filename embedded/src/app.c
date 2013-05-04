@@ -5,6 +5,10 @@
 
 #include "app.h"
 #include "taskStart.h"
+#include "timer.h"
+#include "gpio.h"
+
+
 
 /*
 ************************************************************************************************
@@ -29,6 +33,8 @@
 * Note(s)     : none.
 ************************************************************************************************
 */
+
+CPU_INT32S steps;
 
 int 
 main (void)
@@ -206,6 +212,104 @@ void DAC_WriteValue(uint32 dac_value)
     OSSemPost(&DacSem,
               OS_OPT_POST_ALL,
               &err);
+}
+void moveXDirection ()
+{
+  static CPU_INT32S steps_intern =0;
+
+
+  if(steps > 0 && steps_intern < steps)
+  {
+	steps_intern++;
+  }
+  else if (steps < 0 && steps_intern > steps)
+  {
+	  steps_intern--;
+  }
+  else
+  {
+	  Timer_stop(0);
+  }
+  Gpio_toggle(0,11);
+}
+
+
+
+void setXDirection (CPU_INT32S steps)
+{
+	Timer_initialize(0,270,3);
+	Timer_connectFunction(0, moveXDirection());
+
+	if (steps > 0)
+	{
+		Gpio_set(0,10);
+	}
+	else
+	{
+		Gpio_clear(0,10);
+	}
+	Timer_start(0);
+}
+
+
+void moveYDirection ()
+{
+
+
+}
+
+void moveZDirection ()
+{
+
+
+}
+
+
+
+
+void buttonInit ()
+{
+	//+++++++++++++++++++++++++++++++++++++++++TASTER++++++++++++++++++++++++++++++++++++++++++++++++++
+    //Taster x+
+    Button_initializeButton(1,2,1,ButtonTypeLowActive);
+
+    //Taster x-
+    Button_initializeButton(2,2,1,ButtonTypeLowActive);
+
+    //Taster y+
+    Button_initializeButton(3,2,3,ButtonTypeLowActive);
+
+    //Taster y-
+    Button_initializeButton(4,2,4,ButtonTypeLowActive);
+
+    //Taster z+
+    Button_initializeButton(5,0,26,ButtonTypeLowActive);
+
+    //Taster z-
+    Button_initializeButton(6,2,7,ButtonTypeLowActive);
+
+    //Taster OK
+    Button_initializeButton(7,2,0,ButtonTypeLowActive);
+
+	//+++++++++++++++++++++++++++++++++++++++++ENDSCHALTER++++++++++++++++++++++++++++++++++++++++++++++++++
+    //Endschalter x+
+    Button_initializeButton(8,0,8,ButtonTypeLowActive);
+
+    //Endschalter x-
+    Button_initializeButton(9,0,9,ButtonTypeLowActive);
+
+    //Endschalter y+
+    Button_initializeButton(10,2,6,ButtonTypeLowActive);
+
+    //Endschalter y-
+    Button_initializeButton(11,2,8,ButtonTypeLowActive);
+
+    //Endschalter z+
+    Button_initializeButton(12,0,17,ButtonTypeLowActive);
+
+    //Endschalter z-
+    Button_initializeButton(13,0,22,ButtonTypeLowActive);
+
 }
 
 /*! EOF */
