@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/settings">
+        <file alias="grammar">settings/grammar.txt</file>
+    </qresource>
+    <qresource prefix="/test">
+        <file alias="testcode">settings/test.gcode</file>
+        <file alias="test2">settings/test2.gcode</file>
+    </qresource>
+</RCC>

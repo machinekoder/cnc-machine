@@ -1,0 +1,63 @@
+# Grammatik-Regeln (kontextfrei, epsilonfrei, sonst allgemein)
+# ------------------------------------------------------------
+# Regeln müssen bezüglich der Rückgabewerte gruppiert sein!
+# Nichtterminierte Symbole in Normklammern z.B. |A|
+# Terminierte Symbole außerhalb der Normklammern
+# Linksseitige Symbole ohne Klammern vor dem =
+#
+#
+# \~ = any character except =,:,@,...
+# \* = any character
+#
+# Definition needs following outline:
+#   Rule            |   functions
+S=%
+S=|mcodes|
+S=|gcodes|
+S=|gmove| |xyz|
+S=
+
+xyz=X|real|
+xyz=Y|real|
+xyz=Z|real|
+xyz=X|real| Y|real|
+xyz=X|real| Z|real|
+xyz=Y|real| Z|real|
+xyz=X|real| Y|real| Z|real|
+xyz=X|real| F|real|
+xyz=Y|real| F|real|
+xyz=Z|real| F|real|
+xyz=X|real| Y|real| F|real|
+xyz=X|real| Z|real| F|real|
+xyz=Y|real| Z|real| F|real|
+xyz=X|real| Y|real| Z|real|F|real|
+
+mcodes=M5
+mcodes=M2
+mcodes=M3
+
+gcodes=G21
+
+gmove=G00
+gmove=G01
+
+#Numbers
+uint=|n|
+uint=|n||uint|
+int=|uint|
+int=|+-||uint|
+real=|int|
+real=|int|.|uint|
+#real=.|uint|
+n=0
+n=1
+n=2
+n=3
+n=4
+n=5
+n=6
+n=7
+n=8
+n=9
++-=+
++-=-
