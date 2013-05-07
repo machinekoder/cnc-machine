@@ -7,7 +7,7 @@ SCRIPTPATH = buildscripts
 
 ################################################################################
 # Sytem files
-SRC  = $(SOURCEPATH)/app.c
+SRC = $(SOURCEPATH)/app.c
 SRC += $(SOURCEPATH)/taskMachine.c
 SRC += $(SOURCEPATH)/taskSupervisor.c
 SRC += $(SOURCEPATH)/taskStart.c
