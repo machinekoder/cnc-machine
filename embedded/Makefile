@@ -122,6 +122,7 @@ SSRC += $(LIBRARYPATH)/button.c
 SSRC += $(LIBRARYPATH)/crc.c
 SSRC += $(LIBRARYPATH)/ssp.c
 SSRC += $(LIBRARYPATH)/rfm12.c
+sSSRC += $/src/Libraries/Driver/LPC17xx/src/zentoolworksDriver.c
 
 LDFILE = LPC1758.ld
 LDPATH = Linker

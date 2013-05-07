@@ -72,34 +72,7 @@ main (void)
                 (OS_MEM_QTY  ) 10,
                 (OS_MEM_SIZE ) OUTPUT_MEMORY_SIZE,
                 (OS_ERR     *) &os_err);
-    
-    OSMemCreate((OS_MEM     *)&ServiceRequestMemory,
-                (CPU_CHAR   *)"ServiceRequestMemory",
-                (void       *)&ServiceRequestMemoryStorage[0],
-                (OS_MEM_QTY  ) 20,
-                (OS_MEM_SIZE ) sizeof(App_TaskMachine_ServiceRequest),
-                (OS_ERR     *) &os_err);
-    
-    OSMemCreate((OS_MEM     *)&RawMaterialMemory,
-                (CPU_CHAR   *)"RawMaterialMemory",
-                (void       *)&RawMaterialMemoryStorage[0],
-                (OS_MEM_QTY  ) 20,
-                (OS_MEM_SIZE ) sizeof(uint32),
-                (OS_ERR     *) &os_err);
-
-    OSTaskCreate((OS_TCB      *)&App_TaskStartTCB,                  /* Create the Start Task */
-                 (CPU_CHAR    *)"Start",
-                 (OS_TASK_PTR  )App_TaskStart,
-                 (void        *)0,
-                 (OS_PRIO      )5,                          
-                 (CPU_STK     *)App_TaskStartStk,
-                 (CPU_STK_SIZE )APP_CFG_TASK_START_STK_SIZE_LIMIT,
-                 (CPU_STK_SIZE )APP_CFG_TASK_START_STK_SIZE,
-                 (OS_MSG_QTY   )0u,
-                 (OS_TICK      )0u,
-                 (void        *)0,
-                 (OS_OPT       )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-                 (OS_ERR      *)&os_err);
+ 
 
     OSStart(&os_err);                                                   /* Start Multitasking */
     if(os_err != OS_ERR_NONE)                                         /* shall never get here */
@@ -107,7 +80,9 @@ main (void)
           
     Timer_initialize(Timer0, 270, 3);
     Timer_connectFunction(Timer0, moveXDirection);
-    //cnc_initialize();
+    cnc_initialize();
+    
+
     
     return (0);
 }
@@ -218,6 +193,10 @@ void DAC_WriteValue(uint32 dac_value)
     OSSemPost(&DacSem,
               OS_OPT_POST_ALL,
               &err);
+    
+        cncCalibrateZentool (2000, 0);
+        
+        
 }
 
     

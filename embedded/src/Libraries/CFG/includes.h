@@ -126,6 +126,8 @@
 #include "timer.h"
 #include "gpio.h"
 #include "button.h"
+#include "gpio.h"
+#include "pincon.h"
 
 /*
 *********************************************************************************************************

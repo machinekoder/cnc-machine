@@ -5,10 +5,9 @@
  *      Author: Koorosh
  */
 
-#include "gpio.h"
-#include "pincon.h"
+#include "zentoolworksDriver.h"
 
-void cncInit ()
+void cnc_initialize ()
 {
 	//+++++++++++++++++++++++++++++++++++++++++MOTOR++++++++++++++++++++++++++++++++++++++++++++++++++
 	//Motor x Dir

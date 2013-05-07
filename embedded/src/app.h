@@ -30,6 +30,7 @@
 #include <includes.h>
 #include <sys/stat.h>
 #include "taskMachine.h"
+#include "zentoolworksDriver.h"
 
 /*
 ************************************************************************************************
@@ -78,3 +79,5 @@ uint32 Timer_running(Timer id);
 bool setXDirection (CPU_INT32S stepsX);
 bool setYDirection (CPU_INT32S stepsY);
 void moveXDirection ();
+
+bool cncCalibrateZentool (CPU_INT32U steps, CPU_INT16S difference);
