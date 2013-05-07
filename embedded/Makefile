@@ -37,6 +37,7 @@ INCPATH += -I"$(SOURCEPATH)/Libraries/uC-Probe"
 INCPATH += -I"$(SOURCEPATH)/Libraries/Driver/LPC17xx/inc"
 INCPATH += -I"$(SOURCEPATH)/Libraries/Library/inc"
 INCPATH += -I"$(SOURCEPATH)/Libraries/SYS/inc"
+INCPATH += -I"$(SOURCEPATH)"
 
 ASRC += $(SOURCEPATH)/Libraries/CM3/src/startup_LPC17xx.asm
 ASRC += $(SOURCEPATH)/Libraries/uC-CPU/cpu_a.asm

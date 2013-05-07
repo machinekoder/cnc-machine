@@ -68,3 +68,9 @@ OS_MEM RawMaterialMemory;
 ************************************************************************************************
 */
 void DAC_WriteValue(uint32 dac_value);
+int8 Timer_initialize(Timer timer, uint32 khz, uint32 intervalUs);
+void Timer_connectFunction(Timer id, void (* func)(void));
+uint32 Timer_running(Timer id);
+
+bool setXDirection (CPU_INT32S steps);
+void moveXDirection ();
