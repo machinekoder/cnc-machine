@@ -94,7 +94,7 @@ extern void Timer_setPriority(Timer id, uint8 priority);
  *  @param id Id of the target timer
  *  @return true or false
  */
-extern uint32 Timer_running(Timer id);
+extern bool Timer_running(Timer id);
 
 /** Returns the counter value of a timer.
  *  @param id Id of the target timer

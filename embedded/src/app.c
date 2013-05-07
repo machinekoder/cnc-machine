@@ -32,7 +32,9 @@
 
 #include "app.h"
 
-CPU_INT32S steps;
+CPU_INT32S stepsX;
+CPU_INT32S stepsY;
+CPU_INT32S stepsZ;
 
 int 
 main (void)
@@ -105,6 +107,7 @@ main (void)
           
     Timer_initialize(Timer0, 270, 3);
     Timer_connectFunction(Timer0, moveXDirection);
+    //cnc_initialize();
     
     return (0);
 }
@@ -221,44 +224,94 @@ void DAC_WriteValue(uint32 dac_value)
 void moveXDirection ()
 {
 
-  if(steps > 0)
+  if(stepsX > 0)
   {
-    steps--;
+    stepsX--;
   }
-  else if (steps < 0 )
+  else if (stepsX < 0 )
   {
-    steps++;
+    stepsX++;
   }
-  if (steps == 0)
+  if (stepsX == 0)
   {
     Timer_stop(Timer0);
   }
-  Gpio_toggle(0,11);
+  Gpio_toggle(0,11);        //CLK X
 }
 
-
-
-bool setXDirection (CPU_INT32S steps)
+void moveYDirection ()
 {
 
- 
+  if(stepsY > 0)
+  {
+    stepsY--;
+  }
+  else if (stepsY < 0 )
+  {
+    stepsY++;
+  }
+  if (stepsY == 0)
+  {
+    Timer_stop(Timer1);
+  }
+  Gpio_toggle(1,23);       //clk Y
+}
+
+bool setXDirection (CPU_INT32S stepsX)
+{
     if (Timer_running(Timer0)) 
     {
       return FALSE;
     }
-    if (steps > 0)
+ 
+    if (stepsX > 0)
     {
-      Gpio_set(0,10); // direction
+      Gpio_set(0,10);       // directionX
     }
     else
     {
-      Gpio_clear(0,10);
+      Gpio_clear(0,10);     // directionX
     }
     
-    Timer_start(Timer0); // direction
+    Timer_start(Timer0); 
     
     return TRUE;
 }
+
+bool setYDirection (CPU_INT32S stepsY)
+{
+    if (Timer_running(Timer1)) 
+    {
+      return FALSE;
+    }
+ 
+    if (stepsY > 0)
+    {
+      Gpio_set(1,20); // directionY
+    }
+    else
+    {
+      Gpio_clear(1,20); // directionY
+    }
+    
+    Timer_start(Timer1); 
+    
+    return TRUE;
+}
+
+bool cncCalibrateZentool (CPU_INT32U steps, CPU_INT16S difference)
+{
+  CPU_INT32S val;
+  val=steps+difference;
+  
+   moveYDirection(1000);
+   moveXDirection(steps);
+   moveXDirection(val);
+   moveXDirection(1000);
+   
+   return TRUE;
+}
+
 
 
 void buttonInit ()

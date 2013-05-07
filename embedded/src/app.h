@@ -72,5 +72,9 @@ int8 Timer_initialize(Timer timer, uint32 khz, uint32 intervalUs);
 void Timer_connectFunction(Timer id, void (* func)(void));
 uint32 Timer_running(Timer id);
 
-bool setXDirection (CPU_INT32S steps);
+/** starts moving in Direction X.
+ *  @param stepsX are the steps >0= +  <0= -
+ */
+bool setXDirection (CPU_INT32S stepsX);
+bool setYDirection (CPU_INT32S stepsY);
 void moveXDirection ();

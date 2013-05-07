@@ -1525,7 +1525,7 @@ int8 Timer_singleShot(uint32 ms, void (* func)(void))
        return -1;
 }
 
-void Timer_running(Timer id)
+bool Timer_running(Timer id)
 {
     if (id == Timer0)
     {
@@ -1543,5 +1543,5 @@ void Timer_running(Timer id)
     {
         return runningTimer3();
     }
-    return;
+    return FALSE;
 }
