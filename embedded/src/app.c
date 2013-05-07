@@ -3,10 +3,6 @@
  *
  **/
 
-#include "app.h"
-#include "taskStart.h"
-#include "timer.h"
-#include "gpio.h"
 
 
 
@@ -34,6 +30,8 @@
 ************************************************************************************************
 */
 
+#include "app.h"
+
 CPU_INT32S steps;
 
 int 
@@ -60,6 +58,7 @@ main (void)
 
     //  Dac_initialize();                             // Init DAC
     //DAC_Init(LPC_DAC);
+
 
     OSSemCreate(&UartSem, "UART Semaphore", 1, &os_err);
     OSSemCreate(&DacSem, "DAC Semaphore", 1, &os_err);
@@ -103,6 +102,10 @@ main (void)
     OSStart(&os_err);                                                   /* Start Multitasking */
     if(os_err != OS_ERR_NONE)                                         /* shall never get here */
           for(;;);
+          
+    Timer_initialize(Timer0, 270, 3);
+    Timer_connectFunction(Timer0, moveXDirection);
+    
     return (0);
 }
 
@@ -213,58 +216,49 @@ void DAC_WriteValue(uint32 dac_value)
               OS_OPT_POST_ALL,
               &err);
 }
+
+    
 void moveXDirection ()
 {
-  static CPU_INT32S steps_intern =0;
 
-
-  if(steps > 0 && steps_intern < steps)
+  if(steps > 0)
   {
-	steps_intern++;
+    steps--;
   }
-  else if (steps < 0 && steps_intern > steps)
+  else if (steps < 0 )
   {
-	  steps_intern--;
+    steps++;
   }
-  else
+  if (steps == 0)
   {
-	  Timer_stop(0);
+    Timer_stop(Timer0);
   }
   Gpio_toggle(0,11);
 }
 
 
 
-void setXDirection (CPU_INT32S steps)
-{
-	Timer_initialize(0,270,3);
-	Timer_connectFunction(0, moveXDirection());
-
-	if (steps > 0)
-	{
-		Gpio_set(0,10);
-	}
-	else
-	{
-		Gpio_clear(0,10);
-	}
-	Timer_start(0);
-}
-
-
-void moveYDirection ()
+bool setXDirection (CPU_INT32S steps)
 {
 
-
+ 
+    if (Timer_running(Timer0)) 
+    {
+      return FALSE;
+    }
+    if (steps > 0)
+    {
+      Gpio_set(0,10); // direction
+    }
+    else
+    {
+      Gpio_clear(0,10);
+    }
+    
+    Timer_start(Timer0); // direction
+    
+    return TRUE;
 }
-
-void moveZDirection ()
-{
-
-
-}
-
-
 
 
 void buttonInit ()

@@ -13,7 +13,7 @@ void App_TaskButton(void* p_arg)
     
     while (DEF_TRUE)
     {
-        if (Gpio_read(2, 10) == 0)
+        if ((2, 10) == 0)
         {
             OSSemPost(&ButtonSem,
                 OS_OPT_POST_1,

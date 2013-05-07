@@ -70,6 +70,12 @@ uint32 getCounterValueTimer1();
 uint32 getCounterValueTimer2();
 uint32 getCounterValueTimer3();
 
+bool runningTimer0();
+bool runningTimer1();
+bool runningTimer2();
+bool runningTimer3();
+
+
 int8 initializeTimer0(uint32 khz, uint32 intervalUs)
 {
     uint32 pclk;
@@ -1207,6 +1213,26 @@ void TIMER3_IRQHANDLER()
 }
 #endif
 
+bool runningTimer0()
+{
+  return TIMER0_RUNNING();
+}
+
+bool runningTimer1()
+{
+  return TIMER1_RUNNING();
+}
+
+bool runningTimer2()
+{
+  return TIMER2_RUNNING();
+}
+
+bool runningTimer3()
+{
+  return TIMER3_RUNNING();
+}
+
 int8 Timer_initialize(Timer timer, uint32 khz, uint32 intervalUs)
 {
     if (timer == Timer0)
@@ -1497,4 +1523,25 @@ int8 Timer_singleShot(uint32 ms, void (* func)(void))
    }
    else
        return -1;
+}
+
+void Timer_running(Timer id)
+{
+    if (id == Timer0)
+    {
+        return runningTimer0();
+    }
+    else if (id == Timer1)
+    {
+        return runningTimer1();
+    }
+    else if (id == Timer2)
+    {
+        return runningTimer2();
+    }
+    else if (id == Timer3)
+    {
+        return runningTimer3();
+    }
+    return;
 }
