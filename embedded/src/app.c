@@ -3,8 +3,8 @@
  *
  **/
 
-#include "app.h"
-#include "taskStart.h"
+
+
 
 /*
 ************************************************************************************************
@@ -29,6 +29,12 @@
 * Note(s)     : none.
 ************************************************************************************************
 */
+
+#include "app.h"
+
+CPU_INT32S stepsX;
+CPU_INT32S stepsY;
+CPU_INT32S stepsZ;
 
 int 
 main (void)
@@ -55,6 +61,7 @@ main (void)
     //  Dac_initialize();                             // Init DAC
     //DAC_Init(LPC_DAC);
 
+
     OSSemCreate(&UartSem, "UART Semaphore", 1, &os_err);
     OSSemCreate(&DacSem, "DAC Semaphore", 1, &os_err);
     OSSemCreate(&ButtonSem, "Button Semaphore", 0, &os_err);
@@ -65,38 +72,18 @@ main (void)
                 (OS_MEM_QTY  ) 10,
                 (OS_MEM_SIZE ) OUTPUT_MEMORY_SIZE,
                 (OS_ERR     *) &os_err);
-    
-    OSMemCreate((OS_MEM     *)&ServiceRequestMemory,
-                (CPU_CHAR   *)"ServiceRequestMemory",
-                (void       *)&ServiceRequestMemoryStorage[0],
-                (OS_MEM_QTY  ) 20,
-                (OS_MEM_SIZE ) sizeof(App_TaskMachine_ServiceRequest),
-                (OS_ERR     *) &os_err);
-    
-    OSMemCreate((OS_MEM     *)&RawMaterialMemory,
-                (CPU_CHAR   *)"RawMaterialMemory",
-                (void       *)&RawMaterialMemoryStorage[0],
-                (OS_MEM_QTY  ) 20,
-                (OS_MEM_SIZE ) sizeof(uint32),
-                (OS_ERR     *) &os_err);
-
-    OSTaskCreate((OS_TCB      *)&App_TaskStartTCB,                  /* Create the Start Task */
-                 (CPU_CHAR    *)"Start",
-                 (OS_TASK_PTR  )App_TaskStart,
-                 (void        *)0,
-                 (OS_PRIO      )5,                          
-                 (CPU_STK     *)App_TaskStartStk,
-                 (CPU_STK_SIZE )APP_CFG_TASK_START_STK_SIZE_LIMIT,
-                 (CPU_STK_SIZE )APP_CFG_TASK_START_STK_SIZE,
-                 (OS_MSG_QTY   )0u,
-                 (OS_TICK      )0u,
-                 (void        *)0,
-                 (OS_OPT       )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-                 (OS_ERR      *)&os_err);
+ 
 
     OSStart(&os_err);                                                   /* Start Multitasking */
     if(os_err != OS_ERR_NONE)                                         /* shall never get here */
           for(;;);
+          
+    Timer_initialize(Timer0, 270, 3);
+    Timer_connectFunction(Timer0, moveXDirection);
+    cnc_initialize();
+    
+
+    
     return (0);
 }
 
@@ -206,6 +193,149 @@ void DAC_WriteValue(uint32 dac_value)
     OSSemPost(&DacSem,
               OS_OPT_POST_ALL,
               &err);
+    
+        cncCalibrateZentool (2000, 0);
+        
+        
+}
+
+    
+void moveXDirection ()
+{
+
+  if(stepsX > 0)
+  {
+    stepsX--;
+  }
+  else if (stepsX < 0 )
+  {
+    stepsX++;
+  }
+  if (stepsX == 0)
+  {
+    Timer_stop(Timer0);
+  }
+  Gpio_toggle(0,11);        //CLK X
+}
+
+void moveYDirection ()
+{
+
+  if(stepsY > 0)
+  {
+    stepsY--;
+  }
+  else if (stepsY < 0 )
+  {
+    stepsY++;
+  }
+  if (stepsY == 0)
+  {
+    Timer_stop(Timer1);
+  }
+  Gpio_toggle(1,23);       //clk Y
+}
+
+bool setXDirection (CPU_INT32S stepsX)
+{
+    if (Timer_running(Timer0)) 
+    {
+      return FALSE;
+    }
+ 
+    if (stepsX > 0)
+    {
+      Gpio_set(0,10);       // directionX
+    }
+    else
+    {
+      Gpio_clear(0,10);     // directionX
+    }
+    
+    Timer_start(Timer0); 
+    
+    return TRUE;
+}
+
+bool setYDirection (CPU_INT32S stepsY)
+{
+    if (Timer_running(Timer1)) 
+    {
+      return FALSE;
+    }
+ 
+    if (stepsY > 0)
+    {
+      Gpio_set(1,20); // directionY
+    }
+    else
+    {
+      Gpio_clear(1,20); // directionY
+    }
+    
+    Timer_start(Timer1); 
+    
+    return TRUE;
+}
+
+bool cncCalibrateZentool (CPU_INT32U steps, CPU_INT16S difference)
+{
+  CPU_INT32S val;
+  val=steps+difference;
+  
+   moveYDirection(1000);
+   moveXDirection(steps);
+   moveXDirection(val);
+   moveXDirection(1000);
+   
+   return TRUE;
+}
+
+
+
+void buttonInit ()
+{
+	//+++++++++++++++++++++++++++++++++++++++++TASTER++++++++++++++++++++++++++++++++++++++++++++++++++
+    //Taster x+
+    Button_initializeButton(1,2,1,ButtonTypeLowActive);
+
+    //Taster x-
+    Button_initializeButton(2,2,1,ButtonTypeLowActive);
+
+    //Taster y+
+    Button_initializeButton(3,2,3,ButtonTypeLowActive);
+
+    //Taster y-
+    Button_initializeButton(4,2,4,ButtonTypeLowActive);
+
+    //Taster z+
+    Button_initializeButton(5,0,26,ButtonTypeLowActive);
+
+    //Taster z-
+    Button_initializeButton(6,2,7,ButtonTypeLowActive);
+
+    //Taster OK
+    Button_initializeButton(7,2,0,ButtonTypeLowActive);
+
+	//+++++++++++++++++++++++++++++++++++++++++ENDSCHALTER++++++++++++++++++++++++++++++++++++++++++++++++++
+    //Endschalter x+
+    Button_initializeButton(8,0,8,ButtonTypeLowActive);
+
+    //Endschalter x-
+    Button_initializeButton(9,0,9,ButtonTypeLowActive);
+
+    //Endschalter y+
+    Button_initializeButton(10,2,6,ButtonTypeLowActive);
+
+    //Endschalter y-
+    Button_initializeButton(11,2,8,ButtonTypeLowActive);
+
+    //Endschalter z+
+    Button_initializeButton(12,0,17,ButtonTypeLowActive);
+
+    //Endschalter z-
+    Button_initializeButton(13,0,22,ButtonTypeLowActive);
+
 }
 
 /*! EOF */

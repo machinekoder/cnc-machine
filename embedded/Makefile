@@ -7,7 +7,7 @@ SCRIPTPATH = buildscripts
 
 ################################################################################
 # Sytem files
-SRC  = $(SOURCEPATH)/app.c
+SRC = $(SOURCEPATH)/app.c
 SRC += $(SOURCEPATH)/taskMachine.c
 SRC += $(SOURCEPATH)/taskSupervisor.c
 SRC += $(SOURCEPATH)/taskStart.c
@@ -37,6 +37,7 @@ INCPATH += -I"$(SOURCEPATH)/Libraries/uC-Probe"
 INCPATH += -I"$(SOURCEPATH)/Libraries/Driver/LPC17xx/inc"
 INCPATH += -I"$(SOURCEPATH)/Libraries/Library/inc"
 INCPATH += -I"$(SOURCEPATH)/Libraries/SYS/inc"
+INCPATH += -I"$(SOURCEPATH)"
 
 ASRC += $(SOURCEPATH)/Libraries/CM3/src/startup_LPC17xx.asm
 ASRC += $(SOURCEPATH)/Libraries/uC-CPU/cpu_a.asm
@@ -121,6 +122,7 @@ SSRC += $(LIBRARYPATH)/button.c
 SSRC += $(LIBRARYPATH)/crc.c
 SSRC += $(LIBRARYPATH)/ssp.c
 SSRC += $(LIBRARYPATH)/rfm12.c
+sSSRC += $/src/Libraries/Driver/LPC17xx/src/zentoolworksDriver.c
 
 LDFILE = LPC1758.ld
 LDPATH = Linker

@@ -90,6 +90,12 @@ extern void Timer_setIntervalMs(Timer id, uint32 ms);
  */
 extern void Timer_setPriority(Timer id, uint8 priority);
 
+/** Returns wether the timer is running or not.
+ *  @param id Id of the target timer
+ *  @return true or false
+ */
+extern bool Timer_running(Timer id);
+
 /** Returns the counter value of a timer.
  *  @param id Id of the target timer
  *  @return counter value
