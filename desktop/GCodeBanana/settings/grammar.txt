@@ -30,7 +30,7 @@ xyz=Z|real| F|real|
 xyz=X|real| Y|real| F|real|
 xyz=X|real| Z|real| F|real|
 xyz=Y|real| Z|real| F|real|
-xyz=X|real| Y|real| Z|real|F|real|
+xyz=X|real| Y|real| Z|real| F|real|
 
 mcodes=M5
 mcodes=M2

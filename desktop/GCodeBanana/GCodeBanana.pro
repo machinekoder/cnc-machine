@@ -5,23 +5,28 @@
 #-------------------------------------------------
 
 QT       += core gui
+CONFIG += serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = GCodeBanana
 TEMPLATE = app
 
+LIBS += -lm
+
 
 SOURCES += main.cpp\
         mainwindow.cpp \
     qearleyparser.cpp \
     qgcodeparser.cpp \
-    codeeditor.cpp
+    codeeditor.cpp \
+    communicator.cpp
 
 HEADERS  += mainwindow.h \
     qearleyparser.h \
     qgcodeparser.h \
-    codeeditor.h
+    codeeditor.h \
+    communicator.h
 
 FORMS    += mainwindow.ui
 

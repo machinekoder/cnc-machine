@@ -6,8 +6,18 @@
 #include <QGraphicsLineItem>
 #include <QSettings>
 #include <QFileInfo>
+#include <QTimer>
+#include <QGraphicsSceneMouseEvent>
 #include "qgcodeparser.h"
 #include "codeeditor.h"
+#include <math.h>
+
+typedef struct {
+    double boardWidth;
+    double boardHeight;
+    double boardStepX;
+    double boardStepY;
+} ApplicationSettings;
 
 namespace Ui {
 class MainWindow;
@@ -21,28 +31,28 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-private slots:
-    void codeChanged(bool valid);
-
-    void on_loadFileButton_clicked();
-
-    void on_refreshButton_clicked();
-
+    void showCrosshair();
+    void hideCrosshair();
+    void setCrosshairPos(QPointF point);
 private:
     QGCodeParser *gcodeParser;
 
-    QGraphicsScene *scene;
-    QList<QGraphicsLineItem*> previewItems;
+    QGraphicsScene              *scene;
+    QList<QGraphicsLineItem*>   previewItems;
+    QGraphicsLineItem           *hLine,
+                                *vLine;
 
     QString settingsDir;
+
+    ApplicationSettings applicationSettings;
 
     //setting loading and saving to ini
     void loadSettings();
     void saveSettings();
 
     void previewGCode(QString code);
-    void translateGCode(QString code, double x, double y, double z);
-    void refreshPreview();
+    QString translateGCode(QString code, double x, double y, double z);
+    void drawGrid();
     void clearPreview();
     
 private:
@@ -50,6 +60,13 @@ private:
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
+
+private slots:
+    void codeChanged(bool valid);
+    void refreshPreview();
+
+    void on_loadFileButton_clicked();
+    void on_refreshButton_clicked();
 };
 
 #endif // MAINWINDOW_H

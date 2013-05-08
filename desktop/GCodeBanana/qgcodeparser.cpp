@@ -115,8 +115,6 @@ QString QGCodeParser::stripComments(QString text)
     pos = text.indexOf(")");
     if (pos != -1)
         text = text.mid(pos+1);
-
-    qDebug() << text;
     return text;
 }
 
