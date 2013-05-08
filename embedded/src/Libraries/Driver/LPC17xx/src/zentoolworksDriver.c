@@ -9,8 +9,8 @@
 
 void cnc_initialize ()
 {
-	//+++++++++++++++++++++++++++++++++++++++++MOTOR++++++++++++++++++++++++++++++++++++++++++++++++++
-	//Motor x Dir
+        //+++++++++++++++++++++++++++++++++++++++++MOTOR++++++++++++++++++++++++++++++++++++++++++++++++++
+        //Motor x Dir
     Gpio_setDirection(0,10,Gpio_Direction_Output);
     Pin_setMode(0,10,Pin_Mode_PullUp); //high --> turn right
     Gpio_set(0,10);
@@ -20,17 +20,17 @@ void cnc_initialize ()
     Pin_setMode(0,11,Pin_Mode_PullUp); //high --> clk is disabled
     Gpio_set(0,11);
 
-    //Motor x Enable
+    //Motor xyz Enable
     Gpio_setDirection(0,6,Gpio_Direction_Output);
     Pin_setMode(0,6,Pin_Mode_PullDown); //low --> Enable is active
-    Gpio_set(0,6);
+    Gpio_clear(0,6);
 
     //Motor x Power(stromabsenkung)
     Gpio_setDirection(1,24,Gpio_Direction_Output);
     Pin_setMode(1,24,Pin_Mode_PullDown);
     Gpio_set(1,24);
 
-	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //Motor y Dir
     Gpio_setDirection(1,20,Gpio_Direction_Output);
     Pin_setMode(1,20,Pin_Mode_PullUp);
@@ -41,17 +41,12 @@ void cnc_initialize ()
     Pin_setMode(1,23,Pin_Mode_PullUp);
     Gpio_set(1,23);
 
-    //Motor y Enable
-    Gpio_setDirection(0,6,Gpio_Direction_Output);
-    Pin_setMode(0,6,Pin_Mode_PullUp);
-    Gpio_set(0,6);
-
     //Motor y Power(stromabsenkung)
     Gpio_setDirection(1,25,Gpio_Direction_Output);
     Pin_setMode(1,25,Pin_Mode_PullDown);
     Gpio_set(1,25);
 
-   	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //Motor z Dir
     Gpio_setDirection(0,0,Gpio_Direction_Output);
     Pin_setMode(0,0,Pin_Mode_PullUp); //high --> turn right
@@ -61,11 +56,6 @@ void cnc_initialize ()
     Gpio_setDirection(0,1,Gpio_Direction_Output);
     Pin_setMode(0,1,Pin_Mode_PullUp); //high --> clk is disabled
     Gpio_set(0,1);
-
-    //Motor z Enable
-    Gpio_setDirection(0,6,Gpio_Direction_Output);
-    Pin_setMode(0,6,Pin_Mode_PullDown); //low --> Enable is active
-    Gpio_set(0,6);
 
     //Motor z Power(stromabsenkung)
     Gpio_setDirection(1,26,Gpio_Direction_Output);

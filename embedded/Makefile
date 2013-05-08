@@ -104,6 +104,7 @@ SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/csp_dma.c
 
 SSRC += $(DRVPATH)/lpc17xx_nvic.c
 SSRC += $(DRVPATH)/lpc17xx_dac.c
+SSRC += $(DRVPATH)/zentoolworksDriver.c
 
 #SSRC += $(LIBRARYPATH)/capcom.c
 SSRC += $(LIBRARYPATH)/timer.c
@@ -122,7 +123,6 @@ SSRC += $(LIBRARYPATH)/button.c
 SSRC += $(LIBRARYPATH)/crc.c
 SSRC += $(LIBRARYPATH)/ssp.c
 SSRC += $(LIBRARYPATH)/rfm12.c
-sSSRC += $/src/Libraries/Driver/LPC17xx/src/zentoolworksDriver.c
 
 LDFILE = LPC1758.ld
 LDPATH = Linker

@@ -20,15 +20,10 @@
 #define ENDSCHALTER_Z+ 12
 #define ENDSCHALTER_Z- 13
 
-
-
-
-
-
-
 #include <defines.h>
 #include <includes.h>
 #include <sys/stat.h>
+#include <timer.h>
 #include "taskMachine.h"
 #include "zentoolworksDriver.h"
 
@@ -69,15 +64,13 @@ OS_MEM RawMaterialMemory;
 ************************************************************************************************
 */
 void DAC_WriteValue(uint32 dac_value);
-int8 Timer_initialize(Timer timer, uint32 khz, uint32 intervalUs);
-void Timer_connectFunction(Timer id, void (* func)(void));
-uint32 Timer_running(Timer id);
 
 /** starts moving in Direction X.
  *  @param stepsX are the steps >0= +  <0= -
  */
-bool setXDirection (CPU_INT32S stepsX);
-bool setYDirection (CPU_INT32S stepsY);
 void moveXDirection ();
+void moveYDirection ();
+bool setXDirection (int32 stepsX_local);
+bool setYDirection (int32 stepsY);
 
-bool cncCalibrateZentool (CPU_INT32U steps, CPU_INT16S difference);
+bool cncCalibrateZentool (uint32 steps, int16 difference);

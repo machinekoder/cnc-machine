@@ -32,59 +32,77 @@
 
 #include "app.h"
 
-CPU_INT32S stepsX;
-CPU_INT32S stepsY;
-CPU_INT32S stepsZ;
+int32 stepsX;
+int32 stepsY;
+int32 stepsZ;
+int32 mySteps;
 
 int 
 main (void)
 {
-    OS_ERR   os_err;
-#if (CPU_CFG_NAME_EN == DEF_ENABLED)
-    CPU_ERR  cpu_err;
-#endif
+//    OS_ERR   os_err;
+//#if (CPU_CFG_NAME_EN == DEF_ENABLED)
+//    CPU_ERR  cpu_err;
+//#endif
 
-    BSP_PreInit();                                 /* initialize basic board support routines */
+//    BSP_PreInit();                                 /* initialize basic board support routines */
 
-#if (CPU_CFG_NAME_EN == DEF_ENABLED)
-    CPU_NameSet((CPU_CHAR *)CSP_DEV_NAME,
-                (CPU_ERR  *)&cpu_err);
-#endif
+//#if (CPU_CFG_NAME_EN == DEF_ENABLED)
+//    CPU_NameSet((CPU_CHAR *)CSP_DEV_NAME,
+//                (CPU_ERR  *)&cpu_err);
+//#endif
 
-    Mem_Init();                                       /* Initialize memory management  module */
+    //Mem_Init();                                       /* Initialize memory management  module */
 
-    OSInit(&os_err);                                                        /* Init uC/OS-III */
-    if(os_err != OS_ERR_NONE)
-      for(;;);
+    //OSInit(&os_err);                                                        /* Init uC/OS-III */
+    //if(os_err != OS_ERR_NONE)
+    //  for(;;);
 
 
     //  Dac_initialize();                             // Init DAC
     //DAC_Init(LPC_DAC);
 
 
-    OSSemCreate(&UartSem, "UART Semaphore", 1, &os_err);
-    OSSemCreate(&DacSem, "DAC Semaphore", 1, &os_err);
-    OSSemCreate(&ButtonSem, "Button Semaphore", 0, &os_err);
+    //OSSemCreate(&UartSem, "UART Semaphore", 1, &os_err);
+    //OSSemCreate(&DacSem, "DAC Semaphore", 1, &os_err);
+    //OSSemCreate(&ButtonSem, "Button Semaphore", 0, &os_err);
 
-    OSMemCreate((OS_MEM     *)&OutputMemory,
+    /*OSMemCreate((OS_MEM     *)&OutputMemory,
                 (CPU_CHAR   *)"OutputMemory",
                 (void       *)&OutputMemoryStorage[0][0],
                 (OS_MEM_QTY  ) 10,
                 (OS_MEM_SIZE ) OUTPUT_MEMORY_SIZE,
-                (OS_ERR     *) &os_err);
+                (OS_ERR     *) &os_err);     */
  
 
-    OSStart(&os_err);                                                   /* Start Multitasking */
-    if(os_err != OS_ERR_NONE)                                         /* shall never get here */
-          for(;;);
+    //OSStart(&os_err);                                                   /* Start Multitasking */
+    //if(os_err != OS_ERR_NONE)                                         /* shall never get here */
+    //      for(;;);
           
-    Timer_initialize(Timer0, 270, 3);
+    //Timer_initialize(Timer0, 270, 3);
+    CPU_SR_ALLOC();
+    Led_initialize(1,29, Led_LowActive_Yes);
+    
+    CPU_CRITICAL_ENTER();
+    Timer_initialize(Timer0, 250, 30);
     Timer_connectFunction(Timer0, moveXDirection);
+    Timer_initialize(Timer1, 250, 30);
+    Timer_connectFunction(Timer1, moveYDirection);
+    CPU_CRITICAL_EXIT();
+    
     cnc_initialize();
     
-
+    mySteps = -2000;
     
-    return (0);
+    
+    for (;;)
+    { 
+          //setXDirection (2000);
+          //setYDirection (mySteps);
+          setXDirection (mySteps);
+    }
+
+    return 0 ;
 }
 
 void DAC_WriteValue(uint32 dac_value)
@@ -193,57 +211,59 @@ void DAC_WriteValue(uint32 dac_value)
     OSSemPost(&DacSem,
               OS_OPT_POST_ALL,
               &err);
-    
-        cncCalibrateZentool (2000, 0);
         
         
 }
 
     
 void moveXDirection ()
-{
-
-  if(stepsX > 0)
-  {
-    stepsX--;
-  }
-  else if (stepsX < 0 )
-  {
-    stepsX++;
-  }
+{                  
+  stepsX--;
+  Gpio_toggle(0,11);        //CLK X
+  
   if (stepsX == 0)
   {
-    Timer_stop(Timer0);
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    Timer_stop(Timer0); 
+    CPU_CRITICAL_EXIT();
   }
-  Gpio_toggle(0,11);        //CLK X
+
 }
 
 void moveYDirection ()
 {
-
-  if(stepsY > 0)
-  {
-    stepsY--;
-  }
-  else if (stepsY < 0 )
-  {
-    stepsY++;
-  }
+  stepsY--;
+  Gpio_toggle(1,23);       //clk Y
+  
   if (stepsY == 0)
   {
-    Timer_stop(Timer1);
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    Timer_stop(Timer1); 
+    CPU_CRITICAL_EXIT();
   }
-  Gpio_toggle(1,23);       //clk Y
 }
 
-bool setXDirection (CPU_INT32S stepsX)
-{
-    if (Timer_running(Timer0)) 
+bool setXDirection (int32 stepsX_local)
+{               
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
+    bool running = Timer_running(Timer0);
+    CPU_CRITICAL_EXIT();
+    if (running) 
     {
       return FALSE;
     }
+    
+    if (stepsX_local == 0)
+    {
+      return FALSE;
+    }
+    
+    stepsX = abs(stepsX_local) * 2; // one cock has rising and falling edge
  
-    if (stepsX > 0)
+    if (stepsX_local > 0)
     {
       Gpio_set(0,10);       // directionX
     }
@@ -252,19 +272,28 @@ bool setXDirection (CPU_INT32S stepsX)
       Gpio_clear(0,10);     // directionX
     }
     
+    CPU_CRITICAL_ENTER();
     Timer_start(Timer0); 
+    CPU_CRITICAL_EXIT();
     
     return TRUE;
 }
 
-bool setYDirection (CPU_INT32S stepsY)
+bool setYDirection (int32 stepsY_local)
 {
     if (Timer_running(Timer1)) 
     {
       return FALSE;
     }
+        
+    if (stepsY_local == 0)
+    {
+      return FALSE;
+    }
+    
+    stepsY = abs(stepsY_local) * 2; // one cock has rising and falling edge
  
-    if (stepsY > 0)
+    if (stepsY_local > 0)
     {
       Gpio_set(1,20); // directionY
     }
@@ -273,14 +302,17 @@ bool setYDirection (CPU_INT32S stepsY)
       Gpio_clear(1,20); // directionY
     }
     
+    CPU_SR_ALLOC();
+    CPU_CRITICAL_ENTER();
     Timer_start(Timer1); 
+    CPU_CRITICAL_EXIT(); 
     
     return TRUE;
 }
 
-bool cncCalibrateZentool (CPU_INT32U steps, CPU_INT16S difference)
+bool cncCalibrateZentool (uint32 steps, int16 difference)
 {
-  CPU_INT32S val;
+  int32 val;
   val=steps+difference;
   
    moveYDirection(1000);
@@ -291,11 +323,9 @@ bool cncCalibrateZentool (CPU_INT32U steps, CPU_INT16S difference)
    return TRUE;
 }
 
-
-
 void buttonInit ()
 {
-	//+++++++++++++++++++++++++++++++++++++++++TASTER++++++++++++++++++++++++++++++++++++++++++++++++++
+        //+++++++++++++++++++++++++++++++++++++++++TASTER++++++++++++++++++++++++++++++++++++++++++++++++++
     //Taster x+
     Button_initializeButton(1,2,1,ButtonTypeLowActive);
 
@@ -317,7 +347,7 @@ void buttonInit ()
     //Taster OK
     Button_initializeButton(7,2,0,ButtonTypeLowActive);
 
-	//+++++++++++++++++++++++++++++++++++++++++ENDSCHALTER++++++++++++++++++++++++++++++++++++++++++++++++++
+        //+++++++++++++++++++++++++++++++++++++++++ENDSCHALTER++++++++++++++++++++++++++++++++++++++++++++++++++
     //Endschalter x+
     Button_initializeButton(8,0,8,ButtonTypeLowActive);
 
