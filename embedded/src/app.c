@@ -11,6 +11,22 @@
 *                                            LOCAL VARIABLES
 ************************************************************************************************
 */
+static OS_TCB App_TaskStartTCB;               /* Application Startup Task Control Block (TCB) */
+static OS_TCB App_TaskLEDTCB;
+static OS_TCB App_MotorSteuerungTCB;
+
+static CPU_STK App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];             /* Start Task Stack */
+static CPU_STK App_TaskLEDStk[APP_STACK_SIZE];
+static CPU_STK App_MotorSteuerungStk[APP_STACK_SIZE];
+
+/*
+************************************************************************************************
+*                                         FUNCTION PROTOTYPES
+************************************************************************************************
+*/
+static void App_TaskStart (void  *p_arg);
+static void App_TaskLED (void *p_arg);
+static void App_MotorSteuerung (void *p_arg);
 
 
 /*
@@ -31,6 +47,8 @@
 */
 
 #include "app.h"
+#include "Libraries/uC-CSP/csp.h"
+
 
 int32 stepsX;
 int32 stepsY;
@@ -80,142 +98,181 @@ main (void)
     //      for(;;);
           
     //Timer_initialize(Timer0, 270, 3);
-    CPU_SR_ALLOC();
-    Led_initialize(1,29, Led_LowActive_Yes);
+   // CPU_SR_ALLOC();
+ //   Led_initialize(1,29, Led_LowActive_Yes);
     
-    CPU_CRITICAL_ENTER();
-    Timer_initialize(Timer0, 250, 30);
-    Timer_connectFunction(Timer0, moveXDirection);
-    Timer_initialize(Timer1, 250, 30);
-    Timer_connectFunction(Timer1, moveYDirection);
-    CPU_CRITICAL_EXIT();
+   // CPU_CRITICAL_ENTER();
+//    Timer_initialize(Timer0, 250, 30);
+//    Timer_connectFunction(Timer0, moveXDirection);
+//    Timer_initialize(Timer1, 250, 30);
+//    Timer_connectFunction(Timer1, moveYDirection);
+  //  CPU_CRITICAL_EXIT();
     
-    cnc_initialize();
+   
     
-    mySteps = -2000;
+//    mySteps = -2000;
     
-    
+/*    
     for (;;)
     { 
-          //setXDirection (2000);
-          //setYDirection (mySteps);
+          setXDirection (2000);
+          setYDirection (mySteps);
           setXDirection (mySteps);
     }
 
     return 0 ;
+*/
+
+     OS_ERR   os_err;
+#if (CPU_CFG_NAME_EN == DEF_ENABLED)
+    CPU_ERR  cpu_err;
+#endif
+
+    BSP_PreInit();                                 /* initialize basic board support routines */
+
+#if (CPU_CFG_NAME_EN == DEF_ENABLED)
+    CPU_NameSet((CPU_CHAR *)CSP_DEV_NAME,
+                (CPU_ERR  *)&cpu_err);
+#endif
+
+    Mem_Init();                                       /* Initialize memory management  module */
+
+    OSInit(&os_err);                                                        /* Init uC/OS-III */
+   
+     cnc_initialize();
+    // DAC_Init(LPC_DAC);
+     //  Led_initialize(1,29, Led_LowActive_Yes);
+     CSP_TmrInit();
+     CSP_TmrCfg (CSP_TMR_NBR_00,50000u);
+     CSP_TmrCfg (CSP_TMR_NBR_01,50000u);
+     CSP_TmrCfg (CSP_TMR_NBR_02,50000u);
+     
+    if(os_err != OS_ERR_NONE)
+      for(;;);
+
+    OSTaskCreate((OS_TCB      *)&App_TaskStartTCB,                  /* Create the Start Task */
+                 (CPU_CHAR    *)"Start",
+                 (OS_TASK_PTR  )App_TaskStart,
+                 (void        *)0,
+                 (OS_PRIO      )4,                          
+                 (CPU_STK     *)App_TaskStartStk,
+                 (CPU_STK_SIZE )APP_CFG_TASK_START_STK_SIZE_LIMIT,
+                 (CPU_STK_SIZE )APP_CFG_TASK_START_STK_SIZE,
+                 (OS_MSG_QTY   )0u,
+                 (OS_TICK      )0u,
+                 (void        *)0,
+                 (OS_OPT       )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+                 (OS_ERR      *)&os_err);
+
+    OSStart(&os_err);                                                   /* Start Multitasking */
+    if(os_err != OS_ERR_NONE)                                         /* shall never get here */
+          for(;;);
+    return (0);
 }
 
-void DAC_WriteValue(uint32 dac_value)
+static  void App_TaskStart (void *p_arg)
 {
-    OS_ERR		err;
-    CPU_TS		ts;
-    /*******************************************************************************************
-    *                                                  PEND ON SEMAPHORE
-    *
-    * Description: This function waits for a semaphore.
-    *
-    * Arguments  : p_sem         is a pointer to the semaphore
-    *
-    *              timeout       is an optional timeout period (in clock ticks).  If non-zero,
-    *                            your task will wait for the resource up to the amount of time
-    *                            (in 'ticks') specified by this argument.  If you specify 0,
-    *                            however, your task will wait forever at the specified semaphore
-    *                            or, until the resource becomes available (or the event occurs).
-    *
-    *              opt           determines whether the user wants to block if the semaphore is
-    *              				 not available or not:
-    *
-    *                            OS_OPT_PEND_BLOCKING
-    *                            OS_OPT_PEND_NON_BLOCKING
-    *
-    *              p_ts          is a pointer to a variable that will receive the timestamp of
-    *              			     when the semaphore was posted or pend aborted or the semaphore
-    *              			     deleted.  If you pass a NULL pointer (i.e. (CPU_TS*)0) then you
-    *              			     will not get the timestamp.  In other words, passing a
-    *              			     NULL pointer is valid and indicates that you don't need the
-    *              			     timestamp.
-    *
-    *              p_err         is a pointer to a variable that will contain an error code
-    *              				 returned by this function.
-    *
-    *                            OS_ERR_NONE               The call was successful and your task
-    *                            						   owns the resource or, the event you
-    *                            						   are waiting for occurred.
-    *                            OS_ERR_OBJ_DEL            If 'p_sem' was deleted
-    *                            OS_ERR_OBJ_PTR_NULL       If 'p_sem' is a NULL pointer.
-    *                            OS_ERR_OBJ_TYPE           If 'p_sem' is not pointing at a
-    *                            						   semaphore
-    *                            OS_ERR_OPT_INVALID        If you specified an invalid value
-    *                            						   for 'opt'
-    *                            OS_ERR_PEND_ABORT         If the pend was aborted by another
-    *                            						   task
-    *                            OS_ERR_PEND_ISR           If you called this function from an
-    *                            						   ISR and the result would lead to a
-    *                            						   suspension.
-    *                            OS_ERR_PEND_WOULD_BLOCK   If you specified non-blocking but
-    *                            						   the semaphore was not available.
-    *                            OS_ERR_SCHED_LOCKED       If you called this function when the
-    *                            						   scheduler is locked
-    *                            OS_ERR_STATUS_INVALID     Pend status is invalid
-    *                            OS_ERR_TIMEOUT            The semaphore was not received within
-    *                            						   the specified timeout.
-    *
-    *
-    * Returns    : The current value of the semaphore counter or 0 if not available.
-    ********************************************************************************************
-    */
+  OS_ERR       err;
 
-    OSSemPend(&DacSem,
-              10,
-              OS_OPT_PEND_BLOCKING,
-              &ts,
-              &err);
+  (void)p_arg;                                                    /* Prevent Compiler Warning */
+  CPU_Init();                                               /* Initialize the uC/CPU Services */
+  OS_CSP_TickInit();                                        /* Initialize the Tick Interrupt. */
 
-    DAC_UpdateValue(LPC_DAC,dac_value);
+#if (OS_CFG_STAT_TASK_EN > 0u)
+  OSStatTaskCPUUsageInit(&err);
+#endif
 
 
-    /*******************************************************************************************
-    *                                     POST TO A SEMAPHORE
-    *
-    * Description: This function signals a semaphore
-    *
-    * Arguments  : p_sem    is a pointer to the semaphore
-    *
-    *              opt      determines the type of POST performed:
-    *
-    *                       OS_OPT_POST_1            POST and ready only the highest priority
-    *                       						 task waiting on semaphore
-    *                                                (if tasks are waiting).
-    *                       OS_OPT_POST_ALL          POST to ALL tasks that are waiting on the
-    *                       						 semaphore
-    *
-    *                       OS_OPT_POST_NO_SCHED     Do not call the scheduler
-    *
-    *                       Note(s): 1) OS_OPT_POST_NO_SCHED can be added with one of the other
-    *                       options.
-    *
-    *              p_err    is a pointer to a variable that will contain an error code returned
-    *              			by this function.
-    *
-    *                       OS_ERR_NONE          The call was successful and the semaphore was
-    *                       				     signaled.
-    *                       OS_ERR_OBJ_PTR_NULL  If 'p_sem' is a NULL pointer.
-    *                       OS_ERR_OBJ_TYPE      If 'p_sem' is not pointing at a semaphore
-    *                       OS_ERR_SEM_OVF       If the post would cause the semaphore count
-    *                       			         to overflow.
-    *
-    * Returns    : The current value of the semaphore counter or 0 upon error.
-    ********************************************************************************************
-    */
+#ifdef CPU_CFG_INT_DIS_MEAS_EN
+  CPU_IntDisMeasMaxCurReset();
+#endif
+  
+   /* Enable Timer0 Interrupt.*/
+CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
+                   (CSP_DEV_NBR   )CSP_INT_SRC_NBR_TMR_00,
+                   (CPU_FNCT_PTR  )App_TMR0_IntHandler,
+                   (void         *)0);
+CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_TMR_00);  
 
-    OSSemPost(&DacSem,
-              OS_OPT_POST_ALL,
-              &err);
-        
-        
+   /* Enable Timer1 Interrupt.*/
+CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
+                   (CSP_DEV_NBR   )CSP_INT_SRC_NBR_TMR_01,
+                   (CPU_FNCT_PTR  )App_TMR1_IntHandler,
+                   (void         *)0);
+CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_TMR_01);
+
+   /* Enable Timer2 Interrupt.*/
+CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
+                   (CSP_DEV_NBR   )CSP_INT_SRC_NBR_TMR_02,
+                   (CPU_FNCT_PTR  )App_TMR2_IntHandler,
+                   (void         *)0);
+CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_TMR_02);
+
+
+  OSTaskCreate((OS_TCB     *)&App_TaskLEDTCB,
+               (CPU_CHAR   *)"LED",
+               (OS_TASK_PTR )App_TaskLED,
+               (void       *)0,
+               (OS_PRIO     )2,
+               (CPU_STK    *)App_TaskLEDStk,
+               (CPU_STK_SIZE)0,
+               (CPU_STK_SIZE)APP_STACK_SIZE,
+               (OS_MSG_QTY  )0,
+               (OS_TICK     )0,
+               (void       *)0,
+               (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+               (OS_ERR     *)&err);
+  
+    OSTaskCreate((OS_TCB     *)&App_MotorSteuerungTCB,
+               (CPU_CHAR   *)"MotorSteuerung",
+               (OS_TASK_PTR )App_MotorSteuerung,
+               (void       *)0,
+               (OS_PRIO     )2,
+               (CPU_STK    *)App_MotorSteuerungStk,
+               (CPU_STK_SIZE)0,
+               (CPU_STK_SIZE)APP_STACK_SIZE,
+               (OS_MSG_QTY  )0,
+               (OS_TICK     )0,
+               (void       *)0,
+               (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+               (OS_ERR     *)&err);
+
+  while (DEF_TRUE) {
+    OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
+  }
 }
 
-    
+static void App_TaskLED (void *p_arg) 
+{
+  OS_ERR       err;
+
+  (void)p_arg;                                                    /* Prevent Compiler Warning */
+  GPIO_SetDir(1,(1<<29),1);                                /* Port, Mask, Direction 1 = Output*/
+  while(DEF_TRUE) {
+    GPIO_ClearValue(1,(1<<29));                                                     /* LED on */
+    OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
+    GPIO_SetValue(1,(1<<29));                                                      /* LED off */
+    OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
+  }
+}
+
+static void App_MotorSteuerung (void *p_arg) 
+{
+  OS_ERR       err;
+
+  (void)p_arg;                                                    /* Prevent Compiler Warning */
+ 
+    setXDirection(2000);
+    OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, 0);
+    setYDirection(2000);
+    setXDirection(-2000);
+    OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, 0);
+    setYDirection(-2000);
+ 
+ 
+  }
+}
+
 void moveXDirection ()
 {                  
   stepsX--;
@@ -223,10 +280,7 @@ void moveXDirection ()
   
   if (stepsX == 0)
   {
-    CPU_SR_ALLOC();
-    CPU_CRITICAL_ENTER();
-    Timer_stop(Timer0); 
-    CPU_CRITICAL_EXIT();
+    CSP_TmrStop(CSP_TMR_NBR_00);
   }
 
 }
@@ -238,24 +292,20 @@ void moveYDirection ()
   
   if (stepsY == 0)
   {
-    CPU_SR_ALLOC();
-    CPU_CRITICAL_ENTER();
-    Timer_stop(Timer1); 
-    CPU_CRITICAL_EXIT();
+    CSP_TmrStop(CSP_TMR_NBR_01);
   }
 }
 
 bool setXDirection (int32 stepsX_local)
 {               
-    CPU_SR_ALLOC();
-    CPU_CRITICAL_ENTER();
+/*
     bool running = Timer_running(Timer0);
-    CPU_CRITICAL_EXIT();
+
     if (running) 
     {
       return FALSE;
     }
-    
+  */  
     if (stepsX_local == 0)
     {
       return FALSE;
@@ -272,20 +322,19 @@ bool setXDirection (int32 stepsX_local)
       Gpio_clear(0,10);     // directionX
     }
     
-    CPU_CRITICAL_ENTER();
-    Timer_start(Timer0); 
-    CPU_CRITICAL_EXIT();
+    CSP_TmrStart(CSP_TMR_NBR_00);
     
     return TRUE;
 }
 
 bool setYDirection (int32 stepsY_local)
 {
-    if (Timer_running(Timer1)) 
+  /*  
+  if (Timer_running(Timer1)) 
     {
       return FALSE;
     }
-        
+    */    
     if (stepsY_local == 0)
     {
       return FALSE;
@@ -302,10 +351,7 @@ bool setYDirection (int32 stepsY_local)
       Gpio_clear(1,20); // directionY
     }
     
-    CPU_SR_ALLOC();
-    CPU_CRITICAL_ENTER();
-    Timer_start(Timer1); 
-    CPU_CRITICAL_EXIT(); 
+    CSP_TmrStart(CSP_TMR_NBR_01); 
     
     return TRUE;
 }
@@ -368,4 +414,21 @@ void buttonInit ()
 
 }
 
+static void App_TMR0_IntHandler (void *p_arg)
+{
+  
+  moveXDirection();
+  
+  CSP_TmrIntClr(CSP_TMR_NBR_00);		/* Clear TMR0 interrupt.								*/
+  CPU_IntSrcEn(CPU_INT_SYSTICK);     /* Enable the SYSTICK interrupt. Resume OS operation.   */
+}
+
+static void App_TMR1_IntHandler (void *p_arg)
+{
+  
+  moveYDirection();
+  
+  CSP_TmrIntClr(CSP_TMR_NBR_01);		/* Clear TMR0 interrupt.								*/
+  CPU_IntSrcEn(CPU_INT_SYSTICK);     /* Enable the SYSTICK interrupt. Resume OS operation.   */
+}
 /*! EOF */

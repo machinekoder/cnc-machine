@@ -1,6 +1,7 @@
 ################################################################################
-# Makefile for the LPC1758 / eStick2 by Martin Horauer
+# Makefile for the LPC1758 / eStick2 by Alex
 #
+
 SOURCEPATH = src
 BINPATH = bin
 SCRIPTPATH = buildscripts
@@ -8,11 +9,11 @@ SCRIPTPATH = buildscripts
 ################################################################################
 # Sytem files
 SRC = $(SOURCEPATH)/app.c
-SRC += $(SOURCEPATH)/taskMachine.c
-SRC += $(SOURCEPATH)/taskSupervisor.c
-SRC += $(SOURCEPATH)/taskStart.c
-SRC += $(SOURCEPATH)/taskBlink.c
-SRC += $(SOURCEPATH)/taskButton.c
+#SRC += $(SOURCEPATH)/taskMachine.c
+#SRC += $(SOURCEPATH)/taskSupervisor.c
+#SRC += $(SOURCEPATH)/taskStart.c
+#SRC += $(SOURCEPATH)/taskBlink.c
+#SRC += $(SOURCEPATH)/taskButton.c
 
 ################################################################################
 #don't edit below
@@ -129,12 +130,11 @@ LDPATH = Linker
 
 ################################################################################
 # definitions
-TARGET = bin/firmware
+TARGET = firmware
 MCU = cortex-m3
 FORMAT = binary
 
 CROSS_COMPILE = arm-none-eabi-
-#CROSS_COMPILE = arm-eabi-
 AS = $(CROSS_COMPILE)gcc
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)gcc
@@ -149,10 +149,8 @@ DEBUG = dwarf-2
 OPTFLAGS = -O$(OPT)
 CFLAGS += -fmessage-length=0
 CFLAGS += -Wall
-CFLAGS += -Wa,-adhlns=$(<:%.c=$(BUILDPATH)%.o.lst)
+CFLAGS += -Wa,-adhlns=$(<:%.c=%.o.lst)
 CFLAGS += -g$(DEBUG)
-#CFLAGS += -fno-rtti
-CFLAGS += -fno-exceptions
 
 ALL_CFLAGS = $(INCPATH) $(CFLAGS) $(OPTFLAGS) -mcpu=$(MCU) -mthumb -g3 
 ALL_CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
@@ -161,20 +159,10 @@ ALL_AFLAGS = -x assembler-with-cpp -Wall -Wa,-adhlns="$(<:%.asm=%.o.lst)"
 ALL_AFLAGS += -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" 
 ALL_AFLAGS += -mcpu=$(MCU) -mthumb -g3 -g$(DEBUG)
 
-#ifdef SystemRoot
-#   RM = del /Q
-#   MKDIR = mkdir
-#else
-#   ifeq ($(shell uname), Linux)
-      RM = rm -f
-      MKDIR = mkdir -p
-#   endif
-#endif
-
 ################################################################################
 # Compile: create object files from C source files.
 
-all: start $(TARGET).elf $(TARGET).hex $(TARGET).lst $(TARGET).siz end
+all: start $(TARGET).elf $(TARGET).hex $(TARGET).lst $(TARGET).siz crc end
 
 
 start:
@@ -193,7 +181,7 @@ $(BUILDPATH)%.o : %.c
 	@echo ""
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 	@echo "Building file: $(@:%.o=%.c)"
-	$(MKDIR) `dirname $@`
+	mkdir -p `dirname $@`
 	#TMPNAME=`echo ${$(@:%.o=%.c)#*/}`
 	$(CC) -c $(ALL_CFLAGS) -o $@ `echo "$(@:%.o=%.c)" | sed 's,^[^/]*/,,'`
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -205,7 +193,7 @@ $(BUILDPATH)%.o : %.asm
 	@echo ""
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 	@echo "Building file: $(@:%.o=%.asm)"
-	$(MKDIR) `dirname $@`
+	mkdir -p `dirname $@`
 	$(CC) $(ALL_AFLAGS) -o $@ `echo "$(@:%.o=%.asm)" | sed 's,^[^/]*/,,'`
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 	@echo ""
@@ -250,14 +238,23 @@ $(TARGET).siz: $(TARGET).elf
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~"
 	@echo ""
 
+# Program the eStick2
+debug:
+	@echo ""
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	@echo ""
+	@echo " Starting debug.                                "
+	./run_debug.sh
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
 # Calculate only the CRC
 crc:
 	@echo ""
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~"
 	@echo "Patching the CRC of the HEX file ..."
-	rm -f $(TARGET).bin
-	cp $(TARGET).hex $(TARGET).bin
-	crc $(TARGET).bin
+	rm -f firmware.bin
+	cp firmware.hex firmware.bin
+	crc firmware.bin
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~"
 	@echo ""
 
@@ -265,18 +262,9 @@ run:
 	@echo ""
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~"
 	@echo "Flashing file to device ..."
-	$(SCRIPTPATH)/run.sh
+	./run.sh
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~"
 	@echo ""
-
-# Program the eStick2
-debug:
-	@echo ""
-	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	@echo ""
-	@echo " Starting debug.                                "
-	$(SCRIPTPATH)/run_debug.sh
-	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 # print some usage message
 help:
@@ -307,7 +295,20 @@ help:
 
 .PHONY: all Makefile
 
+ifdef SystemRoot
+   RM = del /Q
+else
+   ifeq ($(shell uname), Linux)
+      RM = rm -f
+   endif
+endif
+
+
 clean:
-	$(RM) $(TARGET).map $(TARGET).lst
+	#$(RM) *~ *.lst *.o *.d *.map 
+	$(RM) $(TARGET).hex $(TARGET).elf #$(TARGET).bin
+	#$(RM) $(SYSPATH)/*.o $(SYSPATH)/*.lst $(SYSPATH)/*.d
+	#$(RM) $(LIBRARYPATH)/*.o $(LIBRARYPATH)/*.lst $(LIBRARYPATH)/*.d
+	#$(RM) $(DRVPATH)/*.o $(DRVPATH)/*.lst $(DRVPATH)/*.d
 	$(RM) -R $(BUILDPATH)*
 
