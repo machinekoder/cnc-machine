@@ -51,79 +51,15 @@ static void App_MotorSteuerung (void *p_arg);
 #include "Libraries/uC-CSP/csp.h"
 
 
-int32 stepsX;
-int32 stepsY;
-int32 stepsZ;
-int32 mySteps;
+uint32 stepsX;
+uint32 stepsY;
+uint32 stepsZ;
+uint32 mySteps;
+uint32 endx=0;
 
 int 
 main (void)
 {
-//    OS_ERR   os_err;
-//#if (CPU_CFG_NAME_EN == DEF_ENABLED)
-//    CPU_ERR  cpu_err;
-//#endif
-
-//    BSP_PreInit();                                 /* initialize basic board support routines */
-
-//#if (CPU_CFG_NAME_EN == DEF_ENABLED)
-//    CPU_NameSet((CPU_CHAR *)CSP_DEV_NAME,
-//                (CPU_ERR  *)&cpu_err);
-//#endif
-
-    //Mem_Init();                                       /* Initialize memory management  module */
-
-    //OSInit(&os_err);                                                        /* Init uC/OS-III */
-    //if(os_err != OS_ERR_NONE)
-    //  for(;;);
-
-
-    //  Dac_initialize();                             // Init DAC
-    //DAC_Init(LPC_DAC);
-
-
-    //OSSemCreate(&UartSem, "UART Semaphore", 1, &os_err);
-    //OSSemCreate(&DacSem, "DAC Semaphore", 1, &os_err);
-    //OSSemCreate(&ButtonSem, "Button Semaphore", 0, &os_err);
-
-    /*OSMemCreate((OS_MEM     *)&OutputMemory,
-                (CPU_CHAR   *)"OutputMemory",
-                (void       *)&OutputMemoryStorage[0][0],
-                (OS_MEM_QTY  ) 10,
-                (OS_MEM_SIZE ) OUTPUT_MEMORY_SIZE,
-                (OS_ERR     *) &os_err);     */
- 
-
-    //OSStart(&os_err);                                                   /* Start Multitasking */
-    //if(os_err != OS_ERR_NONE)                                         /* shall never get here */
-    //      for(;;);
-          
-    //Timer_initialize(Timer0, 270, 3);
-   // CPU_SR_ALLOC();
- //   Led_initialize(1,29, Led_LowActive_Yes);
-    
-   // CPU_CRITICAL_ENTER();
-//    Timer_initialize(Timer0, 250, 30);
-//    Timer_connectFunction(Timer0, moveXDirection);
-//    Timer_initialize(Timer1, 250, 30);
-//    Timer_connectFunction(Timer1, moveYDirection);
-  //  CPU_CRITICAL_EXIT();
-    
-   
-    
-//    mySteps = -2000;
-    
-/*    
-    for (;;)
-    { 
-          setXDirection (2000);
-          setYDirection (mySteps);
-          setXDirection (mySteps);
-    }
-
-    return 0 ;
-*/
-
      OS_ERR   os_err;
 #if (CPU_CFG_NAME_EN == DEF_ENABLED)
     CPU_ERR  cpu_err;
@@ -145,8 +81,8 @@ main (void)
      //  Led_initialize(1,29, Led>_LowActive_Yes);
      CSP_TmrInit();
      CSP_TmrCfg (CSP_TMR_NBR_00,50000u);
-     CSP_TmrCfg (CSP_TMR_NBR_01,50000u);
-     CSP_TmrCfg (CSP_TMR_NBR_02,50000u);
+     CSP_TmrCfg (CSP_TMR_NBR_01,40000u);
+     CSP_TmrCfg (CSP_TMR_NBR_02,40000u);
      
     if(os_err != OS_ERR_NONE)
       for(;;);
@@ -259,32 +195,36 @@ static void App_TaskLED (void *p_arg)
 
 static void App_MotorSteuerung (void *p_arg) 
 {
-// OS_ERR       err;
+OS_ERR       err;
   
 
   (void)p_arg;                                                    /* Prevent Compiler Warning */
  
  for(;;) 
  {
-    setXDirection(-1000);
- //   setYDirection(500);
-    OSTimeDlyHMSM(0u, 0u, 5u, 0u, OS_OPT_TIME_HMSM_STRICT, 0);
- //    setXDirection(-500);
- //   setYDirection(-500);
- //   OSTimeDlyHMSM(0u, 0u, 5u, 0u, OS_OPT_TIME_HMSM_STRICT, 0);   
+ //  setXDirection(-3000);
+    setYDirection(-1000);
+    OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
+ //   setXDirection(1000);
+    setYDirection(3000);
+    OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);   
  }
  
 }
 
 void moveXDirection ()
-{                  
-  stepsX--;
-  Gpio_toggle(0,11);        //CLK X
- // Gpio_toggle(1,29);        //CLK X
+{         
   
-  if (stepsX == 0)
+  
+  endx = Gpio_read(0,9);
+  if ((stepsX > 0) && (endx == 1))
   {
-    CSP_TmrStop(CSP_TMR_NBR_00);
+    stepsX--;
+    Gpio_toggle(0,11);        //CLK X
+  }
+  else
+  {
+      CSP_TmrStop(CSP_TMR_NBR_00);
   }
 
 }
@@ -294,7 +234,7 @@ void moveYDirection ()
   stepsY--;
   Gpio_toggle(1,23);       //clk Y
   
-  if (stepsY == 0)
+   if ((stepsX > 0) && !(Gpio_read(2,6) || Gpio_read(2,8)))
   {
     CSP_TmrStop(CSP_TMR_NBR_01);
   }

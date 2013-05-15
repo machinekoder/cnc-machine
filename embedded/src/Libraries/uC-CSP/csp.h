@@ -618,6 +618,8 @@ void           CSP_TmrStart           (CSP_DEV_NBR    tmr_nbr); /* Start a timer
 
 void           CSP_TmrStop            (CSP_DEV_NBR    tmr_nbr); /* Stop a timer.                                        */
 
+void           CPS_TmrStopInt         (CSP_DEV_NBR    tmr_nbr); /* Stop a timer in interrupt */
+
 void           CSP_TmrWr              (CSP_DEV_NBR    tmr_nbr,  /* Write a value to a timer.                            */                                   
                                        CSP_TMR_VAL    tmr_val);
 

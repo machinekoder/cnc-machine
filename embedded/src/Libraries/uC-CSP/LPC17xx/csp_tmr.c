@@ -625,6 +625,21 @@ void  CSP_TmrStop (CSP_DEV_NBR  tmr_nbr)
     CPU_CRITICAL_EXIT();    
 }
 
+void  CSP_TmrStopInt (CSP_DEV_NBR  tmr_nbr)
+{
+    CSP_TMR_REG *p_tmr_reg;    
+    
+#if (CSP_CFG_ARG_CHK_EN == DEF_ENABLED)
+    if (tmr_nbr > CSP_TMR_NBR_03) {
+        return;
+    }
+#endif
+    
+    p_tmr_reg = (CSP_TMR_REG *)CSP_TmrAddrTbl[tmr_nbr];
+ 
+    p_tmr_reg->TCR = 0u;  
+}
+
 /*
 *********************************************************************************************************
 *                                         CSP_TmrWr()
