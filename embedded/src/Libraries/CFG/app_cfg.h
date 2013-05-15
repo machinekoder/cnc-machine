@@ -135,10 +135,5 @@
 *                                       LIBRARY CONFIGURATION
 *********************************************************************************************************
 */
-#define USE_UART0 1
-#define USE_UART_BUFFER 1
-#define UART_PRINTF_BUFFER_SIZE 100
-#define UART_READ_BUFFER_SIZE 100
-#define UART_WRITE_BUFFER_SIZE 100
 
 #endif

@@ -5,20 +5,20 @@
 *                                             INCLUDE FILES
 ************************************************************************************************
 */
-#define BUTTON_X_PLUS   1
-#define BUTTON_X_MINUS  2
-#define BUTTON_Y_PLUS   3
-#define BUTTON_Y_MINUS  4
-#define BUTTON_Z_PLUS   5
-#define BUTTON_Z_MINUS  6
-#define BUTTON_OK       7
+#define BUTTON_Xplus 1
+#define BUTTON_Xminus 2
+#define BUTTON_Yplus 3
+#define BUTTON_Yminus 4
+#define BUTTON_Zplus 5
+#define BUTTON_Zminus 6
+#define BUTTON_OK 7
 
-#define ENDSCHALTER_X_PLUS  8
-#define ENDSCHALTER_X_MINUS 9
-#define ENDSCHALTER_Y_PLUS  10
-#define ENDSCHALTER_Y_MINUS 11
-#define ENDSCHALTER_Z_PLUS  12
-#define ENDSCHALTER_Z_MINUS 13
+#define ENDSCHALTER_Xplus 8
+#define ENDSCHALTER_Xminus 9
+#define ENDSCHALTER_Yplus 10
+#define ENDSCHALTER_Yminus 11
+#define ENDSCHALTER_Zplus 12
+#define ENDSCHALTER_Zminus 13
 
 #include <defines.h>
 #include <includes.h>
@@ -64,6 +64,9 @@ OS_MEM RawMaterialMemory;
 ************************************************************************************************
 */
 void DAC_WriteValue(uint32 dac_value);
+static void App_TMR0_IntHandler(void *p_arg);
+static void App_TMR1_IntHandler (void *p_arg);
+//static void App_TMR2_IntHandler (void *p_arg);
 
 /** starts moving in Direction X.
  *  @param stepsX are the steps >0= +  <0= -
@@ -74,3 +77,4 @@ bool setXDirection (int32 stepsX_local);
 bool setYDirection (int32 stepsY);
 
 bool cncCalibrateZentool (uint32 steps, int16 difference);
+

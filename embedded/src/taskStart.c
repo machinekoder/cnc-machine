@@ -1,3 +1,4 @@
+/*
 #include "taskStart.h"
 #include "taskMachine.h"
 #include "taskSupervisor.h"
@@ -15,16 +16,16 @@
 * Returns     : none
 *
 ************************************************************************************************
-*/
+
 
 void App_TaskStart (void *p_arg)
 {
   OS_ERR       err;
   int 		   i;
 
-  (void)p_arg;                                                    /* Prevent Compiler Warning */
-  CPU_Init();                                               /* Initialize the uC/CPU Services */
-  OS_CSP_TickInit();                                        /* Initialize the Tick Interrupt. */
+  (void)p_arg;                                                    // Prevent Compiler Warning 
+  CPU_Init();                                               // Initialize the uC/CPU Services 
+  OS_CSP_TickInit();                                        // Initialize the Tick Interrupt. 
 
 #if (OS_CFG_STAT_TASK_EN > 0u)
   OSStatTaskCPUUsageInit(&err);
@@ -100,3 +101,4 @@ void App_TaskStart (void *p_arg)
       OSTimeDlyHMSM(0u, 0u, 20u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
   }
 }
+*/

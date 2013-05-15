@@ -465,7 +465,7 @@ void  CSP_TmrIntClr (CSP_DEV_NBR tmr_nbr)
     reg_msk   = p_tmr_reg->MCR;
     reg_stat  = p_tmr_reg->IR;
     
-    for (match_nbr =  CSP_TMR_MATCH_NBR_03; match_nbr < CSP_TMR_MATCH_NBR_03; match_nbr++) {
+    for (match_nbr =  0; match_nbr <= CSP_TMR_MATCH_NBR_03; match_nbr++) {
         if ((DEF_BIT_IS_SET(reg_msk,  CSP_TMR_BIT_MCR_MRIx(match_nbr)) == DEF_YES) &&
             (DEF_BIT_IS_SET(reg_stat, DEF_BIT(match_nbr))              == DEF_YES)) {
             DEF_BIT_SET(reg_clr, DEF_BIT(match_nbr));
