@@ -29,6 +29,8 @@
 
 #include <types.h>
 #include <timerDriver.h>
+#include <cpu_core.h>
+#include <cpu.h>
 
 typedef enum {
     Timer0 = 0,

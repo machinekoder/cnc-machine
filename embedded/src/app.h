@@ -5,20 +5,20 @@
 *                                             INCLUDE FILES
 ************************************************************************************************
 */
-#define BUTTON_X+ 1
-#define BUTTON_X- 2
-#define BUTTON_Y+ 3
-#define BUTTON_Y- 4
-#define BUTTON_Z+ 5
-#define BUTTON_Z- 6
-#define BUTTON_OK 7
+#define BUTTON_X_PLUS   1
+#define BUTTON_X_MINUS  2
+#define BUTTON_Y_PLUS   3
+#define BUTTON_Y_MINUS  4
+#define BUTTON_Z_PLUS   5
+#define BUTTON_Z_MINUS  6
+#define BUTTON_OK       7
 
-#define ENDSCHALTER_X+ 8
-#define ENDSCHALTER_X- 9
-#define ENDSCHALTER_Y+ 10
-#define ENDSCHALTER_Y- 11
-#define ENDSCHALTER_Z+ 12
-#define ENDSCHALTER_Z- 13
+#define ENDSCHALTER_X_PLUS  8
+#define ENDSCHALTER_X_MINUS 9
+#define ENDSCHALTER_Y_PLUS  10
+#define ENDSCHALTER_Y_MINUS 11
+#define ENDSCHALTER_Z_PLUS  12
+#define ENDSCHALTER_Z_MINUS 13
 
 #include <defines.h>
 #include <includes.h>

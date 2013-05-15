@@ -80,26 +80,23 @@ main (void)
     //      for(;;);
           
     //Timer_initialize(Timer0, 270, 3);
-    CPU_SR_ALLOC();
     Led_initialize(1,29, Led_LowActive_Yes);
     
-    CPU_CRITICAL_ENTER();
     Timer_initialize(Timer0, 250, 30);
     Timer_connectFunction(Timer0, moveXDirection);
     Timer_initialize(Timer1, 250, 30);
     Timer_connectFunction(Timer1, moveYDirection);
-    CPU_CRITICAL_EXIT();
     
     cnc_initialize();
     
     mySteps = -2000;
     
+    setXDirection (mySteps);
     
     for (;;)
     { 
           //setXDirection (2000);
           //setYDirection (mySteps);
-          setXDirection (mySteps);
     }
 
     return 0 ;
@@ -223,10 +220,7 @@ void moveXDirection ()
   
   if (stepsX == 0)
   {
-    CPU_SR_ALLOC();
-    CPU_CRITICAL_ENTER();
     Timer_stop(Timer0); 
-    CPU_CRITICAL_EXIT();
   }
 
 }
@@ -238,19 +232,14 @@ void moveYDirection ()
   
   if (stepsY == 0)
   {
-    CPU_SR_ALLOC();
-    CPU_CRITICAL_ENTER();
     Timer_stop(Timer1); 
-    CPU_CRITICAL_EXIT();
   }
 }
 
 bool setXDirection (int32 stepsX_local)
 {               
-    CPU_SR_ALLOC();
-    CPU_CRITICAL_ENTER();
     bool running = Timer_running(Timer0);
-    CPU_CRITICAL_EXIT();
+    
     if (running) 
     {
       return FALSE;
@@ -272,9 +261,7 @@ bool setXDirection (int32 stepsX_local)
       Gpio_clear(0,10);     // directionX
     }
     
-    CPU_CRITICAL_ENTER();
     Timer_start(Timer0); 
-    CPU_CRITICAL_EXIT();
     
     return TRUE;
 }
@@ -302,10 +289,7 @@ bool setYDirection (int32 stepsY_local)
       Gpio_clear(1,20); // directionY
     }
     
-    CPU_SR_ALLOC();
-    CPU_CRITICAL_ENTER();
     Timer_start(Timer1); 
-    CPU_CRITICAL_EXIT(); 
     
     return TRUE;
 }

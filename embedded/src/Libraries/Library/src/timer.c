@@ -83,12 +83,10 @@ int8 initializeTimer0(uint32 khz, uint32 intervalUs)
     uint32 targetfreq = khz*1000;
     //uint32 divisor;
     uint32 mr0;
+    CPU_SR_ALLOC();
     
     if (TIMER0_RUNNING())                       /* if timer is already in use return -1 */
         return -1;
-    
-    TIMER0_ENABLE_POWER();                      /* Enable power */
-    TIMER0_SET_CORE_CLK_DIVISOR_1();
     
     /*pr = 0xFFFFFFFF/2-1;    // 2^32/2+1
     divisor = SystemCoreClock / targetfreq / (pr+1);
@@ -120,11 +118,13 @@ int8 initializeTimer0(uint32 khz, uint32 intervalUs)
             pclk = SystemCoreClock/8;
         }*/
         
-    pclk = SystemCoreClock;
-    
-    pr = (uint32)((pclk/targetfreq)-1)+1;
-    
+    pclk = SystemCoreClock;   
+    pr = (uint32)((pclk/targetfreq)-1)+1;   
     mr0 = intervalUs/(1E6/(pclk/(pr+1)));
+    
+    CPU_CRITICAL_ENTER();
+    TIMER0_ENABLE_POWER();                      /* Enable power */
+    TIMER0_SET_CORE_CLK_DIVISOR_1();
     
     TIMER0_SET_PRESCALER(pr);                   /* Set the clock prescaler */
     TIMER0_SET_MATCH_REGISTER_0(mr0);           /* Set the match register */
@@ -134,6 +134,7 @@ int8 initializeTimer0(uint32 khz, uint32 intervalUs)
     TIMER0_RESET_AND_IRQ_ON_MATCH();            /* Reset the TC and generate an interrupt */
     TIMER0_ENABLE_IRQ();                        /* Enable IRQ for Timer_32_0) */
     TIMER0_SET_IRQ_PRIORITY(LOW_IRQ_PRIORITY);  /* Set interrupt priority to allow delays in interrupt routine (not recommended) */
+    CPU_CRITICAL_EXIT();
     
     functionPointer0 = NULL;
 
@@ -142,10 +143,14 @@ int8 initializeTimer0(uint32 khz, uint32 intervalUs)
 
 int8 deinitializeTimer0(void)
 {
+    CPU_SR_ALLOC();
+    
     if (TIMER0_RUNNING())                       /* if timer is already in use return -1 */
         return -1;
     
+    CPU_CRITICAL_ENTER();
     TIMER0_DISABLE_IRQ();                               /* Disable timer interrupt */
+    CPU_CRITICAL_EXIT();
     
     return 0;
 }
@@ -260,22 +265,34 @@ int8 initializeCapCom3(uint32 khz, uint8 pin, void (* func)(void))
 
 void startTimer0(void)
 {
+    CPU_SR_ALLOC();
+    
+    CPU_CRITICAL_ENTER();
     TIMER0_START(); /* start timer */
+    CPU_CRITICAL_EXIT();
     
     return;
 }
 
 void stopTimer0(void)
 {
+    CPU_SR_ALLOC();
+    
+    CPU_CRITICAL_ENTER();
     TIMER0_STOP(); /* stop timer */
+    CPU_CRITICAL_EXIT();
     
     return;
 }
 
 void resetTimer0(void)
 {
+    CPU_SR_ALLOC();
+    
+    CPU_CRITICAL_ENTER();
     TIMER0_RESET(); /* reset timer */
     TIMER0_START(); /* start timer */
+    CPU_CRITICAL_EXIT();
     
     return;
 }
@@ -292,7 +309,9 @@ void setIntervalUsTimer0(uint32 us)
     uint32 pclk;
     uint32 pr;
     uint32 mr0;
+    CPU_SR_ALLOC();
     
+    CPU_CRITICAL_ENTER();
     uint8 wasRunning = TIMER0_RUNNING();
     
     pclk = SystemCoreClock;
@@ -305,6 +324,8 @@ void setIntervalUsTimer0(uint32 us)
     if (wasRunning)
         TIMER0_START();
     
+    CPU_CRITICAL_EXIT();
+    
     return;
 }
 
@@ -313,7 +334,9 @@ void setIntervalMsTimer0(uint32 ms)
     uint32 pclk;
     uint32 pr;
     uint32 mr0;
+    CPU_SR_ALLOC();
     
+    CPU_CRITICAL_ENTER();
     uint8 wasRunning = TIMER0_RUNNING();
     
     pclk = SystemCoreClock;
@@ -326,12 +349,18 @@ void setIntervalMsTimer0(uint32 ms)
     if (wasRunning)
         TIMER0_START();
     
+    CPU_CRITICAL_EXIT();
+    
     return;
 }
 
 void setPriorityTimer0(uint8 priority)
 {
+    CPU_SR_ALLOC();
+    
+    CPU_CRITICAL_ENTER();
     TIMER0_SET_IRQ_PRIORITY(priority);
+    CPU_CRITICAL_EXIT();
     
     return;
 }
@@ -400,6 +429,9 @@ int8 delayMsTimer0(uint32 ms)
 
 int8 singleShotTimer0(uint32 ms, void (* func)(void))
 {
+    CPU_SR_ALLOC();
+    
+    CPU_CRITICAL_ENTER();
     if (TIMER0_RUNNING())                       /* if timer is already in use return 1 */
         return -1;
     
@@ -417,20 +449,7 @@ int8 singleShotTimer0(uint32 ms, void (* func)(void))
     functionPointer0 = func;
         
     TIMER0_START();                                     /* Start timer */
-    
-    return 0;
-}
-
-inline uint32 Timer_counterValue(Timer id)
-{
-    if (id == 0)
-        return TIMER0_COUNTER_VALUE();
-    else if (id == 1)
-        return TIMER1_COUNTER_VALUE();
-    else if (id == 2)
-        return TIMER2_COUNTER_VALUE();
-    else if (id == 3)
-        return TIMER3_COUNTER_VALUE();
+    CPU_CRITICAL_EXIT();
     
     return 0;
 }
@@ -1215,7 +1234,14 @@ void TIMER3_IRQHANDLER()
 
 bool runningTimer0()
 {
-  return TIMER0_RUNNING();
+    bool running;
+    CPU_SR_ALLOC();
+    
+    CPU_CRITICAL_ENTER();
+    running = TIMER0_RUNNING();
+    CPU_CRITICAL_EXIT();
+    
+    return running;
 }
 
 bool runningTimer1()
@@ -1544,4 +1570,18 @@ bool Timer_running(Timer id)
         return runningTimer3();
     }
     return FALSE;
+}
+
+inline uint32 Timer_counterValue(Timer id)
+{
+    if (id == Timer0)
+        return TIMER0_COUNTER_VALUE();
+    else if (id == Timer1)
+        return TIMER1_COUNTER_VALUE();
+    else if (id == Timer2)
+        return TIMER2_COUNTER_VALUE();
+    else if (id == Timer3)
+        return TIMER3_COUNTER_VALUE();
+    
+    return 0;
 }
