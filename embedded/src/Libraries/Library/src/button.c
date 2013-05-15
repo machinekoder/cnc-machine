@@ -72,7 +72,7 @@ void valueButton(void){
         {
             Gpio_read(buttons[i].port,buttons[i].pin) ? putVal(i,0): putVal(i,1);
         }
-        else if(buttons[i].type == ButtonTypeLowActive)
+        else if(buttons[i].type == ButtonTypeHighActive)
         {
             Gpio_read(buttons[i].port,buttons[i].pin) ? putVal(i,1): putVal(i,0);
         }

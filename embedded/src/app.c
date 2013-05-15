@@ -13,11 +13,11 @@
 ************************************************************************************************
 */
 static OS_TCB App_TaskStartTCB;               /* Application Startup Task Control Block (TCB) */
-static OS_TCB App_TaskLEDTCB;
+static OS_TCB App_ButtonTCB;
 static OS_TCB App_MotorSteuerungTCB;
 
 static CPU_STK App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];             /* Start Task Stack */
-static CPU_STK App_TaskLEDStk[APP_STACK_SIZE];
+static CPU_STK App_ButtonStk[APP_STACK_SIZE];
 static CPU_STK App_MotorSteuerungStk[APP_STACK_SIZE];
 
 /*
@@ -26,7 +26,7 @@ static CPU_STK App_MotorSteuerungStk[APP_STACK_SIZE];
 ************************************************************************************************
 */
 static void App_TaskStart (void  *p_arg);
-static void App_TaskLED (void *p_arg);
+static void App_Button (void *p_arg);
 static void App_MotorSteuerung (void *p_arg);
 
 
@@ -146,12 +146,12 @@ CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
 CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_TMR_02);
 */
 
-  OSTaskCreate((OS_TCB     *)&App_TaskLEDTCB,
+  OSTaskCreate((OS_TCB     *)&App_ButtonTCB,
                (CPU_CHAR   *)"LED",
-               (OS_TASK_PTR )App_TaskLED,
+               (OS_TASK_PTR )App_Button,
                (void       *)0,
                (OS_PRIO     )2,
-               (CPU_STK    *)App_TaskLEDStk,
+               (CPU_STK    *)App_ButtonStk,
                (CPU_STK_SIZE)0,
                (CPU_STK_SIZE)APP_STACK_SIZE,
                (OS_MSG_QTY  )0,
@@ -179,17 +179,26 @@ CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_TMR_02);
   }
 }
 
-static void App_TaskLED (void *p_arg) 
+static void App_Button (void *p_arg) 
 {
   OS_ERR       err;
-
+    CPU_INT08U count;
+    CPU_INT08U i;
+    CPU_INT08U cncButtons[10];
   (void)p_arg;                                                    /* Prevent Compiler Warning */
-  Led_initialize(1, 29, Led_LowActive_Yes);
+  
   while(DEF_TRUE) {
-    Led_set(Led0);                                                     /* LED on */
-    OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
-    Led_clear(Led0);                                                  /* LED off */
-    OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
+    for(count=0;count<=10;count++);
+    valueButton();                                              
+    OSTimeDlyHMSM(0u, 0u, 0u, 10u, OS_OPT_TIME_HMSM_STRICT, &err);
+    if(count==10)
+    {
+        for(i=0;i<=20;i++)
+        {
+            Button_getPress(cncButtons[count]);
+        }
+    }
+    
   }
 }
 
@@ -358,6 +367,7 @@ void buttonInit ()
 
     //Endschalter z-
     Button_initializeButton(13,0,22,ButtonTypeLowActive);
+#define ENDSCHALTER_XP  
 
 }
 
