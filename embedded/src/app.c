@@ -2,7 +2,8 @@
  *  uC/OS-III - Getting Started Demo Application
  *
  **/
-
+#include "app.h"
+#include "Libraries/uC-CSP/csp.h"
 
 
 
@@ -141,7 +142,7 @@ main (void)
    
      cnc_initialize();
     // DAC_Init(LPC_DAC);
-     //  Led_initialize(1,29, Led_LowActive_Yes);
+     //  Led_initialize(1,29, Led>_LowActive_Yes);
      CSP_TmrInit();
      CSP_TmrCfg (CSP_TMR_NBR_00,50000u);
      CSP_TmrCfg (CSP_TMR_NBR_01,50000u);
@@ -201,13 +202,13 @@ CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
                    (void         *)0);
 CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_TMR_01);
 
-   /* Enable Timer2 Interrupt.*/
+   /* Enable Timer2 Interrupt.
 CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
                    (CSP_DEV_NBR   )CSP_INT_SRC_NBR_TMR_02,
                    (CPU_FNCT_PTR  )App_TMR2_IntHandler,
                    (void         *)0);
 CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_TMR_02);
-
+*/
 
   OSTaskCreate((OS_TCB     *)&App_TaskLEDTCB,
                (CPU_CHAR   *)"LED",
@@ -258,29 +259,35 @@ static void App_TaskLED (void *p_arg)
 
 static void App_MotorSteuerung (void *p_arg) 
 {
-  OS_ERR       err;
+// OS_ERR       err;
+  
 
   (void)p_arg;                                                    /* Prevent Compiler Warning */
  
-    setXDirection(2000);
-    OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, 0);
-    setYDirection(2000);
-    setXDirection(-2000);
-    OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, 0);
-    setYDirection(-2000);
+ for(;;) 
+ {
+    setXDirection(-1000);
+ //   setYDirection(500);
+    OSTimeDlyHMSM(0u, 0u, 5u, 0u, OS_OPT_TIME_HMSM_STRICT, 0);
+ //    setXDirection(-500);
+ //   setYDirection(-500);
+ //   OSTimeDlyHMSM(0u, 0u, 5u, 0u, OS_OPT_TIME_HMSM_STRICT, 0);   
+
+    
+    
+ }
  
- 
-  }
 }
 
 void moveXDirection ()
 {                  
   stepsX--;
   Gpio_toggle(0,11);        //CLK X
+ // Gpio_toggle(1,29);        //CLK X
   
   if (stepsX == 0)
   {
-    CSP_TmrStop(CSP_TMR_NBR_00);
+    CSP_TmrStop(0);
   }
 
 }
@@ -342,7 +349,7 @@ bool setYDirection (int32 stepsY_local)
     
     stepsY = abs(stepsY_local) * 2; // one cock has rising and falling edge
  
-    if (stepsY_local > 0)
+    if (stepsY_local < 0)
     {
       Gpio_set(1,20); // directionY
     }
@@ -358,6 +365,7 @@ bool setYDirection (int32 stepsY_local)
 
 bool cncCalibrateZentool (uint32 steps, int16 difference)
 {
+  /*
   int32 val;
   val=steps+difference;
   
@@ -367,6 +375,8 @@ bool cncCalibrateZentool (uint32 steps, int16 difference)
    moveXDirection(1000);
    
    return TRUE;
+*/
+  
 }
 
 void buttonInit ()

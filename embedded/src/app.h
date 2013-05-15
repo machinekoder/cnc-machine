@@ -66,7 +66,7 @@ OS_MEM RawMaterialMemory;
 void DAC_WriteValue(uint32 dac_value);
 static void App_TMR0_IntHandler(void *p_arg);
 static void App_TMR1_IntHandler (void *p_arg);
-static void App_TMR3_IntHandler (void *p_arg);
+static void App_TMR2_IntHandler (void *p_arg);
 
 /** starts moving in Direction X.
  *  @param stepsX are the steps >0= +  <0= -
