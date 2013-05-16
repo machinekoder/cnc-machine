@@ -31,6 +31,10 @@ uint8 testPin = 2;
 *                                         FUNCTION PROTOTYPES
 ************************************************************************************************
 */
+static void App_TMR0_IntHandler(void *p_arg);
+static void App_TMR1_IntHandler (void *p_arg);
+static void App_TMR2_IntHandler (void *p_arg);
+
 static void App_TaskStart (void  *p_arg);
 static void App_Button (void *p_arg);
 static void App_MotorSteuerung (void *p_arg);
@@ -59,12 +63,10 @@ void buttonInit();
 #include "Libraries/uC-CSP/csp.h"
 
 
-uint32 stepsX;
-uint32 stepsY;
-uint32 stepsZ;
+int32 stepsX;
+int32 stepsY;
+int32 stepsZ;
 uint32 mySteps;
-uint32 endx_p=0;
-uint32 endx_m=0;
 int 
 main (void)
 {
@@ -84,6 +86,8 @@ main (void)
 
     OSInit(&os_err);                                                        /* Init uC/OS-III */
    
+    Debug_printf(Debug_Level_1, "Starting init");
+    
      cnc_initialize();
      buttonInit();
     // DAC_Init(LPC_DAC);
@@ -92,6 +96,8 @@ main (void)
      CSP_TmrCfg (CSP_TMR_NBR_00,50000u);
      CSP_TmrCfg (CSP_TMR_NBR_01,40000u);
      CSP_TmrCfg (CSP_TMR_NBR_02,40000u);
+     
+     Debug_printf(Debug_Level_1, "Init finished");
      
     if(os_err != OS_ERR_NONE)
       for(;;);
@@ -204,38 +210,50 @@ static void App_Button (void *p_arg)
       OSTimeDlyHMSM(0u, 0u, 0u, 10u, OS_OPT_TIME_HMSM_STRICT, &err);
       if(count==10)
       {
-          //for(i=0;i<=20;i++)
-          //{
-              if (Button_getPress(&value) != -1)
-              {
+            while (Button_getPress(&value) != (int8)(-1))
+            {
+                int32 movement;
                 if (value.id == BUTTON_Xplus)
                 {
-                    setXDirection(value.count * 5000);
+                    movement = value.count * 5000;
+                    setXDirection(movement);
+                    Debug_printf(Debug_Level_2, "X: %i\n", movement);
                 }
                 else if (value.id == BUTTON_Xminus)
                 {
-                    setXDirection(-value.count * 5000);
+                    movement = -value.count * 5000;
+                    setXDirection(movement);
+                    Debug_printf(Debug_Level_2, "X: %i\n", movement);
                 }
                 if (value.id == BUTTON_Yplus)
                 {
-                    setYDirection(value.count * 5000);
+                    movement = value.count * 5000;
+                    setYDirection(movement);
+                    Debug_printf(Debug_Level_2, "Y: %i\n", movement);
                 }
                 else if (value.id == BUTTON_Yminus)
                 {
-                    setYDirection(-value.count * 5000);
+                    movement = -value.count * 5000;
+                    setYDirection(movement);
+                    Debug_printf(Debug_Level_2, "Y: %i\n", movement);
                 } 
                 if (value.id == BUTTON_Zplus)
                 {
-                    setZDirection(value.count * 5000);
+                    movement = value.count * 5000;
+                    setZDirection(movement);
+                    Debug_printf(Debug_Level_2, "Z: %i\n", movement);
                 }
                 else if (value.id == BUTTON_Zminus)
                 {
-                    setZDirection(-value.count * 5000);
+                    movement = -value.count * 5000;
+                    setZDirection(movement);
+                    Debug_printf(Debug_Level_2, "Z: %i\n", movement);
                 }  
-                //cncButtons[0] = value;
-              }
-              //i = i;
-          //}
+                else if (value.id == BUTTON_OK)
+                {
+                    Debug_printf(Debug_Level_2, "OK\n");
+                }  
+            }
       }
     }
   }

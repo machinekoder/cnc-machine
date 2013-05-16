@@ -34,13 +34,22 @@ int8 Cb_put(CircularBuffer *buffer, void *item)
     memcpy(buffer->inPointer, item, buffer->dataSize);
     
     //increase the pointer
-    if (buffer->inPointer == (buffer->startPointer+buffer->bufferSize))
+    if (buffer->inPointer >= (buffer->startPointer+buffer->bufferSize))
     {
         buffer->inPointer = buffer->startPointer;
     }
     else
     {
-        buffer->inPointer += buffer->dataSize;
+        void *newPointer;
+        newPointer = buffer->inPointer + buffer->dataSize;
+        if (newPointer > buffer->startPointer)
+        {
+            buffer->inPointer = newPointer;
+        }
+        else 
+        {
+            buffer->inPointer = buffer->startPointer;   // if we are here you probably have not enough memory
+        }
     }
     
     return 0;
@@ -54,13 +63,22 @@ int8 Cb_get(CircularBuffer *buffer, void *item)
     memcpy(item, buffer->outPointer, buffer->dataSize);
      
     //increase the pointer
-    if (buffer->outPointer == (buffer->startPointer+buffer->bufferSize))
+    if (buffer->outPointer >= (buffer->startPointer+buffer->bufferSize))
     {
         buffer->outPointer = buffer->startPointer;
     }
     else
     {
-        buffer->outPointer += buffer->dataSize;
+        void *newPointer;
+        newPointer = buffer->outPointer + buffer->dataSize;
+        if (newPointer > buffer->startPointer)
+        {
+            buffer->outPointer = newPointer;
+        }
+        else 
+        {
+            buffer->outPointer = buffer->startPointer;   // if we are here you probably have not enough memory
+        }
     }
     
     return 0;

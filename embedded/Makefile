@@ -108,7 +108,7 @@ SSRC += $(DRVPATH)/zentoolworksDriver.c
 
 #SSRC += $(LIBRARYPATH)/capcom.c
 SSRC += $(LIBRARYPATH)/timer.c
-SSRC += $(LIBRARYPATH)/timeout.c
+#SSRC += $(LIBRARYPATH)/timeout.c
 SSRC += $(LIBRARYPATH)/led.c
 #SSRC += $(LIBRARYPATH)/uart.c
 SSRC += $(LIBRARYPATH)/circularbuffer.c
@@ -122,8 +122,8 @@ SSRC += $(LIBRARYPATH)/iap.c
 SSRC += $(LIBRARYPATH)/button.c
 SSRC += $(LIBRARYPATH)/crc.c
 SSRC += $(LIBRARYPATH)/ssp.c
-SSRC += $(LIBRARYPATH)/rfm12.c
-sSSRC += $/src/Libraries/Driver/LPC17xx/src/zentoolworksDriver.c
+#SSRC += $(LIBRARYPATH)/rfm12.c
+SSRC += $(LIBRARYPATH)/debug.c
 
 LDFILE = LPC1758.ld
 LDPATH = Linker

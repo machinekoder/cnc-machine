@@ -54,6 +54,7 @@
 #include <timer.h>
 #include "taskMachine.h"
 #include "zentoolworksDriver.h"
+#include "debug.h"
 
 /*
 ************************************************************************************************
@@ -67,10 +68,6 @@ typedef struct {
     uint8  taskId;
     uint32 producedGoods;
 } App_TaskMachine_ServiceRequest;
-
-char g_TWBuffer[0xFF];
-char g_TRBuffer[0xFF];
-char testBuffer[100];
 
 OS_SEM UartSem;
 OS_SEM DacSem;
@@ -91,10 +88,6 @@ OS_MEM RawMaterialMemory;
 *                                         FUNCTION PROTOTYPES
 ************************************************************************************************
 */
-void DAC_WriteValue(uint32 dac_value);
-static void App_TMR0_IntHandler(void *p_arg);
-static void App_TMR1_IntHandler (void *p_arg);
-static void App_TMR2_IntHandler (void *p_arg);
 
 /** starts moving in Direction X.
  *  @param stepsX are the steps >0= +  <0= -
