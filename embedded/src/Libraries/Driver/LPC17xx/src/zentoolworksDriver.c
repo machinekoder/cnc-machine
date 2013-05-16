@@ -7,59 +7,61 @@
 
 #include "zentoolworksDriver.h"
 
+
+
 void cnc_initialize ()
 {
         //+++++++++++++++++++++++++++++++++++++++++MOTOR++++++++++++++++++++++++++++++++++++++++++++++++++
         //Motor x Dir
-    Gpio_setDirection(0,10,Gpio_Direction_Output);
-    Pin_setMode(0,10,Pin_Mode_PullUp); //high --> turn right
-    Gpio_set(0,10);
+    Gpio_setDirection(MOTOR_X_DIR_PORT,MOTOR_X_DIR_PIN,Gpio_Direction_Output);
+    Pin_setMode(MOTOR_X_CLK_PORT,MOTOR_X_CLK_PIN,Pin_Mode_PullUp); //high --> turn right
+    Gpio_set(MOTOR_X_CLK_PORT,MOTOR_X_CLK_PIN);
 
     //Motor x Clk
-    Gpio_setDirection(0,11,Gpio_Direction_Output);
-    Pin_setMode(0,11,Pin_Mode_PullUp); //high --> clk is disabled
-    Gpio_set(0,11);
+    Gpio_setDirection(MOTOR_X_CLK_PORT,MOTOR_X_CLK_PIN,Gpio_Direction_Output);
+    Pin_setMode(MOTOR_X_CLK_PORT,MOTOR_X_CLK_PIN,Pin_Mode_PullUp); //high --> clk is disabled
+    Gpio_set(MOTOR_X_CLK_PORT,MOTOR_X_CLK_PIN);
 
     //Motor xyz Enable
-    Gpio_setDirection(0,6,Gpio_Direction_Output);
-    Pin_setMode(0,6,Pin_Mode_PullDown); //low --> Enable is active
-    Gpio_clear(0,6);
+    Gpio_setDirection(MOTOR_XYZ_ENABLE_PORT,MOTOR_XYZ_ENABLE_PIN,Gpio_Direction_Output);
+    Pin_setMode(MOTOR_XYZ_ENABLE_PORT,MOTOR_XYZ_ENABLE_PIN,Pin_Mode_PullDown); //low --> Enable is active
+    Gpio_clear(MOTOR_XYZ_ENABLE_PORT,MOTOR_XYZ_ENABLE_PIN);
 
     //Motor x Power(stromabsenkung)
-    Gpio_setDirection(1,24,Gpio_Direction_Output);
-    Pin_setMode(1,24,Pin_Mode_PullDown);
-    Gpio_set(1,24);
+    Gpio_setDirection(MOTOR_X_POWER_PORT,MOTOR_X_POWER_PIN,Gpio_Direction_Output);
+    Pin_setMode(MOTOR_X_POWER_PORT,MOTOR_X_POWER_PIN,Pin_Mode_PullDown);
+    Gpio_clear(MOTOR_X_POWER_PORT,MOTOR_X_POWER_PIN);
 
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //Motor y Dir
-    Gpio_setDirection(1,20,Gpio_Direction_Output);
-    Pin_setMode(1,20,Pin_Mode_PullUp);
-    Gpio_set(1,20);
+    Gpio_setDirection(MOTOR_Y_DIR_PORT,MOTOR_Y_DIR_PIN,Gpio_Direction_Output);
+    Pin_setMode(MOTOR_Y_DIR_PORT,MOTOR_Y_DIR_PIN,Pin_Mode_PullUp);
+    Gpio_set(MOTOR_Y_DIR_PORT,MOTOR_Y_DIR_PIN);
 
     //Motor y Clk
-    Gpio_setDirection(1,23,Gpio_Direction_Output);
-    Pin_setMode(1,23,Pin_Mode_PullUp);
-    Gpio_set(1,23);
+    Gpio_setDirection(MOTOR_Y_CLK_PORT,MOTOR_Y_CLK_PIN,Gpio_Direction_Output);
+    Pin_setMode(MOTOR_Y_CLK_PORT,MOTOR_Y_CLK_PIN,Pin_Mode_PullUp);
+    Gpio_set(MOTOR_Y_CLK_PORT,MOTOR_Y_CLK_PIN);
 
     //Motor y Power(stromabsenkung)
-    Gpio_setDirection(1,25,Gpio_Direction_Output);
-    Pin_setMode(1,25,Pin_Mode_PullDown);
-    Gpio_set(1,25);
+    Gpio_setDirection(MOTOR_Y_POWER_PORT,MOTOR_Y_POWER_PIN,Gpio_Direction_Output);
+    Pin_setMode(MOTOR_Y_POWER_PORT,MOTOR_Y_POWER_PIN,Pin_Mode_PullDown);
+    Gpio_clear(MOTOR_Y_POWER_PORT,MOTOR_Y_POWER_PIN);
 
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //Motor z Dir
-    Gpio_setDirection(0,0,Gpio_Direction_Output);
-    Pin_setMode(0,0,Pin_Mode_PullUp); //high --> turn right
-    Gpio_set(0,0);
+    Gpio_setDirection(MOTOR_Z_DIR_PORT,MOTOR_Z_DIR_PIN,Gpio_Direction_Output);
+    Pin_setMode(MOTOR_Z_DIR_PORT,MOTOR_Z_DIR_PIN,Pin_Mode_PullUp); //high --> turn right
+    Gpio_set(MOTOR_Z_DIR_PORT,MOTOR_Z_DIR_PIN);
 
     //Motor z Clk
-    Gpio_setDirection(0,1,Gpio_Direction_Output);
-    Pin_setMode(0,1,Pin_Mode_PullUp); //high --> clk is disabled
-    Gpio_set(0,1);
+    Gpio_setDirection(MOTOR_Z_CLK_PORT,MOTOR_Z_CLK_PIN,Gpio_Direction_Output);
+    Pin_setMode(MOTOR_Z_CLK_PORT,MOTOR_Z_CLK_PIN,Pin_Mode_PullUp); //high --> clk is disabled
+    Gpio_set(MOTOR_Z_CLK_PORT,MOTOR_Z_CLK_PIN);
 
     //Motor z Power(stromabsenkung)
-    Gpio_setDirection(1,26,Gpio_Direction_Output);
-    Pin_setMode(1,26,Pin_Mode_PullDown);//low --> Stromabsenkung is active
-    Gpio_set(1,26);
+    Gpio_setDirection(MOTOR_Z_POWER_PORT,MOTOR_Z_POWER_PIN,Gpio_Direction_Output);
+    Pin_setMode(MOTOR_Z_POWER_PORT,MOTOR_Z_POWER_PIN,Pin_Mode_PullDown);//low --> Stromabsenkung is active
+    Gpio_clear(MOTOR_Z_POWER_PORT,MOTOR_Z_POWER_PIN);
 
 }

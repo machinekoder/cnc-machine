@@ -147,13 +147,13 @@ CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
                    (void         *)0);
 CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_TMR_01);
 
-   /* Enable Timer2 Interrupt.
+   /* Enable Timer2 Interrupt.*/
 CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
                    (CSP_DEV_NBR   )CSP_INT_SRC_NBR_TMR_02,
                    (CPU_FNCT_PTR  )App_TMR2_IntHandler,
                    (void         *)0);
 CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_TMR_02);
-*/
+
 
   OSTaskCreate((OS_TCB     *)&App_ButtonTCB,
                (CPU_CHAR   *)"LED",
@@ -199,17 +199,41 @@ static void App_Button (void *p_arg)
   while(DEF_TRUE) {
     for(count=0;count<=10;count++)
     {
-      //Button_task();  
+      Button_task();  
         testValue = Gpio_read(testPort,testPin);
       OSTimeDlyHMSM(0u, 0u, 0u, 10u, OS_OPT_TIME_HMSM_STRICT, &err);
       if(count==10)
       {
           //for(i=0;i<=20;i++)
           //{
-              //if (Button_getPress(&value) != -1)
-              //{
-              //  cncButtons[0] = value;
-              //}
+              if (Button_getPress(&value) != -1)
+              {
+                if (value.id == BUTTON_Xplus)
+                {
+                    setXDirection(value.count * 5000);
+                }
+                else if (value.id == BUTTON_Xminus)
+                {
+                    setXDirection(-value.count * 5000);
+                }
+                if (value.id == BUTTON_Yplus)
+                {
+                    setYDirection(value.count * 5000);
+                }
+                else if (value.id == BUTTON_Yminus)
+                {
+                    setYDirection(-value.count * 5000);
+                } 
+                if (value.id == BUTTON_Zplus)
+                {
+                    setZDirection(value.count * 5000);
+                }
+                else if (value.id == BUTTON_Zminus)
+                {
+                    setZDirection(-value.count * 5000);
+                }  
+                //cncButtons[0] = value;
+              }
               //i = i;
           //}
       }
@@ -226,26 +250,33 @@ OS_ERR       err;
  
  for(;;) 
  {
- //  setXDirection(-3000);
-    setXDirection(-1000);
-    OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
- //   setXDirection(1000);
-    setXDirection(3000);
-    OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);   
+   // setXDirection(20000);
+   // setYDirection(20000);
+    OSTimeDlyHMSM(0u, 0u, 3u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
+   // setXDirection(-20000);
+   // setYDirection(-20000);
+   // OSTimeDlyHMSM(0u, 0u, 3u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);  
  }
  
 }
 
 void moveXDirection ()
 {         
+  uint8 value_p;
+  uint8 value_m;
   
+  value_p = (stepsX > 0) && !(Button_read(ENDSCHALTER_Xplus));
+  value_m = (stepsX < 0) && !(Button_read(ENDSCHALTER_Xminus));
   
-  endx_m = Gpio_read(0,9);
-  endx_p = CSP_GPIO_Rd(0) & !(1<<9);
-  if ((stepsX > 0) && (endx_m == 1))
+  if (value_p)
   {
     stepsX--;
-    Gpio_toggle(0,11);        //CLK X
+    Gpio_toggle(MOTOR_X_CLK_PORT,MOTOR_X_CLK_PIN);        //CLK X
+  }
+  else if(value_m)
+  {
+      stepsX++;
+      Gpio_toggle(MOTOR_X_CLK_PORT,MOTOR_X_CLK_PIN);
   }
   else
   {
@@ -256,15 +287,53 @@ void moveXDirection ()
 
 void moveYDirection ()
 {
-  stepsY--;
-  Gpio_toggle(1,23);       //clk Y
+  uint8 value_p;
+  uint8 value_m;
   
-   if ((stepsX > 0) && !(Gpio_read(2,6) || Gpio_read(2,8)))
+  value_p = (stepsY > 0) && !(Button_read(ENDSCHALTER_Yplus));
+  value_m = (stepsY < 0) && !(Button_read(ENDSCHALTER_Yminus));
+  
+  if (value_p)
   {
-    CSP_TmrStop(CSP_TMR_NBR_01);
+    stepsY--;
+    Gpio_toggle(MOTOR_Y_CLK_PORT,MOTOR_Y_CLK_PIN);        //CLK X
+  }
+  else if(value_m)
+  {
+      stepsY++;
+      Gpio_toggle(MOTOR_Y_CLK_PORT,MOTOR_Y_CLK_PIN);
+  }
+  else
+  {
+      CSP_TmrStop(CSP_TMR_NBR_01);
+      
   }
 }
 
+void moveZDirection ()
+{
+  uint8 value_p;
+  uint8 value_m;
+  
+  value_p = (stepsZ > 0) && !(Button_read(ENDSCHALTER_Zplus));
+  value_m = (stepsZ < 0) && !(Button_read(ENDSCHALTER_Zminus));
+  
+  if (value_p)
+  {
+    stepsZ--;
+    Gpio_toggle(MOTOR_Z_CLK_PORT,MOTOR_Z_CLK_PIN);        //CLK X
+  }
+  else if(value_m)
+  {
+      stepsZ++;
+      Gpio_toggle(MOTOR_Y_CLK_PORT,MOTOR_Y_CLK_PIN);
+  }
+  else
+  {
+      CSP_TmrStop(CSP_TMR_NBR_02);
+      
+  }
+}
 bool setXDirection (int32 stepsX_local)
 {               
 /*
@@ -280,15 +349,15 @@ bool setXDirection (int32 stepsX_local)
       return FALSE;
     }
     
-    stepsX = abs(stepsX_local) * 2; // one cock has rising and falling edge
+    stepsX = stepsX_local * 2; // one cock has rising and falling edge
  
     if (stepsX_local > 0)
     {
-      Gpio_set(0,10);       // directionX
+      Gpio_set(MOTOR_X_DIR_PORT,MOTOR_X_DIR_PIN);       // directionX
     }
     else
     {
-      Gpio_clear(0,10);     // directionX
+      Gpio_clear(MOTOR_X_DIR_PORT,MOTOR_X_DIR_PIN);     // directionX
     }
     
     CSP_TmrStart(CSP_TMR_NBR_00);
@@ -309,15 +378,15 @@ bool setYDirection (int32 stepsY_local)
       return FALSE;
     }
     
-    stepsY = abs(stepsY_local) * 2; // one cock has rising and falling edge
+    stepsY = stepsY_local * 2; // one cock has rising and falling edge
  
-    if (stepsY_local < 0)
+    if (stepsY_local > 0)
     {
-      Gpio_set(1,20); // directionY
+      Gpio_set(MOTOR_Y_DIR_PORT,MOTOR_Y_DIR_PIN); // directionY
     }
     else
     {
-      Gpio_clear(1,20); // directionY
+      Gpio_clear(MOTOR_Y_DIR_PORT,MOTOR_Y_DIR_PIN); // directionY
     }
     
     CSP_TmrStart(CSP_TMR_NBR_01); 
@@ -325,6 +394,34 @@ bool setYDirection (int32 stepsY_local)
     return TRUE;
 }
 
+bool setZDirection (int32 stepsZ_local)
+{
+  /*  
+  if (Timer_running(Timer1)) 
+    {
+      return FALSE;
+    }
+    */    
+    if (stepsZ_local == 0)
+    {
+      return FALSE;
+    }
+    
+    stepsY = stepsZ_local * 2; // one cock has rising and falling edge
+ 
+    if (stepsZ_local < 0)
+    {
+      Gpio_set(MOTOR_Z_DIR_PORT,MOTOR_Z_DIR_PIN); // directionY
+    }
+    else
+    {
+      Gpio_clear(MOTOR_Z_DIR_PORT,MOTOR_Z_DIR_PIN); // directionY
+    }
+    
+    CSP_TmrStart(CSP_TMR_NBR_02); 
+    
+    return TRUE;
+}
 bool cncCalibrateZentool (uint32 steps, int16 difference)
 {
   /*
@@ -343,46 +440,23 @@ bool cncCalibrateZentool (uint32 steps, int16 difference)
 
 void buttonInit ()
 {
+    Button_initialize2(10000, 30000);
         //+++++++++++++++++++++++++++++++++++++++++TASTER++++++++++++++++++++++++++++++++++++++++++++++++++
     //Taster x+
-    Button_initializeButton(1,2,1,ButtonTypeLowActive);
-
-    //Taster x-
-    Button_initializeButton(2,2,2,ButtonTypeLowActive);
-
-    //Taster y+
-    Button_initializeButton(3,2,3,ButtonTypeLowActive);
-
-    //Taster y-
-    Button_initializeButton(4,2,4,ButtonTypeLowActive);
-
-    //Taster z+
-    Button_initializeButton(5,0,26,ButtonTypeLowActive);
-
-    //Taster z-
-    Button_initializeButton(6,2,7,ButtonTypeLowActive);
-
-    //Taster OK
-    Button_initializeButton(7,2,0,ButtonTypeLowActive);
-
-        //+++++++++++++++++++++++++++++++++++++++++ENDSCHALTER++++++++++++++++++++++++++++++++++++++++++++++++++
-    //Endschalter x+
-    Button_initializeButton(8,0,8,ButtonTypeLowActive);
-
-    //Endschalter x-
-    Button_initializeButton(9,0,9,ButtonTypeLowActive);
-
-    //Endschalter y+
-    Button_initializeButton(10,2,6,ButtonTypeLowActive);
-
-    //Endschalter y-
-    Button_initializeButton(11,2,8,ButtonTypeLowActive);
-
-    //Endschalter z+
-    Button_initializeButton(12,0,17,ButtonTypeLowActive);
-
-    //Endschalter z-
-    Button_initializeButton(13,0,22,ButtonTypeLowActive);
+    Button_initializeButton(BUTTON_Xplus, TASTER_Xplus_PORT, TASTER_Xplus_PIN, ButtonTypeLowActive);
+    Button_initializeButton(BUTTON_Xminus, TASTER_Xmius_PORT, TASTER_Xmius_PIN, ButtonTypeLowActive);
+    Button_initializeButton(BUTTON_Yplus, TASTER_Yplus_PORT, TASTER_Yplus_PIN, ButtonTypeLowActive);
+    Button_initializeButton(BUTTON_Yminus, TASTER_Yminus_PORT, TASTER_Yminus_PIN, ButtonTypeLowActive);
+    Button_initializeButton(BUTTON_Zplus, TASTER_Zplus_PORT, TASTER_Zplus_PIN, ButtonTypeLowActive);
+    Button_initializeButton(BUTTON_Zminus, TASTER_Zminus_PORT, TASTER_Zminus_PIN, ButtonTypeLowActive);
+    Button_initializeButton(BUTTON_OK,TASTER_OK_PORT,TASTER_OK_PIN, ButtonTypeLowActive);
+    Button_initializeButton(ENDSCHALTER_Xplus, ENDSCHALTER_Xplus_PORT, ENDSCHALTER_Xplus_PIN, ButtonTypeLowActive);
+    Button_initializeButton(ENDSCHALTER_Xminus, ENDSCHALTER_Xmius_PORT,  ENDSCHALTER_Xmius_PIN, ButtonTypeLowActive);
+    Button_initializeButton(ENDSCHALTER_Yplus, ENDSCHALTER_Yplus_PORT, ENDSCHALTER_Yplus_PIN, ButtonTypeLowActive);
+    Button_initializeButton(ENDSCHALTER_Yminus, ENDSCHALTER_Yminus_PORT,  ENDSCHALTER_Yminus_PIN, ButtonTypeLowActive);
+    Button_initializeButton(ENDSCHALTER_Zplus, ENDSCHALTER_Zplus_PORT, ENDSCHALTER_Zplus_PIN, ButtonTypeLowActive);
+    Button_initializeButton(ENDSCHALTER_Zminus, ENDSCHALTER_Zminus_PORT,  ENDSCHALTER_Zminus_PIN, ButtonTypeLowActive);
+  
 #define ENDSCHALTER_XP  
 
 }
@@ -401,7 +475,16 @@ static void App_TMR1_IntHandler (void *p_arg)
   
   moveYDirection();
   
-  CSP_TmrIntClr(CSP_TMR_NBR_01);		/* Clear TMR0 interrupt.								*/
+  CSP_TmrIntClr(CSP_TMR_NBR_01);		/* Clear TMR1 interrupt.								*/
+  CPU_IntSrcEn(CPU_INT_SYSTICK);     /* Enable the SYSTICK interrupt. Resume OS operation.   */
+}
+
+static void App_TMR2_IntHandler (void *p_arg)
+{
+  
+  moveZDirection();
+  
+  CSP_TmrIntClr(CSP_TMR_NBR_02);                /* Clear TMR2 interrupt.                                                                */
   CPU_IntSrcEn(CPU_INT_SYSTICK);     /* Enable the SYSTICK interrupt. Resume OS operation.   */
 }
 /*! EOF */

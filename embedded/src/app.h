@@ -20,6 +20,34 @@
 #define ENDSCHALTER_Zplus 12
 #define ENDSCHALTER_Zminus 13
 
+#define TASTER_Xplus_PORT          2
+#define TASTER_Xmius_PORT          2
+#define TASTER_Yplus_PORT          2
+#define TASTER_Yminus_PORT         2
+#define TASTER_Zplus_PORT          0
+#define TASTER_Zminus_PORT         2
+#define TASTER_OK_PORT             2
+#define TASTER_OK_PIN              0
+#define TASTER_Xplus_PIN           1
+#define TASTER_Xmius_PIN           2
+#define TASTER_Yplus_PIN           3
+#define TASTER_Yminus_PIN          4
+#define TASTER_Zplus_PIN           26
+#define TASTER_Zminus_PIN          7
+
+#define ENDSCHALTER_Xplus_PORT          0
+#define ENDSCHALTER_Xmius_PORT          0
+#define ENDSCHALTER_Yplus_PORT          2
+#define ENDSCHALTER_Yminus_PORT         2
+#define ENDSCHALTER_Zplus_PORT          0
+#define ENDSCHALTER_Zminus_PORT         0
+#define ENDSCHALTER_Xplus_PIN           8
+#define ENDSCHALTER_Xmius_PIN           9
+#define ENDSCHALTER_Yplus_PIN           6
+#define ENDSCHALTER_Yminus_PIN          8
+#define ENDSCHALTER_Zplus_PIN           17
+#define ENDSCHALTER_Zminus_PIN          22
+
 #include <defines.h>
 #include <includes.h>
 #include <sys/stat.h>
@@ -66,15 +94,17 @@ OS_MEM RawMaterialMemory;
 void DAC_WriteValue(uint32 dac_value);
 static void App_TMR0_IntHandler(void *p_arg);
 static void App_TMR1_IntHandler (void *p_arg);
-//static void App_TMR2_IntHandler (void *p_arg);
+static void App_TMR2_IntHandler (void *p_arg);
 
 /** starts moving in Direction X.
  *  @param stepsX are the steps >0= +  <0= -
  */
 void moveXDirection ();
 void moveYDirection ();
+void moveZDirection ();
 bool setXDirection (int32 stepsX_local);
 bool setYDirection (int32 stepsY);
+bool setZDirection (int32 stepsZ);
 
 bool cncCalibrateZentool (uint32 steps, int16 difference);
 
