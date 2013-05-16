@@ -20,6 +20,12 @@ static CPU_STK App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];             /* Sta
 static CPU_STK App_ButtonStk[APP_STACK_SIZE];
 static CPU_STK App_MotorSteuerungStk[APP_STACK_SIZE];
 
+
+ButtonValue cncButtons[20]; // TODO
+int8 testValue = 2;
+uint8 testPort = 2;
+uint8 testPin = 2;
+
 /*
 ************************************************************************************************
 *                                         FUNCTION PROTOTYPES
@@ -28,6 +34,8 @@ static CPU_STK App_MotorSteuerungStk[APP_STACK_SIZE];
 static void App_TaskStart (void  *p_arg);
 static void App_Button (void *p_arg);
 static void App_MotorSteuerung (void *p_arg);
+
+void buttonInit();
 
 
 /*
@@ -77,6 +85,7 @@ main (void)
     OSInit(&os_err);                                                        /* Init uC/OS-III */
    
      cnc_initialize();
+     buttonInit();
     // DAC_Init(LPC_DAC);
      //  Led_initialize(1,29, Led>_LowActive_Yes);
      CSP_TmrInit();
@@ -184,21 +193,27 @@ static void App_Button (void *p_arg)
   OS_ERR       err;
     CPU_INT08U count;
     CPU_INT08U i;
-    CPU_INT08U cncButtons[10];
+  ButtonValue value;
   (void)p_arg;                                                    /* Prevent Compiler Warning */
   
   while(DEF_TRUE) {
-    for(count=0;count<=10;count++);
-    valueButton();                                              
-    OSTimeDlyHMSM(0u, 0u, 0u, 10u, OS_OPT_TIME_HMSM_STRICT, &err);
-    if(count==10)
+    for(count=0;count<=10;count++)
     {
-        for(i=0;i<=20;i++)
-        {
-            Button_getPress(cncButtons[count]);
-        }
+      //Button_task();  
+        testValue = Gpio_read(testPort,testPin);
+      OSTimeDlyHMSM(0u, 0u, 0u, 10u, OS_OPT_TIME_HMSM_STRICT, &err);
+      if(count==10)
+      {
+          //for(i=0;i<=20;i++)
+          //{
+              //if (Button_getPress(&value) != -1)
+              //{
+              //  cncButtons[0] = value;
+              //}
+              //i = i;
+          //}
+      }
     }
-    
   }
 }
 
@@ -212,10 +227,10 @@ OS_ERR       err;
  for(;;) 
  {
  //  setXDirection(-3000);
-    setYDirection(-1000);
+    setXDirection(-1000);
     OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
  //   setXDirection(1000);
-    setYDirection(3000);
+    setXDirection(3000);
     OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);   
  }
  
@@ -227,7 +242,7 @@ void moveXDirection ()
   
   endx_m = Gpio_read(0,9);
   endx_p = CSP_GPIO_Rd(0) & !(1<<9);
-  if ((stepsX > 0) && (endx_p == 1))
+  if ((stepsX > 0) && (endx_m == 1))
   {
     stepsX--;
     Gpio_toggle(0,11);        //CLK X
@@ -333,7 +348,7 @@ void buttonInit ()
     Button_initializeButton(1,2,1,ButtonTypeLowActive);
 
     //Taster x-
-    Button_initializeButton(2,2,1,ButtonTypeLowActive);
+    Button_initializeButton(2,2,2,ButtonTypeLowActive);
 
     //Taster y+
     Button_initializeButton(3,2,3,ButtonTypeLowActive);

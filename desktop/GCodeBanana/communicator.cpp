@@ -37,12 +37,12 @@ bool Communicator::connectSerialPort(const QString &device)
         emit serialPortConnected();
         serialPort->write("\r");
 
-        qDebug() << "IRemote: connected to serial device";
+        qDebug() << "GCodeBanana: connected to serial device";
         return true;
     }
     else
     {
-        qDebug() << "IRemote: not connected to serial device";
+        qDebug() << "GCodeBanana: not connected to serial device";
         return false;
     }
 

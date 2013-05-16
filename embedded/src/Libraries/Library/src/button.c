@@ -106,3 +106,8 @@ int8 Button_getPress(ButtonValue *value)
 {
     return Cb_get(&buttonBuffer, (void*)value);
 }
+
+void Button_task()
+{
+    valueButton();
+}

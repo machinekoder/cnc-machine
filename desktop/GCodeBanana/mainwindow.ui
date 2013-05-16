@@ -22,6 +22,21 @@
         <property name="editable">
          <bool>true</bool>
         </property>
+        <item>
+         <property name="text">
+          <string>/dev/ttyACM0</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>/dev/ttyACM1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>/dev/ttyACM2</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

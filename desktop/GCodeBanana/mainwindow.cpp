@@ -316,7 +316,8 @@ QString MainWindow::translateGCode(QString code, double x, double y, double z)
 
 void MainWindow::refreshPreview()
 {
-    ui->graphicsView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+    ui->graphicsView->fitInView(0,0,applicationSettings.boardWidth,applicationSettings.boardHeight, Qt::KeepAspectRatio);
+    //ui->graphicsView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
 void MainWindow::drawGrid()
@@ -342,8 +343,7 @@ void MainWindow::drawGrid()
 
     // draw Labels
 
-
-    ui->graphicsView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+    refreshPreview();
 }
 
 void MainWindow::clearPreview()
