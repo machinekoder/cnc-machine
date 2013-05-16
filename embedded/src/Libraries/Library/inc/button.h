@@ -42,6 +42,8 @@ void Button_initializeButton(uint8 id, uint8 port, uint8 pin, ButtonType type);
 
 int8 Button_getPress(ButtonValue *value);
 
+uint8 Button_read(uint8 id);
+
 void Button_task();
 
 /**

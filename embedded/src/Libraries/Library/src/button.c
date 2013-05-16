@@ -107,6 +107,20 @@ int8 Button_getPress(ButtonValue *value)
     return Cb_get(&buttonBuffer, (void*)value);
 }
 
+uint8 Button_read(uint8 id)
+{
+    if(buttons[id-1].type == ButtonTypeLowActive)
+    {
+        return (!Gpio_read(buttons[id-1].port,buttons[id-1].pin));
+    }
+    else if(buttons[id-1].type == ButtonTypeHighActive)
+    {
+        return Gpio_read(buttons[id-1].port,buttons[id-1].pin);
+    }
+    
+    return 0;
+}
+
 void Button_task()
 {
     valueButton();
