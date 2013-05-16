@@ -52,6 +52,8 @@ typedef enum {
  */
 uint8 Button_initialize(uint32 khz, uint32 sampleInterval, uint32 timeoutInterval);
 
+uint8 Button_initialize2(uint32 sampleInterval, uint32 timeoutInterval);
+
 void Button_initializeButton(uint8 id, uint8 port, uint8 pin, ButtonType type);
 
 int8 Button_getPress(ButtonValue *value);

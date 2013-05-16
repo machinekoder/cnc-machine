@@ -32,7 +32,7 @@ uint8 Button_initialize(uint32 khz, uint32 sampleInterval, uint32 timeoutInterva
     if (Cb_initialize(&buttonBuffer, BUTTON_BUFFER_SIZE, sizeof(ButtonValue), (void*)(&buttonBufferData)) == -1)
         return -1;
     
-	if (Timer_initialize(Timer2, khz, sampleInterval) == -1)
+    if (Timer_initialize(Timer2, khz, sampleInterval) == -1)
         return -1;
     
     maxunset = (uint32)(timeoutInterval/sampleInterval);
@@ -40,6 +40,16 @@ uint8 Button_initialize(uint32 khz, uint32 sampleInterval, uint32 timeoutInterva
     Timer_connectFunction(Timer2, valueButton);
     Timer_start(Timer2);
 
+    return 0;
+}
+
+uint8 Button_initialize2(uint32 sampleInterval, uint32 timeoutInterval)
+{
+    if (Cb_initialize(&buttonBuffer, BUTTON_BUFFER_SIZE, sizeof(ButtonValue), (void*)(&buttonBufferData)) == -1)
+        return -1;
+    
+    maxunset = (uint32)(timeoutInterval/sampleInterval);
+    
     return 0;
 }
 
