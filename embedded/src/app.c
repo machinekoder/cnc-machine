@@ -55,8 +55,8 @@ uint32 stepsX;
 uint32 stepsY;
 uint32 stepsZ;
 uint32 mySteps;
-uint32 endx=0;
-
+uint32 endx_p=0;
+uint32 endx_m=0;
 int 
 main (void)
 {
@@ -225,8 +225,9 @@ void moveXDirection ()
 {         
   
   
-  endx = Gpio_read(0,9);
-  if ((stepsX > 0) && (endx == 1))
+  endx_m = Gpio_read(0,9);
+  endx_p = CSP_GPIO_Rd(0) & !(1<<9);
+  if ((stepsX > 0) && (endx_p == 1))
   {
     stepsX--;
     Gpio_toggle(0,11);        //CLK X
