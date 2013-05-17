@@ -492,8 +492,15 @@ bool setYDirection (int32 stepsY_local)
     {
         return FALSE;
     }
+<<<<<<< HEAD
+    
+    stepsY = stepsY_local * 2; // one cock has rising and falling edge
+ 
+    if (stepsY_local < 0)
+=======
 
     if (stepsY_local > 0)
+>>>>>>> 8e306e932f541095e7db7c775777be781ff65a98
     {
         Gpio_set(MOTOR_Y_DIR_PORT,MOTOR_Y_DIR_PIN); // directionY
     }
