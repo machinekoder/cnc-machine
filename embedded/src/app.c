@@ -34,9 +34,9 @@ int32 stepsX;
 int32 stepsY;
 int32 stepsZ;
 
-const uint32 xCalibration = 50000u;
-const uint32 yCalibration = 50000u;
-const uint32 zCalibration = 50000u;
+const uint32 xCalibration = 5000u;
+const uint32 yCalibration = 5000u;
+const uint32 zCalibration = 5000u;
 
 ApplicationState applicationState = ApplicationState_Movement;
 
@@ -59,6 +59,7 @@ bool endschalterZMinusTest = FALSE;
 int8 testValue = 2;
 uint8 testPort = 2;
 uint8 testPin = 2;
+bool testing = FALSE;
 
 /*
 ************************************************************************************************
@@ -279,6 +280,7 @@ static void App_Button (void *p_arg)
                         else if (value.id == BUTTON_OK)
                         {
                             Debug_printf(Debug_Level_2, "OK pressed\n");
+                            testing = TRUE;
                         }
                     }
                     else if (applicationState == ApplicationState_Test)
@@ -343,7 +345,7 @@ static void App_Button (void *p_arg)
                             endschalterZPlusTest = TRUE;
                             Debug_printf(Debug_Level_2, "Endschalter Z+\n");
                         }
-                        else if (value.id == ENDSCHALTER_Yminus)
+                        else if (value.id == ENDSCHALTER_Zminus)
                         {
                             endschalterZMinusTest = TRUE;
                             Debug_printf(Debug_Level_2, "Endschalter Z-\n");
@@ -367,6 +369,12 @@ static void App_MotorSteuerung (void *p_arg)
         // setXDirection(20000);
         // setYDirection(20000);
         OSTimeDlyHMSM(0u, 0u, 3u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
+        if (testing == TRUE)
+        {
+            testButtons();
+            testEndstops();
+            testing = FALSE;
+        }
         // setXDirection(-20000);
         // setYDirection(-20000);
         // OSTimeDlyHMSM(0u, 0u, 3u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
@@ -440,7 +448,7 @@ void moveZDirection ()
     else if(value_m)
     {
         stepsZ++;
-        Gpio_toggle(MOTOR_Y_CLK_PORT,MOTOR_Y_CLK_PIN);
+        Gpio_toggle(MOTOR_Z_CLK_PORT,MOTOR_Z_CLK_PIN);
     }
     else
     {
@@ -503,7 +511,7 @@ bool setYDirection (int32 stepsY_local)
     }
     else
     {
-        stepsX += stepsY_local * 2; // one cock has rising and falling edge
+        stepsY += stepsY_local * 2; // one cock has rising and falling edge
     }
 
     return TRUE;
@@ -518,11 +526,11 @@ bool setZDirection (int32 stepsZ_local)
 
     if (stepsZ_local < 0)
     {
-        Gpio_set(MOTOR_Z_DIR_PORT,MOTOR_Z_DIR_PIN); // directionY
+        Gpio_clear(MOTOR_Z_DIR_PORT,MOTOR_Z_DIR_PIN); // directionY
     }
     else
     {
-        Gpio_clear(MOTOR_Z_DIR_PORT,MOTOR_Z_DIR_PIN); // directionY
+        Gpio_set(MOTOR_Z_DIR_PORT,MOTOR_Z_DIR_PIN); // directionY
     }
 
     CSP_TmrStart(CSP_TMR_NBR_02);

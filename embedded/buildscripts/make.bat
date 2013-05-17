@@ -1,2 +1,2 @@
 cd ..
-make
+/usr/bin/make

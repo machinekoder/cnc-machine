@@ -119,13 +119,13 @@ int8 Button_getPress(ButtonValue *value)
 
 uint8 Button_read(uint8 id)
 {
-    if(buttons[id-1].type == ButtonTypeLowActive)
+    if(buttons[id].type == ButtonTypeLowActive)
     {
-        return (!Gpio_read(buttons[id-1].port,buttons[id-1].pin));
+        return (!Gpio_read(buttons[id].port,buttons[id].pin));
     }
-    else if(buttons[id-1].type == ButtonTypeHighActive)
+    else if(buttons[id].type == ButtonTypeHighActive)
     {
-        return Gpio_read(buttons[id-1].port,buttons[id-1].pin);
+        return Gpio_read(buttons[id].port,buttons[id].pin);
     }
     
     return 0;

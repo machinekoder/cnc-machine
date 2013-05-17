@@ -5,20 +5,20 @@
 *                                             INCLUDE FILES
 ************************************************************************************************
 */
-#define BUTTON_Xplus 1
-#define BUTTON_Xminus 2
-#define BUTTON_Yplus 3
-#define BUTTON_Yminus 4
-#define BUTTON_Zplus 5
-#define BUTTON_Zminus 6
-#define BUTTON_OK 7
+#define BUTTON_Xplus 0
+#define BUTTON_Xminus 1
+#define BUTTON_Yplus 2
+#define BUTTON_Yminus 3
+#define BUTTON_Zplus 4
+#define BUTTON_Zminus 5
+#define BUTTON_OK 6
 
-#define ENDSCHALTER_Xplus 8
-#define ENDSCHALTER_Xminus 9
-#define ENDSCHALTER_Yplus 10
-#define ENDSCHALTER_Yminus 11
-#define ENDSCHALTER_Zplus 12
-#define ENDSCHALTER_Zminus 13
+#define ENDSCHALTER_Xplus 7
+#define ENDSCHALTER_Xminus 8
+#define ENDSCHALTER_Yplus 9
+#define ENDSCHALTER_Yminus 10
+#define ENDSCHALTER_Zplus 11
+#define ENDSCHALTER_Zminus 12
 
 #define TASTER_Xplus_PORT          2
 #define TASTER_Xmius_PORT          2
