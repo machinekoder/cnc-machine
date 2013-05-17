@@ -96,8 +96,20 @@ void moveXDirection ();
 void moveYDirection ();
 void moveZDirection ();
 bool setXDirection (int32 stepsX_local);
-bool setYDirection (int32 stepsY);
-bool setZDirection (int32 stepsZ);
+bool setYDirection (int32 stepsY_local);
+bool setZDirection (int32 stepsZ_local);
+bool setXDirectionMM (int32 mm);
+bool setYDirectionMM (int32 mm);
+bool setZDirectionMM (int32 mm);
 
-bool cncCalibrateZentool (uint32 steps, int16 difference);
+
+void buttonInit();
+void homeX();
+void homeY();
+void homeZ();
+void homeAll();
+bool cncCalibrateZentool (void);
+
+bool testButtons(void);
+bool testEndstops(void);
 
