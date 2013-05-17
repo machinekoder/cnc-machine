@@ -54,6 +54,7 @@
 #include <timer.h>
 #include "taskMachine.h"
 #include "zentoolworksDriver.h"
+#include "debug.h"
 
 /*
 ************************************************************************************************
@@ -67,10 +68,6 @@ typedef struct {
     uint8  taskId;
     uint32 producedGoods;
 } App_TaskMachine_ServiceRequest;
-
-char g_TWBuffer[0xFF];
-char g_TRBuffer[0xFF];
-char testBuffer[100];
 
 OS_SEM UartSem;
 OS_SEM DacSem;
@@ -91,10 +88,6 @@ OS_MEM RawMaterialMemory;
 *                                         FUNCTION PROTOTYPES
 ************************************************************************************************
 */
-void DAC_WriteValue(uint32 dac_value);
-static void App_TMR0_IntHandler(void *p_arg);
-static void App_TMR1_IntHandler (void *p_arg);
-static void App_TMR2_IntHandler (void *p_arg);
 
 /** starts moving in Direction X.
  *  @param stepsX are the steps >0= +  <0= -
@@ -103,8 +96,20 @@ void moveXDirection ();
 void moveYDirection ();
 void moveZDirection ();
 bool setXDirection (int32 stepsX_local);
-bool setYDirection (int32 stepsY);
-bool setZDirection (int32 stepsZ);
+bool setYDirection (int32 stepsY_local);
+bool setZDirection (int32 stepsZ_local);
+bool setXDirectionMM (int32 mm);
+bool setYDirectionMM (int32 mm);
+bool setZDirectionMM (int32 mm);
 
-bool cncCalibrateZentool (uint32 steps, int16 difference);
+
+void buttonInit();
+void homeX();
+void homeY();
+void homeZ();
+void homeAll();
+bool cncCalibrateZentool (void);
+
+bool testButtons(void);
+bool testEndstops(void);
 

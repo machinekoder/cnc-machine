@@ -12,6 +12,7 @@
 #pragma once
 
 #define BUTTON_BUFFER_SIZE 20
+#define BUTTON_MAX_COUNT 20
 
 #include <types.h>
 #include <timer.h>
@@ -20,14 +21,27 @@
 #include <circularbuffer.h>
 
 typedef enum {
-    ButtonTypeHighActive = 0,
-    ButtonTypeLowActive = 1
+    ButtonTypeHighActive = 0u,
+    ButtonTypeLowActive = 1u
 } ButtonType;
 
 typedef struct {
     uint8 id;
     uint8 count;
 } ButtonValue;
+
+typedef enum {
+    Button1 = 0u,
+    Button2 = 1u,
+    Button3 = 2u,
+    Button4 = 3u,
+    Button5 = 4u,
+    Button6 = 5u,
+    Button7 = 6u,
+    Button8 = 7u,
+    Button9 = 8u,
+    Button10 = 9u
+} Button;
 
 /** Initizes the Button Pin und Ports.
  *@param Mhz Is the frequency in wich values are checked.

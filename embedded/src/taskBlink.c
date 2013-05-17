@@ -21,7 +21,7 @@ void App_TaskBlink(void* p_arg)
         }
         else if (taskState == App_TaskBlink_State_Blink)
         {
-            Led_toggle(Led0);
+            Led_toggle(Led1);
         }
         
         tmpState = (App_TaskBlink_State)OSTaskQPend(10, 
@@ -35,7 +35,7 @@ void App_TaskBlink(void* p_arg)
             taskState = tmpState;
             if (taskState == App_TaskBlink_State_Idle)
             {
-                Led_clear(Led0);
+                Led_clear(Led1);
             }
         }
         

@@ -31,16 +31,16 @@ typedef struct {
 } LedConfig;
 
 typedef enum {
-    Led0 = 0u,
-    Led1 = 1u,
-    Led2 = 2u,
-    Led3 = 3u,
-    Led4 = 4u,
-    Led5 = 5u,
-    Led6 = 6u,
-    Led7 = 7u,
-    Led8 = 8u,
-    Led9 = 9u
+    Led1 = 0u,
+    Led2 = 1u,
+    Led3 = 2u,
+    Led4 = 3u,
+    Led5 = 4u,
+    Led6 = 5u,
+    Led7 = 6u,
+    Led8 = 7u,
+    Led9 = 8u,
+    Led10 = 9u
 } Led;
 
 void Led_initialize(uint8 port, uint8 pin, Led_LowActive lowActive);

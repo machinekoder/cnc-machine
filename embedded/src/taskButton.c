@@ -3,8 +3,8 @@
 void App_TaskButton(void* p_arg)
 {
     OS_ERR       err;
-    CPU_TS       ts;
-    OS_MSG_SIZE  messageSize;
+    //CPU_TS       ts;
+    //OS_MSG_SIZE  messageSize;
     
     (void)p_arg;
     
@@ -13,7 +13,7 @@ void App_TaskButton(void* p_arg)
     
     while (DEF_TRUE)
     {
-        if ((2, 10) == 0)
+        if (Gpio_read(2, 10) == 0)
         {
             OSSemPost(&ButtonSem,
                 OS_OPT_POST_1,

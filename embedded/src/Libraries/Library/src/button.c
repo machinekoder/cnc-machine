@@ -9,10 +9,10 @@ typedef struct {
     uint8 pin;
     uint8 unset;
     uint8 type;
-} Button;
+} ButtonConfig;
 
-volatile Button  buttons[BUTTON_BUFFER_SIZE];
-volatile ButtonValue val[BUTTON_BUFFER_SIZE];
+volatile ButtonConfig  buttons[BUTTON_MAX_COUNT];
+volatile ButtonValue val[BUTTON_MAX_COUNT];
 volatile uint8   buttonCount = 0;
 
 volatile uint32 maxunset;
@@ -61,14 +61,14 @@ void Button_initializeButton(uint8 id, uint8 port, uint8 pin,ButtonType type)
     if(type == ButtonTypeHighActive)
        Pin_setMode(port, pin, Pin_Mode_PullDown);
     
-    buttons[buttonCount].id     = id;
-    buttons[buttonCount].port   = port;
-    buttons[buttonCount].pin    = pin;
-    buttons[buttonCount].type   = type;
-    buttons[buttonCount].unset  = 0;
+    buttons[id].id     = id;
+    buttons[id].port   = port;
+    buttons[id].pin    = pin;
+    buttons[id].type   = type;
+    buttons[id].unset  = 0;
     
-    val[buttonCount].count = 0;
-    val[buttonCount].id = id;
+    val[id].count = 0;
+    val[id].id = id;
 
     buttonCount++;
 }
