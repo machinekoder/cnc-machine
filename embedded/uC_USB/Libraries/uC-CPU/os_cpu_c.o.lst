@@ -1,0 +1,1172 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"os_cpu_c.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.comm	OS_CPU_ExceptStkBase,4,4
+  19              		.align	2
+  20              		.global	OSIdleTaskHook
+  21              		.thumb
+  22              		.thumb_func
+  24              	OSIdleTaskHook:
+  25              	.LFB0:
+  26              		.file 1 "Libraries/uC-CPU/os_cpu_c.c"
+   1:Libraries/uC-CPU/os_cpu_c.c **** /*
+   2:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+   3:Libraries/uC-CPU/os_cpu_c.c **** *                                                uC/OS-III
+   4:Libraries/uC-CPU/os_cpu_c.c **** *                                          The Real-Time Kernel
+   5:Libraries/uC-CPU/os_cpu_c.c **** *
+   6:Libraries/uC-CPU/os_cpu_c.c **** *
+   7:Libraries/uC-CPU/os_cpu_c.c **** *                           (c) Copyright 2009-2010; Micrium, Inc.; Weston, FL
+   8:Libraries/uC-CPU/os_cpu_c.c **** *                    All rights reserved.  Protected by international copyright laws.
+   9:Libraries/uC-CPU/os_cpu_c.c **** *
+  10:Libraries/uC-CPU/os_cpu_c.c **** *                                           ARM Cortex-M3 Port
+  11:Libraries/uC-CPU/os_cpu_c.c **** *
+  12:Libraries/uC-CPU/os_cpu_c.c **** * File      : OS_CPU_C.C
+  13:Libraries/uC-CPU/os_cpu_c.c **** * Version   : V3.01.2
+  14:Libraries/uC-CPU/os_cpu_c.c **** * By        : JJL
+  15:Libraries/uC-CPU/os_cpu_c.c **** *             BAN
+  16:Libraries/uC-CPU/os_cpu_c.c **** *
+  17:Libraries/uC-CPU/os_cpu_c.c **** * LICENSING TERMS:
+  18:Libraries/uC-CPU/os_cpu_c.c **** * ---------------
+  19:Libraries/uC-CPU/os_cpu_c.c **** *             uC/OS-III is provided in source form to registered licensees ONLY.  It is 
+  20:Libraries/uC-CPU/os_cpu_c.c **** *             illegal to distribute this source code to any third party unless you receive 
+  21:Libraries/uC-CPU/os_cpu_c.c **** *             written permission by an authorized Micrium representative.  Knowledge of 
+  22:Libraries/uC-CPU/os_cpu_c.c **** *             the source code may NOT be used to develop a similar product.
+  23:Libraries/uC-CPU/os_cpu_c.c **** *
+  24:Libraries/uC-CPU/os_cpu_c.c **** *             Please help us continue to provide the Embedded community with the finest
+  25:Libraries/uC-CPU/os_cpu_c.c **** *             software available.  Your honesty is greatly appreciated.
+  26:Libraries/uC-CPU/os_cpu_c.c **** *
+  27:Libraries/uC-CPU/os_cpu_c.c **** *             You can contact us at www.micrium.com.
+  28:Libraries/uC-CPU/os_cpu_c.c **** *
+  29:Libraries/uC-CPU/os_cpu_c.c **** * For       : ARMv7M Cortex-M3
+  30:Libraries/uC-CPU/os_cpu_c.c **** * Mode      : Thumb2
+  31:Libraries/uC-CPU/os_cpu_c.c **** * Toolchain : RealView
+  32:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+  33:Libraries/uC-CPU/os_cpu_c.c **** */
+  34:Libraries/uC-CPU/os_cpu_c.c **** 
+  35:Libraries/uC-CPU/os_cpu_c.c **** #define   OS_CPU_GLOBALS
+  36:Libraries/uC-CPU/os_cpu_c.c **** 
+  37:Libraries/uC-CPU/os_cpu_c.c **** #ifdef VSC_INCLUDE_SOURCE_FILE_NAMES
+  38:Libraries/uC-CPU/os_cpu_c.c **** const  CPU_CHAR  *os_cpu_c__c = "$Id: $";
+  39:Libraries/uC-CPU/os_cpu_c.c **** #endif
+  40:Libraries/uC-CPU/os_cpu_c.c **** 
+  41:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+  42:Libraries/uC-CPU/os_cpu_c.c **** /*
+  43:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+  44:Libraries/uC-CPU/os_cpu_c.c **** *                                             INCLUDE FILES
+  45:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+  46:Libraries/uC-CPU/os_cpu_c.c **** */
+  47:Libraries/uC-CPU/os_cpu_c.c **** 
+  48:Libraries/uC-CPU/os_cpu_c.c **** #include  <os.h>
+  49:Libraries/uC-CPU/os_cpu_c.c **** 
+  50:Libraries/uC-CPU/os_cpu_c.c **** /*
+  51:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+  52:Libraries/uC-CPU/os_cpu_c.c **** *                                           IDLE TASK HOOK
+  53:Libraries/uC-CPU/os_cpu_c.c **** *
+  54:Libraries/uC-CPU/os_cpu_c.c **** * Description: This function is called by the idle task.  This hook has been added to allow you to 
+  55:Libraries/uC-CPU/os_cpu_c.c **** *              such things as STOP the CPU to conserve power.
+  56:Libraries/uC-CPU/os_cpu_c.c **** *
+  57:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : None.
+  58:Libraries/uC-CPU/os_cpu_c.c **** *
+  59:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : None.
+  60:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+  61:Libraries/uC-CPU/os_cpu_c.c **** */
+  62:Libraries/uC-CPU/os_cpu_c.c **** 
+  63:Libraries/uC-CPU/os_cpu_c.c **** void  OSIdleTaskHook (void)
+  64:Libraries/uC-CPU/os_cpu_c.c **** {
+  27              		.loc 1 64 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 1, uses_anonymous_args = 0
+  31 0000 80B5     		push	{r7, lr}
+  32              	.LCFI0:
+  33              		.cfi_def_cfa_offset 8
+  34              		.cfi_offset 14, -4
+  35              		.cfi_offset 7, -8
+  36 0002 00AF     		add	r7, sp, #0
+  37              	.LCFI1:
+  38              		.cfi_def_cfa_register 7
+  65:Libraries/uC-CPU/os_cpu_c.c **** #if OS_CFG_APP_HOOKS_EN > 0u
+  66:Libraries/uC-CPU/os_cpu_c.c ****     if (OS_AppIdleTaskHookPtr != (OS_APP_HOOK_VOID)0) {
+  39              		.loc 1 66 0
+  40 0004 40F20003 		movw	r3, #:lower16:OS_AppIdleTaskHookPtr
+  41 0008 C0F20003 		movt	r3, #:upper16:OS_AppIdleTaskHookPtr
+  42 000c 1B68     		ldr	r3, [r3, #0]
+  43 000e 002B     		cmp	r3, #0
+  44 0010 05D0     		beq	.L1
+  67:Libraries/uC-CPU/os_cpu_c.c ****         (*OS_AppIdleTaskHookPtr)();
+  45              		.loc 1 67 0
+  46 0012 40F20003 		movw	r3, #:lower16:OS_AppIdleTaskHookPtr
+  47 0016 C0F20003 		movt	r3, #:upper16:OS_AppIdleTaskHookPtr
+  48 001a 1B68     		ldr	r3, [r3, #0]
+  49 001c 9847     		blx	r3
+  50              	.L1:
+  68:Libraries/uC-CPU/os_cpu_c.c ****     }
+  69:Libraries/uC-CPU/os_cpu_c.c **** #endif
+  70:Libraries/uC-CPU/os_cpu_c.c **** }
+  51              		.loc 1 70 0
+  52 001e 80BD     		pop	{r7, pc}
+  53              		.cfi_endproc
+  54              	.LFE0:
+  56              		.align	2
+  57              		.global	OSInitHook
+  58              		.thumb
+  59              		.thumb_func
+  61              	OSInitHook:
+  62              	.LFB1:
+  71:Libraries/uC-CPU/os_cpu_c.c **** 
+  72:Libraries/uC-CPU/os_cpu_c.c **** 
+  73:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+  74:Libraries/uC-CPU/os_cpu_c.c **** /*
+  75:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+  76:Libraries/uC-CPU/os_cpu_c.c **** *                                       OS INITIALIZATION HOOK
+  77:Libraries/uC-CPU/os_cpu_c.c **** *
+  78:Libraries/uC-CPU/os_cpu_c.c **** * Description: This function is called by OSInit() at the beginning of OSInit().
+  79:Libraries/uC-CPU/os_cpu_c.c **** *
+  80:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : None.
+  81:Libraries/uC-CPU/os_cpu_c.c **** *
+  82:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : None.
+  83:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+  84:Libraries/uC-CPU/os_cpu_c.c **** */
+  85:Libraries/uC-CPU/os_cpu_c.c **** 
+  86:Libraries/uC-CPU/os_cpu_c.c **** void  OSInitHook (void)
+  87:Libraries/uC-CPU/os_cpu_c.c **** {
+  63              		.loc 1 87 0
+  64              		.cfi_startproc
+  65              		@ args = 0, pretend = 0, frame = 8
+  66              		@ frame_needed = 1, uses_anonymous_args = 0
+  67              		@ link register save eliminated.
+  68 0020 80B4     		push	{r7}
+  69              	.LCFI2:
+  70              		.cfi_def_cfa_offset 4
+  71              		.cfi_offset 7, -4
+  72 0022 83B0     		sub	sp, sp, #12
+  73              	.LCFI3:
+  74              		.cfi_def_cfa_offset 16
+  75 0024 00AF     		add	r7, sp, #0
+  76              	.LCFI4:
+  77              		.cfi_def_cfa_register 7
+  88:Libraries/uC-CPU/os_cpu_c.c ****     CPU_STK_SIZE   i;
+  89:Libraries/uC-CPU/os_cpu_c.c ****     CPU_STK       *p_stk;
+  90:Libraries/uC-CPU/os_cpu_c.c **** 
+  91:Libraries/uC-CPU/os_cpu_c.c **** 
+  92:Libraries/uC-CPU/os_cpu_c.c ****     p_stk = OSCfg_ISRStkBasePtr;                            /* Clear the ISR stack                 
+  78              		.loc 1 92 0
+  79 0026 40F20003 		movw	r3, #:lower16:OSCfg_ISRStkBasePtr
+  80 002a C0F20003 		movt	r3, #:upper16:OSCfg_ISRStkBasePtr
+  81 002e 1B68     		ldr	r3, [r3, #0]
+  82 0030 3B60     		str	r3, [r7, #0]
+  93:Libraries/uC-CPU/os_cpu_c.c ****     for (i = 0u; i < OSCfg_ISRStkSize; i++) {
+  83              		.loc 1 93 0
+  84 0032 4FF00003 		mov	r3, #0
+  85 0036 7B60     		str	r3, [r7, #4]
+  86 0038 0BE0     		b	.L4
+  87              	.L5:
+  94:Libraries/uC-CPU/os_cpu_c.c ****         *p_stk++ = (CPU_STK)0u;
+  88              		.loc 1 94 0 discriminator 2
+  89 003a 3B68     		ldr	r3, [r7, #0]
+  90 003c 4FF00002 		mov	r2, #0
+  91 0040 1A60     		str	r2, [r3, #0]
+  92 0042 3B68     		ldr	r3, [r7, #0]
+  93 0044 03F10403 		add	r3, r3, #4
+  94 0048 3B60     		str	r3, [r7, #0]
+  93:Libraries/uC-CPU/os_cpu_c.c ****     for (i = 0u; i < OSCfg_ISRStkSize; i++) {
+  95              		.loc 1 93 0 discriminator 2
+  96 004a 7B68     		ldr	r3, [r7, #4]
+  97 004c 03F10103 		add	r3, r3, #1
+  98 0050 7B60     		str	r3, [r7, #4]
+  99              	.L4:
+  93:Libraries/uC-CPU/os_cpu_c.c ****     for (i = 0u; i < OSCfg_ISRStkSize; i++) {
+ 100              		.loc 1 93 0 is_stmt 0 discriminator 1
+ 101 0052 40F20003 		movw	r3, #:lower16:OSCfg_ISRStkSize
+ 102 0056 C0F20003 		movt	r3, #:upper16:OSCfg_ISRStkSize
+ 103 005a 1B68     		ldr	r3, [r3, #0]
+ 104 005c 7A68     		ldr	r2, [r7, #4]
+ 105 005e 9A42     		cmp	r2, r3
+ 106 0060 EBD3     		bcc	.L5
+  95:Libraries/uC-CPU/os_cpu_c.c ****     }
+  96:Libraries/uC-CPU/os_cpu_c.c ****     OS_CPU_ExceptStkBase = (CPU_STK *)(OSCfg_ISRStkBasePtr + OSCfg_ISRStkSize - 1u);
+ 107              		.loc 1 96 0 is_stmt 1
+ 108 0062 40F20003 		movw	r3, #:lower16:OSCfg_ISRStkBasePtr
+ 109 0066 C0F20003 		movt	r3, #:upper16:OSCfg_ISRStkBasePtr
+ 110 006a 1A68     		ldr	r2, [r3, #0]
+ 111 006c 40F20003 		movw	r3, #:lower16:OSCfg_ISRStkSize
+ 112 0070 C0F20003 		movt	r3, #:upper16:OSCfg_ISRStkSize
+ 113 0074 1B68     		ldr	r3, [r3, #0]
+ 114 0076 03F1FF33 		add	r3, r3, #-1
+ 115 007a 4FEA8303 		lsl	r3, r3, #2
+ 116 007e D218     		adds	r2, r2, r3
+ 117 0080 40F20003 		movw	r3, #:lower16:OS_CPU_ExceptStkBase
+ 118 0084 C0F20003 		movt	r3, #:upper16:OS_CPU_ExceptStkBase
+ 119 0088 1A60     		str	r2, [r3, #0]
+  97:Libraries/uC-CPU/os_cpu_c.c **** }
+ 120              		.loc 1 97 0
+ 121 008a 07F10C07 		add	r7, r7, #12
+ 122 008e BD46     		mov	sp, r7
+ 123 0090 80BC     		pop	{r7}
+ 124 0092 7047     		bx	lr
+ 125              		.cfi_endproc
+ 126              	.LFE1:
+ 128              		.align	2
+ 129              		.global	OSStatTaskHook
+ 130              		.thumb
+ 131              		.thumb_func
+ 133              	OSStatTaskHook:
+ 134              	.LFB2:
+  98:Libraries/uC-CPU/os_cpu_c.c **** 
+  99:Libraries/uC-CPU/os_cpu_c.c **** 
+ 100:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+ 101:Libraries/uC-CPU/os_cpu_c.c **** /*
+ 102:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 103:Libraries/uC-CPU/os_cpu_c.c **** *                                         STATISTIC TASK HOOK
+ 104:Libraries/uC-CPU/os_cpu_c.c **** *
+ 105:Libraries/uC-CPU/os_cpu_c.c **** * Description: This function is called every second by uC/OS-III's statistics task.  This allows yo
+ 106:Libraries/uC-CPU/os_cpu_c.c **** *              application to add functionality to the statistics task.
+ 107:Libraries/uC-CPU/os_cpu_c.c **** *
+ 108:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : None.
+ 109:Libraries/uC-CPU/os_cpu_c.c **** *
+ 110:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : None.
+ 111:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 112:Libraries/uC-CPU/os_cpu_c.c **** */
+ 113:Libraries/uC-CPU/os_cpu_c.c **** 
+ 114:Libraries/uC-CPU/os_cpu_c.c **** void  OSStatTaskHook (void)
+ 115:Libraries/uC-CPU/os_cpu_c.c **** {
+ 135              		.loc 1 115 0
+ 136              		.cfi_startproc
+ 137              		@ args = 0, pretend = 0, frame = 0
+ 138              		@ frame_needed = 1, uses_anonymous_args = 0
+ 139 0094 80B5     		push	{r7, lr}
+ 140              	.LCFI5:
+ 141              		.cfi_def_cfa_offset 8
+ 142              		.cfi_offset 14, -4
+ 143              		.cfi_offset 7, -8
+ 144 0096 00AF     		add	r7, sp, #0
+ 145              	.LCFI6:
+ 146              		.cfi_def_cfa_register 7
+ 116:Libraries/uC-CPU/os_cpu_c.c **** #if OS_CFG_APP_HOOKS_EN > 0u
+ 117:Libraries/uC-CPU/os_cpu_c.c ****     if (OS_AppStatTaskHookPtr != (OS_APP_HOOK_VOID)0) {
+ 147              		.loc 1 117 0
+ 148 0098 40F20003 		movw	r3, #:lower16:OS_AppStatTaskHookPtr
+ 149 009c C0F20003 		movt	r3, #:upper16:OS_AppStatTaskHookPtr
+ 150 00a0 1B68     		ldr	r3, [r3, #0]
+ 151 00a2 002B     		cmp	r3, #0
+ 152 00a4 05D0     		beq	.L6
+ 118:Libraries/uC-CPU/os_cpu_c.c ****         (*OS_AppStatTaskHookPtr)();
+ 153              		.loc 1 118 0
+ 154 00a6 40F20003 		movw	r3, #:lower16:OS_AppStatTaskHookPtr
+ 155 00aa C0F20003 		movt	r3, #:upper16:OS_AppStatTaskHookPtr
+ 156 00ae 1B68     		ldr	r3, [r3, #0]
+ 157 00b0 9847     		blx	r3
+ 158              	.L6:
+ 119:Libraries/uC-CPU/os_cpu_c.c ****     }
+ 120:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 121:Libraries/uC-CPU/os_cpu_c.c **** }
+ 159              		.loc 1 121 0
+ 160 00b2 80BD     		pop	{r7, pc}
+ 161              		.cfi_endproc
+ 162              	.LFE2:
+ 164              		.align	2
+ 165              		.global	OSTaskCreateHook
+ 166              		.thumb
+ 167              		.thumb_func
+ 169              	OSTaskCreateHook:
+ 170              	.LFB3:
+ 122:Libraries/uC-CPU/os_cpu_c.c **** 
+ 123:Libraries/uC-CPU/os_cpu_c.c **** 
+ 124:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+ 125:Libraries/uC-CPU/os_cpu_c.c **** /*
+ 126:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 127:Libraries/uC-CPU/os_cpu_c.c **** *                                          TASK CREATION HOOK
+ 128:Libraries/uC-CPU/os_cpu_c.c **** *
+ 129:Libraries/uC-CPU/os_cpu_c.c **** * Description: This function is called when a task is created.
+ 130:Libraries/uC-CPU/os_cpu_c.c **** *
+ 131:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : p_tcb        Pointer to the task control block of the task being created.
+ 132:Libraries/uC-CPU/os_cpu_c.c **** *
+ 133:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : None.
+ 134:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 135:Libraries/uC-CPU/os_cpu_c.c **** */
+ 136:Libraries/uC-CPU/os_cpu_c.c **** 
+ 137:Libraries/uC-CPU/os_cpu_c.c **** void  OSTaskCreateHook (OS_TCB  *p_tcb)
+ 138:Libraries/uC-CPU/os_cpu_c.c **** {
+ 171              		.loc 1 138 0
+ 172              		.cfi_startproc
+ 173              		@ args = 0, pretend = 0, frame = 8
+ 174              		@ frame_needed = 1, uses_anonymous_args = 0
+ 175 00b4 80B5     		push	{r7, lr}
+ 176              	.LCFI7:
+ 177              		.cfi_def_cfa_offset 8
+ 178              		.cfi_offset 14, -4
+ 179              		.cfi_offset 7, -8
+ 180 00b6 82B0     		sub	sp, sp, #8
+ 181              	.LCFI8:
+ 182              		.cfi_def_cfa_offset 16
+ 183 00b8 00AF     		add	r7, sp, #0
+ 184              	.LCFI9:
+ 185              		.cfi_def_cfa_register 7
+ 186 00ba 7860     		str	r0, [r7, #4]
+ 139:Libraries/uC-CPU/os_cpu_c.c **** #if OS_CFG_APP_HOOKS_EN > 0u
+ 140:Libraries/uC-CPU/os_cpu_c.c ****     if (OS_AppTaskCreateHookPtr != (OS_APP_HOOK_TCB)0) {
+ 187              		.loc 1 140 0
+ 188 00bc 40F20003 		movw	r3, #:lower16:OS_AppTaskCreateHookPtr
+ 189 00c0 C0F20003 		movt	r3, #:upper16:OS_AppTaskCreateHookPtr
+ 190 00c4 1B68     		ldr	r3, [r3, #0]
+ 191 00c6 002B     		cmp	r3, #0
+ 192 00c8 06D0     		beq	.L8
+ 141:Libraries/uC-CPU/os_cpu_c.c ****         (*OS_AppTaskCreateHookPtr)(p_tcb);
+ 193              		.loc 1 141 0
+ 194 00ca 40F20003 		movw	r3, #:lower16:OS_AppTaskCreateHookPtr
+ 195 00ce C0F20003 		movt	r3, #:upper16:OS_AppTaskCreateHookPtr
+ 196 00d2 1B68     		ldr	r3, [r3, #0]
+ 197 00d4 7868     		ldr	r0, [r7, #4]
+ 198 00d6 9847     		blx	r3
+ 199              	.L8:
+ 142:Libraries/uC-CPU/os_cpu_c.c ****     }
+ 143:Libraries/uC-CPU/os_cpu_c.c **** #else
+ 144:Libraries/uC-CPU/os_cpu_c.c ****     (void)p_tcb;                                            /* Prevent compiler warning            
+ 145:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 146:Libraries/uC-CPU/os_cpu_c.c **** }
+ 200              		.loc 1 146 0
+ 201 00d8 07F10807 		add	r7, r7, #8
+ 202 00dc BD46     		mov	sp, r7
+ 203 00de 80BD     		pop	{r7, pc}
+ 204              		.cfi_endproc
+ 205              	.LFE3:
+ 207              		.align	2
+ 208              		.global	OSTaskDelHook
+ 209              		.thumb
+ 210              		.thumb_func
+ 212              	OSTaskDelHook:
+ 213              	.LFB4:
+ 147:Libraries/uC-CPU/os_cpu_c.c **** 
+ 148:Libraries/uC-CPU/os_cpu_c.c **** 
+ 149:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+ 150:Libraries/uC-CPU/os_cpu_c.c **** /*
+ 151:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 152:Libraries/uC-CPU/os_cpu_c.c **** *                                           TASK DELETION HOOK
+ 153:Libraries/uC-CPU/os_cpu_c.c **** *
+ 154:Libraries/uC-CPU/os_cpu_c.c **** * Description: This function is called when a task is deleted.
+ 155:Libraries/uC-CPU/os_cpu_c.c **** *
+ 156:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : p_tcb        Pointer to the task control block of the task being deleted.
+ 157:Libraries/uC-CPU/os_cpu_c.c **** *
+ 158:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : None.
+ 159:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 160:Libraries/uC-CPU/os_cpu_c.c **** */
+ 161:Libraries/uC-CPU/os_cpu_c.c **** 
+ 162:Libraries/uC-CPU/os_cpu_c.c **** void  OSTaskDelHook (OS_TCB  *p_tcb)
+ 163:Libraries/uC-CPU/os_cpu_c.c **** {
+ 214              		.loc 1 163 0
+ 215              		.cfi_startproc
+ 216              		@ args = 0, pretend = 0, frame = 8
+ 217              		@ frame_needed = 1, uses_anonymous_args = 0
+ 218 00e0 80B5     		push	{r7, lr}
+ 219              	.LCFI10:
+ 220              		.cfi_def_cfa_offset 8
+ 221              		.cfi_offset 14, -4
+ 222              		.cfi_offset 7, -8
+ 223 00e2 82B0     		sub	sp, sp, #8
+ 224              	.LCFI11:
+ 225              		.cfi_def_cfa_offset 16
+ 226 00e4 00AF     		add	r7, sp, #0
+ 227              	.LCFI12:
+ 228              		.cfi_def_cfa_register 7
+ 229 00e6 7860     		str	r0, [r7, #4]
+ 164:Libraries/uC-CPU/os_cpu_c.c **** #if OS_CFG_APP_HOOKS_EN > 0u
+ 165:Libraries/uC-CPU/os_cpu_c.c ****     if (OS_AppTaskDelHookPtr != (OS_APP_HOOK_TCB)0) {
+ 230              		.loc 1 165 0
+ 231 00e8 40F20003 		movw	r3, #:lower16:OS_AppTaskDelHookPtr
+ 232 00ec C0F20003 		movt	r3, #:upper16:OS_AppTaskDelHookPtr
+ 233 00f0 1B68     		ldr	r3, [r3, #0]
+ 234 00f2 002B     		cmp	r3, #0
+ 235 00f4 06D0     		beq	.L10
+ 166:Libraries/uC-CPU/os_cpu_c.c ****         (*OS_AppTaskDelHookPtr)(p_tcb);
+ 236              		.loc 1 166 0
+ 237 00f6 40F20003 		movw	r3, #:lower16:OS_AppTaskDelHookPtr
+ 238 00fa C0F20003 		movt	r3, #:upper16:OS_AppTaskDelHookPtr
+ 239 00fe 1B68     		ldr	r3, [r3, #0]
+ 240 0100 7868     		ldr	r0, [r7, #4]
+ 241 0102 9847     		blx	r3
+ 242              	.L10:
+ 167:Libraries/uC-CPU/os_cpu_c.c ****     }
+ 168:Libraries/uC-CPU/os_cpu_c.c **** #else
+ 169:Libraries/uC-CPU/os_cpu_c.c ****     (void)p_tcb;                                            /* Prevent compiler warning            
+ 170:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 171:Libraries/uC-CPU/os_cpu_c.c **** }
+ 243              		.loc 1 171 0
+ 244 0104 07F10807 		add	r7, r7, #8
+ 245 0108 BD46     		mov	sp, r7
+ 246 010a 80BD     		pop	{r7, pc}
+ 247              		.cfi_endproc
+ 248              	.LFE4:
+ 250              		.align	2
+ 251              		.global	OSTaskReturnHook
+ 252              		.thumb
+ 253              		.thumb_func
+ 255              	OSTaskReturnHook:
+ 256              	.LFB5:
+ 172:Libraries/uC-CPU/os_cpu_c.c **** 
+ 173:Libraries/uC-CPU/os_cpu_c.c **** 
+ 174:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+ 175:Libraries/uC-CPU/os_cpu_c.c **** /*
+ 176:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 177:Libraries/uC-CPU/os_cpu_c.c **** *                                            TASK RETURN HOOK
+ 178:Libraries/uC-CPU/os_cpu_c.c **** *
+ 179:Libraries/uC-CPU/os_cpu_c.c **** * Description: This function is called if a task accidentally returns.  In other words, a task shou
+ 180:Libraries/uC-CPU/os_cpu_c.c **** *              either be an infinite loop or delete itself when done.
+ 181:Libraries/uC-CPU/os_cpu_c.c **** *
+ 182:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : p_tcb        Pointer to the task control block of the task that is returning.
+ 183:Libraries/uC-CPU/os_cpu_c.c **** *
+ 184:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : None.
+ 185:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 186:Libraries/uC-CPU/os_cpu_c.c **** */
+ 187:Libraries/uC-CPU/os_cpu_c.c **** 
+ 188:Libraries/uC-CPU/os_cpu_c.c **** void  OSTaskReturnHook (OS_TCB  *p_tcb)
+ 189:Libraries/uC-CPU/os_cpu_c.c **** {
+ 257              		.loc 1 189 0
+ 258              		.cfi_startproc
+ 259              		@ args = 0, pretend = 0, frame = 8
+ 260              		@ frame_needed = 1, uses_anonymous_args = 0
+ 261 010c 80B5     		push	{r7, lr}
+ 262              	.LCFI13:
+ 263              		.cfi_def_cfa_offset 8
+ 264              		.cfi_offset 14, -4
+ 265              		.cfi_offset 7, -8
+ 266 010e 82B0     		sub	sp, sp, #8
+ 267              	.LCFI14:
+ 268              		.cfi_def_cfa_offset 16
+ 269 0110 00AF     		add	r7, sp, #0
+ 270              	.LCFI15:
+ 271              		.cfi_def_cfa_register 7
+ 272 0112 7860     		str	r0, [r7, #4]
+ 190:Libraries/uC-CPU/os_cpu_c.c **** #if OS_CFG_APP_HOOKS_EN > 0u
+ 191:Libraries/uC-CPU/os_cpu_c.c ****     if (OS_AppTaskReturnHookPtr != (OS_APP_HOOK_TCB)0) {
+ 273              		.loc 1 191 0
+ 274 0114 40F20003 		movw	r3, #:lower16:OS_AppTaskReturnHookPtr
+ 275 0118 C0F20003 		movt	r3, #:upper16:OS_AppTaskReturnHookPtr
+ 276 011c 1B68     		ldr	r3, [r3, #0]
+ 277 011e 002B     		cmp	r3, #0
+ 278 0120 06D0     		beq	.L12
+ 192:Libraries/uC-CPU/os_cpu_c.c ****         (*OS_AppTaskReturnHookPtr)(p_tcb);
+ 279              		.loc 1 192 0
+ 280 0122 40F20003 		movw	r3, #:lower16:OS_AppTaskReturnHookPtr
+ 281 0126 C0F20003 		movt	r3, #:upper16:OS_AppTaskReturnHookPtr
+ 282 012a 1B68     		ldr	r3, [r3, #0]
+ 283 012c 7868     		ldr	r0, [r7, #4]
+ 284 012e 9847     		blx	r3
+ 285              	.L12:
+ 193:Libraries/uC-CPU/os_cpu_c.c ****     }
+ 194:Libraries/uC-CPU/os_cpu_c.c **** #else
+ 195:Libraries/uC-CPU/os_cpu_c.c ****     (void)p_tcb;                                            /* Prevent compiler warning            
+ 196:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 197:Libraries/uC-CPU/os_cpu_c.c **** }
+ 286              		.loc 1 197 0
+ 287 0130 07F10807 		add	r7, r7, #8
+ 288 0134 BD46     		mov	sp, r7
+ 289 0136 80BD     		pop	{r7, pc}
+ 290              		.cfi_endproc
+ 291              	.LFE5:
+ 293              		.align	2
+ 294              		.global	OSTaskStkInit
+ 295              		.thumb
+ 296              		.thumb_func
+ 298              	OSTaskStkInit:
+ 299              	.LFB6:
+ 198:Libraries/uC-CPU/os_cpu_c.c **** 
+ 199:Libraries/uC-CPU/os_cpu_c.c **** 
+ 200:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+ 201:Libraries/uC-CPU/os_cpu_c.c **** /*
+ 202:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 203:Libraries/uC-CPU/os_cpu_c.c **** *                                       INITIALIZE A TASK'S STACK
+ 204:Libraries/uC-CPU/os_cpu_c.c **** *
+ 205:Libraries/uC-CPU/os_cpu_c.c **** * Description: This function is called by OS_Task_Create() or OSTaskCreateExt() to initialize the s
+ 206:Libraries/uC-CPU/os_cpu_c.c **** *              frame of the task being created. This function is highly processor specific.
+ 207:Libraries/uC-CPU/os_cpu_c.c **** *
+ 208:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : p_task       Pointer to the task entry point address.
+ 209:Libraries/uC-CPU/os_cpu_c.c **** *
+ 210:Libraries/uC-CPU/os_cpu_c.c **** *              p_arg        Pointer to a user supplied data area that will be passed to the task
+ 211:Libraries/uC-CPU/os_cpu_c.c **** *                               when the task first executes.
+ 212:Libraries/uC-CPU/os_cpu_c.c **** *
+ 213:Libraries/uC-CPU/os_cpu_c.c **** *              p_stk_base   Pointer to the base address of the stack.
+ 214:Libraries/uC-CPU/os_cpu_c.c **** *
+ 215:Libraries/uC-CPU/os_cpu_c.c **** *              stk_size     Size of the stack, in number of CPU_STK elements.
+ 216:Libraries/uC-CPU/os_cpu_c.c **** *
+ 217:Libraries/uC-CPU/os_cpu_c.c **** *              opt          Options used to alter the behavior of OS_Task_StkInit().
+ 218:Libraries/uC-CPU/os_cpu_c.c **** *                            (see OS.H for OS_TASK_OPT_xxx).
+ 219:Libraries/uC-CPU/os_cpu_c.c **** *
+ 220:Libraries/uC-CPU/os_cpu_c.c **** * Returns    : Always returns the location of the new top-of-stack' once the processor registers ha
+ 221:Libraries/uC-CPU/os_cpu_c.c **** *              been placed on the stack in the proper order.
+ 222:Libraries/uC-CPU/os_cpu_c.c **** *
+ 223:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : 1) Interrupts are enabled when task starts executing.
+ 224:Libraries/uC-CPU/os_cpu_c.c **** *
+ 225:Libraries/uC-CPU/os_cpu_c.c **** *              2) All tasks run in Thread mode, using process stack.
+ 226:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 227:Libraries/uC-CPU/os_cpu_c.c **** */
+ 228:Libraries/uC-CPU/os_cpu_c.c **** 
+ 229:Libraries/uC-CPU/os_cpu_c.c **** CPU_STK  *OSTaskStkInit (OS_TASK_PTR    p_task,
+ 230:Libraries/uC-CPU/os_cpu_c.c ****                          void          *p_arg,
+ 231:Libraries/uC-CPU/os_cpu_c.c ****                          CPU_STK       *p_stk_base,
+ 232:Libraries/uC-CPU/os_cpu_c.c ****                          CPU_STK       *p_stk_limit,
+ 233:Libraries/uC-CPU/os_cpu_c.c ****                          CPU_STK_SIZE   stk_size,
+ 234:Libraries/uC-CPU/os_cpu_c.c ****                          OS_OPT         opt)
+ 235:Libraries/uC-CPU/os_cpu_c.c **** {
+ 300              		.loc 1 235 0
+ 301              		.cfi_startproc
+ 302              		@ args = 8, pretend = 0, frame = 24
+ 303              		@ frame_needed = 1, uses_anonymous_args = 0
+ 304              		@ link register save eliminated.
+ 305 0138 80B4     		push	{r7}
+ 306              	.LCFI16:
+ 307              		.cfi_def_cfa_offset 4
+ 308              		.cfi_offset 7, -4
+ 309 013a 87B0     		sub	sp, sp, #28
+ 310              	.LCFI17:
+ 311              		.cfi_def_cfa_offset 32
+ 312 013c 00AF     		add	r7, sp, #0
+ 313              	.LCFI18:
+ 314              		.cfi_def_cfa_register 7
+ 315 013e F860     		str	r0, [r7, #12]
+ 316 0140 B960     		str	r1, [r7, #8]
+ 317 0142 7A60     		str	r2, [r7, #4]
+ 318 0144 3B60     		str	r3, [r7, #0]
+ 236:Libraries/uC-CPU/os_cpu_c.c ****     CPU_STK  *p_stk;
+ 237:Libraries/uC-CPU/os_cpu_c.c **** 
+ 238:Libraries/uC-CPU/os_cpu_c.c **** 
+ 239:Libraries/uC-CPU/os_cpu_c.c ****     (void)opt;                                              /* Prevent compiler warning            
+ 240:Libraries/uC-CPU/os_cpu_c.c **** 
+ 241:Libraries/uC-CPU/os_cpu_c.c ****     p_stk = &p_stk_base[stk_size];                          /* Load stack pointer                  
+ 319              		.loc 1 241 0
+ 320 0146 3B6A     		ldr	r3, [r7, #32]
+ 321 0148 4FEA8303 		lsl	r3, r3, #2
+ 322 014c 7A68     		ldr	r2, [r7, #4]
+ 323 014e D318     		adds	r3, r2, r3
+ 324 0150 7B61     		str	r3, [r7, #20]
+ 242:Libraries/uC-CPU/os_cpu_c.c ****                                                             /* Registers stacked as if auto-saved o
+ 243:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x01000000u;                        /* xPSR                                
+ 325              		.loc 1 243 0
+ 326 0152 7B69     		ldr	r3, [r7, #20]
+ 327 0154 A3F10403 		sub	r3, r3, #4
+ 328 0158 7B61     		str	r3, [r7, #20]
+ 329 015a 7B69     		ldr	r3, [r7, #20]
+ 330 015c 4FF08072 		mov	r2, #16777216
+ 331 0160 1A60     		str	r2, [r3, #0]
+ 244:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)p_task;                             /* Entry Point                         
+ 332              		.loc 1 244 0
+ 333 0162 7B69     		ldr	r3, [r7, #20]
+ 334 0164 A3F10403 		sub	r3, r3, #4
+ 335 0168 7B61     		str	r3, [r7, #20]
+ 336 016a FA68     		ldr	r2, [r7, #12]
+ 337 016c 7B69     		ldr	r3, [r7, #20]
+ 338 016e 1A60     		str	r2, [r3, #0]
+ 245:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)OS_TaskReturn;                      /* R14 (LR)                            
+ 339              		.loc 1 245 0
+ 340 0170 7B69     		ldr	r3, [r7, #20]
+ 341 0172 A3F10403 		sub	r3, r3, #4
+ 342 0176 7B61     		str	r3, [r7, #20]
+ 343 0178 40F20003 		movw	r3, #:lower16:OS_TaskReturn
+ 344 017c C0F20003 		movt	r3, #:upper16:OS_TaskReturn
+ 345 0180 7A69     		ldr	r2, [r7, #20]
+ 346 0182 1360     		str	r3, [r2, #0]
+ 246:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x12121212u;                        /* R12                                 
+ 347              		.loc 1 246 0
+ 348 0184 7B69     		ldr	r3, [r7, #20]
+ 349 0186 A3F10403 		sub	r3, r3, #4
+ 350 018a 7B61     		str	r3, [r7, #20]
+ 351 018c 7B69     		ldr	r3, [r7, #20]
+ 352 018e 4FF01232 		mov	r2, #303174162
+ 353 0192 1A60     		str	r2, [r3, #0]
+ 247:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x03030303u;                        /* R3                                  
+ 354              		.loc 1 247 0
+ 355 0194 7B69     		ldr	r3, [r7, #20]
+ 356 0196 A3F10403 		sub	r3, r3, #4
+ 357 019a 7B61     		str	r3, [r7, #20]
+ 358 019c 7B69     		ldr	r3, [r7, #20]
+ 359 019e 4FF00332 		mov	r2, #50529027
+ 360 01a2 1A60     		str	r2, [r3, #0]
+ 248:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x02020202u;                        /* R2                                  
+ 361              		.loc 1 248 0
+ 362 01a4 7B69     		ldr	r3, [r7, #20]
+ 363 01a6 A3F10403 		sub	r3, r3, #4
+ 364 01aa 7B61     		str	r3, [r7, #20]
+ 365 01ac 7B69     		ldr	r3, [r7, #20]
+ 366 01ae 4FF00232 		mov	r2, #33686018
+ 367 01b2 1A60     		str	r2, [r3, #0]
+ 249:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)p_stk_limit;                        /* R1                                  
+ 368              		.loc 1 249 0
+ 369 01b4 7B69     		ldr	r3, [r7, #20]
+ 370 01b6 A3F10403 		sub	r3, r3, #4
+ 371 01ba 7B61     		str	r3, [r7, #20]
+ 372 01bc 3A68     		ldr	r2, [r7, #0]
+ 373 01be 7B69     		ldr	r3, [r7, #20]
+ 374 01c0 1A60     		str	r2, [r3, #0]
+ 250:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)p_arg;                              /* R0 : argument                       
+ 375              		.loc 1 250 0
+ 376 01c2 7B69     		ldr	r3, [r7, #20]
+ 377 01c4 A3F10403 		sub	r3, r3, #4
+ 378 01c8 7B61     		str	r3, [r7, #20]
+ 379 01ca BA68     		ldr	r2, [r7, #8]
+ 380 01cc 7B69     		ldr	r3, [r7, #20]
+ 381 01ce 1A60     		str	r2, [r3, #0]
+ 251:Libraries/uC-CPU/os_cpu_c.c ****                                                             /* Remaining registers saved on process
+ 252:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x11111111u;                        /* R11                                 
+ 382              		.loc 1 252 0
+ 383 01d0 7B69     		ldr	r3, [r7, #20]
+ 384 01d2 A3F10403 		sub	r3, r3, #4
+ 385 01d6 7B61     		str	r3, [r7, #20]
+ 386 01d8 7B69     		ldr	r3, [r7, #20]
+ 387 01da 4FF01132 		mov	r2, #286331153
+ 388 01de 1A60     		str	r2, [r3, #0]
+ 253:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x10101010u;                        /* R10                                 
+ 389              		.loc 1 253 0
+ 390 01e0 7B69     		ldr	r3, [r7, #20]
+ 391 01e2 A3F10403 		sub	r3, r3, #4
+ 392 01e6 7B61     		str	r3, [r7, #20]
+ 393 01e8 7B69     		ldr	r3, [r7, #20]
+ 394 01ea 4FF01032 		mov	r2, #269488144
+ 395 01ee 1A60     		str	r2, [r3, #0]
+ 254:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x09090909u;                        /* R9                                  
+ 396              		.loc 1 254 0
+ 397 01f0 7B69     		ldr	r3, [r7, #20]
+ 398 01f2 A3F10403 		sub	r3, r3, #4
+ 399 01f6 7B61     		str	r3, [r7, #20]
+ 400 01f8 7B69     		ldr	r3, [r7, #20]
+ 401 01fa 4FF00932 		mov	r2, #151587081
+ 402 01fe 1A60     		str	r2, [r3, #0]
+ 255:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x08080808u;                        /* R8                                  
+ 403              		.loc 1 255 0
+ 404 0200 7B69     		ldr	r3, [r7, #20]
+ 405 0202 A3F10403 		sub	r3, r3, #4
+ 406 0206 7B61     		str	r3, [r7, #20]
+ 407 0208 7B69     		ldr	r3, [r7, #20]
+ 408 020a 4FF00832 		mov	r2, #134744072
+ 409 020e 1A60     		str	r2, [r3, #0]
+ 256:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x07070707u;                        /* R7                                  
+ 410              		.loc 1 256 0
+ 411 0210 7B69     		ldr	r3, [r7, #20]
+ 412 0212 A3F10403 		sub	r3, r3, #4
+ 413 0216 7B61     		str	r3, [r7, #20]
+ 414 0218 7B69     		ldr	r3, [r7, #20]
+ 415 021a 4FF00732 		mov	r2, #117901063
+ 416 021e 1A60     		str	r2, [r3, #0]
+ 257:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x06060606u;                        /* R6                                  
+ 417              		.loc 1 257 0
+ 418 0220 7B69     		ldr	r3, [r7, #20]
+ 419 0222 A3F10403 		sub	r3, r3, #4
+ 420 0226 7B61     		str	r3, [r7, #20]
+ 421 0228 7B69     		ldr	r3, [r7, #20]
+ 422 022a 4FF00632 		mov	r2, #101058054
+ 423 022e 1A60     		str	r2, [r3, #0]
+ 258:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x05050505u;                        /* R5                                  
+ 424              		.loc 1 258 0
+ 425 0230 7B69     		ldr	r3, [r7, #20]
+ 426 0232 A3F10403 		sub	r3, r3, #4
+ 427 0236 7B61     		str	r3, [r7, #20]
+ 428 0238 7B69     		ldr	r3, [r7, #20]
+ 429 023a 4FF00532 		mov	r2, #84215045
+ 430 023e 1A60     		str	r2, [r3, #0]
+ 259:Libraries/uC-CPU/os_cpu_c.c ****     *--p_stk = (CPU_STK)0x04040404u;                        /* R4                                  
+ 431              		.loc 1 259 0
+ 432 0240 7B69     		ldr	r3, [r7, #20]
+ 433 0242 A3F10403 		sub	r3, r3, #4
+ 434 0246 7B61     		str	r3, [r7, #20]
+ 435 0248 7B69     		ldr	r3, [r7, #20]
+ 436 024a 4FF00432 		mov	r2, #67372036
+ 437 024e 1A60     		str	r2, [r3, #0]
+ 260:Libraries/uC-CPU/os_cpu_c.c **** 
+ 261:Libraries/uC-CPU/os_cpu_c.c ****     return (p_stk);
+ 438              		.loc 1 261 0
+ 439 0250 7B69     		ldr	r3, [r7, #20]
+ 262:Libraries/uC-CPU/os_cpu_c.c **** }
+ 440              		.loc 1 262 0
+ 441 0252 1846     		mov	r0, r3
+ 442 0254 07F11C07 		add	r7, r7, #28
+ 443 0258 BD46     		mov	sp, r7
+ 444 025a 80BC     		pop	{r7}
+ 445 025c 7047     		bx	lr
+ 446              		.cfi_endproc
+ 447              	.LFE6:
+ 449 025e 00BF     		.align	2
+ 450              		.global	OSTaskSwHook
+ 451              		.thumb
+ 452              		.thumb_func
+ 454              	OSTaskSwHook:
+ 455              	.LFB7:
+ 263:Libraries/uC-CPU/os_cpu_c.c **** 
+ 264:Libraries/uC-CPU/os_cpu_c.c **** 
+ 265:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+ 266:Libraries/uC-CPU/os_cpu_c.c **** /*
+ 267:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 268:Libraries/uC-CPU/os_cpu_c.c **** *                                           TASK SWITCH HOOK
+ 269:Libraries/uC-CPU/os_cpu_c.c **** *
+ 270:Libraries/uC-CPU/os_cpu_c.c **** * Description: This function is called when a task switch is performed.  This allows you to perform
+ 271:Libraries/uC-CPU/os_cpu_c.c **** *              operations during a context switch.
+ 272:Libraries/uC-CPU/os_cpu_c.c **** *
+ 273:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : None.
+ 274:Libraries/uC-CPU/os_cpu_c.c **** *
+ 275:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : 1) Interrupts are disabled during this call.
+ 276:Libraries/uC-CPU/os_cpu_c.c **** *              2) It is assumed that the global pointer 'OSTCBHighRdyPtr' points to the TCB of the 
+ 277:Libraries/uC-CPU/os_cpu_c.c **** *                 that will be 'switched in' (i.e. the highest priority task) and, 'OSTCBCurPtr' po
+ 278:Libraries/uC-CPU/os_cpu_c.c **** *                 to the task being switched out (i.e. the preempted task).
+ 279:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 280:Libraries/uC-CPU/os_cpu_c.c **** */
+ 281:Libraries/uC-CPU/os_cpu_c.c **** 
+ 282:Libraries/uC-CPU/os_cpu_c.c **** void  OSTaskSwHook (void)
+ 283:Libraries/uC-CPU/os_cpu_c.c **** {
+ 456              		.loc 1 283 0
+ 457              		.cfi_startproc
+ 458              		@ args = 0, pretend = 0, frame = 8
+ 459              		@ frame_needed = 1, uses_anonymous_args = 0
+ 460 0260 B0B5     		push	{r4, r5, r7, lr}
+ 461              	.LCFI19:
+ 462              		.cfi_def_cfa_offset 16
+ 463              		.cfi_offset 14, -4
+ 464              		.cfi_offset 7, -8
+ 465              		.cfi_offset 5, -12
+ 466              		.cfi_offset 4, -16
+ 467 0262 82B0     		sub	sp, sp, #8
+ 468              	.LCFI20:
+ 469              		.cfi_def_cfa_offset 24
+ 470 0264 00AF     		add	r7, sp, #0
+ 471              	.LCFI21:
+ 472              		.cfi_def_cfa_register 7
+ 284:Libraries/uC-CPU/os_cpu_c.c **** #if OS_CFG_TASK_PROFILE_EN > 0u
+ 285:Libraries/uC-CPU/os_cpu_c.c ****     CPU_TS  ts;
+ 286:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 287:Libraries/uC-CPU/os_cpu_c.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN
+ 288:Libraries/uC-CPU/os_cpu_c.c ****     CPU_TS  int_dis_time;
+ 289:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 290:Libraries/uC-CPU/os_cpu_c.c **** 
+ 291:Libraries/uC-CPU/os_cpu_c.c **** 
+ 292:Libraries/uC-CPU/os_cpu_c.c **** 
+ 293:Libraries/uC-CPU/os_cpu_c.c **** #if OS_CFG_APP_HOOKS_EN > 0u
+ 294:Libraries/uC-CPU/os_cpu_c.c ****     if (OS_AppTaskSwHookPtr != (OS_APP_HOOK_VOID)0) {
+ 473              		.loc 1 294 0
+ 474 0266 40F20003 		movw	r3, #:lower16:OS_AppTaskSwHookPtr
+ 475 026a C0F20003 		movt	r3, #:upper16:OS_AppTaskSwHookPtr
+ 476 026e 1B68     		ldr	r3, [r3, #0]
+ 477 0270 002B     		cmp	r3, #0
+ 478 0272 05D0     		beq	.L16
+ 295:Libraries/uC-CPU/os_cpu_c.c ****         (*OS_AppTaskSwHookPtr)();
+ 479              		.loc 1 295 0
+ 480 0274 40F20003 		movw	r3, #:lower16:OS_AppTaskSwHookPtr
+ 481 0278 C0F20003 		movt	r3, #:upper16:OS_AppTaskSwHookPtr
+ 482 027c 1B68     		ldr	r3, [r3, #0]
+ 483 027e 9847     		blx	r3
+ 484              	.L16:
+ 296:Libraries/uC-CPU/os_cpu_c.c ****     }
+ 297:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 298:Libraries/uC-CPU/os_cpu_c.c **** 
+ 299:Libraries/uC-CPU/os_cpu_c.c **** #if OS_CFG_TASK_PROFILE_EN > 0u
+ 300:Libraries/uC-CPU/os_cpu_c.c ****     ts = OS_TS_GET();
+ 485              		.loc 1 300 0
+ 486 0280 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 487 0284 7860     		str	r0, [r7, #4]
+ 301:Libraries/uC-CPU/os_cpu_c.c ****     if (OSTCBCurPtr != OSTCBHighRdyPtr) {
+ 488              		.loc 1 301 0
+ 489 0286 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 490 028a C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 491 028e 1A68     		ldr	r2, [r3, #0]
+ 492 0290 40F20003 		movw	r3, #:lower16:OSTCBHighRdyPtr
+ 493 0294 C0F20003 		movt	r3, #:upper16:OSTCBHighRdyPtr
+ 494 0298 1B68     		ldr	r3, [r3, #0]
+ 495 029a 9A42     		cmp	r2, r3
+ 496 029c 2AD0     		beq	.L17
+ 302:Libraries/uC-CPU/os_cpu_c.c ****         OSTCBCurPtr->CyclesDelta  = ts - OSTCBCurPtr->CyclesStart;
+ 497              		.loc 1 302 0
+ 498 029e 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 499 02a2 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 500 02a6 1A68     		ldr	r2, [r3, #0]
+ 501 02a8 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 502 02ac C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 503 02b0 1B68     		ldr	r3, [r3, #0]
+ 504 02b2 D3F8AC30 		ldr	r3, [r3, #172]
+ 505 02b6 7968     		ldr	r1, [r7, #4]
+ 506 02b8 CB1A     		subs	r3, r1, r3
+ 507 02ba C2F8A830 		str	r3, [r2, #168]
+ 303:Libraries/uC-CPU/os_cpu_c.c ****         OSTCBCurPtr->CyclesTotal += (OS_CYCLES)OSTCBCurPtr->CyclesDelta;
+ 508              		.loc 1 303 0
+ 509 02be 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 510 02c2 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 511 02c6 1C68     		ldr	r4, [r3, #0]
+ 512 02c8 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 513 02cc C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 514 02d0 1B68     		ldr	r3, [r3, #0]
+ 515 02d2 D3E92C01 		ldrd	r0, [r3, #176]
+ 516 02d6 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 517 02da C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 518 02de 1B68     		ldr	r3, [r3, #0]
+ 519 02e0 D3F8A850 		ldr	r5, [r3, #168]
+ 520 02e4 2A46     		mov	r2, r5
+ 521 02e6 4FF00003 		mov	r3, #0
+ 522 02ea 1218     		adds	r2, r2, r0
+ 523 02ec 43EB0103 		adc	r3, r3, r1
+ 524 02f0 C4E92C23 		strd	r2, [r4, #176]
+ 525              	.L17:
+ 304:Libraries/uC-CPU/os_cpu_c.c ****     }
+ 305:Libraries/uC-CPU/os_cpu_c.c **** 
+ 306:Libraries/uC-CPU/os_cpu_c.c ****     OSTCBHighRdyPtr->CyclesStart = ts;
+ 526              		.loc 1 306 0
+ 527 02f4 40F20003 		movw	r3, #:lower16:OSTCBHighRdyPtr
+ 528 02f8 C0F20003 		movt	r3, #:upper16:OSTCBHighRdyPtr
+ 529 02fc 1B68     		ldr	r3, [r3, #0]
+ 530 02fe 7A68     		ldr	r2, [r7, #4]
+ 531 0300 C3F8AC20 		str	r2, [r3, #172]
+ 307:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 308:Libraries/uC-CPU/os_cpu_c.c **** 
+ 309:Libraries/uC-CPU/os_cpu_c.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN
+ 310:Libraries/uC-CPU/os_cpu_c.c ****     int_dis_time = CPU_IntDisMeasMaxCurReset();             /* Keep track of per-task interrupt dis
+ 532              		.loc 1 310 0
+ 533 0304 FFF7FEFF 		bl	CPU_IntDisMeasMaxCurReset
+ 534 0308 3860     		str	r0, [r7, #0]
+ 311:Libraries/uC-CPU/os_cpu_c.c ****     if (OSTCBCurPtr->IntDisTimeMax < int_dis_time) {
+ 535              		.loc 1 311 0
+ 536 030a 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 537 030e C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 538 0312 1B68     		ldr	r3, [r3, #0]
+ 539 0314 D3F8B820 		ldr	r2, [r3, #184]
+ 540 0318 3B68     		ldr	r3, [r7, #0]
+ 541 031a 9A42     		cmp	r2, r3
+ 542 031c 07D2     		bcs	.L18
+ 312:Libraries/uC-CPU/os_cpu_c.c ****         OSTCBCurPtr->IntDisTimeMax = int_dis_time;
+ 543              		.loc 1 312 0
+ 544 031e 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 545 0322 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 546 0326 1B68     		ldr	r3, [r3, #0]
+ 547 0328 3A68     		ldr	r2, [r7, #0]
+ 548 032a C3F8B820 		str	r2, [r3, #184]
+ 549              	.L18:
+ 313:Libraries/uC-CPU/os_cpu_c.c ****     }
+ 314:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 315:Libraries/uC-CPU/os_cpu_c.c **** 
+ 316:Libraries/uC-CPU/os_cpu_c.c **** #if OS_CFG_SCHED_LOCK_TIME_MEAS_EN > 0u
+ 317:Libraries/uC-CPU/os_cpu_c.c ****                                                             /* Keep track of per-task scheduler loc
+ 318:Libraries/uC-CPU/os_cpu_c.c ****     if (OSTCBCurPtr->SchedLockTimeMax < OSSchedLockTimeMaxCur) {
+ 550              		.loc 1 318 0
+ 551 032e 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 552 0332 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 553 0336 1B68     		ldr	r3, [r3, #0]
+ 554 0338 D3F8BC20 		ldr	r2, [r3, #188]
+ 555 033c 40F20003 		movw	r3, #:lower16:OSSchedLockTimeMaxCur
+ 556 0340 C0F20003 		movt	r3, #:upper16:OSSchedLockTimeMaxCur
+ 557 0344 1B68     		ldr	r3, [r3, #0]
+ 558 0346 9A42     		cmp	r2, r3
+ 559 0348 0BD2     		bcs	.L19
+ 319:Libraries/uC-CPU/os_cpu_c.c ****         OSTCBCurPtr->SchedLockTimeMax = OSSchedLockTimeMaxCur;
+ 560              		.loc 1 319 0
+ 561 034a 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 562 034e C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 563 0352 1A68     		ldr	r2, [r3, #0]
+ 564 0354 40F20003 		movw	r3, #:lower16:OSSchedLockTimeMaxCur
+ 565 0358 C0F20003 		movt	r3, #:upper16:OSSchedLockTimeMaxCur
+ 566 035c 1B68     		ldr	r3, [r3, #0]
+ 567 035e C2F8BC30 		str	r3, [r2, #188]
+ 568              	.L19:
+ 320:Libraries/uC-CPU/os_cpu_c.c ****     }
+ 321:Libraries/uC-CPU/os_cpu_c.c ****     OSSchedLockTimeMaxCur = (CPU_TS)0;                      /* Reset the per-task value            
+ 569              		.loc 1 321 0
+ 570 0362 40F20003 		movw	r3, #:lower16:OSSchedLockTimeMaxCur
+ 571 0366 C0F20003 		movt	r3, #:upper16:OSSchedLockTimeMaxCur
+ 572 036a 4FF00002 		mov	r2, #0
+ 573 036e 1A60     		str	r2, [r3, #0]
+ 322:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 323:Libraries/uC-CPU/os_cpu_c.c **** }
+ 574              		.loc 1 323 0
+ 575 0370 07F10807 		add	r7, r7, #8
+ 576 0374 BD46     		mov	sp, r7
+ 577 0376 B0BD     		pop	{r4, r5, r7, pc}
+ 578              		.cfi_endproc
+ 579              	.LFE7:
+ 581              		.align	2
+ 582              		.global	OSTimeTickHook
+ 583              		.thumb
+ 584              		.thumb_func
+ 586              	OSTimeTickHook:
+ 587              	.LFB8:
+ 324:Libraries/uC-CPU/os_cpu_c.c **** 
+ 325:Libraries/uC-CPU/os_cpu_c.c **** 
+ 326:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+ 327:Libraries/uC-CPU/os_cpu_c.c **** /*
+ 328:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 329:Libraries/uC-CPU/os_cpu_c.c **** *                                              TICK HOOK
+ 330:Libraries/uC-CPU/os_cpu_c.c **** *
+ 331:Libraries/uC-CPU/os_cpu_c.c **** * Description: This function is called every tick.
+ 332:Libraries/uC-CPU/os_cpu_c.c **** *
+ 333:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : None.
+ 334:Libraries/uC-CPU/os_cpu_c.c **** *
+ 335:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : 1) This function is assumed to be called from the Tick ISR.
+ 336:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 337:Libraries/uC-CPU/os_cpu_c.c **** */
+ 338:Libraries/uC-CPU/os_cpu_c.c **** 
+ 339:Libraries/uC-CPU/os_cpu_c.c **** void  OSTimeTickHook (void)
+ 340:Libraries/uC-CPU/os_cpu_c.c **** {
+ 588              		.loc 1 340 0
+ 589              		.cfi_startproc
+ 590              		@ args = 0, pretend = 0, frame = 0
+ 591              		@ frame_needed = 1, uses_anonymous_args = 0
+ 592 0378 80B5     		push	{r7, lr}
+ 593              	.LCFI22:
+ 594              		.cfi_def_cfa_offset 8
+ 595              		.cfi_offset 14, -4
+ 596              		.cfi_offset 7, -8
+ 597 037a 00AF     		add	r7, sp, #0
+ 598              	.LCFI23:
+ 599              		.cfi_def_cfa_register 7
+ 341:Libraries/uC-CPU/os_cpu_c.c **** #if OS_CFG_APP_HOOKS_EN > 0u
+ 342:Libraries/uC-CPU/os_cpu_c.c ****     if (OS_AppTimeTickHookPtr != (OS_APP_HOOK_VOID)0) {
+ 600              		.loc 1 342 0
+ 601 037c 40F20003 		movw	r3, #:lower16:OS_AppTimeTickHookPtr
+ 602 0380 C0F20003 		movt	r3, #:upper16:OS_AppTimeTickHookPtr
+ 603 0384 1B68     		ldr	r3, [r3, #0]
+ 604 0386 002B     		cmp	r3, #0
+ 605 0388 05D0     		beq	.L20
+ 343:Libraries/uC-CPU/os_cpu_c.c ****         (*OS_AppTimeTickHookPtr)();
+ 606              		.loc 1 343 0
+ 607 038a 40F20003 		movw	r3, #:lower16:OS_AppTimeTickHookPtr
+ 608 038e C0F20003 		movt	r3, #:upper16:OS_AppTimeTickHookPtr
+ 609 0392 1B68     		ldr	r3, [r3, #0]
+ 610 0394 9847     		blx	r3
+ 611              	.L20:
+ 344:Libraries/uC-CPU/os_cpu_c.c ****     }
+ 345:Libraries/uC-CPU/os_cpu_c.c **** #endif
+ 346:Libraries/uC-CPU/os_cpu_c.c **** }
+ 612              		.loc 1 346 0
+ 613 0396 80BD     		pop	{r7, pc}
+ 614              		.cfi_endproc
+ 615              	.LFE8:
+ 617              		.align	2
+ 618              		.global	OS_CPU_SysTickHandler
+ 619              		.thumb
+ 620              		.thumb_func
+ 622              	OS_CPU_SysTickHandler:
+ 623              	.LFB9:
+ 347:Libraries/uC-CPU/os_cpu_c.c **** 
+ 348:Libraries/uC-CPU/os_cpu_c.c **** 
+ 349:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+ 350:Libraries/uC-CPU/os_cpu_c.c **** /*
+ 351:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 352:Libraries/uC-CPU/os_cpu_c.c **** *                                          SYS TICK HANDLER
+ 353:Libraries/uC-CPU/os_cpu_c.c **** *
+ 354:Libraries/uC-CPU/os_cpu_c.c **** * Description: Handle the system tick (SysTick) interrupt, which is used to generate the uC/OS-II t
+ 355:Libraries/uC-CPU/os_cpu_c.c **** *              interrupt.
+ 356:Libraries/uC-CPU/os_cpu_c.c **** *
+ 357:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : None.
+ 358:Libraries/uC-CPU/os_cpu_c.c **** *
+ 359:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : 1) This function MUST be placed on entry 15 of the Cortex-M3 vector table.
+ 360:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 361:Libraries/uC-CPU/os_cpu_c.c **** */
+ 362:Libraries/uC-CPU/os_cpu_c.c **** 
+ 363:Libraries/uC-CPU/os_cpu_c.c **** void  OS_CPU_SysTickHandler (void)
+ 364:Libraries/uC-CPU/os_cpu_c.c **** {
+ 624              		.loc 1 364 0
+ 625              		.cfi_startproc
+ 626              		@ args = 0, pretend = 0, frame = 8
+ 627              		@ frame_needed = 1, uses_anonymous_args = 0
+ 628 0398 80B5     		push	{r7, lr}
+ 629              	.LCFI24:
+ 630              		.cfi_def_cfa_offset 8
+ 631              		.cfi_offset 14, -4
+ 632              		.cfi_offset 7, -8
+ 633 039a 82B0     		sub	sp, sp, #8
+ 634              	.LCFI25:
+ 635              		.cfi_def_cfa_offset 16
+ 636 039c 00AF     		add	r7, sp, #0
+ 637              	.LCFI26:
+ 638              		.cfi_def_cfa_register 7
+ 365:Libraries/uC-CPU/os_cpu_c.c ****     CPU_SR_ALLOC();
+ 639              		.loc 1 365 0
+ 640 039e 4FF00003 		mov	r3, #0
+ 641 03a2 7B60     		str	r3, [r7, #4]
+ 366:Libraries/uC-CPU/os_cpu_c.c **** 
+ 367:Libraries/uC-CPU/os_cpu_c.c **** 
+ 368:Libraries/uC-CPU/os_cpu_c.c ****     CPU_CRITICAL_ENTER();
+ 642              		.loc 1 368 0
+ 643 03a4 FFF7FEFF 		bl	CPU_SR_Save
+ 644 03a8 7860     		str	r0, [r7, #4]
+ 645 03aa FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 369:Libraries/uC-CPU/os_cpu_c.c ****     OSIntNestingCtr++;                                      /* Tell uC/OS-III that we are starting 
+ 646              		.loc 1 369 0
+ 647 03ae 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 648 03b2 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 649 03b6 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 650 03b8 03F10103 		add	r3, r3, #1
+ 651 03bc DAB2     		uxtb	r2, r3
+ 652 03be 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 653 03c2 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 654 03c6 1A70     		strb	r2, [r3, #0]
+ 370:Libraries/uC-CPU/os_cpu_c.c ****     CPU_CRITICAL_EXIT();
+ 655              		.loc 1 370 0
+ 656 03c8 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 657 03cc 7868     		ldr	r0, [r7, #4]
+ 658 03ce FFF7FEFF 		bl	CPU_SR_Restore
+ 371:Libraries/uC-CPU/os_cpu_c.c **** 
+ 372:Libraries/uC-CPU/os_cpu_c.c ****     OSTimeTick();                                           /* Call uC/OS-III's OSTimeTick()       
+ 659              		.loc 1 372 0
+ 660 03d2 FFF7FEFF 		bl	OSTimeTick
+ 373:Libraries/uC-CPU/os_cpu_c.c **** 
+ 374:Libraries/uC-CPU/os_cpu_c.c ****     OSIntExit();                                            /* Tell uC/OS-III that we are leaving t
+ 661              		.loc 1 374 0
+ 662 03d6 FFF7FEFF 		bl	OSIntExit
+ 375:Libraries/uC-CPU/os_cpu_c.c **** }
+ 663              		.loc 1 375 0
+ 664 03da 07F10807 		add	r7, r7, #8
+ 665 03de BD46     		mov	sp, r7
+ 666 03e0 80BD     		pop	{r7, pc}
+ 667              		.cfi_endproc
+ 668              	.LFE9:
+ 670 03e2 00BF     		.align	2
+ 671              		.global	OS_CPU_SysTickInit
+ 672              		.thumb
+ 673              		.thumb_func
+ 675              	OS_CPU_SysTickInit:
+ 676              	.LFB10:
+ 376:Libraries/uC-CPU/os_cpu_c.c **** 
+ 377:Libraries/uC-CPU/os_cpu_c.c **** 
+ 378:Libraries/uC-CPU/os_cpu_c.c **** /*$PAGE*/
+ 379:Libraries/uC-CPU/os_cpu_c.c **** /*
+ 380:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 381:Libraries/uC-CPU/os_cpu_c.c **** *                                         INITIALIZE SYS TICK
+ 382:Libraries/uC-CPU/os_cpu_c.c **** *
+ 383:Libraries/uC-CPU/os_cpu_c.c **** * Description: Initialize the SysTick.
+ 384:Libraries/uC-CPU/os_cpu_c.c **** *
+ 385:Libraries/uC-CPU/os_cpu_c.c **** * Arguments  : cnts         Number of SysTick counts between two OS tick interrupts.
+ 386:Libraries/uC-CPU/os_cpu_c.c **** *
+ 387:Libraries/uC-CPU/os_cpu_c.c **** * Note(s)    : 1) This function MUST be called after OSStart() & after processor initialization.
+ 388:Libraries/uC-CPU/os_cpu_c.c **** ***************************************************************************************************
+ 389:Libraries/uC-CPU/os_cpu_c.c **** */
+ 390:Libraries/uC-CPU/os_cpu_c.c **** 
+ 391:Libraries/uC-CPU/os_cpu_c.c **** void  OS_CPU_SysTickInit (CPU_INT32U  cnts)
+ 392:Libraries/uC-CPU/os_cpu_c.c **** {
+ 677              		.loc 1 392 0
+ 678              		.cfi_startproc
+ 679              		@ args = 0, pretend = 0, frame = 16
+ 680              		@ frame_needed = 1, uses_anonymous_args = 0
+ 681              		@ link register save eliminated.
+ 682 03e4 80B4     		push	{r7}
+ 683              	.LCFI27:
+ 684              		.cfi_def_cfa_offset 4
+ 685              		.cfi_offset 7, -4
+ 686 03e6 85B0     		sub	sp, sp, #20
+ 687              	.LCFI28:
+ 688              		.cfi_def_cfa_offset 24
+ 689 03e8 00AF     		add	r7, sp, #0
+ 690              	.LCFI29:
+ 691              		.cfi_def_cfa_register 7
+ 692 03ea 7860     		str	r0, [r7, #4]
+ 393:Libraries/uC-CPU/os_cpu_c.c ****     CPU_INT32U  prio;
+ 394:Libraries/uC-CPU/os_cpu_c.c **** 
+ 395:Libraries/uC-CPU/os_cpu_c.c **** 
+ 396:Libraries/uC-CPU/os_cpu_c.c ****     CPU_REG_NVIC_ST_RELOAD = cnts - 1u;
+ 693              		.loc 1 396 0
+ 694 03ec 4EF21403 		movw	r3, #57364
+ 695 03f0 CEF20003 		movt	r3, 57344
+ 696 03f4 7A68     		ldr	r2, [r7, #4]
+ 697 03f6 02F1FF32 		add	r2, r2, #-1
+ 698 03fa 1A60     		str	r2, [r3, #0]
+ 397:Libraries/uC-CPU/os_cpu_c.c **** 
+ 398:Libraries/uC-CPU/os_cpu_c.c ****                                                             /* Set SysTick handler prio.           
+ 399:Libraries/uC-CPU/os_cpu_c.c ****     prio  = CPU_REG_NVIC_SHPRI3;
+ 699              		.loc 1 399 0
+ 700 03fc 4EF62053 		movw	r3, #60704
+ 701 0400 CEF20003 		movt	r3, 57344
+ 702 0404 1B68     		ldr	r3, [r3, #0]
+ 703 0406 FB60     		str	r3, [r7, #12]
+ 400:Libraries/uC-CPU/os_cpu_c.c ****     prio &= DEF_BIT_FIELD(24, 0);
+ 704              		.loc 1 400 0
+ 705 0408 FB68     		ldr	r3, [r7, #12]
+ 706 040a 23F07F43 		bic	r3, r3, #-16777216
+ 707 040e FB60     		str	r3, [r7, #12]
+ 401:Libraries/uC-CPU/os_cpu_c.c ****     prio |= DEF_BIT_MASK(OS_CPU_CFG_SYSTICK_PRIO, 24);
+ 402:Libraries/uC-CPU/os_cpu_c.c **** 
+ 403:Libraries/uC-CPU/os_cpu_c.c ****     CPU_REG_NVIC_SHPRI3 = prio;
+ 708              		.loc 1 403 0
+ 709 0410 4EF62053 		movw	r3, #60704
+ 710 0414 CEF20003 		movt	r3, 57344
+ 711 0418 FA68     		ldr	r2, [r7, #12]
+ 712 041a 1A60     		str	r2, [r3, #0]
+ 404:Libraries/uC-CPU/os_cpu_c.c **** 
+ 405:Libraries/uC-CPU/os_cpu_c.c ****                                                             /* Enable timer.                       
+ 406:Libraries/uC-CPU/os_cpu_c.c ****     CPU_REG_NVIC_ST_CTRL |= CPU_REG_NVIC_ST_CTRL_CLKSOURCE |
+ 713              		.loc 1 406 0
+ 714 041c 4EF21003 		movw	r3, #57360
+ 715 0420 CEF20003 		movt	r3, 57344
+ 716 0424 4EF21002 		movw	r2, #57360
+ 717 0428 CEF20002 		movt	r2, 57344
+ 718 042c 1268     		ldr	r2, [r2, #0]
+ 719 042e 42F00502 		orr	r2, r2, #5
+ 720 0432 1A60     		str	r2, [r3, #0]
+ 407:Libraries/uC-CPU/os_cpu_c.c ****                             CPU_REG_NVIC_ST_CTRL_ENABLE;
+ 408:Libraries/uC-CPU/os_cpu_c.c ****                                                             /* Enable timer interrupt.             
+ 409:Libraries/uC-CPU/os_cpu_c.c ****     CPU_REG_NVIC_ST_CTRL |= CPU_REG_NVIC_ST_CTRL_TICKINT;
+ 721              		.loc 1 409 0
+ 722 0434 4EF21003 		movw	r3, #57360
+ 723 0438 CEF20003 		movt	r3, 57344
+ 724 043c 4EF21002 		movw	r2, #57360
+ 725 0440 CEF20002 		movt	r2, 57344
+ 726 0444 1268     		ldr	r2, [r2, #0]
+ 727 0446 42F00202 		orr	r2, r2, #2
+ 728 044a 1A60     		str	r2, [r3, #0]
+ 410:Libraries/uC-CPU/os_cpu_c.c **** }
+ 729              		.loc 1 410 0
+ 730 044c 07F11407 		add	r7, r7, #20
+ 731 0450 BD46     		mov	sp, r7
+ 732 0452 80BC     		pop	{r7}
+ 733 0454 7047     		bx	lr
+ 734              		.cfi_endproc
+ 735              	.LFE10:
+ 737              	.Letext0:
+ 738              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 739              		.file 3 "Libraries/uC-CPU/cpu_core.h"
+ 740              		.file 4 "Libraries/uC-OSIII/os_type.h"
+ 741              		.file 5 "Libraries/uC-OSIII/os.h"
+ 742              		.file 6 "Libraries/uC-CPU/os_cpu.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 os_cpu_c.c
+                            *COM*:00000004 OS_CPU_ExceptStkBase
+     /tmp/ccgHTKRw.s:19     .text:00000000 $t
+     /tmp/ccgHTKRw.s:24     .text:00000000 OSIdleTaskHook
+     /tmp/ccgHTKRw.s:61     .text:00000020 OSInitHook
+     /tmp/ccgHTKRw.s:133    .text:00000094 OSStatTaskHook
+     /tmp/ccgHTKRw.s:169    .text:000000b4 OSTaskCreateHook
+     /tmp/ccgHTKRw.s:212    .text:000000e0 OSTaskDelHook
+     /tmp/ccgHTKRw.s:255    .text:0000010c OSTaskReturnHook
+     /tmp/ccgHTKRw.s:298    .text:00000138 OSTaskStkInit
+     /tmp/ccgHTKRw.s:454    .text:00000260 OSTaskSwHook
+     /tmp/ccgHTKRw.s:586    .text:00000378 OSTimeTickHook
+     /tmp/ccgHTKRw.s:622    .text:00000398 OS_CPU_SysTickHandler
+     /tmp/ccgHTKRw.s:675    .text:000003e4 OS_CPU_SysTickInit
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+OS_AppIdleTaskHookPtr
+OSCfg_ISRStkBasePtr
+OSCfg_ISRStkSize
+OS_AppStatTaskHookPtr
+OS_AppTaskCreateHookPtr
+OS_AppTaskDelHookPtr
+OS_AppTaskReturnHookPtr
+OS_TaskReturn
+OS_AppTaskSwHookPtr
+CPU_TS_TmrRd
+OSTCBCurPtr
+OSTCBHighRdyPtr
+CPU_IntDisMeasMaxCurReset
+OSSchedLockTimeMaxCur
+OS_AppTimeTickHookPtr
+CPU_SR_Save
+CPU_IntDisMeasStart
+OSIntNestingCtr
+CPU_IntDisMeasStop
+CPU_SR_Restore
+OSTimeTick
+OSIntExit

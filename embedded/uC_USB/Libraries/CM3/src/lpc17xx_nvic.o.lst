@@ -1,0 +1,364 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"lpc17xx_nvic.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	NVIC_DeInit
+  20              		.thumb
+  21              		.thumb_func
+  23              	NVIC_DeInit:
+  24              	.LFB55:
+  25              		.file 1 "Libraries/CM3/src/lpc17xx_nvic.c"
+   1:Libraries/CM3/src/lpc17xx_nvic.c **** /**********************************************************************
+   2:Libraries/CM3/src/lpc17xx_nvic.c **** * $Id$		lpc17xx_nvic.c				2010-05-21
+   3:Libraries/CM3/src/lpc17xx_nvic.c **** *//**
+   4:Libraries/CM3/src/lpc17xx_nvic.c **** * @file		lpc17xx_nvic.c
+   5:Libraries/CM3/src/lpc17xx_nvic.c **** * @brief	Contains all expansion functions support for
+   6:Libraries/CM3/src/lpc17xx_nvic.c **** * 			NVIC firmware library on LPC17xx. The main
+   7:Libraries/CM3/src/lpc17xx_nvic.c **** * 			NVIC functions are defined in core_cm3.h
+   8:Libraries/CM3/src/lpc17xx_nvic.c **** * @version	2.0
+   9:Libraries/CM3/src/lpc17xx_nvic.c **** * @date		21. May. 2010
+  10:Libraries/CM3/src/lpc17xx_nvic.c **** * @author	NXP MCU SW Application Team
+  11:Libraries/CM3/src/lpc17xx_nvic.c **** *
+  12:Libraries/CM3/src/lpc17xx_nvic.c **** * Copyright(C) 2010, NXP Semiconductor
+  13:Libraries/CM3/src/lpc17xx_nvic.c **** * All rights reserved.
+  14:Libraries/CM3/src/lpc17xx_nvic.c **** *
+  15:Libraries/CM3/src/lpc17xx_nvic.c **** ***********************************************************************
+  16:Libraries/CM3/src/lpc17xx_nvic.c **** * Software that is described herein is for illustrative purposes only
+  17:Libraries/CM3/src/lpc17xx_nvic.c **** * which provides customers with programming information regarding the
+  18:Libraries/CM3/src/lpc17xx_nvic.c **** * products. This software is supplied "AS IS" without any warranties.
+  19:Libraries/CM3/src/lpc17xx_nvic.c **** * NXP Semiconductors assumes no responsibility or liability for the
+  20:Libraries/CM3/src/lpc17xx_nvic.c **** * use of the software, conveys no license or title under any patent,
+  21:Libraries/CM3/src/lpc17xx_nvic.c **** * copyright, or mask work right to the product. NXP Semiconductors
+  22:Libraries/CM3/src/lpc17xx_nvic.c **** * reserves the right to make changes in the software without
+  23:Libraries/CM3/src/lpc17xx_nvic.c **** * notification. NXP Semiconductors also make no representation or
+  24:Libraries/CM3/src/lpc17xx_nvic.c **** * warranty that such application will be suitable for the specified
+  25:Libraries/CM3/src/lpc17xx_nvic.c **** * use without further testing or modification.
+  26:Libraries/CM3/src/lpc17xx_nvic.c **** **********************************************************************/
+  27:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  28:Libraries/CM3/src/lpc17xx_nvic.c **** /* Peripheral group ----------------------------------------------------------- */
+  29:Libraries/CM3/src/lpc17xx_nvic.c **** /** @addtogroup NVIC
+  30:Libraries/CM3/src/lpc17xx_nvic.c ****  * @{
+  31:Libraries/CM3/src/lpc17xx_nvic.c ****  */
+  32:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  33:Libraries/CM3/src/lpc17xx_nvic.c **** /* Includes ------------------------------------------------------------------- */
+  34:Libraries/CM3/src/lpc17xx_nvic.c **** #include "lpc17xx_nvic.h"
+  35:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  36:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  37:Libraries/CM3/src/lpc17xx_nvic.c **** /* Private Macros ------------------------------------------------------------- */
+  38:Libraries/CM3/src/lpc17xx_nvic.c **** /** @addtogroup NVIC_Private_Macros
+  39:Libraries/CM3/src/lpc17xx_nvic.c ****  * @{
+  40:Libraries/CM3/src/lpc17xx_nvic.c ****  */
+  41:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  42:Libraries/CM3/src/lpc17xx_nvic.c **** /* Vector table offset bit mask */
+  43:Libraries/CM3/src/lpc17xx_nvic.c **** #define NVIC_VTOR_MASK              0x3FFFFF80
+  44:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  45:Libraries/CM3/src/lpc17xx_nvic.c **** /**
+  46:Libraries/CM3/src/lpc17xx_nvic.c ****  * @}
+  47:Libraries/CM3/src/lpc17xx_nvic.c ****  */
+  48:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  49:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  50:Libraries/CM3/src/lpc17xx_nvic.c **** /* Public Functions ----------------------------------------------------------- */
+  51:Libraries/CM3/src/lpc17xx_nvic.c **** /** @addtogroup NVIC_Public_Functions
+  52:Libraries/CM3/src/lpc17xx_nvic.c ****  * @{
+  53:Libraries/CM3/src/lpc17xx_nvic.c ****  */
+  54:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  55:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  56:Libraries/CM3/src/lpc17xx_nvic.c **** /*****************************************************************************//**
+  57:Libraries/CM3/src/lpc17xx_nvic.c ****  * @brief		De-initializes the NVIC peripheral registers to their default
+  58:Libraries/CM3/src/lpc17xx_nvic.c ****  * 				reset values.
+  59:Libraries/CM3/src/lpc17xx_nvic.c ****  * @param		None
+  60:Libraries/CM3/src/lpc17xx_nvic.c ****  * @return      None
+  61:Libraries/CM3/src/lpc17xx_nvic.c ****  *
+  62:Libraries/CM3/src/lpc17xx_nvic.c ****  * These following NVIC peripheral registers will be de-initialized:
+  63:Libraries/CM3/src/lpc17xx_nvic.c ****  * - Disable Interrupt (32 IRQ interrupt sources that matched with LPC17xx)
+  64:Libraries/CM3/src/lpc17xx_nvic.c ****  * - Clear all Pending Interrupts (32 IRQ interrupt source that matched with LPC17xx)
+  65:Libraries/CM3/src/lpc17xx_nvic.c ****  * - Clear all Interrupt Priorities (32 IRQ interrupt source that matched with LPC17xx)
+  66:Libraries/CM3/src/lpc17xx_nvic.c ****  *******************************************************************************/
+  67:Libraries/CM3/src/lpc17xx_nvic.c **** void NVIC_DeInit(void)
+  68:Libraries/CM3/src/lpc17xx_nvic.c **** {
+  26              		.loc 1 68 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 8
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30              		@ link register save eliminated.
+  31 0000 80B4     		push	{r7}
+  32              	.LCFI0:
+  33              		.cfi_def_cfa_offset 4
+  34              		.cfi_offset 7, -4
+  35 0002 83B0     		sub	sp, sp, #12
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 16
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  69:Libraries/CM3/src/lpc17xx_nvic.c **** 	uint8_t tmp;
+  70:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  71:Libraries/CM3/src/lpc17xx_nvic.c **** 	/* Disable all interrupts */
+  72:Libraries/CM3/src/lpc17xx_nvic.c **** 	NVIC->ICER[0] = 0xFFFFFFFF;
+  41              		.loc 1 72 0
+  42 0006 4FF46143 		mov	r3, #57600
+  43 000a CEF20003 		movt	r3, 57344
+  44 000e 4FF0FF32 		mov	r2, #-1
+  45 0012 C3F88020 		str	r2, [r3, #128]
+  73:Libraries/CM3/src/lpc17xx_nvic.c **** 	NVIC->ICER[1] = 0x00000001;
+  46              		.loc 1 73 0
+  47 0016 4FF46143 		mov	r3, #57600
+  48 001a CEF20003 		movt	r3, 57344
+  49 001e 4FF00102 		mov	r2, #1
+  50 0022 C3F88420 		str	r2, [r3, #132]
+  74:Libraries/CM3/src/lpc17xx_nvic.c **** 	/* Clear all pending interrupts */
+  75:Libraries/CM3/src/lpc17xx_nvic.c **** 	NVIC->ICPR[0] = 0xFFFFFFFF;
+  51              		.loc 1 75 0
+  52 0026 4FF46143 		mov	r3, #57600
+  53 002a CEF20003 		movt	r3, 57344
+  54 002e 4FF0FF32 		mov	r2, #-1
+  55 0032 C3F88021 		str	r2, [r3, #384]
+  76:Libraries/CM3/src/lpc17xx_nvic.c **** 	NVIC->ICPR[1] = 0x00000001;
+  56              		.loc 1 76 0
+  57 0036 4FF46143 		mov	r3, #57600
+  58 003a CEF20003 		movt	r3, 57344
+  59 003e 4FF00102 		mov	r2, #1
+  60 0042 C3F88421 		str	r2, [r3, #388]
+  77:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  78:Libraries/CM3/src/lpc17xx_nvic.c **** 	/* Clear all interrupt priority */
+  79:Libraries/CM3/src/lpc17xx_nvic.c **** 	for (tmp = 0; tmp < 32; tmp++) {
+  61              		.loc 1 79 0
+  62 0046 4FF00003 		mov	r3, #0
+  63 004a FB71     		strb	r3, [r7, #7]
+  64 004c 0DE0     		b	.L2
+  65              	.L3:
+  80:Libraries/CM3/src/lpc17xx_nvic.c **** 		NVIC->IP[tmp] = 0x00;
+  66              		.loc 1 80 0 discriminator 2
+  67 004e 4FF46143 		mov	r3, #57600
+  68 0052 CEF20003 		movt	r3, 57344
+  69 0056 FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+  70 0058 9B18     		adds	r3, r3, r2
+  71 005a 4FF00002 		mov	r2, #0
+  72 005e 83F80023 		strb	r2, [r3, #768]
+  79:Libraries/CM3/src/lpc17xx_nvic.c **** 	for (tmp = 0; tmp < 32; tmp++) {
+  73              		.loc 1 79 0 discriminator 2
+  74 0062 FB79     		ldrb	r3, [r7, #7]
+  75 0064 03F10103 		add	r3, r3, #1
+  76 0068 FB71     		strb	r3, [r7, #7]
+  77              	.L2:
+  79:Libraries/CM3/src/lpc17xx_nvic.c **** 	for (tmp = 0; tmp < 32; tmp++) {
+  78              		.loc 1 79 0 is_stmt 0 discriminator 1
+  79 006a FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+  80 006c 1F2B     		cmp	r3, #31
+  81 006e EED9     		bls	.L3
+  81:Libraries/CM3/src/lpc17xx_nvic.c **** 	}
+  82:Libraries/CM3/src/lpc17xx_nvic.c **** }
+  82              		.loc 1 82 0 is_stmt 1
+  83 0070 07F10C07 		add	r7, r7, #12
+  84 0074 BD46     		mov	sp, r7
+  85 0076 80BC     		pop	{r7}
+  86 0078 7047     		bx	lr
+  87              		.cfi_endproc
+  88              	.LFE55:
+  90 007a 00BF     		.align	2
+  91              		.global	NVIC_SCBDeInit
+  92              		.thumb
+  93              		.thumb_func
+  95              	NVIC_SCBDeInit:
+  96              	.LFB56:
+  83:Libraries/CM3/src/lpc17xx_nvic.c **** 
+  84:Libraries/CM3/src/lpc17xx_nvic.c **** /*****************************************************************************//**
+  85:Libraries/CM3/src/lpc17xx_nvic.c ****  * @brief			De-initializes the SCB peripheral registers to their default
+  86:Libraries/CM3/src/lpc17xx_nvic.c ****  *                  reset values.
+  87:Libraries/CM3/src/lpc17xx_nvic.c ****  * @param			none
+  88:Libraries/CM3/src/lpc17xx_nvic.c ****  * @return 			none
+  89:Libraries/CM3/src/lpc17xx_nvic.c ****  *
+  90:Libraries/CM3/src/lpc17xx_nvic.c ****  * These following SCB NVIC peripheral registers will be de-initialized:
+  91:Libraries/CM3/src/lpc17xx_nvic.c ****  * - Interrupt Control State register
+  92:Libraries/CM3/src/lpc17xx_nvic.c ****  * - Interrupt Vector Table Offset register
+  93:Libraries/CM3/src/lpc17xx_nvic.c ****  * - Application Interrupt/Reset Control register
+  94:Libraries/CM3/src/lpc17xx_nvic.c ****  * - System Control register
+  95:Libraries/CM3/src/lpc17xx_nvic.c ****  * - Configuration Control register
+  96:Libraries/CM3/src/lpc17xx_nvic.c ****  * - System Handlers Priority Registers
+  97:Libraries/CM3/src/lpc17xx_nvic.c ****  * - System Handler Control and State Register
+  98:Libraries/CM3/src/lpc17xx_nvic.c ****  * - Configurable Fault Status Register
+  99:Libraries/CM3/src/lpc17xx_nvic.c ****  * - Hard Fault Status Register
+ 100:Libraries/CM3/src/lpc17xx_nvic.c ****  * - Debug Fault Status Register
+ 101:Libraries/CM3/src/lpc17xx_nvic.c ****  *******************************************************************************/
+ 102:Libraries/CM3/src/lpc17xx_nvic.c **** void NVIC_SCBDeInit(void)
+ 103:Libraries/CM3/src/lpc17xx_nvic.c **** {
+  97              		.loc 1 103 0
+  98              		.cfi_startproc
+  99              		@ args = 0, pretend = 0, frame = 8
+ 100              		@ frame_needed = 1, uses_anonymous_args = 0
+ 101              		@ link register save eliminated.
+ 102 007c 80B4     		push	{r7}
+ 103              	.LCFI3:
+ 104              		.cfi_def_cfa_offset 4
+ 105              		.cfi_offset 7, -4
+ 106 007e 83B0     		sub	sp, sp, #12
+ 107              	.LCFI4:
+ 108              		.cfi_def_cfa_offset 16
+ 109 0080 00AF     		add	r7, sp, #0
+ 110              	.LCFI5:
+ 111              		.cfi_def_cfa_register 7
+ 104:Libraries/CM3/src/lpc17xx_nvic.c **** 	uint8_t tmp;
+ 105:Libraries/CM3/src/lpc17xx_nvic.c **** 
+ 106:Libraries/CM3/src/lpc17xx_nvic.c **** 	SCB->ICSR = 0x0A000000;
+ 112              		.loc 1 106 0
+ 113 0082 4FF46D43 		mov	r3, #60672
+ 114 0086 CEF20003 		movt	r3, 57344
+ 115 008a 4FF02062 		mov	r2, #167772160
+ 116 008e 5A60     		str	r2, [r3, #4]
+ 107:Libraries/CM3/src/lpc17xx_nvic.c **** 	SCB->VTOR = 0x00000000;
+ 117              		.loc 1 107 0
+ 118 0090 4FF46D43 		mov	r3, #60672
+ 119 0094 CEF20003 		movt	r3, 57344
+ 120 0098 4FF00002 		mov	r2, #0
+ 121 009c 9A60     		str	r2, [r3, #8]
+ 108:Libraries/CM3/src/lpc17xx_nvic.c **** 	SCB->AIRCR = 0x05FA0000;
+ 122              		.loc 1 108 0
+ 123 009e 4FF46D43 		mov	r3, #60672
+ 124 00a2 CEF20003 		movt	r3, 57344
+ 125 00a6 4FF00002 		mov	r2, #0
+ 126 00aa C0F2FA52 		movt	r2, 1530
+ 127 00ae DA60     		str	r2, [r3, #12]
+ 109:Libraries/CM3/src/lpc17xx_nvic.c **** 	SCB->SCR = 0x00000000;
+ 128              		.loc 1 109 0
+ 129 00b0 4FF46D43 		mov	r3, #60672
+ 130 00b4 CEF20003 		movt	r3, 57344
+ 131 00b8 4FF00002 		mov	r2, #0
+ 132 00bc 1A61     		str	r2, [r3, #16]
+ 110:Libraries/CM3/src/lpc17xx_nvic.c **** 	SCB->CCR = 0x00000000;
+ 133              		.loc 1 110 0
+ 134 00be 4FF46D43 		mov	r3, #60672
+ 135 00c2 CEF20003 		movt	r3, 57344
+ 136 00c6 4FF00002 		mov	r2, #0
+ 137 00ca 5A61     		str	r2, [r3, #20]
+ 111:Libraries/CM3/src/lpc17xx_nvic.c **** 
+ 112:Libraries/CM3/src/lpc17xx_nvic.c **** 	for (tmp = 0; tmp < 32; tmp++) {
+ 138              		.loc 1 112 0
+ 139 00cc 4FF00003 		mov	r3, #0
+ 140 00d0 FB71     		strb	r3, [r7, #7]
+ 141 00d2 0CE0     		b	.L5
+ 142              	.L6:
+ 113:Libraries/CM3/src/lpc17xx_nvic.c **** 		SCB->SHP[tmp] = 0x00;
+ 143              		.loc 1 113 0 discriminator 2
+ 144 00d4 4FF46D43 		mov	r3, #60672
+ 145 00d8 CEF20003 		movt	r3, 57344
+ 146 00dc FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 147 00de 9B18     		adds	r3, r3, r2
+ 148 00e0 4FF00002 		mov	r2, #0
+ 149 00e4 1A76     		strb	r2, [r3, #24]
+ 112:Libraries/CM3/src/lpc17xx_nvic.c **** 	for (tmp = 0; tmp < 32; tmp++) {
+ 150              		.loc 1 112 0 discriminator 2
+ 151 00e6 FB79     		ldrb	r3, [r7, #7]
+ 152 00e8 03F10103 		add	r3, r3, #1
+ 153 00ec FB71     		strb	r3, [r7, #7]
+ 154              	.L5:
+ 112:Libraries/CM3/src/lpc17xx_nvic.c **** 	for (tmp = 0; tmp < 32; tmp++) {
+ 155              		.loc 1 112 0 is_stmt 0 discriminator 1
+ 156 00ee FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 157 00f0 1F2B     		cmp	r3, #31
+ 158 00f2 EFD9     		bls	.L6
+ 114:Libraries/CM3/src/lpc17xx_nvic.c **** 	}
+ 115:Libraries/CM3/src/lpc17xx_nvic.c **** 
+ 116:Libraries/CM3/src/lpc17xx_nvic.c **** 	SCB->SHCSR = 0x00000000;
+ 159              		.loc 1 116 0 is_stmt 1
+ 160 00f4 4FF46D43 		mov	r3, #60672
+ 161 00f8 CEF20003 		movt	r3, 57344
+ 162 00fc 4FF00002 		mov	r2, #0
+ 163 0100 5A62     		str	r2, [r3, #36]
+ 117:Libraries/CM3/src/lpc17xx_nvic.c **** 	SCB->CFSR = 0xFFFFFFFF;
+ 164              		.loc 1 117 0
+ 165 0102 4FF46D43 		mov	r3, #60672
+ 166 0106 CEF20003 		movt	r3, 57344
+ 167 010a 4FF0FF32 		mov	r2, #-1
+ 168 010e 9A62     		str	r2, [r3, #40]
+ 118:Libraries/CM3/src/lpc17xx_nvic.c **** 	SCB->HFSR = 0xFFFFFFFF;
+ 169              		.loc 1 118 0
+ 170 0110 4FF46D43 		mov	r3, #60672
+ 171 0114 CEF20003 		movt	r3, 57344
+ 172 0118 4FF0FF32 		mov	r2, #-1
+ 173 011c DA62     		str	r2, [r3, #44]
+ 119:Libraries/CM3/src/lpc17xx_nvic.c **** 	SCB->DFSR = 0xFFFFFFFF;
+ 174              		.loc 1 119 0
+ 175 011e 4FF46D43 		mov	r3, #60672
+ 176 0122 CEF20003 		movt	r3, 57344
+ 177 0126 4FF0FF32 		mov	r2, #-1
+ 178 012a 1A63     		str	r2, [r3, #48]
+ 120:Libraries/CM3/src/lpc17xx_nvic.c **** }
+ 179              		.loc 1 120 0
+ 180 012c 07F10C07 		add	r7, r7, #12
+ 181 0130 BD46     		mov	sp, r7
+ 182 0132 80BC     		pop	{r7}
+ 183 0134 7047     		bx	lr
+ 184              		.cfi_endproc
+ 185              	.LFE56:
+ 187 0136 00BF     		.align	2
+ 188              		.global	NVIC_SetVTOR
+ 189              		.thumb
+ 190              		.thumb_func
+ 192              	NVIC_SetVTOR:
+ 193              	.LFB57:
+ 121:Libraries/CM3/src/lpc17xx_nvic.c **** 
+ 122:Libraries/CM3/src/lpc17xx_nvic.c **** 
+ 123:Libraries/CM3/src/lpc17xx_nvic.c **** /*****************************************************************************//**
+ 124:Libraries/CM3/src/lpc17xx_nvic.c ****  * @brief		Set Vector Table Offset value
+ 125:Libraries/CM3/src/lpc17xx_nvic.c ****  * @param		offset Offset value
+ 126:Libraries/CM3/src/lpc17xx_nvic.c ****  * @return      None
+ 127:Libraries/CM3/src/lpc17xx_nvic.c ****  *******************************************************************************/
+ 128:Libraries/CM3/src/lpc17xx_nvic.c **** void NVIC_SetVTOR(uint32_t offset)
+ 129:Libraries/CM3/src/lpc17xx_nvic.c **** {
+ 194              		.loc 1 129 0
+ 195              		.cfi_startproc
+ 196              		@ args = 0, pretend = 0, frame = 8
+ 197              		@ frame_needed = 1, uses_anonymous_args = 0
+ 198              		@ link register save eliminated.
+ 199 0138 80B4     		push	{r7}
+ 200              	.LCFI6:
+ 201              		.cfi_def_cfa_offset 4
+ 202              		.cfi_offset 7, -4
+ 203 013a 83B0     		sub	sp, sp, #12
+ 204              	.LCFI7:
+ 205              		.cfi_def_cfa_offset 16
+ 206 013c 00AF     		add	r7, sp, #0
+ 207              	.LCFI8:
+ 208              		.cfi_def_cfa_register 7
+ 209 013e 7860     		str	r0, [r7, #4]
+ 130:Libraries/CM3/src/lpc17xx_nvic.c **** //	SCB->VTOR  = (offset & NVIC_VTOR_MASK);
+ 131:Libraries/CM3/src/lpc17xx_nvic.c **** 	SCB->VTOR  = offset;
+ 210              		.loc 1 131 0
+ 211 0140 4FF46D43 		mov	r3, #60672
+ 212 0144 CEF20003 		movt	r3, 57344
+ 213 0148 7A68     		ldr	r2, [r7, #4]
+ 214 014a 9A60     		str	r2, [r3, #8]
+ 132:Libraries/CM3/src/lpc17xx_nvic.c **** }
+ 215              		.loc 1 132 0
+ 216 014c 07F10C07 		add	r7, r7, #12
+ 217 0150 BD46     		mov	sp, r7
+ 218 0152 80BC     		pop	{r7}
+ 219 0154 7047     		bx	lr
+ 220              		.cfi_endproc
+ 221              	.LFE57:
+ 223              	.Letext0:
+ 224              		.file 2 "/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none
+ 225              		.file 3 "Libraries/CM3/inc/core_cm3.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 lpc17xx_nvic.c
+     /tmp/ccrtQQYX.s:18     .text:00000000 $t
+     /tmp/ccrtQQYX.s:23     .text:00000000 NVIC_DeInit
+     /tmp/ccrtQQYX.s:95     .text:0000007c NVIC_SCBDeInit
+     /tmp/ccrtQQYX.s:192    .text:00000138 NVIC_SetVTOR
+                     .debug_frame:00000010 $d
+
+NO UNDEFINED SYMBOLS

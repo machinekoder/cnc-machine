@@ -1,0 +1,1246 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"os_int.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	OS_IntQPost
+  20              		.thumb
+  21              		.thumb_func
+  23              	OS_IntQPost:
+  24              	.LFB0:
+  25              		.file 1 "Libraries/uC-OSIII/os_int.c"
+   1:Libraries/uC-OSIII/os_int.c **** /*
+   2:Libraries/uC-OSIII/os_int.c **** ***************************************************************************************************
+   3:Libraries/uC-OSIII/os_int.c **** *                                                      uC/OS-III
+   4:Libraries/uC-OSIII/os_int.c **** *                                                 The Real-Time Kernel
+   5:Libraries/uC-OSIII/os_int.c **** *
+   6:Libraries/uC-OSIII/os_int.c **** *                                  (c) Copyright 2009-2010; Micrium, Inc.; Weston, FL
+   7:Libraries/uC-OSIII/os_int.c **** *                          All rights reserved.  Protected by international copyright laws.
+   8:Libraries/uC-OSIII/os_int.c **** *
+   9:Libraries/uC-OSIII/os_int.c **** *                                                  ISR QUEUE MANAGEMENT
+  10:Libraries/uC-OSIII/os_int.c **** *
+  11:Libraries/uC-OSIII/os_int.c **** * File    : OS_INT.C
+  12:Libraries/uC-OSIII/os_int.c **** * By      : JJL
+  13:Libraries/uC-OSIII/os_int.c **** * Version : V3.01.2
+  14:Libraries/uC-OSIII/os_int.c **** *
+  15:Libraries/uC-OSIII/os_int.c **** * LICENSING TERMS:
+  16:Libraries/uC-OSIII/os_int.c **** * ---------------
+  17:Libraries/uC-OSIII/os_int.c **** *               uC/OS-III is provided in source form to registered licensees ONLY.  It is
+  18:Libraries/uC-OSIII/os_int.c **** *               illegal to distribute this source code to any third party unless you receive
+  19:Libraries/uC-OSIII/os_int.c **** *               written permission by an authorized Micrium representative.  Knowledge of
+  20:Libraries/uC-OSIII/os_int.c **** *               the source code may NOT be used to develop a similar product.
+  21:Libraries/uC-OSIII/os_int.c **** *
+  22:Libraries/uC-OSIII/os_int.c **** *               Please help us continue to provide the Embedded community with the finest
+  23:Libraries/uC-OSIII/os_int.c **** *               software available.  Your honesty is greatly appreciated.
+  24:Libraries/uC-OSIII/os_int.c **** *
+  25:Libraries/uC-OSIII/os_int.c **** *               You can contact us at www.micrium.com.
+  26:Libraries/uC-OSIII/os_int.c **** ***************************************************************************************************
+  27:Libraries/uC-OSIII/os_int.c **** */
+  28:Libraries/uC-OSIII/os_int.c **** 
+  29:Libraries/uC-OSIII/os_int.c **** #include  <os.h>
+  30:Libraries/uC-OSIII/os_int.c **** 
+  31:Libraries/uC-OSIII/os_int.c **** #ifdef VSC_INCLUDE_SOURCE_FILE_NAMES
+  32:Libraries/uC-OSIII/os_int.c **** const  CPU_CHAR  *os_int__c = "$Id: $";
+  33:Libraries/uC-OSIII/os_int.c **** #endif
+  34:Libraries/uC-OSIII/os_int.c **** 
+  35:Libraries/uC-OSIII/os_int.c **** 
+  36:Libraries/uC-OSIII/os_int.c **** #if OS_CFG_ISR_POST_DEFERRED_EN > 0u
+  37:Libraries/uC-OSIII/os_int.c **** /*$PAGE*/
+  38:Libraries/uC-OSIII/os_int.c **** /*
+  39:Libraries/uC-OSIII/os_int.c **** ***************************************************************************************************
+  40:Libraries/uC-OSIII/os_int.c **** *                                                   POST TO ISR QUEUE
+  41:Libraries/uC-OSIII/os_int.c **** *
+  42:Libraries/uC-OSIII/os_int.c **** * Description: This function places contents of posts into an intermediate queue to help defer proc
+  43:Libraries/uC-OSIII/os_int.c **** *              at the task level.
+  44:Libraries/uC-OSIII/os_int.c **** *
+  45:Libraries/uC-OSIII/os_int.c **** * Arguments  : type       is the type of kernel object the post is destined to:
+  46:Libraries/uC-OSIII/os_int.c **** *
+  47:Libraries/uC-OSIII/os_int.c **** *                             OS_OBJ_TYPE_SEM
+  48:Libraries/uC-OSIII/os_int.c **** *                             OS_OBJ_TYPE_Q
+  49:Libraries/uC-OSIII/os_int.c **** *                             OS_OBJ_TYPE_FLAG
+  50:Libraries/uC-OSIII/os_int.c **** *                             OS_OBJ_TYPE_TASK_MSG
+  51:Libraries/uC-OSIII/os_int.c **** *                             OS_OBJ_TYPE_TASK_SIGNAL
+  52:Libraries/uC-OSIII/os_int.c **** *
+  53:Libraries/uC-OSIII/os_int.c **** *              p_obj      is a pointer to the kernel object to post to.  This can be a pointer to a
+  54:Libraries/uC-OSIII/os_int.c **** *              -----      a message queue or a task control clock.
+  55:Libraries/uC-OSIII/os_int.c **** *
+  56:Libraries/uC-OSIII/os_int.c **** *              p_void     is a pointer to a message that is being posted.  This is used when postin
+  57:Libraries/uC-OSIII/os_int.c **** *                         queue or directly to a task.
+  58:Libraries/uC-OSIII/os_int.c **** *
+  59:Libraries/uC-OSIII/os_int.c **** *              msg_size   is the size of the message being posted
+  60:Libraries/uC-OSIII/os_int.c **** *
+  61:Libraries/uC-OSIII/os_int.c **** *              flags      if the post is done to an event flag group then this corresponds to the f
+  62:Libraries/uC-OSIII/os_int.c **** *                         posted
+  63:Libraries/uC-OSIII/os_int.c **** *
+  64:Libraries/uC-OSIII/os_int.c **** *              ts         is a timestamp as to when the post was done
+  65:Libraries/uC-OSIII/os_int.c **** *
+  66:Libraries/uC-OSIII/os_int.c **** *              opt        this corresponds to post options and applies to:
+  67:Libraries/uC-OSIII/os_int.c **** *
+  68:Libraries/uC-OSIII/os_int.c **** *                             OSFlagPost()
+  69:Libraries/uC-OSIII/os_int.c **** *                             OSSemPost()
+  70:Libraries/uC-OSIII/os_int.c **** *                             OSQPost()
+  71:Libraries/uC-OSIII/os_int.c **** *                             OSTaskQPost()
+  72:Libraries/uC-OSIII/os_int.c **** *
+  73:Libraries/uC-OSIII/os_int.c **** *              p_err      is a pointer to a variable that will contain an error code returned by th
+  74:Libraries/uC-OSIII/os_int.c **** *
+  75:Libraries/uC-OSIII/os_int.c **** *                             OS_ERR_NONE         if the post to the ISR queue was successful
+  76:Libraries/uC-OSIII/os_int.c **** *                             OS_ERR_INT_Q_FULL   if the ISR queue is full and cannot accepts any f
+  77:Libraries/uC-OSIII/os_int.c **** *                                                 generally indicates that you are receiving interr
+  78:Libraries/uC-OSIII/os_int.c **** *                                                 can process them or, that you didn't make the ISR
+  79:Libraries/uC-OSIII/os_int.c **** *
+  80:Libraries/uC-OSIII/os_int.c **** * Returns    : none
+  81:Libraries/uC-OSIII/os_int.c **** *
+  82:Libraries/uC-OSIII/os_int.c **** * Note(s)    : none
+  83:Libraries/uC-OSIII/os_int.c **** ***************************************************************************************************
+  84:Libraries/uC-OSIII/os_int.c **** */
+  85:Libraries/uC-OSIII/os_int.c **** 
+  86:Libraries/uC-OSIII/os_int.c **** void  OS_IntQPost (OS_OBJ_TYPE    type,
+  87:Libraries/uC-OSIII/os_int.c ****                    void          *p_obj,
+  88:Libraries/uC-OSIII/os_int.c ****                    void          *p_void,
+  89:Libraries/uC-OSIII/os_int.c ****                    OS_MSG_SIZE    msg_size,
+  90:Libraries/uC-OSIII/os_int.c ****                    OS_FLAGS       flags,
+  91:Libraries/uC-OSIII/os_int.c ****                    OS_OPT         opt,
+  92:Libraries/uC-OSIII/os_int.c ****                    CPU_TS         ts,
+  93:Libraries/uC-OSIII/os_int.c ****                    OS_ERR        *p_err)
+  94:Libraries/uC-OSIII/os_int.c **** {
+  26              		.loc 1 94 0
+  27              		.cfi_startproc
+  28              		@ args = 16, pretend = 0, frame = 24
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 14, -4
+  34              		.cfi_offset 7, -8
+  35 0002 86B0     		sub	sp, sp, #24
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 32
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  41 0006 F860     		str	r0, [r7, #12]
+  42 0008 B960     		str	r1, [r7, #8]
+  43 000a 7A60     		str	r2, [r7, #4]
+  44 000c 7B80     		strh	r3, [r7, #2]	@ movhi
+  95:Libraries/uC-OSIII/os_int.c ****     CPU_SR_ALLOC();
+  45              		.loc 1 95 0
+  46 000e 4FF00003 		mov	r3, #0
+  47 0012 7B61     		str	r3, [r7, #20]
+  96:Libraries/uC-OSIII/os_int.c **** 
+  97:Libraries/uC-OSIII/os_int.c **** 
+  98:Libraries/uC-OSIII/os_int.c **** 
+  99:Libraries/uC-OSIII/os_int.c **** #ifdef OS_SAFETY_CRITICAL
+ 100:Libraries/uC-OSIII/os_int.c ****     if (p_err == (OS_ERR *)0) {
+ 101:Libraries/uC-OSIII/os_int.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 102:Libraries/uC-OSIII/os_int.c ****     }
+ 103:Libraries/uC-OSIII/os_int.c **** #endif
+ 104:Libraries/uC-OSIII/os_int.c **** 
+ 105:Libraries/uC-OSIII/os_int.c ****     CPU_CRITICAL_ENTER();
+  48              		.loc 1 105 0
+  49 0014 FFF7FEFF 		bl	CPU_SR_Save
+  50 0018 7861     		str	r0, [r7, #20]
+  51 001a FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 106:Libraries/uC-OSIII/os_int.c ****     if (OSIntQNbrEntries < OSCfg_IntQSize) {                /* Make sure we haven't already filled 
+  52              		.loc 1 106 0
+  53 001e 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+  54 0022 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+  55 0026 1A88     		ldrh	r2, [r3, #0]
+  56 0028 40F20003 		movw	r3, #:lower16:OSCfg_IntQSize
+  57 002c C0F20003 		movt	r3, #:upper16:OSCfg_IntQSize
+  58 0030 1B88     		ldrh	r3, [r3, #0]
+  59 0032 9A42     		cmp	r2, r3
+  60 0034 80F08B80 		bcs	.L2
+ 107:Libraries/uC-OSIII/os_int.c ****         OSIntQNbrEntries++;
+  61              		.loc 1 107 0
+  62 0038 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+  63 003c C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+  64 0040 1B88     		ldrh	r3, [r3, #0]
+  65 0042 03F10103 		add	r3, r3, #1
+  66 0046 9AB2     		uxth	r2, r3
+  67 0048 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+  68 004c C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+  69 0050 1A80     		strh	r2, [r3, #0]	@ movhi
+ 108:Libraries/uC-OSIII/os_int.c **** 
+ 109:Libraries/uC-OSIII/os_int.c ****         if (OSIntQMaxNbrEntries < OSIntQNbrEntries) {
+  70              		.loc 1 109 0
+  71 0052 40F20003 		movw	r3, #:lower16:OSIntQMaxNbrEntries
+  72 0056 C0F20003 		movt	r3, #:upper16:OSIntQMaxNbrEntries
+  73 005a 1A88     		ldrh	r2, [r3, #0]
+  74 005c 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+  75 0060 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+  76 0064 1B88     		ldrh	r3, [r3, #0]
+  77 0066 9A42     		cmp	r2, r3
+  78 0068 09D2     		bcs	.L3
+ 110:Libraries/uC-OSIII/os_int.c ****             OSIntQMaxNbrEntries = OSIntQNbrEntries;
+  79              		.loc 1 110 0
+  80 006a 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+  81 006e C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+  82 0072 1A88     		ldrh	r2, [r3, #0]
+  83 0074 40F20003 		movw	r3, #:lower16:OSIntQMaxNbrEntries
+  84 0078 C0F20003 		movt	r3, #:upper16:OSIntQMaxNbrEntries
+  85 007c 1A80     		strh	r2, [r3, #0]	@ movhi
+  86              	.L3:
+ 111:Libraries/uC-OSIII/os_int.c ****         }
+ 112:Libraries/uC-OSIII/os_int.c **** 
+ 113:Libraries/uC-OSIII/os_int.c ****         OSIntQInPtr->Type       = type;                     /* Save object type being posted       
+  87              		.loc 1 113 0
+  88 007e 40F20003 		movw	r3, #:lower16:OSIntQInPtr
+  89 0082 C0F20003 		movt	r3, #:upper16:OSIntQInPtr
+  90 0086 1B68     		ldr	r3, [r3, #0]
+  91 0088 FA68     		ldr	r2, [r7, #12]
+  92 008a 1A60     		str	r2, [r3, #0]
+ 114:Libraries/uC-OSIII/os_int.c ****         OSIntQInPtr->ObjPtr     = p_obj;                    /* Save pointer to object being posted 
+  93              		.loc 1 114 0
+  94 008c 40F20003 		movw	r3, #:lower16:OSIntQInPtr
+  95 0090 C0F20003 		movt	r3, #:upper16:OSIntQInPtr
+  96 0094 1B68     		ldr	r3, [r3, #0]
+  97 0096 BA68     		ldr	r2, [r7, #8]
+  98 0098 9A60     		str	r2, [r3, #8]
+ 115:Libraries/uC-OSIII/os_int.c ****         OSIntQInPtr->MsgPtr     = p_void;                   /* Save pointer to message if posting t
+  99              		.loc 1 115 0
+ 100 009a 40F20003 		movw	r3, #:lower16:OSIntQInPtr
+ 101 009e C0F20003 		movt	r3, #:upper16:OSIntQInPtr
+ 102 00a2 1B68     		ldr	r3, [r3, #0]
+ 103 00a4 7A68     		ldr	r2, [r7, #4]
+ 104 00a6 DA60     		str	r2, [r3, #12]
+ 116:Libraries/uC-OSIII/os_int.c ****         OSIntQInPtr->MsgSize    = msg_size;                 /* Save the message size   if posting t
+ 105              		.loc 1 116 0
+ 106 00a8 40F20003 		movw	r3, #:lower16:OSIntQInPtr
+ 107 00ac C0F20003 		movt	r3, #:upper16:OSIntQInPtr
+ 108 00b0 1B68     		ldr	r3, [r3, #0]
+ 109 00b2 7A88     		ldrh	r2, [r7, #2]	@ movhi
+ 110 00b4 1A82     		strh	r2, [r3, #16]	@ movhi
+ 117:Libraries/uC-OSIII/os_int.c ****         OSIntQInPtr->Flags      = flags;                    /* Save the flags if posting to an even
+ 111              		.loc 1 117 0
+ 112 00b6 40F20003 		movw	r3, #:lower16:OSIntQInPtr
+ 113 00ba C0F20003 		movt	r3, #:upper16:OSIntQInPtr
+ 114 00be 1B68     		ldr	r3, [r3, #0]
+ 115 00c0 3A6A     		ldr	r2, [r7, #32]
+ 116 00c2 5A61     		str	r2, [r3, #20]
+ 118:Libraries/uC-OSIII/os_int.c ****         OSIntQInPtr->Opt        = opt;                      /* Save post options                   
+ 117              		.loc 1 118 0
+ 118 00c4 40F20003 		movw	r3, #:lower16:OSIntQInPtr
+ 119 00c8 C0F20003 		movt	r3, #:upper16:OSIntQInPtr
+ 120 00cc 1B68     		ldr	r3, [r3, #0]
+ 121 00ce BA8C     		ldrh	r2, [r7, #36]	@ movhi
+ 122 00d0 1A83     		strh	r2, [r3, #24]	@ movhi
+ 119:Libraries/uC-OSIII/os_int.c ****         OSIntQInPtr->TS         = ts;                       /* Save time stamp                     
+ 123              		.loc 1 119 0
+ 124 00d2 40F20003 		movw	r3, #:lower16:OSIntQInPtr
+ 125 00d6 C0F20003 		movt	r3, #:upper16:OSIntQInPtr
+ 126 00da 1B68     		ldr	r3, [r3, #0]
+ 127 00dc BA6A     		ldr	r2, [r7, #40]
+ 128 00de DA61     		str	r2, [r3, #28]
+ 120:Libraries/uC-OSIII/os_int.c **** 
+ 121:Libraries/uC-OSIII/os_int.c ****         OSIntQInPtr             =  OSIntQInPtr->NextPtr;    /* Point to the next interrupt handler 
+ 129              		.loc 1 121 0
+ 130 00e0 40F20003 		movw	r3, #:lower16:OSIntQInPtr
+ 131 00e4 C0F20003 		movt	r3, #:upper16:OSIntQInPtr
+ 132 00e8 1B68     		ldr	r3, [r3, #0]
+ 133 00ea 5A68     		ldr	r2, [r3, #4]
+ 134 00ec 40F20003 		movw	r3, #:lower16:OSIntQInPtr
+ 135 00f0 C0F20003 		movt	r3, #:upper16:OSIntQInPtr
+ 136 00f4 1A60     		str	r2, [r3, #0]
+ 122:Libraries/uC-OSIII/os_int.c **** 
+ 123:Libraries/uC-OSIII/os_int.c ****         OSRdyList[0].NbrEntries = (OS_OBJ_QTY)1;            /* Make the interrupt handler task read
+ 137              		.loc 1 123 0
+ 138 00f6 40F20003 		movw	r3, #:lower16:OSRdyList
+ 139 00fa C0F20003 		movt	r3, #:upper16:OSRdyList
+ 140 00fe 4FF00102 		mov	r2, #1
+ 141 0102 1A81     		strh	r2, [r3, #8]	@ movhi
+ 124:Libraries/uC-OSIII/os_int.c ****         OSRdyList[0].HeadPtr    = &OSIntQTaskTCB;
+ 142              		.loc 1 124 0
+ 143 0104 40F20003 		movw	r3, #:lower16:OSRdyList
+ 144 0108 C0F20003 		movt	r3, #:upper16:OSRdyList
+ 145 010c 40F20002 		movw	r2, #:lower16:OSIntQTaskTCB
+ 146 0110 C0F20002 		movt	r2, #:upper16:OSIntQTaskTCB
+ 147 0114 1A60     		str	r2, [r3, #0]
+ 125:Libraries/uC-OSIII/os_int.c ****         OSRdyList[0].TailPtr    = &OSIntQTaskTCB;
+ 148              		.loc 1 125 0
+ 149 0116 40F20003 		movw	r3, #:lower16:OSRdyList
+ 150 011a C0F20003 		movt	r3, #:upper16:OSRdyList
+ 151 011e 40F20002 		movw	r2, #:lower16:OSIntQTaskTCB
+ 152 0122 C0F20002 		movt	r2, #:upper16:OSIntQTaskTCB
+ 153 0126 5A60     		str	r2, [r3, #4]
+ 126:Libraries/uC-OSIII/os_int.c ****         OS_PrioInsert(0u);                                  /* Add task priority 0 in the priority 
+ 154              		.loc 1 126 0
+ 155 0128 4FF00000 		mov	r0, #0
+ 156 012c FFF7FEFF 		bl	OS_PrioInsert
+ 127:Libraries/uC-OSIII/os_int.c ****         OSPrioSaved             = OSPrioCur;                /* Save current priority               
+ 157              		.loc 1 127 0
+ 158 0130 40F20003 		movw	r3, #:lower16:OSPrioCur
+ 159 0134 C0F20003 		movt	r3, #:upper16:OSPrioCur
+ 160 0138 1A78     		ldrb	r2, [r3, #0]	@ zero_extendqisi2
+ 161 013a 40F20003 		movw	r3, #:lower16:OSPrioSaved
+ 162 013e C0F20003 		movt	r3, #:upper16:OSPrioSaved
+ 163 0142 1A70     		strb	r2, [r3, #0]
+ 128:Libraries/uC-OSIII/os_int.c **** 
+ 129:Libraries/uC-OSIII/os_int.c ****         *p_err                  = OS_ERR_NONE;
+ 164              		.loc 1 129 0
+ 165 0144 FB6A     		ldr	r3, [r7, #44]
+ 166 0146 4FF00002 		mov	r2, #0
+ 167 014a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 168 014c 10E0     		b	.L4
+ 169              	.L2:
+ 130:Libraries/uC-OSIII/os_int.c ****     } else {
+ 131:Libraries/uC-OSIII/os_int.c ****         OSIntQOvfCtr++;                                     /* Count the number of ISR queue overfl
+ 170              		.loc 1 131 0
+ 171 014e 40F20003 		movw	r3, #:lower16:OSIntQOvfCtr
+ 172 0152 C0F20003 		movt	r3, #:upper16:OSIntQOvfCtr
+ 173 0156 1B88     		ldrh	r3, [r3, #0]
+ 174 0158 03F10103 		add	r3, r3, #1
+ 175 015c 9AB2     		uxth	r2, r3
+ 176 015e 40F20003 		movw	r3, #:lower16:OSIntQOvfCtr
+ 177 0162 C0F20003 		movt	r3, #:upper16:OSIntQOvfCtr
+ 178 0166 1A80     		strh	r2, [r3, #0]	@ movhi
+ 132:Libraries/uC-OSIII/os_int.c ****         *p_err                  = OS_ERR_INT_Q_FULL;
+ 179              		.loc 1 132 0
+ 180 0168 FB6A     		ldr	r3, [r7, #44]
+ 181 016a 44F25362 		movw	r2, #18003
+ 182 016e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 183              	.L4:
+ 133:Libraries/uC-OSIII/os_int.c ****     }
+ 134:Libraries/uC-OSIII/os_int.c ****     CPU_CRITICAL_EXIT();
+ 184              		.loc 1 134 0
+ 185 0170 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 186 0174 7869     		ldr	r0, [r7, #20]
+ 187 0176 FFF7FEFF 		bl	CPU_SR_Restore
+ 135:Libraries/uC-OSIII/os_int.c **** }
+ 188              		.loc 1 135 0
+ 189 017a 07F11807 		add	r7, r7, #24
+ 190 017e BD46     		mov	sp, r7
+ 191 0180 80BD     		pop	{r7, pc}
+ 192              		.cfi_endproc
+ 193              	.LFE0:
+ 195 0182 00BF     		.align	2
+ 196              		.global	OS_IntQRePost
+ 197              		.thumb
+ 198              		.thumb_func
+ 200              	OS_IntQRePost:
+ 201              	.LFB1:
+ 136:Libraries/uC-OSIII/os_int.c **** 
+ 137:Libraries/uC-OSIII/os_int.c **** /*$PAGE*/
+ 138:Libraries/uC-OSIII/os_int.c **** /*
+ 139:Libraries/uC-OSIII/os_int.c **** ***************************************************************************************************
+ 140:Libraries/uC-OSIII/os_int.c **** *                                               INTERRUPT QUEUE MANAGEMENT TASK
+ 141:Libraries/uC-OSIII/os_int.c **** *
+ 142:Libraries/uC-OSIII/os_int.c **** * Description: This task is created by OS_IntQTaskInit().
+ 143:Libraries/uC-OSIII/os_int.c **** *
+ 144:Libraries/uC-OSIII/os_int.c **** * Arguments  : p_arg     is a pointer to an optional argument that is passed during task creation. 
+ 145:Libraries/uC-OSIII/os_int.c **** *                        the argument is not used and will be a NULL pointer.
+ 146:Libraries/uC-OSIII/os_int.c **** *
+ 147:Libraries/uC-OSIII/os_int.c **** * Returns    : none
+ 148:Libraries/uC-OSIII/os_int.c **** ***************************************************************************************************
+ 149:Libraries/uC-OSIII/os_int.c **** */
+ 150:Libraries/uC-OSIII/os_int.c **** 
+ 151:Libraries/uC-OSIII/os_int.c **** void  OS_IntQRePost (void)
+ 152:Libraries/uC-OSIII/os_int.c **** {
+ 202              		.loc 1 152 0
+ 203              		.cfi_startproc
+ 204              		@ args = 0, pretend = 0, frame = 40
+ 205              		@ frame_needed = 1, uses_anonymous_args = 0
+ 206 0184 80B5     		push	{r7, lr}
+ 207              	.LCFI3:
+ 208              		.cfi_def_cfa_offset 8
+ 209              		.cfi_offset 14, -4
+ 210              		.cfi_offset 7, -8
+ 211 0186 8CB0     		sub	sp, sp, #48
+ 212              	.LCFI4:
+ 213              		.cfi_def_cfa_offset 56
+ 214 0188 02AF     		add	r7, sp, #8
+ 215              	.LCFI5:
+ 216              		.cfi_def_cfa 7, 48
+ 153:Libraries/uC-OSIII/os_int.c ****     void         *p_obj;
+ 154:Libraries/uC-OSIII/os_int.c ****     void         *p_void;
+ 155:Libraries/uC-OSIII/os_int.c ****     OS_ERR        err;
+ 156:Libraries/uC-OSIII/os_int.c ****     OS_FLAGS      flags;
+ 157:Libraries/uC-OSIII/os_int.c ****     CPU_TS        ts;
+ 158:Libraries/uC-OSIII/os_int.c ****     OS_OBJ_TYPE   type;
+ 159:Libraries/uC-OSIII/os_int.c ****     OS_OPT        opt;
+ 160:Libraries/uC-OSIII/os_int.c ****     OS_MSG_SIZE   msg_size;
+ 161:Libraries/uC-OSIII/os_int.c ****     CPU_SR_ALLOC();
+ 217              		.loc 1 161 0
+ 218 018a 4FF00003 		mov	r3, #0
+ 219 018e 7B62     		str	r3, [r7, #36]
+ 162:Libraries/uC-OSIII/os_int.c **** 
+ 163:Libraries/uC-OSIII/os_int.c **** 
+ 164:Libraries/uC-OSIII/os_int.c **** 
+ 165:Libraries/uC-OSIII/os_int.c ****     CPU_CRITICAL_ENTER();
+ 220              		.loc 1 165 0
+ 221 0190 FFF7FEFF 		bl	CPU_SR_Save
+ 222 0194 7862     		str	r0, [r7, #36]
+ 223 0196 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 166:Libraries/uC-OSIII/os_int.c ****     type         = OSIntQOutPtr->Type;                      /* Get local copy of queue item content
+ 224              		.loc 1 166 0
+ 225 019a 40F20003 		movw	r3, #:lower16:OSIntQOutPtr
+ 226 019e C0F20003 		movt	r3, #:upper16:OSIntQOutPtr
+ 227 01a2 1B68     		ldr	r3, [r3, #0]
+ 228 01a4 1B68     		ldr	r3, [r3, #0]
+ 229 01a6 3B62     		str	r3, [r7, #32]
+ 167:Libraries/uC-OSIII/os_int.c ****     p_obj        = OSIntQOutPtr->ObjPtr;
+ 230              		.loc 1 167 0
+ 231 01a8 40F20003 		movw	r3, #:lower16:OSIntQOutPtr
+ 232 01ac C0F20003 		movt	r3, #:upper16:OSIntQOutPtr
+ 233 01b0 1B68     		ldr	r3, [r3, #0]
+ 234 01b2 9B68     		ldr	r3, [r3, #8]
+ 235 01b4 FB61     		str	r3, [r7, #28]
+ 168:Libraries/uC-OSIII/os_int.c ****     p_void       = OSIntQOutPtr->MsgPtr;
+ 236              		.loc 1 168 0
+ 237 01b6 40F20003 		movw	r3, #:lower16:OSIntQOutPtr
+ 238 01ba C0F20003 		movt	r3, #:upper16:OSIntQOutPtr
+ 239 01be 1B68     		ldr	r3, [r3, #0]
+ 240 01c0 DB68     		ldr	r3, [r3, #12]
+ 241 01c2 BB61     		str	r3, [r7, #24]
+ 169:Libraries/uC-OSIII/os_int.c ****     msg_size     = OSIntQOutPtr->MsgSize;
+ 242              		.loc 1 169 0
+ 243 01c4 40F20003 		movw	r3, #:lower16:OSIntQOutPtr
+ 244 01c8 C0F20003 		movt	r3, #:upper16:OSIntQOutPtr
+ 245 01cc 1B68     		ldr	r3, [r3, #0]
+ 246 01ce 1B8A     		ldrh	r3, [r3, #16]	@ movhi
+ 247 01d0 FB82     		strh	r3, [r7, #22]	@ movhi
+ 170:Libraries/uC-OSIII/os_int.c ****     flags        = OSIntQOutPtr->Flags;
+ 248              		.loc 1 170 0
+ 249 01d2 40F20003 		movw	r3, #:lower16:OSIntQOutPtr
+ 250 01d6 C0F20003 		movt	r3, #:upper16:OSIntQOutPtr
+ 251 01da 1B68     		ldr	r3, [r3, #0]
+ 252 01dc 5B69     		ldr	r3, [r3, #20]
+ 253 01de 3B61     		str	r3, [r7, #16]
+ 171:Libraries/uC-OSIII/os_int.c ****     opt          = OSIntQOutPtr->Opt;
+ 254              		.loc 1 171 0
+ 255 01e0 40F20003 		movw	r3, #:lower16:OSIntQOutPtr
+ 256 01e4 C0F20003 		movt	r3, #:upper16:OSIntQOutPtr
+ 257 01e8 1B68     		ldr	r3, [r3, #0]
+ 258 01ea 1B8B     		ldrh	r3, [r3, #24]	@ movhi
+ 259 01ec FB81     		strh	r3, [r7, #14]	@ movhi
+ 172:Libraries/uC-OSIII/os_int.c ****     ts           = OSIntQOutPtr->TS;
+ 260              		.loc 1 172 0
+ 261 01ee 40F20003 		movw	r3, #:lower16:OSIntQOutPtr
+ 262 01f2 C0F20003 		movt	r3, #:upper16:OSIntQOutPtr
+ 263 01f6 1B68     		ldr	r3, [r3, #0]
+ 264 01f8 DB69     		ldr	r3, [r3, #28]
+ 265 01fa BB60     		str	r3, [r7, #8]
+ 173:Libraries/uC-OSIII/os_int.c ****     OSIntQOutPtr = OSIntQOutPtr->NextPtr;                   /* Point to next item in the ISR queue 
+ 266              		.loc 1 173 0
+ 267 01fc 40F20003 		movw	r3, #:lower16:OSIntQOutPtr
+ 268 0200 C0F20003 		movt	r3, #:upper16:OSIntQOutPtr
+ 269 0204 1B68     		ldr	r3, [r3, #0]
+ 270 0206 5A68     		ldr	r2, [r3, #4]
+ 271 0208 40F20003 		movw	r3, #:lower16:OSIntQOutPtr
+ 272 020c C0F20003 		movt	r3, #:upper16:OSIntQOutPtr
+ 273 0210 1A60     		str	r2, [r3, #0]
+ 174:Libraries/uC-OSIII/os_int.c ****     CPU_CRITICAL_EXIT();
+ 274              		.loc 1 174 0
+ 275 0212 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 276 0216 786A     		ldr	r0, [r7, #36]
+ 277 0218 FFF7FEFF 		bl	CPU_SR_Restore
+ 175:Libraries/uC-OSIII/os_int.c ****     switch (type) {                                         /* Re-post to task                     
+ 278              		.loc 1 175 0
+ 279 021c 3B6A     		ldr	r3, [r7, #32]
+ 280 021e 45F25432 		movw	r2, #21332
+ 281 0222 C4F24972 		movt	r2, 18249
+ 282 0226 9342     		cmp	r3, r2
+ 283 0228 51D0     		beq	.L9
+ 284 022a 45F25432 		movw	r2, #21332
+ 285 022e C4F24972 		movt	r2, 18249
+ 286 0232 9342     		cmp	r3, r2
+ 287 0234 0CD8     		bhi	.L13
+ 288 0236 44F25352 		movw	r2, #17747
+ 289 023a C4F24D12 		movt	r2, 16717
+ 290 023e 9342     		cmp	r3, r2
+ 291 0240 30D0     		beq	.L7
+ 292 0242 44F64642 		movw	r2, #19526
+ 293 0246 C4F24172 		movt	r2, 18241
+ 294 024a 9342     		cmp	r3, r2
+ 295 024c 13D0     		beq	.L8
+ 296 024e 93E0     		b	.L6
+ 297              	.L13:
+ 298 0250 44F65412 		movw	r2, #18772
+ 299 0254 C4F64332 		movt	r2, 19267
+ 300 0258 9342     		cmp	r3, r2
+ 301 025a 41D0     		beq	.L11
+ 302 025c 45F25152 		movw	r2, #21841
+ 303 0260 C5F24552 		movt	r2, 21829
+ 304 0264 9342     		cmp	r3, r2
+ 305 0266 11D0     		beq	.L12
+ 306 0268 44F65452 		movw	r2, #19796
+ 307 026c C4F25372 		movt	r2, 18259
+ 308 0270 9342     		cmp	r3, r2
+ 309 0272 20D0     		beq	.L10
+ 310 0274 80E0     		b	.L6
+ 311              	.L8:
+ 176:Libraries/uC-OSIII/os_int.c ****         case OS_OBJ_TYPE_FLAG:
+ 177:Libraries/uC-OSIII/os_int.c **** #if OS_CFG_FLAG_EN > 0u
+ 178:Libraries/uC-OSIII/os_int.c ****              (void)OS_FlagPost((OS_FLAG_GRP *)p_obj,
+ 312              		.loc 1 178 0
+ 313 0276 FB89     		ldrh	r3, [r7, #14]
+ 314 0278 07F10602 		add	r2, r7, #6
+ 315 027c 0092     		str	r2, [sp, #0]
+ 316 027e F869     		ldr	r0, [r7, #28]
+ 317 0280 3969     		ldr	r1, [r7, #16]
+ 318 0282 1A46     		mov	r2, r3
+ 319 0284 BB68     		ldr	r3, [r7, #8]
+ 320 0286 FFF7FEFF 		bl	OS_FlagPost
+ 179:Libraries/uC-OSIII/os_int.c ****                                (OS_FLAGS     )flags,
+ 180:Libraries/uC-OSIII/os_int.c ****                                (OS_OPT       )opt,
+ 181:Libraries/uC-OSIII/os_int.c ****                                (CPU_TS       )ts,
+ 182:Libraries/uC-OSIII/os_int.c ****                                (OS_ERR      *)&err);
+ 183:Libraries/uC-OSIII/os_int.c **** #endif
+ 184:Libraries/uC-OSIII/os_int.c ****              break;
+ 321              		.loc 1 184 0
+ 322 028a 78E0     		b	.L5
+ 323              	.L12:
+ 185:Libraries/uC-OSIII/os_int.c **** 
+ 186:Libraries/uC-OSIII/os_int.c ****         case OS_OBJ_TYPE_Q:
+ 187:Libraries/uC-OSIII/os_int.c **** #if OS_CFG_Q_EN > 0u
+ 188:Libraries/uC-OSIII/os_int.c ****              OS_QPost((OS_Q      *)p_obj,
+ 324              		.loc 1 188 0
+ 325 028c FA8A     		ldrh	r2, [r7, #22]
+ 326 028e FB89     		ldrh	r3, [r7, #14]
+ 327 0290 B968     		ldr	r1, [r7, #8]
+ 328 0292 0091     		str	r1, [sp, #0]
+ 329 0294 07F10601 		add	r1, r7, #6
+ 330 0298 0191     		str	r1, [sp, #4]
+ 331 029a F869     		ldr	r0, [r7, #28]
+ 332 029c B969     		ldr	r1, [r7, #24]
+ 333 029e FFF7FEFF 		bl	OS_QPost
+ 189:Libraries/uC-OSIII/os_int.c ****                       (void      *)p_void,
+ 190:Libraries/uC-OSIII/os_int.c ****                       (OS_MSG_SIZE)msg_size,
+ 191:Libraries/uC-OSIII/os_int.c ****                       (OS_OPT     )opt,
+ 192:Libraries/uC-OSIII/os_int.c ****                       (CPU_TS     )ts,
+ 193:Libraries/uC-OSIII/os_int.c ****                       (OS_ERR    *)&err);
+ 194:Libraries/uC-OSIII/os_int.c **** #endif
+ 195:Libraries/uC-OSIII/os_int.c ****              break;
+ 334              		.loc 1 195 0
+ 335 02a2 6CE0     		b	.L5
+ 336              	.L7:
+ 196:Libraries/uC-OSIII/os_int.c **** 
+ 197:Libraries/uC-OSIII/os_int.c ****         case OS_OBJ_TYPE_SEM:
+ 198:Libraries/uC-OSIII/os_int.c **** #if OS_CFG_SEM_EN > 0u
+ 199:Libraries/uC-OSIII/os_int.c ****              (void)OS_SemPost((OS_SEM *)p_obj,
+ 337              		.loc 1 199 0
+ 338 02a4 FB89     		ldrh	r3, [r7, #14]
+ 339 02a6 F869     		ldr	r0, [r7, #28]
+ 340 02a8 1946     		mov	r1, r3
+ 341 02aa BA68     		ldr	r2, [r7, #8]
+ 342 02ac 07F10603 		add	r3, r7, #6
+ 343 02b0 FFF7FEFF 		bl	OS_SemPost
+ 200:Libraries/uC-OSIII/os_int.c ****                               (OS_OPT  )opt,
+ 201:Libraries/uC-OSIII/os_int.c ****                               (CPU_TS  )ts,
+ 202:Libraries/uC-OSIII/os_int.c ****                               (OS_ERR *)&err);
+ 203:Libraries/uC-OSIII/os_int.c **** #endif
+ 204:Libraries/uC-OSIII/os_int.c ****              break;
+ 344              		.loc 1 204 0
+ 345 02b4 63E0     		b	.L5
+ 346              	.L10:
+ 205:Libraries/uC-OSIII/os_int.c **** 
+ 206:Libraries/uC-OSIII/os_int.c ****         case OS_OBJ_TYPE_TASK_MSG:
+ 207:Libraries/uC-OSIII/os_int.c **** #if OS_CFG_TASK_Q_EN > 0u
+ 208:Libraries/uC-OSIII/os_int.c ****              OS_TaskQPost((OS_TCB    *)p_obj,
+ 347              		.loc 1 208 0
+ 348 02b6 FA8A     		ldrh	r2, [r7, #22]
+ 349 02b8 FB89     		ldrh	r3, [r7, #14]
+ 350 02ba B968     		ldr	r1, [r7, #8]
+ 351 02bc 0091     		str	r1, [sp, #0]
+ 352 02be 07F10601 		add	r1, r7, #6
+ 353 02c2 0191     		str	r1, [sp, #4]
+ 354 02c4 F869     		ldr	r0, [r7, #28]
+ 355 02c6 B969     		ldr	r1, [r7, #24]
+ 356 02c8 FFF7FEFF 		bl	OS_TaskQPost
+ 209:Libraries/uC-OSIII/os_int.c ****                           (void      *)p_void,
+ 210:Libraries/uC-OSIII/os_int.c ****                           (OS_MSG_SIZE)msg_size,
+ 211:Libraries/uC-OSIII/os_int.c ****                           (OS_OPT     )opt,
+ 212:Libraries/uC-OSIII/os_int.c ****                           (CPU_TS     )ts,
+ 213:Libraries/uC-OSIII/os_int.c ****                           (OS_ERR    *)&err);
+ 214:Libraries/uC-OSIII/os_int.c **** #endif
+ 215:Libraries/uC-OSIII/os_int.c ****              break;
+ 357              		.loc 1 215 0
+ 358 02cc 57E0     		b	.L5
+ 359              	.L9:
+ 216:Libraries/uC-OSIII/os_int.c **** 
+ 217:Libraries/uC-OSIII/os_int.c ****         case OS_OBJ_TYPE_TASK_SIGNAL:
+ 218:Libraries/uC-OSIII/os_int.c ****              (void)OS_TaskSemPost((OS_TCB *)p_obj,
+ 360              		.loc 1 218 0
+ 361 02ce FB89     		ldrh	r3, [r7, #14]
+ 362 02d0 F869     		ldr	r0, [r7, #28]
+ 363 02d2 1946     		mov	r1, r3
+ 364 02d4 BA68     		ldr	r2, [r7, #8]
+ 365 02d6 07F10603 		add	r3, r7, #6
+ 366 02da FFF7FEFF 		bl	OS_TaskSemPost
+ 219:Libraries/uC-OSIII/os_int.c ****                                   (OS_OPT  )opt,
+ 220:Libraries/uC-OSIII/os_int.c ****                                   (CPU_TS  )ts,
+ 221:Libraries/uC-OSIII/os_int.c ****                                   (OS_ERR *)&err);
+ 222:Libraries/uC-OSIII/os_int.c ****              break;
+ 367              		.loc 1 222 0
+ 368 02de 4EE0     		b	.L5
+ 369              	.L11:
+ 223:Libraries/uC-OSIII/os_int.c **** 
+ 224:Libraries/uC-OSIII/os_int.c ****         case OS_OBJ_TYPE_TICK:
+ 225:Libraries/uC-OSIII/os_int.c **** #if OS_CFG_SCHED_ROUND_ROBIN_EN > 0u
+ 226:Libraries/uC-OSIII/os_int.c ****              OS_SchedRoundRobin(&OSRdyList[OSPrioSaved]);
+ 370              		.loc 1 226 0
+ 371 02e0 40F20003 		movw	r3, #:lower16:OSPrioSaved
+ 372 02e4 C0F20003 		movt	r3, #:upper16:OSPrioSaved
+ 373 02e8 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 374 02ea 1A46     		mov	r2, r3
+ 375 02ec 1346     		mov	r3, r2
+ 376 02ee 4FEA4303 		lsl	r3, r3, #1
+ 377 02f2 9B18     		adds	r3, r3, r2
+ 378 02f4 4FEA8303 		lsl	r3, r3, #2
+ 379 02f8 1A46     		mov	r2, r3
+ 380 02fa 40F20003 		movw	r3, #:lower16:OSRdyList
+ 381 02fe C0F20003 		movt	r3, #:upper16:OSRdyList
+ 382 0302 D318     		adds	r3, r2, r3
+ 383 0304 1846     		mov	r0, r3
+ 384 0306 FFF7FEFF 		bl	OS_SchedRoundRobin
+ 227:Libraries/uC-OSIII/os_int.c **** #endif
+ 228:Libraries/uC-OSIII/os_int.c **** 
+ 229:Libraries/uC-OSIII/os_int.c ****              (void)OS_TaskSemPost((OS_TCB *)&OSTickTaskTCB,                /* Signal tick task     
+ 385              		.loc 1 229 0
+ 386 030a 40F20000 		movw	r0, #:lower16:OSTickTaskTCB
+ 387 030e C0F20000 		movt	r0, #:upper16:OSTickTaskTCB
+ 388 0312 4FF00001 		mov	r1, #0
+ 389 0316 BA68     		ldr	r2, [r7, #8]
+ 390 0318 07F10603 		add	r3, r7, #6
+ 391 031c FFF7FEFF 		bl	OS_TaskSemPost
+ 230:Libraries/uC-OSIII/os_int.c ****                                   (OS_OPT  )OS_OPT_POST_NONE,
+ 231:Libraries/uC-OSIII/os_int.c ****                                   (CPU_TS  )ts,
+ 232:Libraries/uC-OSIII/os_int.c ****                                   (OS_ERR *)&err);
+ 233:Libraries/uC-OSIII/os_int.c **** #if OS_CFG_TMR_EN > 0u
+ 234:Libraries/uC-OSIII/os_int.c ****              OSTmrUpdateCtr--;
+ 392              		.loc 1 234 0
+ 393 0320 40F20003 		movw	r3, #:lower16:OSTmrUpdateCtr
+ 394 0324 C0F20003 		movt	r3, #:upper16:OSTmrUpdateCtr
+ 395 0328 1B68     		ldr	r3, [r3, #0]
+ 396 032a 03F1FF32 		add	r2, r3, #-1
+ 397 032e 40F20003 		movw	r3, #:lower16:OSTmrUpdateCtr
+ 398 0332 C0F20003 		movt	r3, #:upper16:OSTmrUpdateCtr
+ 399 0336 1A60     		str	r2, [r3, #0]
+ 235:Libraries/uC-OSIII/os_int.c ****              if (OSTmrUpdateCtr == (OS_CTR)0u) {
+ 400              		.loc 1 235 0
+ 401 0338 40F20003 		movw	r3, #:lower16:OSTmrUpdateCtr
+ 402 033c C0F20003 		movt	r3, #:upper16:OSTmrUpdateCtr
+ 403 0340 1B68     		ldr	r3, [r3, #0]
+ 404 0342 002B     		cmp	r3, #0
+ 405 0344 1AD1     		bne	.L16
+ 236:Libraries/uC-OSIII/os_int.c ****                  OSTmrUpdateCtr = OSTmrUpdateCnt;
+ 406              		.loc 1 236 0
+ 407 0346 40F20003 		movw	r3, #:lower16:OSTmrUpdateCnt
+ 408 034a C0F20003 		movt	r3, #:upper16:OSTmrUpdateCnt
+ 409 034e 1A68     		ldr	r2, [r3, #0]
+ 410 0350 40F20003 		movw	r3, #:lower16:OSTmrUpdateCtr
+ 411 0354 C0F20003 		movt	r3, #:upper16:OSTmrUpdateCtr
+ 412 0358 1A60     		str	r2, [r3, #0]
+ 237:Libraries/uC-OSIII/os_int.c ****                  ts             = OS_TS_GET();                             /* Get timestamp        
+ 413              		.loc 1 237 0
+ 414 035a FFF7FEFF 		bl	CPU_TS_TmrRd
+ 415 035e B860     		str	r0, [r7, #8]
+ 238:Libraries/uC-OSIII/os_int.c ****                  (void)OS_TaskSemPost((OS_TCB *)&OSTmrTaskTCB,             /* Signal timer task    
+ 416              		.loc 1 238 0
+ 417 0360 40F20000 		movw	r0, #:lower16:OSTmrTaskTCB
+ 418 0364 C0F20000 		movt	r0, #:upper16:OSTmrTaskTCB
+ 419 0368 4FF00001 		mov	r1, #0
+ 420 036c BA68     		ldr	r2, [r7, #8]
+ 421 036e 07F10603 		add	r3, r7, #6
+ 422 0372 FFF7FEFF 		bl	OS_TaskSemPost
+ 239:Libraries/uC-OSIII/os_int.c ****                                       (OS_OPT  )OS_OPT_POST_NONE,
+ 240:Libraries/uC-OSIII/os_int.c ****                                       (CPU_TS  )ts,
+ 241:Libraries/uC-OSIII/os_int.c ****                                       (OS_ERR *)&err);
+ 242:Libraries/uC-OSIII/os_int.c ****              }
+ 243:Libraries/uC-OSIII/os_int.c **** #endif
+ 244:Libraries/uC-OSIII/os_int.c ****              break;
+ 423              		.loc 1 244 0
+ 424 0376 01E0     		b	.L16
+ 425              	.L6:
+ 245:Libraries/uC-OSIII/os_int.c **** 
+ 246:Libraries/uC-OSIII/os_int.c ****         default:
+ 247:Libraries/uC-OSIII/os_int.c ****              break;
+ 426              		.loc 1 247 0
+ 427 0378 00BF     		nop
+ 428 037a 00E0     		b	.L5
+ 429              	.L16:
+ 244:Libraries/uC-OSIII/os_int.c ****              break;
+ 430              		.loc 1 244 0
+ 431 037c 00BF     		nop
+ 432              	.L5:
+ 248:Libraries/uC-OSIII/os_int.c ****     }
+ 249:Libraries/uC-OSIII/os_int.c **** }
+ 433              		.loc 1 249 0
+ 434 037e 07F12807 		add	r7, r7, #40
+ 435 0382 BD46     		mov	sp, r7
+ 436 0384 80BD     		pop	{r7, pc}
+ 437              		.cfi_endproc
+ 438              	.LFE1:
+ 440 0386 00BF     		.align	2
+ 441              		.global	OS_IntQTask
+ 442              		.thumb
+ 443              		.thumb_func
+ 445              	OS_IntQTask:
+ 446              	.LFB2:
+ 250:Libraries/uC-OSIII/os_int.c **** 
+ 251:Libraries/uC-OSIII/os_int.c **** /*$PAGE*/
+ 252:Libraries/uC-OSIII/os_int.c **** /*
+ 253:Libraries/uC-OSIII/os_int.c **** ***************************************************************************************************
+ 254:Libraries/uC-OSIII/os_int.c **** *                                               INTERRUPT QUEUE MANAGEMENT TASK
+ 255:Libraries/uC-OSIII/os_int.c **** *
+ 256:Libraries/uC-OSIII/os_int.c **** * Description: This task is created by OS_IntQTaskInit().
+ 257:Libraries/uC-OSIII/os_int.c **** *
+ 258:Libraries/uC-OSIII/os_int.c **** * Arguments  : p_arg     is a pointer to an optional argument that is passed during task creation. 
+ 259:Libraries/uC-OSIII/os_int.c **** *                        the argument is not used and will be a NULL pointer.
+ 260:Libraries/uC-OSIII/os_int.c **** *
+ 261:Libraries/uC-OSIII/os_int.c **** * Returns    : none
+ 262:Libraries/uC-OSIII/os_int.c **** ***************************************************************************************************
+ 263:Libraries/uC-OSIII/os_int.c **** */
+ 264:Libraries/uC-OSIII/os_int.c **** 
+ 265:Libraries/uC-OSIII/os_int.c **** void  OS_IntQTask (void *p_arg)
+ 266:Libraries/uC-OSIII/os_int.c **** {
+ 447              		.loc 1 266 0
+ 448              		.cfi_startproc
+ 449              		@ args = 0, pretend = 0, frame = 24
+ 450              		@ frame_needed = 1, uses_anonymous_args = 0
+ 451 0388 80B5     		push	{r7, lr}
+ 452              	.LCFI6:
+ 453              		.cfi_def_cfa_offset 8
+ 454              		.cfi_offset 14, -4
+ 455              		.cfi_offset 7, -8
+ 456 038a 86B0     		sub	sp, sp, #24
+ 457              	.LCFI7:
+ 458              		.cfi_def_cfa_offset 32
+ 459 038c 00AF     		add	r7, sp, #0
+ 460              	.LCFI8:
+ 461              		.cfi_def_cfa_register 7
+ 462 038e 7860     		str	r0, [r7, #4]
+ 267:Libraries/uC-OSIII/os_int.c ****     CPU_BOOLEAN  done;
+ 268:Libraries/uC-OSIII/os_int.c ****     CPU_TS       ts_start;
+ 269:Libraries/uC-OSIII/os_int.c ****     CPU_TS       ts_end;
+ 270:Libraries/uC-OSIII/os_int.c ****     CPU_SR_ALLOC();
+ 463              		.loc 1 270 0
+ 464 0390 4FF00003 		mov	r3, #0
+ 465 0394 3B61     		str	r3, [r7, #16]
+ 466              	.L22:
+ 271:Libraries/uC-OSIII/os_int.c **** 
+ 272:Libraries/uC-OSIII/os_int.c **** 
+ 273:Libraries/uC-OSIII/os_int.c **** 
+ 274:Libraries/uC-OSIII/os_int.c ****     p_arg = p_arg;                                          /* Not using 'p_arg', prevent compiler 
+ 275:Libraries/uC-OSIII/os_int.c ****     while (DEF_ON) {
+ 276:Libraries/uC-OSIII/os_int.c ****         done = DEF_FALSE;
+ 467              		.loc 1 276 0
+ 468 0396 4FF00003 		mov	r3, #0
+ 469 039a FB75     		strb	r3, [r7, #23]
+ 277:Libraries/uC-OSIII/os_int.c ****         while (done == DEF_FALSE) {
+ 470              		.loc 1 277 0
+ 471 039c 5FE0     		b	.L18
+ 472              	.L21:
+ 278:Libraries/uC-OSIII/os_int.c ****             if (OSIntQNbrEntries == (OS_OBJ_QTY)0u) {
+ 473              		.loc 1 278 0
+ 474 039e 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 475 03a2 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 476 03a6 1B88     		ldrh	r3, [r3, #0]
+ 477 03a8 002B     		cmp	r3, #0
+ 478 03aa 28D1     		bne	.L19
+ 279:Libraries/uC-OSIII/os_int.c ****                 CPU_CRITICAL_ENTER();
+ 479              		.loc 1 279 0
+ 480 03ac FFF7FEFF 		bl	CPU_SR_Save
+ 481 03b0 3861     		str	r0, [r7, #16]
+ 482 03b2 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 280:Libraries/uC-OSIII/os_int.c ****                 OSRdyList[0].NbrEntries = (OS_OBJ_QTY)0u;   /* Remove from ready list              
+ 483              		.loc 1 280 0
+ 484 03b6 40F20003 		movw	r3, #:lower16:OSRdyList
+ 485 03ba C0F20003 		movt	r3, #:upper16:OSRdyList
+ 486 03be 4FF00002 		mov	r2, #0
+ 487 03c2 1A81     		strh	r2, [r3, #8]	@ movhi
+ 281:Libraries/uC-OSIII/os_int.c ****                 OSRdyList[0].HeadPtr    = (OS_TCB   *)0;
+ 488              		.loc 1 281 0
+ 489 03c4 40F20003 		movw	r3, #:lower16:OSRdyList
+ 490 03c8 C0F20003 		movt	r3, #:upper16:OSRdyList
+ 491 03cc 4FF00002 		mov	r2, #0
+ 492 03d0 1A60     		str	r2, [r3, #0]
+ 282:Libraries/uC-OSIII/os_int.c ****                 OSRdyList[0].TailPtr    = (OS_TCB   *)0;
+ 493              		.loc 1 282 0
+ 494 03d2 40F20003 		movw	r3, #:lower16:OSRdyList
+ 495 03d6 C0F20003 		movt	r3, #:upper16:OSRdyList
+ 496 03da 4FF00002 		mov	r2, #0
+ 497 03de 5A60     		str	r2, [r3, #4]
+ 283:Libraries/uC-OSIII/os_int.c ****                 OS_PrioRemove(0u);                          /* Remove from the priority table      
+ 498              		.loc 1 283 0
+ 499 03e0 4FF00000 		mov	r0, #0
+ 500 03e4 FFF7FEFF 		bl	OS_PrioRemove
+ 284:Libraries/uC-OSIII/os_int.c ****                 CPU_CRITICAL_EXIT();
+ 501              		.loc 1 284 0
+ 502 03e8 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 503 03ec 3869     		ldr	r0, [r7, #16]
+ 504 03ee FFF7FEFF 		bl	CPU_SR_Restore
+ 285:Libraries/uC-OSIII/os_int.c ****                 OSSched();
+ 505              		.loc 1 285 0
+ 506 03f2 FFF7FEFF 		bl	OSSched
+ 286:Libraries/uC-OSIII/os_int.c ****                 done = DEF_TRUE;                            /* No more entries in the queue, we are
+ 507              		.loc 1 286 0
+ 508 03f6 4FF00103 		mov	r3, #1
+ 509 03fa FB75     		strb	r3, [r7, #23]
+ 510 03fc 2FE0     		b	.L18
+ 511              	.L19:
+ 287:Libraries/uC-OSIII/os_int.c ****             } else {
+ 288:Libraries/uC-OSIII/os_int.c ****                 ts_start = OS_TS_GET();
+ 512              		.loc 1 288 0
+ 513 03fe FFF7FEFF 		bl	CPU_TS_TmrRd
+ 514 0402 F860     		str	r0, [r7, #12]
+ 289:Libraries/uC-OSIII/os_int.c ****                 OS_IntQRePost();
+ 515              		.loc 1 289 0
+ 516 0404 FFF7FEFF 		bl	OS_IntQRePost
+ 290:Libraries/uC-OSIII/os_int.c ****                 ts_end   = OS_TS_GET() - ts_start;          /* Measure execution time of tick task 
+ 517              		.loc 1 290 0
+ 518 0408 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 519 040c 0246     		mov	r2, r0
+ 520 040e FB68     		ldr	r3, [r7, #12]
+ 521 0410 D31A     		subs	r3, r2, r3
+ 522 0412 BB60     		str	r3, [r7, #8]
+ 291:Libraries/uC-OSIII/os_int.c ****                 if (ts_end > OSIntQTaskTimeMax) {
+ 523              		.loc 1 291 0
+ 524 0414 40F20003 		movw	r3, #:lower16:OSIntQTaskTimeMax
+ 525 0418 C0F20003 		movt	r3, #:upper16:OSIntQTaskTimeMax
+ 526 041c 1B68     		ldr	r3, [r3, #0]
+ 527 041e BA68     		ldr	r2, [r7, #8]
+ 528 0420 9A42     		cmp	r2, r3
+ 529 0422 05D9     		bls	.L20
+ 292:Libraries/uC-OSIII/os_int.c ****                     OSIntQTaskTimeMax = ts_end;
+ 530              		.loc 1 292 0
+ 531 0424 40F20003 		movw	r3, #:lower16:OSIntQTaskTimeMax
+ 532 0428 C0F20003 		movt	r3, #:upper16:OSIntQTaskTimeMax
+ 533 042c BA68     		ldr	r2, [r7, #8]
+ 534 042e 1A60     		str	r2, [r3, #0]
+ 535              	.L20:
+ 293:Libraries/uC-OSIII/os_int.c ****                 }
+ 294:Libraries/uC-OSIII/os_int.c ****                 CPU_CRITICAL_ENTER();
+ 536              		.loc 1 294 0
+ 537 0430 FFF7FEFF 		bl	CPU_SR_Save
+ 538 0434 3861     		str	r0, [r7, #16]
+ 539 0436 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 295:Libraries/uC-OSIII/os_int.c ****                 OSIntQNbrEntries--;
+ 540              		.loc 1 295 0
+ 541 043a 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 542 043e C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 543 0442 1B88     		ldrh	r3, [r3, #0]
+ 544 0444 03F1FF33 		add	r3, r3, #-1
+ 545 0448 9AB2     		uxth	r2, r3
+ 546 044a 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 547 044e C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 548 0452 1A80     		strh	r2, [r3, #0]	@ movhi
+ 296:Libraries/uC-OSIII/os_int.c ****                 CPU_CRITICAL_EXIT();
+ 549              		.loc 1 296 0
+ 550 0454 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 551 0458 3869     		ldr	r0, [r7, #16]
+ 552 045a FFF7FEFF 		bl	CPU_SR_Restore
+ 553              	.L18:
+ 277:Libraries/uC-OSIII/os_int.c ****         while (done == DEF_FALSE) {
+ 554              		.loc 1 277 0 discriminator 1
+ 555 045e FB7D     		ldrb	r3, [r7, #23]	@ zero_extendqisi2
+ 556 0460 002B     		cmp	r3, #0
+ 557 0462 9CD0     		beq	.L21
+ 297:Libraries/uC-OSIII/os_int.c ****             }
+ 298:Libraries/uC-OSIII/os_int.c ****         }
+ 299:Libraries/uC-OSIII/os_int.c ****     }
+ 558              		.loc 1 299 0
+ 559 0464 97E7     		b	.L22
+ 560              		.cfi_endproc
+ 561              	.LFE2:
+ 563              		.section	.rodata
+ 564              		.align	2
+ 565              	.LC0:
+ 566 0000 75432F4F 		.ascii	"uC/OS-III ISR Queue Task\000"
+ 566      532D4949 
+ 566      49204953 
+ 566      52205175 
+ 566      65756520 
+ 567 0019 000000   		.text
+ 568 0466 00BF     		.align	2
+ 569              		.global	OS_IntQTaskInit
+ 570              		.thumb
+ 571              		.thumb_func
+ 573              	OS_IntQTaskInit:
+ 574              	.LFB3:
+ 300:Libraries/uC-OSIII/os_int.c **** }
+ 301:Libraries/uC-OSIII/os_int.c **** 
+ 302:Libraries/uC-OSIII/os_int.c **** /*$PAGE*/
+ 303:Libraries/uC-OSIII/os_int.c **** /*
+ 304:Libraries/uC-OSIII/os_int.c **** ***************************************************************************************************
+ 305:Libraries/uC-OSIII/os_int.c **** *                                                 INITIALIZE THE ISR QUEUE
+ 306:Libraries/uC-OSIII/os_int.c **** *
+ 307:Libraries/uC-OSIII/os_int.c **** * Description: This function is called by OSInit() to initialize the ISR queue.
+ 308:Libraries/uC-OSIII/os_int.c **** *
+ 309:Libraries/uC-OSIII/os_int.c **** * Arguments  : p_err    is a pointer to a variable that will contain an error code returned by this
+ 310:Libraries/uC-OSIII/os_int.c **** *
+ 311:Libraries/uC-OSIII/os_int.c **** *                           OS_ERR_INT_Q             If you didn't provide an ISR queue in OS_CFG.C
+ 312:Libraries/uC-OSIII/os_int.c **** *                           OS_ERR_INT_Q_SIZE        If you didn't specify a large enough ISR queue
+ 313:Libraries/uC-OSIII/os_int.c **** *                           OS_ERR_STK_INVALID       If you specified a NULL pointer for the task o
+ 314:Libraries/uC-OSIII/os_int.c **** *                                                    handler
+ 315:Libraries/uC-OSIII/os_int.c **** *                           OS_ERR_STK_SIZE_INVALID  If you didn't specify a stack size greater tha
+ 316:Libraries/uC-OSIII/os_int.c **** *                                                    specified by OS_CFG_STK_SIZE_MIN
+ 317:Libraries/uC-OSIII/os_int.c **** *                           OS_ERR_???               An error code returned by OSTaskCreate().
+ 318:Libraries/uC-OSIII/os_int.c **** *
+ 319:Libraries/uC-OSIII/os_int.c **** * Returns    : none
+ 320:Libraries/uC-OSIII/os_int.c **** *
+ 321:Libraries/uC-OSIII/os_int.c **** * Note(s)    : none
+ 322:Libraries/uC-OSIII/os_int.c **** ***************************************************************************************************
+ 323:Libraries/uC-OSIII/os_int.c **** */
+ 324:Libraries/uC-OSIII/os_int.c **** 
+ 325:Libraries/uC-OSIII/os_int.c **** void  OS_IntQTaskInit (OS_ERR  *p_err)
+ 326:Libraries/uC-OSIII/os_int.c **** {
+ 575              		.loc 1 326 0
+ 576              		.cfi_startproc
+ 577              		@ args = 0, pretend = 0, frame = 24
+ 578              		@ frame_needed = 1, uses_anonymous_args = 0
+ 579 0468 80B5     		push	{r7, lr}
+ 580              	.LCFI9:
+ 581              		.cfi_def_cfa_offset 8
+ 582              		.cfi_offset 14, -4
+ 583              		.cfi_offset 7, -8
+ 584 046a 90B0     		sub	sp, sp, #64
+ 585              	.LCFI10:
+ 586              		.cfi_def_cfa_offset 72
+ 587 046c 0AAF     		add	r7, sp, #40
+ 588              	.LCFI11:
+ 589              		.cfi_def_cfa 7, 32
+ 590 046e 7860     		str	r0, [r7, #4]
+ 327:Libraries/uC-OSIII/os_int.c ****     OS_INT_Q      *p_int_q;
+ 328:Libraries/uC-OSIII/os_int.c ****     OS_INT_Q      *p_int_q_next;
+ 329:Libraries/uC-OSIII/os_int.c ****     OS_OBJ_QTY     i;
+ 330:Libraries/uC-OSIII/os_int.c **** 
+ 331:Libraries/uC-OSIII/os_int.c **** 
+ 332:Libraries/uC-OSIII/os_int.c **** 
+ 333:Libraries/uC-OSIII/os_int.c **** #ifdef OS_SAFETY_CRITICAL
+ 334:Libraries/uC-OSIII/os_int.c ****     if (p_err == (OS_ERR *)0) {
+ 335:Libraries/uC-OSIII/os_int.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 336:Libraries/uC-OSIII/os_int.c ****     }
+ 337:Libraries/uC-OSIII/os_int.c **** #endif
+ 338:Libraries/uC-OSIII/os_int.c **** 
+ 339:Libraries/uC-OSIII/os_int.c ****     OSIntQOvfCtr = (OS_QTY)0u;                              /* Clear the ISR queue overflow counter
+ 591              		.loc 1 339 0
+ 592 0470 40F20003 		movw	r3, #:lower16:OSIntQOvfCtr
+ 593 0474 C0F20003 		movt	r3, #:upper16:OSIntQOvfCtr
+ 594 0478 4FF00002 		mov	r2, #0
+ 595 047c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 340:Libraries/uC-OSIII/os_int.c **** 
+ 341:Libraries/uC-OSIII/os_int.c ****     if (OSCfg_IntQBasePtr == (OS_INT_Q *)0) {
+ 596              		.loc 1 341 0
+ 597 047e 40F20003 		movw	r3, #:lower16:OSCfg_IntQBasePtr
+ 598 0482 C0F20003 		movt	r3, #:upper16:OSCfg_IntQBasePtr
+ 599 0486 1B68     		ldr	r3, [r3, #0]
+ 600 0488 002B     		cmp	r3, #0
+ 601 048a 04D1     		bne	.L24
+ 342:Libraries/uC-OSIII/os_int.c ****         *p_err = OS_ERR_INT_Q;
+ 602              		.loc 1 342 0
+ 603 048c 7B68     		ldr	r3, [r7, #4]
+ 604 048e 44F25262 		movw	r2, #18002
+ 605 0492 1A80     		strh	r2, [r3, #0]	@ movhi
+ 343:Libraries/uC-OSIII/os_int.c ****         return;
+ 606              		.loc 1 343 0
+ 607 0494 CAE0     		b	.L23
+ 608              	.L24:
+ 344:Libraries/uC-OSIII/os_int.c ****     }
+ 345:Libraries/uC-OSIII/os_int.c **** 
+ 346:Libraries/uC-OSIII/os_int.c ****     if (OSCfg_IntQSize < (OS_OBJ_QTY)2u) {
+ 609              		.loc 1 346 0
+ 610 0496 40F20003 		movw	r3, #:lower16:OSCfg_IntQSize
+ 611 049a C0F20003 		movt	r3, #:upper16:OSCfg_IntQSize
+ 612 049e 1B88     		ldrh	r3, [r3, #0]
+ 613 04a0 012B     		cmp	r3, #1
+ 614 04a2 04D8     		bhi	.L26
+ 347:Libraries/uC-OSIII/os_int.c ****         *p_err = OS_ERR_INT_Q_SIZE;
+ 615              		.loc 1 347 0
+ 616 04a4 7B68     		ldr	r3, [r7, #4]
+ 617 04a6 44F25462 		movw	r2, #18004
+ 618 04aa 1A80     		strh	r2, [r3, #0]	@ movhi
+ 348:Libraries/uC-OSIII/os_int.c ****         return;
+ 619              		.loc 1 348 0
+ 620 04ac BEE0     		b	.L23
+ 621              	.L26:
+ 349:Libraries/uC-OSIII/os_int.c ****     }
+ 350:Libraries/uC-OSIII/os_int.c **** 
+ 351:Libraries/uC-OSIII/os_int.c ****     OSIntQTaskTimeMax = (CPU_TS)0;
+ 622              		.loc 1 351 0
+ 623 04ae 40F20003 		movw	r3, #:lower16:OSIntQTaskTimeMax
+ 624 04b2 C0F20003 		movt	r3, #:upper16:OSIntQTaskTimeMax
+ 625 04b6 4FF00002 		mov	r2, #0
+ 626 04ba 1A60     		str	r2, [r3, #0]
+ 352:Libraries/uC-OSIII/os_int.c **** 
+ 353:Libraries/uC-OSIII/os_int.c ****     p_int_q           = OSCfg_IntQBasePtr;                  /* Initialize the circular ISR queue   
+ 627              		.loc 1 353 0
+ 628 04bc 40F20003 		movw	r3, #:lower16:OSCfg_IntQBasePtr
+ 629 04c0 C0F20003 		movt	r3, #:upper16:OSCfg_IntQBasePtr
+ 630 04c4 1B68     		ldr	r3, [r3, #0]
+ 631 04c6 7B61     		str	r3, [r7, #20]
+ 354:Libraries/uC-OSIII/os_int.c ****     p_int_q_next      = p_int_q;
+ 632              		.loc 1 354 0
+ 633 04c8 7B69     		ldr	r3, [r7, #20]
+ 634 04ca 3B61     		str	r3, [r7, #16]
+ 355:Libraries/uC-OSIII/os_int.c ****     p_int_q_next++;
+ 635              		.loc 1 355 0
+ 636 04cc 3B69     		ldr	r3, [r7, #16]
+ 637 04ce 03F12003 		add	r3, r3, #32
+ 638 04d2 3B61     		str	r3, [r7, #16]
+ 356:Libraries/uC-OSIII/os_int.c ****     for (i = 0u; i < OSCfg_IntQSize; i++) {
+ 639              		.loc 1 356 0
+ 640 04d4 4FF00003 		mov	r3, #0
+ 641 04d8 FB81     		strh	r3, [r7, #14]	@ movhi
+ 642 04da 28E0     		b	.L27
+ 643              	.L28:
+ 357:Libraries/uC-OSIII/os_int.c ****         p_int_q->Type    =  OS_OBJ_TYPE_NONE;
+ 644              		.loc 1 357 0 discriminator 2
+ 645 04dc 7A69     		ldr	r2, [r7, #20]
+ 646 04de 44F64E73 		movw	r3, #20302
+ 647 04e2 C4F24E53 		movt	r3, 17742
+ 648 04e6 1360     		str	r3, [r2, #0]
+ 358:Libraries/uC-OSIII/os_int.c ****         p_int_q->ObjPtr  = (void      *)0;
+ 649              		.loc 1 358 0 discriminator 2
+ 650 04e8 7B69     		ldr	r3, [r7, #20]
+ 651 04ea 4FF00002 		mov	r2, #0
+ 652 04ee 9A60     		str	r2, [r3, #8]
+ 359:Libraries/uC-OSIII/os_int.c ****         p_int_q->MsgPtr  = (void      *)0;
+ 653              		.loc 1 359 0 discriminator 2
+ 654 04f0 7B69     		ldr	r3, [r7, #20]
+ 655 04f2 4FF00002 		mov	r2, #0
+ 656 04f6 DA60     		str	r2, [r3, #12]
+ 360:Libraries/uC-OSIII/os_int.c ****         p_int_q->MsgSize = (OS_MSG_SIZE)0u;
+ 657              		.loc 1 360 0 discriminator 2
+ 658 04f8 7B69     		ldr	r3, [r7, #20]
+ 659 04fa 4FF00002 		mov	r2, #0
+ 660 04fe 1A82     		strh	r2, [r3, #16]	@ movhi
+ 361:Libraries/uC-OSIII/os_int.c ****         p_int_q->Flags   = (OS_FLAGS   )0u;
+ 661              		.loc 1 361 0 discriminator 2
+ 662 0500 7B69     		ldr	r3, [r7, #20]
+ 663 0502 4FF00002 		mov	r2, #0
+ 664 0506 5A61     		str	r2, [r3, #20]
+ 362:Libraries/uC-OSIII/os_int.c ****         p_int_q->Opt     = (OS_OPT     )0u;
+ 665              		.loc 1 362 0 discriminator 2
+ 666 0508 7B69     		ldr	r3, [r7, #20]
+ 667 050a 4FF00002 		mov	r2, #0
+ 668 050e 1A83     		strh	r2, [r3, #24]	@ movhi
+ 363:Libraries/uC-OSIII/os_int.c ****         p_int_q->NextPtr = p_int_q_next;
+ 669              		.loc 1 363 0 discriminator 2
+ 670 0510 7B69     		ldr	r3, [r7, #20]
+ 671 0512 3A69     		ldr	r2, [r7, #16]
+ 672 0514 5A60     		str	r2, [r3, #4]
+ 364:Libraries/uC-OSIII/os_int.c ****         p_int_q++;
+ 673              		.loc 1 364 0 discriminator 2
+ 674 0516 7B69     		ldr	r3, [r7, #20]
+ 675 0518 03F12003 		add	r3, r3, #32
+ 676 051c 7B61     		str	r3, [r7, #20]
+ 365:Libraries/uC-OSIII/os_int.c ****         p_int_q_next++;
+ 677              		.loc 1 365 0 discriminator 2
+ 678 051e 3B69     		ldr	r3, [r7, #16]
+ 679 0520 03F12003 		add	r3, r3, #32
+ 680 0524 3B61     		str	r3, [r7, #16]
+ 356:Libraries/uC-OSIII/os_int.c ****     for (i = 0u; i < OSCfg_IntQSize; i++) {
+ 681              		.loc 1 356 0 discriminator 2
+ 682 0526 FB89     		ldrh	r3, [r7, #14]	@ movhi
+ 683 0528 03F10103 		add	r3, r3, #1
+ 684 052c FB81     		strh	r3, [r7, #14]	@ movhi
+ 685              	.L27:
+ 356:Libraries/uC-OSIII/os_int.c ****     for (i = 0u; i < OSCfg_IntQSize; i++) {
+ 686              		.loc 1 356 0 is_stmt 0 discriminator 1
+ 687 052e 40F20003 		movw	r3, #:lower16:OSCfg_IntQSize
+ 688 0532 C0F20003 		movt	r3, #:upper16:OSCfg_IntQSize
+ 689 0536 1B88     		ldrh	r3, [r3, #0]
+ 690 0538 FA89     		ldrh	r2, [r7, #14]
+ 691 053a 9A42     		cmp	r2, r3
+ 692 053c CED3     		bcc	.L28
+ 366:Libraries/uC-OSIII/os_int.c ****     }
+ 367:Libraries/uC-OSIII/os_int.c ****     p_int_q--;
+ 693              		.loc 1 367 0 is_stmt 1
+ 694 053e 7B69     		ldr	r3, [r7, #20]
+ 695 0540 A3F12003 		sub	r3, r3, #32
+ 696 0544 7B61     		str	r3, [r7, #20]
+ 368:Libraries/uC-OSIII/os_int.c ****     p_int_q_next        = OSCfg_IntQBasePtr;
+ 697              		.loc 1 368 0
+ 698 0546 40F20003 		movw	r3, #:lower16:OSCfg_IntQBasePtr
+ 699 054a C0F20003 		movt	r3, #:upper16:OSCfg_IntQBasePtr
+ 700 054e 1B68     		ldr	r3, [r3, #0]
+ 701 0550 3B61     		str	r3, [r7, #16]
+ 369:Libraries/uC-OSIII/os_int.c ****     p_int_q->NextPtr    = p_int_q_next;
+ 702              		.loc 1 369 0
+ 703 0552 7B69     		ldr	r3, [r7, #20]
+ 704 0554 3A69     		ldr	r2, [r7, #16]
+ 705 0556 5A60     		str	r2, [r3, #4]
+ 370:Libraries/uC-OSIII/os_int.c ****     OSIntQInPtr         = p_int_q_next;
+ 706              		.loc 1 370 0
+ 707 0558 40F20003 		movw	r3, #:lower16:OSIntQInPtr
+ 708 055c C0F20003 		movt	r3, #:upper16:OSIntQInPtr
+ 709 0560 3A69     		ldr	r2, [r7, #16]
+ 710 0562 1A60     		str	r2, [r3, #0]
+ 371:Libraries/uC-OSIII/os_int.c ****     OSIntQOutPtr        = p_int_q_next;
+ 711              		.loc 1 371 0
+ 712 0564 40F20003 		movw	r3, #:lower16:OSIntQOutPtr
+ 713 0568 C0F20003 		movt	r3, #:upper16:OSIntQOutPtr
+ 714 056c 3A69     		ldr	r2, [r7, #16]
+ 715 056e 1A60     		str	r2, [r3, #0]
+ 372:Libraries/uC-OSIII/os_int.c ****     OSIntQNbrEntries    = (OS_OBJ_QTY)0u;
+ 716              		.loc 1 372 0
+ 717 0570 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 718 0574 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 719 0578 4FF00002 		mov	r2, #0
+ 720 057c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 373:Libraries/uC-OSIII/os_int.c ****     OSIntQMaxNbrEntries = (OS_OBJ_QTY)0u;
+ 721              		.loc 1 373 0
+ 722 057e 40F20003 		movw	r3, #:lower16:OSIntQMaxNbrEntries
+ 723 0582 C0F20003 		movt	r3, #:upper16:OSIntQMaxNbrEntries
+ 724 0586 4FF00002 		mov	r2, #0
+ 725 058a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 374:Libraries/uC-OSIII/os_int.c **** 
+ 375:Libraries/uC-OSIII/os_int.c ****                                                             /* -------------- CREATE THE ISR QUEUE 
+ 376:Libraries/uC-OSIII/os_int.c ****     if (OSCfg_IntQTaskStkBasePtr == (CPU_STK *)0) {
+ 726              		.loc 1 376 0
+ 727 058c 40F20003 		movw	r3, #:lower16:OSCfg_IntQTaskStkBasePtr
+ 728 0590 C0F20003 		movt	r3, #:upper16:OSCfg_IntQTaskStkBasePtr
+ 729 0594 1B68     		ldr	r3, [r3, #0]
+ 730 0596 002B     		cmp	r3, #0
+ 731 0598 04D1     		bne	.L29
+ 377:Libraries/uC-OSIII/os_int.c ****         *p_err = OS_ERR_STK_INVALID;
+ 732              		.loc 1 377 0
+ 733 059a 7B68     		ldr	r3, [r7, #4]
+ 734 059c 46F62C62 		movw	r2, #28204
+ 735 05a0 1A80     		strh	r2, [r3, #0]	@ movhi
+ 378:Libraries/uC-OSIII/os_int.c ****         return;
+ 736              		.loc 1 378 0
+ 737 05a2 43E0     		b	.L23
+ 738              	.L29:
+ 379:Libraries/uC-OSIII/os_int.c ****     }
+ 380:Libraries/uC-OSIII/os_int.c **** 
+ 381:Libraries/uC-OSIII/os_int.c ****     if (OSCfg_IntQTaskStkSize < OSCfg_StkSizeMin) {
+ 739              		.loc 1 381 0
+ 740 05a4 40F20003 		movw	r3, #:lower16:OSCfg_IntQTaskStkSize
+ 741 05a8 C0F20003 		movt	r3, #:upper16:OSCfg_IntQTaskStkSize
+ 742 05ac 1A68     		ldr	r2, [r3, #0]
+ 743 05ae 40F20003 		movw	r3, #:lower16:OSCfg_StkSizeMin
+ 744 05b2 C0F20003 		movt	r3, #:upper16:OSCfg_StkSizeMin
+ 745 05b6 1B68     		ldr	r3, [r3, #0]
+ 746 05b8 9A42     		cmp	r2, r3
+ 747 05ba 04D2     		bcs	.L30
+ 382:Libraries/uC-OSIII/os_int.c ****         *p_err = OS_ERR_STK_SIZE_INVALID;
+ 748              		.loc 1 382 0
+ 749 05bc 7B68     		ldr	r3, [r7, #4]
+ 750 05be 46F62D62 		movw	r2, #28205
+ 751 05c2 1A80     		strh	r2, [r3, #0]	@ movhi
+ 383:Libraries/uC-OSIII/os_int.c ****         return;
+ 752              		.loc 1 383 0
+ 753 05c4 32E0     		b	.L23
+ 754              	.L30:
+ 384:Libraries/uC-OSIII/os_int.c ****     }
+ 385:Libraries/uC-OSIII/os_int.c **** 
+ 386:Libraries/uC-OSIII/os_int.c ****     OSTaskCreate((OS_TCB     *)&OSIntQTaskTCB,
+ 755              		.loc 1 386 0
+ 756 05c6 40F20003 		movw	r3, #:lower16:OSCfg_IntQTaskStkBasePtr
+ 757 05ca C0F20003 		movt	r3, #:upper16:OSCfg_IntQTaskStkBasePtr
+ 758 05ce 1968     		ldr	r1, [r3, #0]
+ 759 05d0 40F20003 		movw	r3, #:lower16:OSCfg_IntQTaskStkLimit
+ 760 05d4 C0F20003 		movt	r3, #:upper16:OSCfg_IntQTaskStkLimit
+ 761 05d8 1A68     		ldr	r2, [r3, #0]
+ 762 05da 40F20003 		movw	r3, #:lower16:OSCfg_IntQTaskStkSize
+ 763 05de C0F20003 		movt	r3, #:upper16:OSCfg_IntQTaskStkSize
+ 764 05e2 1B68     		ldr	r3, [r3, #0]
+ 765 05e4 4FF00000 		mov	r0, #0
+ 766 05e8 0090     		str	r0, [sp, #0]
+ 767 05ea 0191     		str	r1, [sp, #4]
+ 768 05ec 0292     		str	r2, [sp, #8]
+ 769 05ee 0393     		str	r3, [sp, #12]
+ 770 05f0 4FF00003 		mov	r3, #0
+ 771 05f4 0493     		str	r3, [sp, #16]
+ 772 05f6 4FF00003 		mov	r3, #0
+ 773 05fa 0593     		str	r3, [sp, #20]
+ 774 05fc 4FF00003 		mov	r3, #0
+ 775 0600 0693     		str	r3, [sp, #24]
+ 776 0602 4FF00303 		mov	r3, #3
+ 777 0606 0793     		str	r3, [sp, #28]
+ 778 0608 7B68     		ldr	r3, [r7, #4]
+ 779 060a 0893     		str	r3, [sp, #32]
+ 780 060c 40F20000 		movw	r0, #:lower16:OSIntQTaskTCB
+ 781 0610 C0F20000 		movt	r0, #:upper16:OSIntQTaskTCB
+ 782 0614 40F20001 		movw	r1, #:lower16:.LC0
+ 783 0618 C0F20001 		movt	r1, #:upper16:.LC0
+ 784 061c 40F20002 		movw	r2, #:lower16:OS_IntQTask
+ 785 0620 C0F20002 		movt	r2, #:upper16:OS_IntQTask
+ 786 0624 4FF00003 		mov	r3, #0
+ 787 0628 FFF7FEFF 		bl	OSTaskCreate
+ 788              	.L23:
+ 387:Libraries/uC-OSIII/os_int.c ****                  (CPU_CHAR   *)((void *)"uC/OS-III ISR Queue Task"),
+ 388:Libraries/uC-OSIII/os_int.c ****                  (OS_TASK_PTR )OS_IntQTask,
+ 389:Libraries/uC-OSIII/os_int.c ****                  (void       *)0,
+ 390:Libraries/uC-OSIII/os_int.c ****                  (OS_PRIO     )0u,                          /* This task is ALWAYS at priority '0' 
+ 391:Libraries/uC-OSIII/os_int.c ****                  (CPU_STK    *)OSCfg_IntQTaskStkBasePtr,
+ 392:Libraries/uC-OSIII/os_int.c ****                  (CPU_STK_SIZE)OSCfg_IntQTaskStkLimit,
+ 393:Libraries/uC-OSIII/os_int.c ****                  (CPU_STK_SIZE)OSCfg_IntQTaskStkSize,
+ 394:Libraries/uC-OSIII/os_int.c ****                  (OS_MSG_QTY  )0u,
+ 395:Libraries/uC-OSIII/os_int.c ****                  (OS_TICK     )0u,
+ 396:Libraries/uC-OSIII/os_int.c ****                  (void       *)0,
+ 397:Libraries/uC-OSIII/os_int.c ****                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+ 398:Libraries/uC-OSIII/os_int.c ****                  (OS_ERR     *)p_err);
+ 399:Libraries/uC-OSIII/os_int.c **** }
+ 789              		.loc 1 399 0
+ 790 062c 07F11807 		add	r7, r7, #24
+ 791 0630 BD46     		mov	sp, r7
+ 792 0632 80BD     		pop	{r7, pc}
+ 793              		.cfi_endproc
+ 794              	.LFE3:
+ 796              	.Letext0:
+ 797              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 798              		.file 3 "Libraries/uC-CPU/cpu_core.h"
+ 799              		.file 4 "Libraries/uC-OSIII/os_type.h"
+ 800              		.file 5 "Libraries/uC-OSIII/os.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 os_int.c
+     /tmp/ccuQNMzd.s:18     .text:00000000 $t
+     /tmp/ccuQNMzd.s:23     .text:00000000 OS_IntQPost
+     /tmp/ccuQNMzd.s:200    .text:00000184 OS_IntQRePost
+     /tmp/ccuQNMzd.s:445    .text:00000388 OS_IntQTask
+     /tmp/ccuQNMzd.s:564    .rodata:00000000 $d
+     /tmp/ccuQNMzd.s:565    .rodata:00000000 .LC0
+     /tmp/ccuQNMzd.s:573    .text:00000468 OS_IntQTaskInit
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+CPU_SR_Save
+CPU_IntDisMeasStart
+OSIntQNbrEntries
+OSCfg_IntQSize
+OSIntQMaxNbrEntries
+OSIntQInPtr
+OSRdyList
+OSIntQTaskTCB
+OS_PrioInsert
+OSPrioCur
+OSPrioSaved
+OSIntQOvfCtr
+CPU_IntDisMeasStop
+CPU_SR_Restore
+OSIntQOutPtr
+OS_FlagPost
+OS_QPost
+OS_SemPost
+OS_TaskQPost
+OS_TaskSemPost
+OS_SchedRoundRobin
+OSTickTaskTCB
+OSTmrUpdateCtr
+OSTmrUpdateCnt
+CPU_TS_TmrRd
+OSTmrTaskTCB
+OS_PrioRemove
+OSSched
+OSIntQTaskTimeMax
+OSCfg_IntQBasePtr
+OSCfg_IntQTaskStkBasePtr
+OSCfg_IntQTaskStkSize
+OSCfg_StkSizeMin
+OSCfg_IntQTaskStkLimit
+OSTaskCreate

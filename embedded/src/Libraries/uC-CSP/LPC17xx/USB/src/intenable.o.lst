@@ -1,0 +1,1109 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"intenable.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.thumb
+  20              		.thumb_func
+  22              	NVIC_EnableIRQ:
+  23              	.LFB40:
+  24              		.file 1 "Libraries/CM3/inc/core_cm3.h"
+   1:Libraries/CM3/inc/core_cm3.h **** /**************************************************************************//**
+   2:Libraries/CM3/inc/core_cm3.h ****  * @file     core_cm3.h
+   3:Libraries/CM3/inc/core_cm3.h ****  * @brief    CMSIS Cortex-M3 Core Peripheral Access Layer Header File
+   4:Libraries/CM3/inc/core_cm3.h ****  * @version  V2.01
+   5:Libraries/CM3/inc/core_cm3.h ****  * @date     06. December 2010
+   6:Libraries/CM3/inc/core_cm3.h ****  *
+   7:Libraries/CM3/inc/core_cm3.h ****  * @note
+   8:Libraries/CM3/inc/core_cm3.h ****  * Copyright (C) 2009-2010 ARM Limited. All rights reserved.
+   9:Libraries/CM3/inc/core_cm3.h ****  *
+  10:Libraries/CM3/inc/core_cm3.h ****  * @par
+  11:Libraries/CM3/inc/core_cm3.h ****  * ARM Limited (ARM) is supplying this software for use with Cortex-M
+  12:Libraries/CM3/inc/core_cm3.h ****  * processor based microcontrollers.  This file can be freely distributed
+  13:Libraries/CM3/inc/core_cm3.h ****  * within development tools that are supporting such ARM based processors.
+  14:Libraries/CM3/inc/core_cm3.h ****  *
+  15:Libraries/CM3/inc/core_cm3.h ****  * @par
+  16:Libraries/CM3/inc/core_cm3.h ****  * THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
+  17:Libraries/CM3/inc/core_cm3.h ****  * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
+  18:Libraries/CM3/inc/core_cm3.h ****  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
+  19:Libraries/CM3/inc/core_cm3.h ****  * ARM SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR
+  20:Libraries/CM3/inc/core_cm3.h ****  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+  21:Libraries/CM3/inc/core_cm3.h ****  *
+  22:Libraries/CM3/inc/core_cm3.h ****  ******************************************************************************/
+  23:Libraries/CM3/inc/core_cm3.h **** #if defined ( __ICCARM__ )
+  24:Libraries/CM3/inc/core_cm3.h ****  #pragma system_include  /* treat file as system include file for MISRA check */
+  25:Libraries/CM3/inc/core_cm3.h **** #endif
+  26:Libraries/CM3/inc/core_cm3.h **** 
+  27:Libraries/CM3/inc/core_cm3.h **** #ifdef __cplusplus
+  28:Libraries/CM3/inc/core_cm3.h ****  extern "C" {
+  29:Libraries/CM3/inc/core_cm3.h **** #endif
+  30:Libraries/CM3/inc/core_cm3.h **** 
+  31:Libraries/CM3/inc/core_cm3.h **** #ifndef __CORE_CM3_H_GENERIC
+  32:Libraries/CM3/inc/core_cm3.h **** #define __CORE_CM3_H_GENERIC
+  33:Libraries/CM3/inc/core_cm3.h **** 
+  34:Libraries/CM3/inc/core_cm3.h **** /**  @ingroup  CMSIS
+  35:Libraries/CM3/inc/core_cm3.h ****  @addtogroup CMSIS_core_LintCinfiguration CMSIS Core Lint Configuration
+  36:Libraries/CM3/inc/core_cm3.h ****   List of Lint messages which will be suppressed and not shown:
+  37:Libraries/CM3/inc/core_cm3.h ****     - not yet checked
+  38:Libraries/CM3/inc/core_cm3.h ****   .
+  39:Libraries/CM3/inc/core_cm3.h ****   Note:  To re-enable a Message, insert a space before 'lint' *
+  40:Libraries/CM3/inc/core_cm3.h **** 
+  41:Libraries/CM3/inc/core_cm3.h ****  */
+  42:Libraries/CM3/inc/core_cm3.h **** 
+  43:Libraries/CM3/inc/core_cm3.h **** 
+  44:Libraries/CM3/inc/core_cm3.h **** /*******************************************************************************
+  45:Libraries/CM3/inc/core_cm3.h ****  *                 CMSIS definitions
+  46:Libraries/CM3/inc/core_cm3.h ****  ******************************************************************************/
+  47:Libraries/CM3/inc/core_cm3.h **** /** @ingroup  CMSIS
+  48:Libraries/CM3/inc/core_cm3.h ****  * @addtogroup CMSIS_core_definitions CMSIS Core Definitions
+  49:Libraries/CM3/inc/core_cm3.h ****   This file defines all structures and symbols for CMSIS core:
+  50:Libraries/CM3/inc/core_cm3.h ****    - CMSIS version number
+  51:Libraries/CM3/inc/core_cm3.h ****    - Cortex-M core
+  52:Libraries/CM3/inc/core_cm3.h ****    - Cortex-M core Revision Number
+  53:Libraries/CM3/inc/core_cm3.h ****   @{
+  54:Libraries/CM3/inc/core_cm3.h ****  */
+  55:Libraries/CM3/inc/core_cm3.h **** 
+  56:Libraries/CM3/inc/core_cm3.h **** /*  CMSIS CM3 definitions */
+  57:Libraries/CM3/inc/core_cm3.h **** #define __CM3_CMSIS_VERSION_MAIN  (0x02)                                                       /*!<
+  58:Libraries/CM3/inc/core_cm3.h **** #define __CM3_CMSIS_VERSION_SUB   (0x00)                                                       /*!<
+  59:Libraries/CM3/inc/core_cm3.h **** #define __CM3_CMSIS_VERSION       ((__CM3_CMSIS_VERSION_MAIN << 16) | __CM3_CMSIS_VERSION_SUB) /*!<
+  60:Libraries/CM3/inc/core_cm3.h **** 
+  61:Libraries/CM3/inc/core_cm3.h **** #define __CORTEX_M                (0x03)                                                       /*!<
+  62:Libraries/CM3/inc/core_cm3.h **** 
+  63:Libraries/CM3/inc/core_cm3.h **** 
+  64:Libraries/CM3/inc/core_cm3.h **** #if defined ( __CC_ARM   )
+  65:Libraries/CM3/inc/core_cm3.h ****   #define __ASM            __asm                                      /*!< asm keyword for ARM Comp
+  66:Libraries/CM3/inc/core_cm3.h ****   #define __INLINE         __inline                                   /*!< inline keyword for ARM C
+  67:Libraries/CM3/inc/core_cm3.h **** 
+  68:Libraries/CM3/inc/core_cm3.h **** #elif defined ( __ICCARM__ )
+  69:Libraries/CM3/inc/core_cm3.h ****   #define __ASM           __asm                                       /*!< asm keyword for IAR Comp
+  70:Libraries/CM3/inc/core_cm3.h ****   #define __INLINE        inline                                      /*!< inline keyword for IAR C
+  71:Libraries/CM3/inc/core_cm3.h **** 
+  72:Libraries/CM3/inc/core_cm3.h **** #elif defined   (  __GNUC__  )
+  73:Libraries/CM3/inc/core_cm3.h ****   #define __ASM            __asm                                      /*!< asm keyword for GNU Comp
+  74:Libraries/CM3/inc/core_cm3.h ****   #define __INLINE         inline                                     /*!< inline keyword for GNU C
+  75:Libraries/CM3/inc/core_cm3.h **** 
+  76:Libraries/CM3/inc/core_cm3.h **** #elif defined   (  __TASKING__  )
+  77:Libraries/CM3/inc/core_cm3.h ****   #define __ASM            __asm                                      /*!< asm keyword for TASKING 
+  78:Libraries/CM3/inc/core_cm3.h ****   #define __INLINE         inline                                     /*!< inline keyword for TASKI
+  79:Libraries/CM3/inc/core_cm3.h **** 
+  80:Libraries/CM3/inc/core_cm3.h **** #endif
+  81:Libraries/CM3/inc/core_cm3.h **** 
+  82:Libraries/CM3/inc/core_cm3.h **** #include <stdint.h>                      /*!< standard types definitions                      */
+  83:Libraries/CM3/inc/core_cm3.h **** #include "core_cmInstr.h"                /*!< Core Instruction Access                         */
+  84:Libraries/CM3/inc/core_cm3.h **** #include "core_cmFunc.h"                 /*!< Core Function Access                            */
+  85:Libraries/CM3/inc/core_cm3.h **** 
+  86:Libraries/CM3/inc/core_cm3.h **** #endif /* __CORE_CM3_H_GENERIC */
+  87:Libraries/CM3/inc/core_cm3.h **** 
+  88:Libraries/CM3/inc/core_cm3.h **** 
+  89:Libraries/CM3/inc/core_cm3.h **** #ifndef __CMSIS_GENERIC
+  90:Libraries/CM3/inc/core_cm3.h **** 
+  91:Libraries/CM3/inc/core_cm3.h **** #ifndef __CORE_CM3_H_DEPENDANT
+  92:Libraries/CM3/inc/core_cm3.h **** #define __CORE_CM3_H_DEPENDANT
+  93:Libraries/CM3/inc/core_cm3.h **** 
+  94:Libraries/CM3/inc/core_cm3.h **** /* IO definitions (access restrictions to peripheral registers) */
+  95:Libraries/CM3/inc/core_cm3.h **** #ifdef __cplusplus
+  96:Libraries/CM3/inc/core_cm3.h ****   #define     __I     volatile           /*!< defines 'read only' permissions                 */
+  97:Libraries/CM3/inc/core_cm3.h **** #else
+  98:Libraries/CM3/inc/core_cm3.h ****   #define     __I     volatile const     /*!< defines 'read only' permissions                 */
+  99:Libraries/CM3/inc/core_cm3.h **** #endif
+ 100:Libraries/CM3/inc/core_cm3.h **** #define     __O     volatile             /*!< defines 'write only' permissions                */
+ 101:Libraries/CM3/inc/core_cm3.h **** #define     __IO    volatile             /*!< defines 'read / write' permissions              */
+ 102:Libraries/CM3/inc/core_cm3.h **** 
+ 103:Libraries/CM3/inc/core_cm3.h **** /*@} end of group CMSIS_core_definitions */
+ 104:Libraries/CM3/inc/core_cm3.h **** 
+ 105:Libraries/CM3/inc/core_cm3.h **** 
+ 106:Libraries/CM3/inc/core_cm3.h **** 
+ 107:Libraries/CM3/inc/core_cm3.h **** /*******************************************************************************
+ 108:Libraries/CM3/inc/core_cm3.h ****  *                 Register Abstraction
+ 109:Libraries/CM3/inc/core_cm3.h ****  ******************************************************************************/
+ 110:Libraries/CM3/inc/core_cm3.h **** 
+ 111:Libraries/CM3/inc/core_cm3.h **** /** @ingroup  CMSIS
+ 112:Libraries/CM3/inc/core_cm3.h ****  * @addtogroup CMSIS_core_register CMSIS Core Register
+ 113:Libraries/CM3/inc/core_cm3.h ****   Core Register contain:
+ 114:Libraries/CM3/inc/core_cm3.h ****   - Core Register
+ 115:Libraries/CM3/inc/core_cm3.h ****   - Core NVIC Register
+ 116:Libraries/CM3/inc/core_cm3.h ****   - Core SCB Register
+ 117:Libraries/CM3/inc/core_cm3.h ****   - Core SysTick Register
+ 118:Libraries/CM3/inc/core_cm3.h ****   - Core Debug Register
+ 119:Libraries/CM3/inc/core_cm3.h ****   - Core MPU Register
+ 120:Libraries/CM3/inc/core_cm3.h **** */
+ 121:Libraries/CM3/inc/core_cm3.h **** 
+ 122:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS_core_register
+ 123:Libraries/CM3/inc/core_cm3.h ****     \defgroup CMSIS_CORE CMSIS Core
+ 124:Libraries/CM3/inc/core_cm3.h ****   Type definitions for the Cortex-M Core Registers
+ 125:Libraries/CM3/inc/core_cm3.h ****   @{
+ 126:Libraries/CM3/inc/core_cm3.h ****  */
+ 127:Libraries/CM3/inc/core_cm3.h **** 
+ 128:Libraries/CM3/inc/core_cm3.h **** /** \brief  Union type to access the Application Program Status Register (APSR).
+ 129:Libraries/CM3/inc/core_cm3.h ****  */
+ 130:Libraries/CM3/inc/core_cm3.h **** typedef union
+ 131:Libraries/CM3/inc/core_cm3.h **** {
+ 132:Libraries/CM3/inc/core_cm3.h ****   struct
+ 133:Libraries/CM3/inc/core_cm3.h ****   {
+ 134:Libraries/CM3/inc/core_cm3.h **** #if (__CORTEX_M != 0x04)
+ 135:Libraries/CM3/inc/core_cm3.h ****     uint32_t _reserved0:27;              /*!< bit:  0..26  Reserved                           */
+ 136:Libraries/CM3/inc/core_cm3.h **** #else
+ 137:Libraries/CM3/inc/core_cm3.h ****     uint32_t _reserved0:16;              /*!< bit:  0..15  Reserved                           */
+ 138:Libraries/CM3/inc/core_cm3.h ****     uint32_t GE:4;                       /*!< bit: 16..19  Greater than or Equal flags        */
+ 139:Libraries/CM3/inc/core_cm3.h ****     uint32_t _reserved1:7;               /*!< bit: 20..26  Reserved                           */
+ 140:Libraries/CM3/inc/core_cm3.h **** #endif
+ 141:Libraries/CM3/inc/core_cm3.h ****     uint32_t Q:1;                        /*!< bit:     27  Saturation condition flag          */
+ 142:Libraries/CM3/inc/core_cm3.h ****     uint32_t V:1;                        /*!< bit:     28  Overflow condition code flag       */
+ 143:Libraries/CM3/inc/core_cm3.h ****     uint32_t C:1;                        /*!< bit:     29  Carry condition code flag          */
+ 144:Libraries/CM3/inc/core_cm3.h ****     uint32_t Z:1;                        /*!< bit:     30  Zero condition code flag           */
+ 145:Libraries/CM3/inc/core_cm3.h ****     uint32_t N:1;                        /*!< bit:     31  Negative condition code flag       */
+ 146:Libraries/CM3/inc/core_cm3.h ****   } b;                                   /*!< Structure used for bit  access                  */
+ 147:Libraries/CM3/inc/core_cm3.h ****   uint32_t w;                            /*!< Type      used for word access                  */
+ 148:Libraries/CM3/inc/core_cm3.h **** } APSR_Type;
+ 149:Libraries/CM3/inc/core_cm3.h **** 
+ 150:Libraries/CM3/inc/core_cm3.h **** 
+ 151:Libraries/CM3/inc/core_cm3.h **** /** \brief  Union type to access the Interrupt Program Status Register (IPSR).
+ 152:Libraries/CM3/inc/core_cm3.h ****  */
+ 153:Libraries/CM3/inc/core_cm3.h **** typedef union
+ 154:Libraries/CM3/inc/core_cm3.h **** {
+ 155:Libraries/CM3/inc/core_cm3.h ****   struct
+ 156:Libraries/CM3/inc/core_cm3.h ****   {
+ 157:Libraries/CM3/inc/core_cm3.h ****     uint32_t ISR:9;                      /*!< bit:  0.. 8  Exception number                   */
+ 158:Libraries/CM3/inc/core_cm3.h ****     uint32_t _reserved0:23;              /*!< bit:  9..31  Reserved                           */
+ 159:Libraries/CM3/inc/core_cm3.h ****   } b;                                   /*!< Structure used for bit  access                  */
+ 160:Libraries/CM3/inc/core_cm3.h ****   uint32_t w;                            /*!< Type      used for word access                  */
+ 161:Libraries/CM3/inc/core_cm3.h **** } IPSR_Type;
+ 162:Libraries/CM3/inc/core_cm3.h **** 
+ 163:Libraries/CM3/inc/core_cm3.h **** 
+ 164:Libraries/CM3/inc/core_cm3.h **** /** \brief  Union type to access the Special-Purpose Program Status Registers (xPSR).
+ 165:Libraries/CM3/inc/core_cm3.h ****  */
+ 166:Libraries/CM3/inc/core_cm3.h **** typedef union
+ 167:Libraries/CM3/inc/core_cm3.h **** {
+ 168:Libraries/CM3/inc/core_cm3.h ****   struct
+ 169:Libraries/CM3/inc/core_cm3.h ****   {
+ 170:Libraries/CM3/inc/core_cm3.h ****     uint32_t ISR:9;                      /*!< bit:  0.. 8  Exception number                   */
+ 171:Libraries/CM3/inc/core_cm3.h **** #if (__CORTEX_M != 0x04)
+ 172:Libraries/CM3/inc/core_cm3.h ****     uint32_t _reserved0:15;              /*!< bit:  9..23  Reserved                           */
+ 173:Libraries/CM3/inc/core_cm3.h **** #else
+ 174:Libraries/CM3/inc/core_cm3.h ****     uint32_t _reserved0:7;               /*!< bit:  9..15  Reserved                           */
+ 175:Libraries/CM3/inc/core_cm3.h ****     uint32_t GE:4;                       /*!< bit: 16..19  Greater than or Equal flags        */
+ 176:Libraries/CM3/inc/core_cm3.h ****     uint32_t _reserved1:4;               /*!< bit: 20..23  Reserved                           */
+ 177:Libraries/CM3/inc/core_cm3.h **** #endif
+ 178:Libraries/CM3/inc/core_cm3.h ****     uint32_t T:1;                        /*!< bit:     24  Thumb bit        (read 0)          */
+ 179:Libraries/CM3/inc/core_cm3.h ****     uint32_t IT:2;                       /*!< bit: 25..26  saved IT state   (read 0)          */
+ 180:Libraries/CM3/inc/core_cm3.h ****     uint32_t Q:1;                        /*!< bit:     27  Saturation condition flag          */
+ 181:Libraries/CM3/inc/core_cm3.h ****     uint32_t V:1;                        /*!< bit:     28  Overflow condition code flag       */
+ 182:Libraries/CM3/inc/core_cm3.h ****     uint32_t C:1;                        /*!< bit:     29  Carry condition code flag          */
+ 183:Libraries/CM3/inc/core_cm3.h ****     uint32_t Z:1;                        /*!< bit:     30  Zero condition code flag           */
+ 184:Libraries/CM3/inc/core_cm3.h ****     uint32_t N:1;                        /*!< bit:     31  Negative condition code flag       */
+ 185:Libraries/CM3/inc/core_cm3.h ****   } b;                                   /*!< Structure used for bit  access                  */
+ 186:Libraries/CM3/inc/core_cm3.h ****   uint32_t w;                            /*!< Type      used for word access                  */
+ 187:Libraries/CM3/inc/core_cm3.h **** } xPSR_Type;
+ 188:Libraries/CM3/inc/core_cm3.h **** 
+ 189:Libraries/CM3/inc/core_cm3.h **** 
+ 190:Libraries/CM3/inc/core_cm3.h **** /** \brief  Union type to access the Control Registers (CONTROL).
+ 191:Libraries/CM3/inc/core_cm3.h ****  */
+ 192:Libraries/CM3/inc/core_cm3.h **** typedef union
+ 193:Libraries/CM3/inc/core_cm3.h **** {
+ 194:Libraries/CM3/inc/core_cm3.h ****   struct
+ 195:Libraries/CM3/inc/core_cm3.h ****   {
+ 196:Libraries/CM3/inc/core_cm3.h ****     uint32_t nPRIV:1;                    /*!< bit:      0  Execution privilege in Thread mode */
+ 197:Libraries/CM3/inc/core_cm3.h ****     uint32_t SPSEL:1;                    /*!< bit:      1  Stack to be used                   */
+ 198:Libraries/CM3/inc/core_cm3.h ****     uint32_t FPCA:1;                     /*!< bit:      2  FP extension active flag           */
+ 199:Libraries/CM3/inc/core_cm3.h ****     uint32_t _reserved0:29;              /*!< bit:  3..31  Reserved                           */
+ 200:Libraries/CM3/inc/core_cm3.h ****   } b;                                   /*!< Structure used for bit  access                  */
+ 201:Libraries/CM3/inc/core_cm3.h ****   uint32_t w;                            /*!< Type      used for word access                  */
+ 202:Libraries/CM3/inc/core_cm3.h **** } CONTROL_Type;
+ 203:Libraries/CM3/inc/core_cm3.h **** 
+ 204:Libraries/CM3/inc/core_cm3.h **** /*@} end of group CMSIS_CORE */
+ 205:Libraries/CM3/inc/core_cm3.h **** 
+ 206:Libraries/CM3/inc/core_cm3.h **** 
+ 207:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS_core_register
+ 208:Libraries/CM3/inc/core_cm3.h ****     \defgroup CMSIS_NVIC CMSIS NVIC
+ 209:Libraries/CM3/inc/core_cm3.h ****   Type definitions for the Cortex-M NVIC Registers
+ 210:Libraries/CM3/inc/core_cm3.h ****   @{
+ 211:Libraries/CM3/inc/core_cm3.h ****  */
+ 212:Libraries/CM3/inc/core_cm3.h **** 
+ 213:Libraries/CM3/inc/core_cm3.h **** /** \brief  Structure type to access the Nested Vectored Interrupt Controller (NVIC).
+ 214:Libraries/CM3/inc/core_cm3.h ****  */
+ 215:Libraries/CM3/inc/core_cm3.h **** typedef struct
+ 216:Libraries/CM3/inc/core_cm3.h **** {
+ 217:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t ISER[8];                 /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register   
+ 218:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED0[24];
+ 219:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t ICER[8];                 /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register 
+ 220:Libraries/CM3/inc/core_cm3.h ****        uint32_t RSERVED1[24];
+ 221:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t ISPR[8];                 /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register  
+ 222:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED2[24];
+ 223:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t ICPR[8];                 /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register
+ 224:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED3[24];
+ 225:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t IABR[8];                 /*!< Offset: 0x200 (R/W)  Interrupt Active bit Register   
+ 226:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED4[56];
+ 227:Libraries/CM3/inc/core_cm3.h ****   __IO uint8_t  IP[240];                 /*!< Offset: 0x300 (R/W)  Interrupt Priority Register (8Bi
+ 228:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED5[644];
+ 229:Libraries/CM3/inc/core_cm3.h ****   __O  uint32_t STIR;                    /*!< Offset: 0xE00 ( /W)  Software Trigger Interrupt Regis
+ 230:Libraries/CM3/inc/core_cm3.h **** }  NVIC_Type;
+ 231:Libraries/CM3/inc/core_cm3.h **** 
+ 232:Libraries/CM3/inc/core_cm3.h **** /*@} end of group CMSIS_NVIC */
+ 233:Libraries/CM3/inc/core_cm3.h **** 
+ 234:Libraries/CM3/inc/core_cm3.h **** 
+ 235:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS_core_register
+ 236:Libraries/CM3/inc/core_cm3.h ****     \defgroup CMSIS_SCB CMSIS SCB
+ 237:Libraries/CM3/inc/core_cm3.h ****   Type definitions for the Cortex-M System Control Block Registers
+ 238:Libraries/CM3/inc/core_cm3.h ****   @{
+ 239:Libraries/CM3/inc/core_cm3.h ****  */
+ 240:Libraries/CM3/inc/core_cm3.h **** 
+ 241:Libraries/CM3/inc/core_cm3.h **** /** \brief  Structure type to access the System Control Block (SCB).
+ 242:Libraries/CM3/inc/core_cm3.h ****  */
+ 243:Libraries/CM3/inc/core_cm3.h **** typedef struct
+ 244:Libraries/CM3/inc/core_cm3.h **** {
+ 245:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t CPUID;                   /*!< Offset: 0x000 (R/ )  CPU ID Base Register            
+ 246:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t ICSR;                    /*!< Offset: 0x004 (R/W)  Interrupt Control State Register
+ 247:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t VTOR;                    /*!< Offset: 0x008 (R/W)  Vector Table Offset Register    
+ 248:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t AIRCR;                   /*!< Offset: 0x00C (R/W)  Application Interrupt / Reset Co
+ 249:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t SCR;                     /*!< Offset: 0x010 (R/W)  System Control Register         
+ 250:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t CCR;                     /*!< Offset: 0x014 (R/W)  Configuration Control Register  
+ 251:Libraries/CM3/inc/core_cm3.h ****   __IO uint8_t  SHP[12];                 /*!< Offset: 0x018 (R/W)  System Handlers Priority Registe
+ 252:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t SHCSR;                   /*!< Offset: 0x024 (R/W)  System Handler Control and State
+ 253:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t CFSR;                    /*!< Offset: 0x028 (R/W)  Configurable Fault Status Regist
+ 254:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t HFSR;                    /*!< Offset: 0x02C (R/W)  Hard Fault Status Register      
+ 255:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t DFSR;                    /*!< Offset: 0x030 (R/W)  Debug Fault Status Register     
+ 256:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t MMFAR;                   /*!< Offset: 0x034 (R/W)  Mem Manage Address Register     
+ 257:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t BFAR;                    /*!< Offset: 0x038 (R/W)  Bus Fault Address Register      
+ 258:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t AFSR;                    /*!< Offset: 0x03C (R/W)  Auxiliary Fault Status Register 
+ 259:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t PFR[2];                  /*!< Offset: 0x040 (R/ )  Processor Feature Register      
+ 260:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t DFR;                     /*!< Offset: 0x048 (R/ )  Debug Feature Register          
+ 261:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t ADR;                     /*!< Offset: 0x04C (R/ )  Auxiliary Feature Register      
+ 262:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t MMFR[4];                 /*!< Offset: 0x050 (R/ )  Memory Model Feature Register   
+ 263:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t ISAR[5];                 /*!< Offset: 0x060 (R/ )  ISA Feature Register            
+ 264:Libraries/CM3/inc/core_cm3.h **** } SCB_Type;
+ 265:Libraries/CM3/inc/core_cm3.h **** 
+ 266:Libraries/CM3/inc/core_cm3.h **** /* SCB CPUID Register Definitions */
+ 267:Libraries/CM3/inc/core_cm3.h **** #define SCB_CPUID_IMPLEMENTER_Pos          24                                             /*!< SCB 
+ 268:Libraries/CM3/inc/core_cm3.h **** #define SCB_CPUID_IMPLEMENTER_Msk          (0xFFUL << SCB_CPUID_IMPLEMENTER_Pos)          /*!< SCB 
+ 269:Libraries/CM3/inc/core_cm3.h **** 
+ 270:Libraries/CM3/inc/core_cm3.h **** #define SCB_CPUID_VARIANT_Pos              20                                             /*!< SCB 
+ 271:Libraries/CM3/inc/core_cm3.h **** #define SCB_CPUID_VARIANT_Msk              (0xFUL << SCB_CPUID_VARIANT_Pos)               /*!< SCB 
+ 272:Libraries/CM3/inc/core_cm3.h **** 
+ 273:Libraries/CM3/inc/core_cm3.h **** #define SCB_CPUID_PARTNO_Pos                4                                             /*!< SCB 
+ 274:Libraries/CM3/inc/core_cm3.h **** #define SCB_CPUID_PARTNO_Msk               (0xFFFUL << SCB_CPUID_PARTNO_Pos)              /*!< SCB 
+ 275:Libraries/CM3/inc/core_cm3.h **** 
+ 276:Libraries/CM3/inc/core_cm3.h **** #define SCB_CPUID_REVISION_Pos              0                                             /*!< SCB 
+ 277:Libraries/CM3/inc/core_cm3.h **** #define SCB_CPUID_REVISION_Msk             (0xFUL << SCB_CPUID_REVISION_Pos)              /*!< SCB 
+ 278:Libraries/CM3/inc/core_cm3.h **** 
+ 279:Libraries/CM3/inc/core_cm3.h **** /* SCB Interrupt Control State Register Definitions */
+ 280:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_NMIPENDSET_Pos            31                                             /*!< SCB 
+ 281:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_NMIPENDSET_Msk            (1UL << SCB_ICSR_NMIPENDSET_Pos)               /*!< SCB 
+ 282:Libraries/CM3/inc/core_cm3.h **** 
+ 283:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_PENDSVSET_Pos             28                                             /*!< SCB 
+ 284:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_PENDSVSET_Msk             (1UL << SCB_ICSR_PENDSVSET_Pos)                /*!< SCB 
+ 285:Libraries/CM3/inc/core_cm3.h **** 
+ 286:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_PENDSVCLR_Pos             27                                             /*!< SCB 
+ 287:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_PENDSVCLR_Msk             (1UL << SCB_ICSR_PENDSVCLR_Pos)                /*!< SCB 
+ 288:Libraries/CM3/inc/core_cm3.h **** 
+ 289:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_PENDSTSET_Pos             26                                             /*!< SCB 
+ 290:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_PENDSTSET_Msk             (1UL << SCB_ICSR_PENDSTSET_Pos)                /*!< SCB 
+ 291:Libraries/CM3/inc/core_cm3.h **** 
+ 292:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_PENDSTCLR_Pos             25                                             /*!< SCB 
+ 293:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_PENDSTCLR_Msk             (1UL << SCB_ICSR_PENDSTCLR_Pos)                /*!< SCB 
+ 294:Libraries/CM3/inc/core_cm3.h **** 
+ 295:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_ISRPREEMPT_Pos            23                                             /*!< SCB 
+ 296:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_ISRPREEMPT_Msk            (1UL << SCB_ICSR_ISRPREEMPT_Pos)               /*!< SCB 
+ 297:Libraries/CM3/inc/core_cm3.h **** 
+ 298:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_ISRPENDING_Pos            22                                             /*!< SCB 
+ 299:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_ISRPENDING_Msk            (1UL << SCB_ICSR_ISRPENDING_Pos)               /*!< SCB 
+ 300:Libraries/CM3/inc/core_cm3.h **** 
+ 301:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_VECTPENDING_Pos           12                                             /*!< SCB 
+ 302:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_VECTPENDING_Msk           (0x1FFUL << SCB_ICSR_VECTPENDING_Pos)          /*!< SCB 
+ 303:Libraries/CM3/inc/core_cm3.h **** 
+ 304:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_RETTOBASE_Pos             11                                             /*!< SCB 
+ 305:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_RETTOBASE_Msk             (1UL << SCB_ICSR_RETTOBASE_Pos)                /*!< SCB 
+ 306:Libraries/CM3/inc/core_cm3.h **** 
+ 307:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_VECTACTIVE_Pos             0                                             /*!< SCB 
+ 308:Libraries/CM3/inc/core_cm3.h **** #define SCB_ICSR_VECTACTIVE_Msk            (0x1FFUL << SCB_ICSR_VECTACTIVE_Pos)           /*!< SCB 
+ 309:Libraries/CM3/inc/core_cm3.h **** 
+ 310:Libraries/CM3/inc/core_cm3.h **** /* SCB Interrupt Control State Register Definitions */
+ 311:Libraries/CM3/inc/core_cm3.h **** #define SCB_VTOR_TBLBASE_Pos               29                                             /*!< SCB 
+ 312:Libraries/CM3/inc/core_cm3.h **** #define SCB_VTOR_TBLBASE_Msk               (1UL << SCB_VTOR_TBLBASE_Pos)                  /*!< SCB 
+ 313:Libraries/CM3/inc/core_cm3.h **** 
+ 314:Libraries/CM3/inc/core_cm3.h **** #define SCB_VTOR_TBLOFF_Pos                 7                                             /*!< SCB 
+ 315:Libraries/CM3/inc/core_cm3.h **** #define SCB_VTOR_TBLOFF_Msk                (0x3FFFFFUL << SCB_VTOR_TBLOFF_Pos)            /*!< SCB 
+ 316:Libraries/CM3/inc/core_cm3.h **** 
+ 317:Libraries/CM3/inc/core_cm3.h **** /* SCB Application Interrupt and Reset Control Register Definitions */
+ 318:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_VECTKEY_Pos              16                                             /*!< SCB 
+ 319:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_VECTKEY_Msk              (0xFFFFUL << SCB_AIRCR_VECTKEY_Pos)            /*!< SCB 
+ 320:Libraries/CM3/inc/core_cm3.h **** 
+ 321:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_VECTKEYSTAT_Pos          16                                             /*!< SCB 
+ 322:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_VECTKEYSTAT_Msk          (0xFFFFUL << SCB_AIRCR_VECTKEYSTAT_Pos)        /*!< SCB 
+ 323:Libraries/CM3/inc/core_cm3.h **** 
+ 324:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_ENDIANESS_Pos            15                                             /*!< SCB 
+ 325:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_ENDIANESS_Msk            (1UL << SCB_AIRCR_ENDIANESS_Pos)               /*!< SCB 
+ 326:Libraries/CM3/inc/core_cm3.h **** 
+ 327:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_PRIGROUP_Pos              8                                             /*!< SCB 
+ 328:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_PRIGROUP_Msk             (7UL << SCB_AIRCR_PRIGROUP_Pos)                /*!< SCB 
+ 329:Libraries/CM3/inc/core_cm3.h **** 
+ 330:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_SYSRESETREQ_Pos           2                                             /*!< SCB 
+ 331:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_SYSRESETREQ_Msk          (1UL << SCB_AIRCR_SYSRESETREQ_Pos)             /*!< SCB 
+ 332:Libraries/CM3/inc/core_cm3.h **** 
+ 333:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_VECTCLRACTIVE_Pos         1                                             /*!< SCB 
+ 334:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_VECTCLRACTIVE_Msk        (1UL << SCB_AIRCR_VECTCLRACTIVE_Pos)           /*!< SCB 
+ 335:Libraries/CM3/inc/core_cm3.h **** 
+ 336:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_VECTRESET_Pos             0                                             /*!< SCB 
+ 337:Libraries/CM3/inc/core_cm3.h **** #define SCB_AIRCR_VECTRESET_Msk            (1UL << SCB_AIRCR_VECTRESET_Pos)               /*!< SCB 
+ 338:Libraries/CM3/inc/core_cm3.h **** 
+ 339:Libraries/CM3/inc/core_cm3.h **** /* SCB System Control Register Definitions */
+ 340:Libraries/CM3/inc/core_cm3.h **** #define SCB_SCR_SEVONPEND_Pos               4                                             /*!< SCB 
+ 341:Libraries/CM3/inc/core_cm3.h **** #define SCB_SCR_SEVONPEND_Msk              (1UL << SCB_SCR_SEVONPEND_Pos)                 /*!< SCB 
+ 342:Libraries/CM3/inc/core_cm3.h **** 
+ 343:Libraries/CM3/inc/core_cm3.h **** #define SCB_SCR_SLEEPDEEP_Pos               2                                             /*!< SCB 
+ 344:Libraries/CM3/inc/core_cm3.h **** #define SCB_SCR_SLEEPDEEP_Msk              (1UL << SCB_SCR_SLEEPDEEP_Pos)                 /*!< SCB 
+ 345:Libraries/CM3/inc/core_cm3.h **** 
+ 346:Libraries/CM3/inc/core_cm3.h **** #define SCB_SCR_SLEEPONEXIT_Pos             1                                             /*!< SCB 
+ 347:Libraries/CM3/inc/core_cm3.h **** #define SCB_SCR_SLEEPONEXIT_Msk            (1UL << SCB_SCR_SLEEPONEXIT_Pos)               /*!< SCB 
+ 348:Libraries/CM3/inc/core_cm3.h **** 
+ 349:Libraries/CM3/inc/core_cm3.h **** /* SCB Configuration Control Register Definitions */
+ 350:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_STKALIGN_Pos                9                                             /*!< SCB 
+ 351:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_STKALIGN_Msk               (1UL << SCB_CCR_STKALIGN_Pos)                  /*!< SCB 
+ 352:Libraries/CM3/inc/core_cm3.h **** 
+ 353:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_BFHFNMIGN_Pos               8                                             /*!< SCB 
+ 354:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_BFHFNMIGN_Msk              (1UL << SCB_CCR_BFHFNMIGN_Pos)                 /*!< SCB 
+ 355:Libraries/CM3/inc/core_cm3.h **** 
+ 356:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_DIV_0_TRP_Pos               4                                             /*!< SCB 
+ 357:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_DIV_0_TRP_Msk              (1UL << SCB_CCR_DIV_0_TRP_Pos)                 /*!< SCB 
+ 358:Libraries/CM3/inc/core_cm3.h **** 
+ 359:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_UNALIGN_TRP_Pos             3                                             /*!< SCB 
+ 360:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_UNALIGN_TRP_Msk            (1UL << SCB_CCR_UNALIGN_TRP_Pos)               /*!< SCB 
+ 361:Libraries/CM3/inc/core_cm3.h **** 
+ 362:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_USERSETMPEND_Pos            1                                             /*!< SCB 
+ 363:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_USERSETMPEND_Msk           (1UL << SCB_CCR_USERSETMPEND_Pos)              /*!< SCB 
+ 364:Libraries/CM3/inc/core_cm3.h **** 
+ 365:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_NONBASETHRDENA_Pos          0                                             /*!< SCB 
+ 366:Libraries/CM3/inc/core_cm3.h **** #define SCB_CCR_NONBASETHRDENA_Msk         (1UL << SCB_CCR_NONBASETHRDENA_Pos)            /*!< SCB 
+ 367:Libraries/CM3/inc/core_cm3.h **** 
+ 368:Libraries/CM3/inc/core_cm3.h **** /* SCB System Handler Control and State Register Definitions */
+ 369:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_USGFAULTENA_Pos          18                                             /*!< SCB 
+ 370:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_USGFAULTENA_Msk          (1UL << SCB_SHCSR_USGFAULTENA_Pos)             /*!< SCB 
+ 371:Libraries/CM3/inc/core_cm3.h **** 
+ 372:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_BUSFAULTENA_Pos          17                                             /*!< SCB 
+ 373:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_BUSFAULTENA_Msk          (1UL << SCB_SHCSR_BUSFAULTENA_Pos)             /*!< SCB 
+ 374:Libraries/CM3/inc/core_cm3.h **** 
+ 375:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_MEMFAULTENA_Pos          16                                             /*!< SCB 
+ 376:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_MEMFAULTENA_Msk          (1UL << SCB_SHCSR_MEMFAULTENA_Pos)             /*!< SCB 
+ 377:Libraries/CM3/inc/core_cm3.h **** 
+ 378:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_SVCALLPENDED_Pos         15                                             /*!< SCB 
+ 379:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_SVCALLPENDED_Msk         (1UL << SCB_SHCSR_SVCALLPENDED_Pos)            /*!< SCB 
+ 380:Libraries/CM3/inc/core_cm3.h **** 
+ 381:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_BUSFAULTPENDED_Pos       14                                             /*!< SCB 
+ 382:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_BUSFAULTPENDED_Msk       (1UL << SCB_SHCSR_BUSFAULTPENDED_Pos)          /*!< SCB 
+ 383:Libraries/CM3/inc/core_cm3.h **** 
+ 384:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_MEMFAULTPENDED_Pos       13                                             /*!< SCB 
+ 385:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_MEMFAULTPENDED_Msk       (1UL << SCB_SHCSR_MEMFAULTPENDED_Pos)          /*!< SCB 
+ 386:Libraries/CM3/inc/core_cm3.h **** 
+ 387:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_USGFAULTPENDED_Pos       12                                             /*!< SCB 
+ 388:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_USGFAULTPENDED_Msk       (1UL << SCB_SHCSR_USGFAULTPENDED_Pos)          /*!< SCB 
+ 389:Libraries/CM3/inc/core_cm3.h **** 
+ 390:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_SYSTICKACT_Pos           11                                             /*!< SCB 
+ 391:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_SYSTICKACT_Msk           (1UL << SCB_SHCSR_SYSTICKACT_Pos)              /*!< SCB 
+ 392:Libraries/CM3/inc/core_cm3.h **** 
+ 393:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_PENDSVACT_Pos            10                                             /*!< SCB 
+ 394:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_PENDSVACT_Msk            (1UL << SCB_SHCSR_PENDSVACT_Pos)               /*!< SCB 
+ 395:Libraries/CM3/inc/core_cm3.h **** 
+ 396:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_MONITORACT_Pos            8                                             /*!< SCB 
+ 397:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_MONITORACT_Msk           (1UL << SCB_SHCSR_MONITORACT_Pos)              /*!< SCB 
+ 398:Libraries/CM3/inc/core_cm3.h **** 
+ 399:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_SVCALLACT_Pos             7                                             /*!< SCB 
+ 400:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_SVCALLACT_Msk            (1UL << SCB_SHCSR_SVCALLACT_Pos)               /*!< SCB 
+ 401:Libraries/CM3/inc/core_cm3.h **** 
+ 402:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_USGFAULTACT_Pos           3                                             /*!< SCB 
+ 403:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_USGFAULTACT_Msk          (1UL << SCB_SHCSR_USGFAULTACT_Pos)             /*!< SCB 
+ 404:Libraries/CM3/inc/core_cm3.h **** 
+ 405:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_BUSFAULTACT_Pos           1                                             /*!< SCB 
+ 406:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_BUSFAULTACT_Msk          (1UL << SCB_SHCSR_BUSFAULTACT_Pos)             /*!< SCB 
+ 407:Libraries/CM3/inc/core_cm3.h **** 
+ 408:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_MEMFAULTACT_Pos           0                                             /*!< SCB 
+ 409:Libraries/CM3/inc/core_cm3.h **** #define SCB_SHCSR_MEMFAULTACT_Msk          (1UL << SCB_SHCSR_MEMFAULTACT_Pos)             /*!< SCB 
+ 410:Libraries/CM3/inc/core_cm3.h **** 
+ 411:Libraries/CM3/inc/core_cm3.h **** /* SCB Configurable Fault Status Registers Definitions */
+ 412:Libraries/CM3/inc/core_cm3.h **** #define SCB_CFSR_USGFAULTSR_Pos            16                                             /*!< SCB 
+ 413:Libraries/CM3/inc/core_cm3.h **** #define SCB_CFSR_USGFAULTSR_Msk            (0xFFFFUL << SCB_CFSR_USGFAULTSR_Pos)          /*!< SCB 
+ 414:Libraries/CM3/inc/core_cm3.h **** 
+ 415:Libraries/CM3/inc/core_cm3.h **** #define SCB_CFSR_BUSFAULTSR_Pos             8                                             /*!< SCB 
+ 416:Libraries/CM3/inc/core_cm3.h **** #define SCB_CFSR_BUSFAULTSR_Msk            (0xFFUL << SCB_CFSR_BUSFAULTSR_Pos)            /*!< SCB 
+ 417:Libraries/CM3/inc/core_cm3.h **** 
+ 418:Libraries/CM3/inc/core_cm3.h **** #define SCB_CFSR_MEMFAULTSR_Pos             0                                             /*!< SCB 
+ 419:Libraries/CM3/inc/core_cm3.h **** #define SCB_CFSR_MEMFAULTSR_Msk            (0xFFUL << SCB_CFSR_MEMFAULTSR_Pos)            /*!< SCB 
+ 420:Libraries/CM3/inc/core_cm3.h **** 
+ 421:Libraries/CM3/inc/core_cm3.h **** /* SCB Hard Fault Status Registers Definitions */
+ 422:Libraries/CM3/inc/core_cm3.h **** #define SCB_HFSR_DEBUGEVT_Pos              31                                             /*!< SCB 
+ 423:Libraries/CM3/inc/core_cm3.h **** #define SCB_HFSR_DEBUGEVT_Msk              (1UL << SCB_HFSR_DEBUGEVT_Pos)                 /*!< SCB 
+ 424:Libraries/CM3/inc/core_cm3.h **** 
+ 425:Libraries/CM3/inc/core_cm3.h **** #define SCB_HFSR_FORCED_Pos                30                                             /*!< SCB 
+ 426:Libraries/CM3/inc/core_cm3.h **** #define SCB_HFSR_FORCED_Msk                (1UL << SCB_HFSR_FORCED_Pos)                   /*!< SCB 
+ 427:Libraries/CM3/inc/core_cm3.h **** 
+ 428:Libraries/CM3/inc/core_cm3.h **** #define SCB_HFSR_VECTTBL_Pos                1                                             /*!< SCB 
+ 429:Libraries/CM3/inc/core_cm3.h **** #define SCB_HFSR_VECTTBL_Msk               (1UL << SCB_HFSR_VECTTBL_Pos)                  /*!< SCB 
+ 430:Libraries/CM3/inc/core_cm3.h **** 
+ 431:Libraries/CM3/inc/core_cm3.h **** /* SCB Debug Fault Status Register Definitions */
+ 432:Libraries/CM3/inc/core_cm3.h **** #define SCB_DFSR_EXTERNAL_Pos               4                                             /*!< SCB 
+ 433:Libraries/CM3/inc/core_cm3.h **** #define SCB_DFSR_EXTERNAL_Msk              (1UL << SCB_DFSR_EXTERNAL_Pos)                 /*!< SCB 
+ 434:Libraries/CM3/inc/core_cm3.h **** 
+ 435:Libraries/CM3/inc/core_cm3.h **** #define SCB_DFSR_VCATCH_Pos                 3                                             /*!< SCB 
+ 436:Libraries/CM3/inc/core_cm3.h **** #define SCB_DFSR_VCATCH_Msk                (1UL << SCB_DFSR_VCATCH_Pos)                   /*!< SCB 
+ 437:Libraries/CM3/inc/core_cm3.h **** 
+ 438:Libraries/CM3/inc/core_cm3.h **** #define SCB_DFSR_DWTTRAP_Pos                2                                             /*!< SCB 
+ 439:Libraries/CM3/inc/core_cm3.h **** #define SCB_DFSR_DWTTRAP_Msk               (1UL << SCB_DFSR_DWTTRAP_Pos)                  /*!< SCB 
+ 440:Libraries/CM3/inc/core_cm3.h **** 
+ 441:Libraries/CM3/inc/core_cm3.h **** #define SCB_DFSR_BKPT_Pos                   1                                             /*!< SCB 
+ 442:Libraries/CM3/inc/core_cm3.h **** #define SCB_DFSR_BKPT_Msk                  (1UL << SCB_DFSR_BKPT_Pos)                     /*!< SCB 
+ 443:Libraries/CM3/inc/core_cm3.h **** 
+ 444:Libraries/CM3/inc/core_cm3.h **** #define SCB_DFSR_HALTED_Pos                 0                                             /*!< SCB 
+ 445:Libraries/CM3/inc/core_cm3.h **** #define SCB_DFSR_HALTED_Msk                (1UL << SCB_DFSR_HALTED_Pos)                   /*!< SCB 
+ 446:Libraries/CM3/inc/core_cm3.h **** 
+ 447:Libraries/CM3/inc/core_cm3.h **** /*@} end of group CMSIS_SCB */
+ 448:Libraries/CM3/inc/core_cm3.h **** 
+ 449:Libraries/CM3/inc/core_cm3.h **** 
+ 450:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS_core_register
+ 451:Libraries/CM3/inc/core_cm3.h ****     \defgroup CMSIS_SysTick CMSIS SysTick
+ 452:Libraries/CM3/inc/core_cm3.h ****   Type definitions for the Cortex-M System Timer Registers
+ 453:Libraries/CM3/inc/core_cm3.h ****   @{
+ 454:Libraries/CM3/inc/core_cm3.h ****  */
+ 455:Libraries/CM3/inc/core_cm3.h **** 
+ 456:Libraries/CM3/inc/core_cm3.h **** /** \brief  Structure type to access the System Timer (SysTick).
+ 457:Libraries/CM3/inc/core_cm3.h ****  */
+ 458:Libraries/CM3/inc/core_cm3.h **** typedef struct
+ 459:Libraries/CM3/inc/core_cm3.h **** {
+ 460:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t CTRL;                    /*!< Offset: 0x000 (R/W)  SysTick Control and Status Regis
+ 461:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t LOAD;                    /*!< Offset: 0x004 (R/W)  SysTick Reload Value Register   
+ 462:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t VAL;                     /*!< Offset: 0x008 (R/W)  SysTick Current Value Register  
+ 463:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t CALIB;                   /*!< Offset: 0x00C (R/ )  SysTick Calibration Register    
+ 464:Libraries/CM3/inc/core_cm3.h **** } SysTick_Type;
+ 465:Libraries/CM3/inc/core_cm3.h **** 
+ 466:Libraries/CM3/inc/core_cm3.h **** /* SysTick Control / Status Register Definitions */
+ 467:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CTRL_COUNTFLAG_Pos         16                                             /*!< SysT
+ 468:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CTRL_COUNTFLAG_Msk         (1UL << SysTick_CTRL_COUNTFLAG_Pos)            /*!< SysT
+ 469:Libraries/CM3/inc/core_cm3.h **** 
+ 470:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CTRL_CLKSOURCE_Pos          2                                             /*!< SysT
+ 471:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CTRL_CLKSOURCE_Msk         (1UL << SysTick_CTRL_CLKSOURCE_Pos)            /*!< SysT
+ 472:Libraries/CM3/inc/core_cm3.h **** 
+ 473:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CTRL_TICKINT_Pos            1                                             /*!< SysT
+ 474:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CTRL_TICKINT_Msk           (1UL << SysTick_CTRL_TICKINT_Pos)              /*!< SysT
+ 475:Libraries/CM3/inc/core_cm3.h **** 
+ 476:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CTRL_ENABLE_Pos             0                                             /*!< SysT
+ 477:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CTRL_ENABLE_Msk            (1UL << SysTick_CTRL_ENABLE_Pos)               /*!< SysT
+ 478:Libraries/CM3/inc/core_cm3.h **** 
+ 479:Libraries/CM3/inc/core_cm3.h **** /* SysTick Reload Register Definitions */
+ 480:Libraries/CM3/inc/core_cm3.h **** #define SysTick_LOAD_RELOAD_Pos             0                                             /*!< SysT
+ 481:Libraries/CM3/inc/core_cm3.h **** #define SysTick_LOAD_RELOAD_Msk            (0xFFFFFFUL << SysTick_LOAD_RELOAD_Pos)        /*!< SysT
+ 482:Libraries/CM3/inc/core_cm3.h **** 
+ 483:Libraries/CM3/inc/core_cm3.h **** /* SysTick Current Register Definitions */
+ 484:Libraries/CM3/inc/core_cm3.h **** #define SysTick_VAL_CURRENT_Pos             0                                             /*!< SysT
+ 485:Libraries/CM3/inc/core_cm3.h **** #define SysTick_VAL_CURRENT_Msk            (0xFFFFFFUL << SysTick_VAL_CURRENT_Pos)        /*!< SysT
+ 486:Libraries/CM3/inc/core_cm3.h **** 
+ 487:Libraries/CM3/inc/core_cm3.h **** /* SysTick Calibration Register Definitions */
+ 488:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CALIB_NOREF_Pos            31                                             /*!< SysT
+ 489:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CALIB_NOREF_Msk            (1UL << SysTick_CALIB_NOREF_Pos)               /*!< SysT
+ 490:Libraries/CM3/inc/core_cm3.h **** 
+ 491:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CALIB_SKEW_Pos             30                                             /*!< SysT
+ 492:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CALIB_SKEW_Msk             (1UL << SysTick_CALIB_SKEW_Pos)                /*!< SysT
+ 493:Libraries/CM3/inc/core_cm3.h **** 
+ 494:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CALIB_TENMS_Pos             0                                             /*!< SysT
+ 495:Libraries/CM3/inc/core_cm3.h **** #define SysTick_CALIB_TENMS_Msk            (0xFFFFFFUL << SysTick_VAL_CURRENT_Pos)        /*!< SysT
+ 496:Libraries/CM3/inc/core_cm3.h **** 
+ 497:Libraries/CM3/inc/core_cm3.h **** /*@} end of group CMSIS_SysTick */
+ 498:Libraries/CM3/inc/core_cm3.h **** 
+ 499:Libraries/CM3/inc/core_cm3.h **** 
+ 500:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS_core_register
+ 501:Libraries/CM3/inc/core_cm3.h ****     \defgroup CMSIS_ITM CMSIS ITM
+ 502:Libraries/CM3/inc/core_cm3.h ****   Type definitions for the Cortex-M Instrumentation Trace Macrocell (ITM)
+ 503:Libraries/CM3/inc/core_cm3.h ****   @{
+ 504:Libraries/CM3/inc/core_cm3.h ****  */
+ 505:Libraries/CM3/inc/core_cm3.h **** 
+ 506:Libraries/CM3/inc/core_cm3.h **** /** \brief  Structure type to access the Instrumentation Trace Macrocell Register (ITM).
+ 507:Libraries/CM3/inc/core_cm3.h ****  */
+ 508:Libraries/CM3/inc/core_cm3.h **** typedef struct
+ 509:Libraries/CM3/inc/core_cm3.h **** {
+ 510:Libraries/CM3/inc/core_cm3.h ****   __O  union
+ 511:Libraries/CM3/inc/core_cm3.h ****   {
+ 512:Libraries/CM3/inc/core_cm3.h ****     __O  uint8_t    u8;                  /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 8-bit         
+ 513:Libraries/CM3/inc/core_cm3.h ****     __O  uint16_t   u16;                 /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 16-bit        
+ 514:Libraries/CM3/inc/core_cm3.h ****     __O  uint32_t   u32;                 /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 32-bit        
+ 515:Libraries/CM3/inc/core_cm3.h ****   }  PORT [32];                          /*!< Offset: 0x000 ( /W)  ITM Stimulus Port Registers     
+ 516:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED0[864];
+ 517:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t TER;                     /*!< Offset:       (R/W)  ITM Trace Enable Register       
+ 518:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED1[15];
+ 519:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t TPR;                     /*!< Offset:       (R/W)  ITM Trace Privilege Register    
+ 520:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED2[15];
+ 521:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t TCR;                     /*!< Offset:       (R/W)  ITM Trace Control Register      
+ 522:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED3[29];
+ 523:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t IWR;                     /*!< Offset:       (R/W)  ITM Integration Write Register  
+ 524:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t IRR;                     /*!< Offset:       (R/W)  ITM Integration Read Register   
+ 525:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t IMCR;                    /*!< Offset:       (R/W)  ITM Integration Mode Control Reg
+ 526:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED4[43];
+ 527:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t LAR;                     /*!< Offset:       (R/W)  ITM Lock Access Register        
+ 528:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t LSR;                     /*!< Offset:       (R/W)  ITM Lock Status Register        
+ 529:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED5[6];
+ 530:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t PID4;                    /*!< Offset:       (R/ )  ITM Peripheral Identification Re
+ 531:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t PID5;                    /*!< Offset:       (R/ )  ITM Peripheral Identification Re
+ 532:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t PID6;                    /*!< Offset:       (R/ )  ITM Peripheral Identification Re
+ 533:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t PID7;                    /*!< Offset:       (R/ )  ITM Peripheral Identification Re
+ 534:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t PID0;                    /*!< Offset:       (R/ )  ITM Peripheral Identification Re
+ 535:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t PID1;                    /*!< Offset:       (R/ )  ITM Peripheral Identification Re
+ 536:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t PID2;                    /*!< Offset:       (R/ )  ITM Peripheral Identification Re
+ 537:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t PID3;                    /*!< Offset:       (R/ )  ITM Peripheral Identification Re
+ 538:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t CID0;                    /*!< Offset:       (R/ )  ITM Component  Identification Re
+ 539:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t CID1;                    /*!< Offset:       (R/ )  ITM Component  Identification Re
+ 540:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t CID2;                    /*!< Offset:       (R/ )  ITM Component  Identification Re
+ 541:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t CID3;                    /*!< Offset:       (R/ )  ITM Component  Identification Re
+ 542:Libraries/CM3/inc/core_cm3.h **** } ITM_Type;
+ 543:Libraries/CM3/inc/core_cm3.h **** 
+ 544:Libraries/CM3/inc/core_cm3.h **** /* ITM Trace Privilege Register Definitions */
+ 545:Libraries/CM3/inc/core_cm3.h **** #define ITM_TPR_PRIVMASK_Pos                0                                             /*!< ITM 
+ 546:Libraries/CM3/inc/core_cm3.h **** #define ITM_TPR_PRIVMASK_Msk               (0xFUL << ITM_TPR_PRIVMASK_Pos)                /*!< ITM 
+ 547:Libraries/CM3/inc/core_cm3.h **** 
+ 548:Libraries/CM3/inc/core_cm3.h **** /* ITM Trace Control Register Definitions */
+ 549:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_BUSY_Pos                   23                                             /*!< ITM 
+ 550:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_BUSY_Msk                   (1UL << ITM_TCR_BUSY_Pos)                      /*!< ITM 
+ 551:Libraries/CM3/inc/core_cm3.h **** 
+ 552:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_ATBID_Pos                  16                                             /*!< ITM 
+ 553:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_ATBID_Msk                  (0x7FUL << ITM_TCR_ATBID_Pos)                  /*!< ITM 
+ 554:Libraries/CM3/inc/core_cm3.h **** 
+ 555:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_TSPrescale_Pos              8                                             /*!< ITM 
+ 556:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_TSPrescale_Msk             (3UL << ITM_TCR_TSPrescale_Pos)                /*!< ITM 
+ 557:Libraries/CM3/inc/core_cm3.h **** 
+ 558:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_SWOENA_Pos                  4                                             /*!< ITM 
+ 559:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_SWOENA_Msk                 (1UL << ITM_TCR_SWOENA_Pos)                    /*!< ITM 
+ 560:Libraries/CM3/inc/core_cm3.h **** 
+ 561:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_DWTENA_Pos                  3                                             /*!< ITM 
+ 562:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_DWTENA_Msk                 (1UL << ITM_TCR_DWTENA_Pos)                    /*!< ITM 
+ 563:Libraries/CM3/inc/core_cm3.h **** 
+ 564:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_SYNCENA_Pos                 2                                             /*!< ITM 
+ 565:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_SYNCENA_Msk                (1UL << ITM_TCR_SYNCENA_Pos)                   /*!< ITM 
+ 566:Libraries/CM3/inc/core_cm3.h **** 
+ 567:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_TSENA_Pos                   1                                             /*!< ITM 
+ 568:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_TSENA_Msk                  (1UL << ITM_TCR_TSENA_Pos)                     /*!< ITM 
+ 569:Libraries/CM3/inc/core_cm3.h **** 
+ 570:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_ITMENA_Pos                  0                                             /*!< ITM 
+ 571:Libraries/CM3/inc/core_cm3.h **** #define ITM_TCR_ITMENA_Msk                 (1UL << ITM_TCR_ITMENA_Pos)                    /*!< ITM 
+ 572:Libraries/CM3/inc/core_cm3.h **** 
+ 573:Libraries/CM3/inc/core_cm3.h **** /* ITM Integration Write Register Definitions */
+ 574:Libraries/CM3/inc/core_cm3.h **** #define ITM_IWR_ATVALIDM_Pos                0                                             /*!< ITM 
+ 575:Libraries/CM3/inc/core_cm3.h **** #define ITM_IWR_ATVALIDM_Msk               (1UL << ITM_IWR_ATVALIDM_Pos)                  /*!< ITM 
+ 576:Libraries/CM3/inc/core_cm3.h **** 
+ 577:Libraries/CM3/inc/core_cm3.h **** /* ITM Integration Read Register Definitions */
+ 578:Libraries/CM3/inc/core_cm3.h **** #define ITM_IRR_ATREADYM_Pos                0                                             /*!< ITM 
+ 579:Libraries/CM3/inc/core_cm3.h **** #define ITM_IRR_ATREADYM_Msk               (1UL << ITM_IRR_ATREADYM_Pos)                  /*!< ITM 
+ 580:Libraries/CM3/inc/core_cm3.h **** 
+ 581:Libraries/CM3/inc/core_cm3.h **** /* ITM Integration Mode Control Register Definitions */
+ 582:Libraries/CM3/inc/core_cm3.h **** #define ITM_IMCR_INTEGRATION_Pos            0                                             /*!< ITM 
+ 583:Libraries/CM3/inc/core_cm3.h **** #define ITM_IMCR_INTEGRATION_Msk           (1UL << ITM_IMCR_INTEGRATION_Pos)              /*!< ITM 
+ 584:Libraries/CM3/inc/core_cm3.h **** 
+ 585:Libraries/CM3/inc/core_cm3.h **** /* ITM Lock Status Register Definitions */
+ 586:Libraries/CM3/inc/core_cm3.h **** #define ITM_LSR_ByteAcc_Pos                 2                                             /*!< ITM 
+ 587:Libraries/CM3/inc/core_cm3.h **** #define ITM_LSR_ByteAcc_Msk                (1UL << ITM_LSR_ByteAcc_Pos)                   /*!< ITM 
+ 588:Libraries/CM3/inc/core_cm3.h **** 
+ 589:Libraries/CM3/inc/core_cm3.h **** #define ITM_LSR_Access_Pos                  1                                             /*!< ITM 
+ 590:Libraries/CM3/inc/core_cm3.h **** #define ITM_LSR_Access_Msk                 (1UL << ITM_LSR_Access_Pos)                    /*!< ITM 
+ 591:Libraries/CM3/inc/core_cm3.h **** 
+ 592:Libraries/CM3/inc/core_cm3.h **** #define ITM_LSR_Present_Pos                 0                                             /*!< ITM 
+ 593:Libraries/CM3/inc/core_cm3.h **** #define ITM_LSR_Present_Msk                (1UL << ITM_LSR_Present_Pos)                   /*!< ITM 
+ 594:Libraries/CM3/inc/core_cm3.h **** 
+ 595:Libraries/CM3/inc/core_cm3.h **** /*@}*/ /* end of group CMSIS_ITM */
+ 596:Libraries/CM3/inc/core_cm3.h **** 
+ 597:Libraries/CM3/inc/core_cm3.h **** 
+ 598:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS_core_register
+ 599:Libraries/CM3/inc/core_cm3.h ****     \defgroup CMSIS_InterruptType CMSIS Interrupt Type
+ 600:Libraries/CM3/inc/core_cm3.h ****   Type definitions for the Cortex-M Interrupt Type Register
+ 601:Libraries/CM3/inc/core_cm3.h ****   @{
+ 602:Libraries/CM3/inc/core_cm3.h ****  */
+ 603:Libraries/CM3/inc/core_cm3.h **** 
+ 604:Libraries/CM3/inc/core_cm3.h **** /** \brief  Structure type to access the Interrupt Type Register.
+ 605:Libraries/CM3/inc/core_cm3.h ****  */
+ 606:Libraries/CM3/inc/core_cm3.h **** typedef struct
+ 607:Libraries/CM3/inc/core_cm3.h **** {
+ 608:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED0;
+ 609:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t ICTR;                    /*!< Offset: 0x004 (R/ )  Interrupt Control Type Register 
+ 610:Libraries/CM3/inc/core_cm3.h **** #if ((defined __CM3_REV) && (__CM3_REV >= 0x200))
+ 611:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t ACTLR;                   /*!< Offset: 0x008 (R/W)  Auxiliary Control Register      
+ 612:Libraries/CM3/inc/core_cm3.h **** #else
+ 613:Libraries/CM3/inc/core_cm3.h ****        uint32_t RESERVED1;
+ 614:Libraries/CM3/inc/core_cm3.h **** #endif
+ 615:Libraries/CM3/inc/core_cm3.h **** } InterruptType_Type;
+ 616:Libraries/CM3/inc/core_cm3.h **** 
+ 617:Libraries/CM3/inc/core_cm3.h **** /* Interrupt Controller Type Register Definitions */
+ 618:Libraries/CM3/inc/core_cm3.h **** #define IntType_ICTR_INTLINESNUM_Pos  0                                                   /*!< Inte
+ 619:Libraries/CM3/inc/core_cm3.h **** #define IntType_ICTR_INTLINESNUM_Msk (0x1FUL << IntType_ICTR_INTLINESNUM_Pos)             /*!< Inte
+ 620:Libraries/CM3/inc/core_cm3.h **** 
+ 621:Libraries/CM3/inc/core_cm3.h **** /* Auxiliary Control Register Definitions */
+ 622:Libraries/CM3/inc/core_cm3.h **** #define IntType_ACTLR_DISFOLD_Pos     2                                                   /*!< Inte
+ 623:Libraries/CM3/inc/core_cm3.h **** #define IntType_ACTLR_DISFOLD_Msk    (1UL << IntType_ACTLR_DISFOLD_Pos)                   /*!< Inte
+ 624:Libraries/CM3/inc/core_cm3.h **** 
+ 625:Libraries/CM3/inc/core_cm3.h **** #define IntType_ACTLR_DISDEFWBUF_Pos  1                                                   /*!< Inte
+ 626:Libraries/CM3/inc/core_cm3.h **** #define IntType_ACTLR_DISDEFWBUF_Msk (1UL << IntType_ACTLR_DISDEFWBUF_Pos)                /*!< Inte
+ 627:Libraries/CM3/inc/core_cm3.h **** 
+ 628:Libraries/CM3/inc/core_cm3.h **** #define IntType_ACTLR_DISMCYCINT_Pos  0                                                   /*!< Inte
+ 629:Libraries/CM3/inc/core_cm3.h **** #define IntType_ACTLR_DISMCYCINT_Msk (1UL << IntType_ACTLR_DISMCYCINT_Pos)                /*!< Inte
+ 630:Libraries/CM3/inc/core_cm3.h **** 
+ 631:Libraries/CM3/inc/core_cm3.h **** /*@}*/ /* end of group CMSIS_InterruptType */
+ 632:Libraries/CM3/inc/core_cm3.h **** 
+ 633:Libraries/CM3/inc/core_cm3.h **** 
+ 634:Libraries/CM3/inc/core_cm3.h **** #if (__MPU_PRESENT == 1)
+ 635:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS_core_register
+ 636:Libraries/CM3/inc/core_cm3.h ****     \defgroup CMSIS_MPU CMSIS MPU
+ 637:Libraries/CM3/inc/core_cm3.h ****   Type definitions for the Cortex-M Memory Protection Unit (MPU)
+ 638:Libraries/CM3/inc/core_cm3.h ****   @{
+ 639:Libraries/CM3/inc/core_cm3.h ****  */
+ 640:Libraries/CM3/inc/core_cm3.h **** 
+ 641:Libraries/CM3/inc/core_cm3.h **** /** \brief  Structure type to access the Memory Protection Unit (MPU).
+ 642:Libraries/CM3/inc/core_cm3.h ****  */
+ 643:Libraries/CM3/inc/core_cm3.h **** typedef struct
+ 644:Libraries/CM3/inc/core_cm3.h **** {
+ 645:Libraries/CM3/inc/core_cm3.h ****   __I  uint32_t TYPE;                    /*!< Offset: 0x000 (R/ )  MPU Type Register               
+ 646:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t CTRL;                    /*!< Offset: 0x004 (R/W)  MPU Control Register            
+ 647:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t RNR;                     /*!< Offset: 0x008 (R/W)  MPU Region RNRber Register      
+ 648:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t RBAR;                    /*!< Offset: 0x00C (R/W)  MPU Region Base Address Register
+ 649:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t RASR;                    /*!< Offset: 0x010 (R/W)  MPU Region Attribute and Size Re
+ 650:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t RBAR_A1;                 /*!< Offset: 0x014 (R/W)  MPU Alias 1 Region Base Address 
+ 651:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t RASR_A1;                 /*!< Offset: 0x018 (R/W)  MPU Alias 1 Region Attribute and
+ 652:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t RBAR_A2;                 /*!< Offset: 0x01C (R/W)  MPU Alias 2 Region Base Address 
+ 653:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t RASR_A2;                 /*!< Offset: 0x020 (R/W)  MPU Alias 2 Region Attribute and
+ 654:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t RBAR_A3;                 /*!< Offset: 0x024 (R/W)  MPU Alias 3 Region Base Address 
+ 655:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t RASR_A3;                 /*!< Offset: 0x028 (R/W)  MPU Alias 3 Region Attribute and
+ 656:Libraries/CM3/inc/core_cm3.h **** } MPU_Type;
+ 657:Libraries/CM3/inc/core_cm3.h **** 
+ 658:Libraries/CM3/inc/core_cm3.h **** /* MPU Type Register */
+ 659:Libraries/CM3/inc/core_cm3.h **** #define MPU_TYPE_IREGION_Pos               16                                             /*!< MPU 
+ 660:Libraries/CM3/inc/core_cm3.h **** #define MPU_TYPE_IREGION_Msk               (0xFFUL << MPU_TYPE_IREGION_Pos)               /*!< MPU 
+ 661:Libraries/CM3/inc/core_cm3.h **** 
+ 662:Libraries/CM3/inc/core_cm3.h **** #define MPU_TYPE_DREGION_Pos                8                                             /*!< MPU 
+ 663:Libraries/CM3/inc/core_cm3.h **** #define MPU_TYPE_DREGION_Msk               (0xFFUL << MPU_TYPE_DREGION_Pos)               /*!< MPU 
+ 664:Libraries/CM3/inc/core_cm3.h **** 
+ 665:Libraries/CM3/inc/core_cm3.h **** #define MPU_TYPE_SEPARATE_Pos               0                                             /*!< MPU 
+ 666:Libraries/CM3/inc/core_cm3.h **** #define MPU_TYPE_SEPARATE_Msk              (1UL << MPU_TYPE_SEPARATE_Pos)                 /*!< MPU 
+ 667:Libraries/CM3/inc/core_cm3.h **** 
+ 668:Libraries/CM3/inc/core_cm3.h **** /* MPU Control Register */
+ 669:Libraries/CM3/inc/core_cm3.h **** #define MPU_CTRL_PRIVDEFENA_Pos             2                                             /*!< MPU 
+ 670:Libraries/CM3/inc/core_cm3.h **** #define MPU_CTRL_PRIVDEFENA_Msk            (1UL << MPU_CTRL_PRIVDEFENA_Pos)               /*!< MPU 
+ 671:Libraries/CM3/inc/core_cm3.h **** 
+ 672:Libraries/CM3/inc/core_cm3.h **** #define MPU_CTRL_HFNMIENA_Pos               1                                             /*!< MPU 
+ 673:Libraries/CM3/inc/core_cm3.h **** #define MPU_CTRL_HFNMIENA_Msk              (1UL << MPU_CTRL_HFNMIENA_Pos)                 /*!< MPU 
+ 674:Libraries/CM3/inc/core_cm3.h **** 
+ 675:Libraries/CM3/inc/core_cm3.h **** #define MPU_CTRL_ENABLE_Pos                 0                                             /*!< MPU 
+ 676:Libraries/CM3/inc/core_cm3.h **** #define MPU_CTRL_ENABLE_Msk                (1UL << MPU_CTRL_ENABLE_Pos)                   /*!< MPU 
+ 677:Libraries/CM3/inc/core_cm3.h **** 
+ 678:Libraries/CM3/inc/core_cm3.h **** /* MPU Region Number Register */
+ 679:Libraries/CM3/inc/core_cm3.h **** #define MPU_RNR_REGION_Pos                  0                                             /*!< MPU 
+ 680:Libraries/CM3/inc/core_cm3.h **** #define MPU_RNR_REGION_Msk                 (0xFFUL << MPU_RNR_REGION_Pos)                 /*!< MPU 
+ 681:Libraries/CM3/inc/core_cm3.h **** 
+ 682:Libraries/CM3/inc/core_cm3.h **** /* MPU Region Base Address Register */
+ 683:Libraries/CM3/inc/core_cm3.h **** #define MPU_RBAR_ADDR_Pos                   5                                             /*!< MPU 
+ 684:Libraries/CM3/inc/core_cm3.h **** #define MPU_RBAR_ADDR_Msk                  (0x7FFFFFFUL << MPU_RBAR_ADDR_Pos)             /*!< MPU 
+ 685:Libraries/CM3/inc/core_cm3.h **** 
+ 686:Libraries/CM3/inc/core_cm3.h **** #define MPU_RBAR_VALID_Pos                  4                                             /*!< MPU 
+ 687:Libraries/CM3/inc/core_cm3.h **** #define MPU_RBAR_VALID_Msk                 (1UL << MPU_RBAR_VALID_Pos)                    /*!< MPU 
+ 688:Libraries/CM3/inc/core_cm3.h **** 
+ 689:Libraries/CM3/inc/core_cm3.h **** #define MPU_RBAR_REGION_Pos                 0                                             /*!< MPU 
+ 690:Libraries/CM3/inc/core_cm3.h **** #define MPU_RBAR_REGION_Msk                (0xFUL << MPU_RBAR_REGION_Pos)                 /*!< MPU 
+ 691:Libraries/CM3/inc/core_cm3.h **** 
+ 692:Libraries/CM3/inc/core_cm3.h **** /* MPU Region Attribute and Size Register */
+ 693:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_XN_Pos                    28                                             /*!< MPU 
+ 694:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_XN_Msk                    (1UL << MPU_RASR_XN_Pos)                       /*!< MPU 
+ 695:Libraries/CM3/inc/core_cm3.h **** 
+ 696:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_AP_Pos                    24                                             /*!< MPU 
+ 697:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_AP_Msk                    (7UL << MPU_RASR_AP_Pos)                       /*!< MPU 
+ 698:Libraries/CM3/inc/core_cm3.h **** 
+ 699:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_TEX_Pos                   19                                             /*!< MPU 
+ 700:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_TEX_Msk                   (7UL << MPU_RASR_TEX_Pos)                      /*!< MPU 
+ 701:Libraries/CM3/inc/core_cm3.h **** 
+ 702:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_S_Pos                     18                                             /*!< MPU 
+ 703:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_S_Msk                     (1UL << MPU_RASR_S_Pos)                        /*!< MPU 
+ 704:Libraries/CM3/inc/core_cm3.h **** 
+ 705:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_C_Pos                     17                                             /*!< MPU 
+ 706:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_C_Msk                     (1UL << MPU_RASR_C_Pos)                        /*!< MPU 
+ 707:Libraries/CM3/inc/core_cm3.h **** 
+ 708:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_B_Pos                     16                                             /*!< MPU 
+ 709:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_B_Msk                     (1UL << MPU_RASR_B_Pos)                        /*!< MPU 
+ 710:Libraries/CM3/inc/core_cm3.h **** 
+ 711:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_SRD_Pos                    8                                             /*!< MPU 
+ 712:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_SRD_Msk                   (0xFFUL << MPU_RASR_SRD_Pos)                   /*!< MPU 
+ 713:Libraries/CM3/inc/core_cm3.h **** 
+ 714:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_SIZE_Pos                   1                                             /*!< MPU 
+ 715:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_SIZE_Msk                  (0x1FUL << MPU_RASR_SIZE_Pos)                  /*!< MPU 
+ 716:Libraries/CM3/inc/core_cm3.h **** 
+ 717:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_ENA_Pos                     0                                            /*!< MPU 
+ 718:Libraries/CM3/inc/core_cm3.h **** #define MPU_RASR_ENA_Msk                    (0x1UL << MPU_RASR_ENA_Pos)                   /*!< MPU 
+ 719:Libraries/CM3/inc/core_cm3.h **** 
+ 720:Libraries/CM3/inc/core_cm3.h **** /*@} end of group CMSIS_MPU */
+ 721:Libraries/CM3/inc/core_cm3.h **** #endif
+ 722:Libraries/CM3/inc/core_cm3.h **** 
+ 723:Libraries/CM3/inc/core_cm3.h **** 
+ 724:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS_core_register
+ 725:Libraries/CM3/inc/core_cm3.h ****     \defgroup CMSIS_CoreDebug CMSIS Core Debug
+ 726:Libraries/CM3/inc/core_cm3.h ****   Type definitions for the Cortex-M Core Debug Registers
+ 727:Libraries/CM3/inc/core_cm3.h ****   @{
+ 728:Libraries/CM3/inc/core_cm3.h ****  */
+ 729:Libraries/CM3/inc/core_cm3.h **** 
+ 730:Libraries/CM3/inc/core_cm3.h **** /** \brief  Structure type to access the Core Debug Register (CoreDebug).
+ 731:Libraries/CM3/inc/core_cm3.h ****  */
+ 732:Libraries/CM3/inc/core_cm3.h **** typedef struct
+ 733:Libraries/CM3/inc/core_cm3.h **** {
+ 734:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t DHCSR;                   /*!< Offset: 0x000 (R/W)  Debug Halting Control and Status
+ 735:Libraries/CM3/inc/core_cm3.h ****   __O  uint32_t DCRSR;                   /*!< Offset: 0x004 ( /W)  Debug Core Register Selector Reg
+ 736:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t DCRDR;                   /*!< Offset: 0x008 (R/W)  Debug Core Register Data Registe
+ 737:Libraries/CM3/inc/core_cm3.h ****   __IO uint32_t DEMCR;                   /*!< Offset: 0x00C (R/W)  Debug Exception and Monitor Cont
+ 738:Libraries/CM3/inc/core_cm3.h **** } CoreDebug_Type;
+ 739:Libraries/CM3/inc/core_cm3.h **** 
+ 740:Libraries/CM3/inc/core_cm3.h **** /* Debug Halting Control and Status Register */
+ 741:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_DBGKEY_Pos         16                                             /*!< Core
+ 742:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_DBGKEY_Msk         (0xFFFFUL << CoreDebug_DHCSR_DBGKEY_Pos)       /*!< Core
+ 743:Libraries/CM3/inc/core_cm3.h **** 
+ 744:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_RESET_ST_Pos     25                                             /*!< Core
+ 745:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_RESET_ST_Msk     (1UL << CoreDebug_DHCSR_S_RESET_ST_Pos)        /*!< Core
+ 746:Libraries/CM3/inc/core_cm3.h **** 
+ 747:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_RETIRE_ST_Pos    24                                             /*!< Core
+ 748:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_RETIRE_ST_Msk    (1UL << CoreDebug_DHCSR_S_RETIRE_ST_Pos)       /*!< Core
+ 749:Libraries/CM3/inc/core_cm3.h **** 
+ 750:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_LOCKUP_Pos       19                                             /*!< Core
+ 751:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_LOCKUP_Msk       (1UL << CoreDebug_DHCSR_S_LOCKUP_Pos)          /*!< Core
+ 752:Libraries/CM3/inc/core_cm3.h **** 
+ 753:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_SLEEP_Pos        18                                             /*!< Core
+ 754:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_SLEEP_Msk        (1UL << CoreDebug_DHCSR_S_SLEEP_Pos)           /*!< Core
+ 755:Libraries/CM3/inc/core_cm3.h **** 
+ 756:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_HALT_Pos         17                                             /*!< Core
+ 757:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_HALT_Msk         (1UL << CoreDebug_DHCSR_S_HALT_Pos)            /*!< Core
+ 758:Libraries/CM3/inc/core_cm3.h **** 
+ 759:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_REGRDY_Pos       16                                             /*!< Core
+ 760:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_S_REGRDY_Msk       (1UL << CoreDebug_DHCSR_S_REGRDY_Pos)          /*!< Core
+ 761:Libraries/CM3/inc/core_cm3.h **** 
+ 762:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_C_SNAPSTALL_Pos     5                                             /*!< Core
+ 763:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_C_SNAPSTALL_Msk    (1UL << CoreDebug_DHCSR_C_SNAPSTALL_Pos)       /*!< Core
+ 764:Libraries/CM3/inc/core_cm3.h **** 
+ 765:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_C_MASKINTS_Pos      3                                             /*!< Core
+ 766:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_C_MASKINTS_Msk     (1UL << CoreDebug_DHCSR_C_MASKINTS_Pos)        /*!< Core
+ 767:Libraries/CM3/inc/core_cm3.h **** 
+ 768:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_C_STEP_Pos          2                                             /*!< Core
+ 769:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_C_STEP_Msk         (1UL << CoreDebug_DHCSR_C_STEP_Pos)            /*!< Core
+ 770:Libraries/CM3/inc/core_cm3.h **** 
+ 771:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_C_HALT_Pos          1                                             /*!< Core
+ 772:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_C_HALT_Msk         (1UL << CoreDebug_DHCSR_C_HALT_Pos)            /*!< Core
+ 773:Libraries/CM3/inc/core_cm3.h **** 
+ 774:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_C_DEBUGEN_Pos       0                                             /*!< Core
+ 775:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DHCSR_C_DEBUGEN_Msk      (1UL << CoreDebug_DHCSR_C_DEBUGEN_Pos)         /*!< Core
+ 776:Libraries/CM3/inc/core_cm3.h **** 
+ 777:Libraries/CM3/inc/core_cm3.h **** /* Debug Core Register Selector Register */
+ 778:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DCRSR_REGWnR_Pos         16                                             /*!< Core
+ 779:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DCRSR_REGWnR_Msk         (1UL << CoreDebug_DCRSR_REGWnR_Pos)            /*!< Core
+ 780:Libraries/CM3/inc/core_cm3.h **** 
+ 781:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DCRSR_REGSEL_Pos          0                                             /*!< Core
+ 782:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DCRSR_REGSEL_Msk         (0x1FUL << CoreDebug_DCRSR_REGSEL_Pos)         /*!< Core
+ 783:Libraries/CM3/inc/core_cm3.h **** 
+ 784:Libraries/CM3/inc/core_cm3.h **** /* Debug Exception and Monitor Control Register */
+ 785:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_TRCENA_Pos         24                                             /*!< Core
+ 786:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_TRCENA_Msk         (1UL << CoreDebug_DEMCR_TRCENA_Pos)            /*!< Core
+ 787:Libraries/CM3/inc/core_cm3.h **** 
+ 788:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_MON_REQ_Pos        19                                             /*!< Core
+ 789:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_MON_REQ_Msk        (1UL << CoreDebug_DEMCR_MON_REQ_Pos)           /*!< Core
+ 790:Libraries/CM3/inc/core_cm3.h **** 
+ 791:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_MON_STEP_Pos       18                                             /*!< Core
+ 792:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_MON_STEP_Msk       (1UL << CoreDebug_DEMCR_MON_STEP_Pos)          /*!< Core
+ 793:Libraries/CM3/inc/core_cm3.h **** 
+ 794:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_MON_PEND_Pos       17                                             /*!< Core
+ 795:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_MON_PEND_Msk       (1UL << CoreDebug_DEMCR_MON_PEND_Pos)          /*!< Core
+ 796:Libraries/CM3/inc/core_cm3.h **** 
+ 797:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_MON_EN_Pos         16                                             /*!< Core
+ 798:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_MON_EN_Msk         (1UL << CoreDebug_DEMCR_MON_EN_Pos)            /*!< Core
+ 799:Libraries/CM3/inc/core_cm3.h **** 
+ 800:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_HARDERR_Pos     10                                             /*!< Core
+ 801:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_HARDERR_Msk     (1UL << CoreDebug_DEMCR_VC_HARDERR_Pos)        /*!< Core
+ 802:Libraries/CM3/inc/core_cm3.h **** 
+ 803:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_INTERR_Pos       9                                             /*!< Core
+ 804:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_INTERR_Msk      (1UL << CoreDebug_DEMCR_VC_INTERR_Pos)         /*!< Core
+ 805:Libraries/CM3/inc/core_cm3.h **** 
+ 806:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_BUSERR_Pos       8                                             /*!< Core
+ 807:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_BUSERR_Msk      (1UL << CoreDebug_DEMCR_VC_BUSERR_Pos)         /*!< Core
+ 808:Libraries/CM3/inc/core_cm3.h **** 
+ 809:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_STATERR_Pos      7                                             /*!< Core
+ 810:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_STATERR_Msk     (1UL << CoreDebug_DEMCR_VC_STATERR_Pos)        /*!< Core
+ 811:Libraries/CM3/inc/core_cm3.h **** 
+ 812:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_CHKERR_Pos       6                                             /*!< Core
+ 813:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_CHKERR_Msk      (1UL << CoreDebug_DEMCR_VC_CHKERR_Pos)         /*!< Core
+ 814:Libraries/CM3/inc/core_cm3.h **** 
+ 815:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_NOCPERR_Pos      5                                             /*!< Core
+ 816:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_NOCPERR_Msk     (1UL << CoreDebug_DEMCR_VC_NOCPERR_Pos)        /*!< Core
+ 817:Libraries/CM3/inc/core_cm3.h **** 
+ 818:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_MMERR_Pos        4                                             /*!< Core
+ 819:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_MMERR_Msk       (1UL << CoreDebug_DEMCR_VC_MMERR_Pos)          /*!< Core
+ 820:Libraries/CM3/inc/core_cm3.h **** 
+ 821:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_CORERESET_Pos    0                                             /*!< Core
+ 822:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_DEMCR_VC_CORERESET_Msk   (1UL << CoreDebug_DEMCR_VC_CORERESET_Pos)      /*!< Core
+ 823:Libraries/CM3/inc/core_cm3.h **** 
+ 824:Libraries/CM3/inc/core_cm3.h **** /*@} end of group CMSIS_CoreDebug */
+ 825:Libraries/CM3/inc/core_cm3.h **** 
+ 826:Libraries/CM3/inc/core_cm3.h **** 
+ 827:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS_core_register
+ 828:Libraries/CM3/inc/core_cm3.h ****   @{
+ 829:Libraries/CM3/inc/core_cm3.h ****  */
+ 830:Libraries/CM3/inc/core_cm3.h **** 
+ 831:Libraries/CM3/inc/core_cm3.h **** /* Memory mapping of Cortex-M3 Hardware */
+ 832:Libraries/CM3/inc/core_cm3.h **** #define SCS_BASE            (0xE000E000UL)                            /*!< System Control Space Bas
+ 833:Libraries/CM3/inc/core_cm3.h **** #define ITM_BASE            (0xE0000000UL)                            /*!< ITM Base Address        
+ 834:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug_BASE      (0xE000EDF0UL)                            /*!< Core Debug Base Address 
+ 835:Libraries/CM3/inc/core_cm3.h **** #define SysTick_BASE        (SCS_BASE +  0x0010UL)                    /*!< SysTick Base Address    
+ 836:Libraries/CM3/inc/core_cm3.h **** #define NVIC_BASE           (SCS_BASE +  0x0100UL)                    /*!< NVIC Base Address       
+ 837:Libraries/CM3/inc/core_cm3.h **** #define SCB_BASE            (SCS_BASE +  0x0D00UL)                    /*!< System Control Block Bas
+ 838:Libraries/CM3/inc/core_cm3.h **** 
+ 839:Libraries/CM3/inc/core_cm3.h **** #define InterruptType       ((InterruptType_Type *) SCS_BASE)         /*!< Interrupt Type Register 
+ 840:Libraries/CM3/inc/core_cm3.h **** #define SCB                 ((SCB_Type *)           SCB_BASE)         /*!< SCB configuration struct
+ 841:Libraries/CM3/inc/core_cm3.h **** #define SysTick             ((SysTick_Type *)       SysTick_BASE)     /*!< SysTick configuration st
+ 842:Libraries/CM3/inc/core_cm3.h **** #define NVIC                ((NVIC_Type *)          NVIC_BASE)        /*!< NVIC configuration struc
+ 843:Libraries/CM3/inc/core_cm3.h **** #define ITM                 ((ITM_Type *)           ITM_BASE)         /*!< ITM configuration struct
+ 844:Libraries/CM3/inc/core_cm3.h **** #define CoreDebug           ((CoreDebug_Type *)     CoreDebug_BASE)   /*!< Core Debug configuration
+ 845:Libraries/CM3/inc/core_cm3.h **** 
+ 846:Libraries/CM3/inc/core_cm3.h **** #if (__MPU_PRESENT == 1)
+ 847:Libraries/CM3/inc/core_cm3.h ****   #define MPU_BASE          (SCS_BASE +  0x0D90UL)                    /*!< Memory Protection Unit  
+ 848:Libraries/CM3/inc/core_cm3.h ****   #define MPU               ((MPU_Type*)            MPU_BASE)         /*!< Memory Protection Unit  
+ 849:Libraries/CM3/inc/core_cm3.h **** #endif
+ 850:Libraries/CM3/inc/core_cm3.h **** 
+ 851:Libraries/CM3/inc/core_cm3.h **** /*@} */
+ 852:Libraries/CM3/inc/core_cm3.h **** 
+ 853:Libraries/CM3/inc/core_cm3.h **** 
+ 854:Libraries/CM3/inc/core_cm3.h **** 
+ 855:Libraries/CM3/inc/core_cm3.h **** /*******************************************************************************
+ 856:Libraries/CM3/inc/core_cm3.h ****  *                Hardware Abstraction Layer
+ 857:Libraries/CM3/inc/core_cm3.h ****  ******************************************************************************/
+ 858:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS
+ 859:Libraries/CM3/inc/core_cm3.h ****   \addtogroup CMSIS_Core_FunctionInterface CMSIS Core Function Interface
+ 860:Libraries/CM3/inc/core_cm3.h ****   Core Function Interface contains:
+ 861:Libraries/CM3/inc/core_cm3.h ****   - Core NVIC Functions
+ 862:Libraries/CM3/inc/core_cm3.h ****   - Core SysTick Functions
+ 863:Libraries/CM3/inc/core_cm3.h ****   - Core Debug Functions
+ 864:Libraries/CM3/inc/core_cm3.h ****   - Core Register Access Functions
+ 865:Libraries/CM3/inc/core_cm3.h **** */
+ 866:Libraries/CM3/inc/core_cm3.h **** 
+ 867:Libraries/CM3/inc/core_cm3.h **** 
+ 868:Libraries/CM3/inc/core_cm3.h **** 
+ 869:Libraries/CM3/inc/core_cm3.h **** /* ##########################   NVIC functions  #################################### */
+ 870:Libraries/CM3/inc/core_cm3.h **** /** \ingroup  CMSIS_Core_FunctionInterface
+ 871:Libraries/CM3/inc/core_cm3.h ****     \defgroup CMSIS_Core_NVICFunctions CMSIS Core NVIC Functions
+ 872:Libraries/CM3/inc/core_cm3.h ****   @{
+ 873:Libraries/CM3/inc/core_cm3.h ****  */
+ 874:Libraries/CM3/inc/core_cm3.h **** /** @addtogroup CMSIS_Core_NVICFunctions
+ 875:Libraries/CM3/inc/core_cm3.h ****  * @{
+ 876:Libraries/CM3/inc/core_cm3.h ****  */
+ 877:Libraries/CM3/inc/core_cm3.h **** /** \brief  Set Priority Grouping
+ 878:Libraries/CM3/inc/core_cm3.h **** 
+ 879:Libraries/CM3/inc/core_cm3.h ****   This function sets the priority grouping field using the required unlock sequence.
+ 880:Libraries/CM3/inc/core_cm3.h ****   The parameter PriorityGroup is assigned to the field SCB->AIRCR [10:8] PRIGROUP field.
+ 881:Libraries/CM3/inc/core_cm3.h ****   Only values from 0..7 are used.
+ 882:Libraries/CM3/inc/core_cm3.h ****   In case of a conflict between priority grouping and available
+ 883:Libraries/CM3/inc/core_cm3.h ****   priority bits (__NVIC_PRIO_BITS) the smallest possible priority group is set.
+ 884:Libraries/CM3/inc/core_cm3.h **** 
+ 885:Libraries/CM3/inc/core_cm3.h ****     \param [in]      PriorityGroup  Priority grouping field
+ 886:Libraries/CM3/inc/core_cm3.h ****  */
+ 887:Libraries/CM3/inc/core_cm3.h **** static __INLINE void NVIC_SetPriorityGrouping(uint32_t PriorityGroup)
+ 888:Libraries/CM3/inc/core_cm3.h **** {
+ 889:Libraries/CM3/inc/core_cm3.h ****   uint32_t reg_value;
+ 890:Libraries/CM3/inc/core_cm3.h ****   uint32_t PriorityGroupTmp = (PriorityGroup & 0x07);                         /* only values 0..7 a
+ 891:Libraries/CM3/inc/core_cm3.h **** 
+ 892:Libraries/CM3/inc/core_cm3.h ****   reg_value  =  SCB->AIRCR;                                                   /* read old register 
+ 893:Libraries/CM3/inc/core_cm3.h ****   reg_value &= ~(SCB_AIRCR_VECTKEY_Msk | SCB_AIRCR_PRIGROUP_Msk);             /* clear bits to chan
+ 894:Libraries/CM3/inc/core_cm3.h ****   reg_value  =  (reg_value                       |
+ 895:Libraries/CM3/inc/core_cm3.h ****                 (0x5FA << SCB_AIRCR_VECTKEY_Pos) |
+ 896:Libraries/CM3/inc/core_cm3.h ****                 (PriorityGroupTmp << 8));                                     /* Insert write key a
+ 897:Libraries/CM3/inc/core_cm3.h ****   SCB->AIRCR =  reg_value;
+ 898:Libraries/CM3/inc/core_cm3.h **** }
+ 899:Libraries/CM3/inc/core_cm3.h **** 
+ 900:Libraries/CM3/inc/core_cm3.h **** 
+ 901:Libraries/CM3/inc/core_cm3.h **** /** \brief  Get Priority Grouping
+ 902:Libraries/CM3/inc/core_cm3.h **** 
+ 903:Libraries/CM3/inc/core_cm3.h ****   This function gets the priority grouping from NVIC Interrupt Controller.
+ 904:Libraries/CM3/inc/core_cm3.h ****   Priority grouping is SCB->AIRCR [10:8] PRIGROUP field.
+ 905:Libraries/CM3/inc/core_cm3.h **** 
+ 906:Libraries/CM3/inc/core_cm3.h ****     \return                Priority grouping field
+ 907:Libraries/CM3/inc/core_cm3.h ****  */
+ 908:Libraries/CM3/inc/core_cm3.h **** static __INLINE uint32_t NVIC_GetPriorityGrouping(void)
+ 909:Libraries/CM3/inc/core_cm3.h **** {
+ 910:Libraries/CM3/inc/core_cm3.h ****   return ((SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) >> SCB_AIRCR_PRIGROUP_Pos);   /* read priority grou
+ 911:Libraries/CM3/inc/core_cm3.h **** }
+ 912:Libraries/CM3/inc/core_cm3.h **** 
+ 913:Libraries/CM3/inc/core_cm3.h **** 
+ 914:Libraries/CM3/inc/core_cm3.h **** /** \brief  Enable External Interrupt
+ 915:Libraries/CM3/inc/core_cm3.h **** 
+ 916:Libraries/CM3/inc/core_cm3.h ****     This function enables a device specific interupt in the NVIC interrupt controller.
+ 917:Libraries/CM3/inc/core_cm3.h ****     The interrupt number cannot be a negative value.
+ 918:Libraries/CM3/inc/core_cm3.h **** 
+ 919:Libraries/CM3/inc/core_cm3.h ****     \param [in]      IRQn  Number of the external interrupt to enable
+ 920:Libraries/CM3/inc/core_cm3.h ****  */
+ 921:Libraries/CM3/inc/core_cm3.h **** static __INLINE void NVIC_EnableIRQ(IRQn_Type IRQn)
+ 922:Libraries/CM3/inc/core_cm3.h **** {
+  25              		.loc 1 922 0
+  26              		.cfi_startproc
+  27              		@ args = 0, pretend = 0, frame = 8
+  28              		@ frame_needed = 1, uses_anonymous_args = 0
+  29              		@ link register save eliminated.
+  30 0000 80B4     		push	{r7}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 4
+  33              		.cfi_offset 7, -4
+  34 0002 83B0     		sub	sp, sp, #12
+  35              	.LCFI1:
+  36              		.cfi_def_cfa_offset 16
+  37 0004 00AF     		add	r7, sp, #0
+  38              	.LCFI2:
+  39              		.cfi_def_cfa_register 7
+  40 0006 0346     		mov	r3, r0
+  41 0008 FB71     		strb	r3, [r7, #7]
+ 923:Libraries/CM3/inc/core_cm3.h ****   NVIC->ISER[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F)); /* enable interrupt */
+  42              		.loc 1 923 0
+  43 000a 4FF46143 		mov	r3, #57600
+  44 000e CEF20003 		movt	r3, 57344
+  45 0012 97F90720 		ldrsb	r2, [r7, #7]
+  46 0016 4FEA5212 		lsr	r2, r2, #5
+  47 001a F979     		ldrb	r1, [r7, #7]	@ zero_extendqisi2
+  48 001c 01F01F01 		and	r1, r1, #31
+  49 0020 4FF00100 		mov	r0, #1
+  50 0024 00FA01F1 		lsl	r1, r0, r1
+  51 0028 43F82210 		str	r1, [r3, r2, lsl #2]
+ 924:Libraries/CM3/inc/core_cm3.h **** }
+  52              		.loc 1 924 0
+  53 002c 07F10C07 		add	r7, r7, #12
+  54 0030 BD46     		mov	sp, r7
+  55 0032 80BC     		pop	{r7}
+  56 0034 7047     		bx	lr
+  57              		.cfi_endproc
+  58              	.LFE40:
+  60 0036 00BF     		.align	2
+  61              		.thumb
+  62              		.thumb_func
+  64              	NVIC_DisableIRQ:
+  65              	.LFB41:
+ 925:Libraries/CM3/inc/core_cm3.h **** 
+ 926:Libraries/CM3/inc/core_cm3.h **** 
+ 927:Libraries/CM3/inc/core_cm3.h **** /** \brief  Disable External Interrupt
+ 928:Libraries/CM3/inc/core_cm3.h **** 
+ 929:Libraries/CM3/inc/core_cm3.h ****     This function disables a device specific interupt in the NVIC interrupt controller.
+ 930:Libraries/CM3/inc/core_cm3.h ****     The interrupt number cannot be a negative value.
+ 931:Libraries/CM3/inc/core_cm3.h **** 
+ 932:Libraries/CM3/inc/core_cm3.h ****     \param [in]      IRQn  Number of the external interrupt to disable
+ 933:Libraries/CM3/inc/core_cm3.h ****  */
+ 934:Libraries/CM3/inc/core_cm3.h **** static __INLINE void NVIC_DisableIRQ(IRQn_Type IRQn)
+ 935:Libraries/CM3/inc/core_cm3.h **** {
+  66              		.loc 1 935 0
+  67              		.cfi_startproc
+  68              		@ args = 0, pretend = 0, frame = 8
+  69              		@ frame_needed = 1, uses_anonymous_args = 0
+  70              		@ link register save eliminated.
+  71 0038 80B4     		push	{r7}
+  72              	.LCFI3:
+  73              		.cfi_def_cfa_offset 4
+  74              		.cfi_offset 7, -4
+  75 003a 83B0     		sub	sp, sp, #12
+  76              	.LCFI4:
+  77              		.cfi_def_cfa_offset 16
+  78 003c 00AF     		add	r7, sp, #0
+  79              	.LCFI5:
+  80              		.cfi_def_cfa_register 7
+  81 003e 0346     		mov	r3, r0
+  82 0040 FB71     		strb	r3, [r7, #7]
+ 936:Libraries/CM3/inc/core_cm3.h ****   NVIC->ICER[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F)); /* disable interrupt */
+  83              		.loc 1 936 0
+  84 0042 4FF46143 		mov	r3, #57600
+  85 0046 CEF20003 		movt	r3, 57344
+  86 004a 97F90720 		ldrsb	r2, [r7, #7]
+  87 004e 4FEA5212 		lsr	r2, r2, #5
+  88 0052 F979     		ldrb	r1, [r7, #7]	@ zero_extendqisi2
+  89 0054 01F01F01 		and	r1, r1, #31
+  90 0058 4FF00100 		mov	r0, #1
+  91 005c 00FA01F1 		lsl	r1, r0, r1
+  92 0060 02F12002 		add	r2, r2, #32
+  93 0064 43F82210 		str	r1, [r3, r2, lsl #2]
+ 937:Libraries/CM3/inc/core_cm3.h **** }
+  94              		.loc 1 937 0
+  95 0068 07F10C07 		add	r7, r7, #12
+  96 006c BD46     		mov	sp, r7
+  97 006e 80BC     		pop	{r7}
+  98 0070 7047     		bx	lr
+  99              		.cfi_endproc
+ 100              	.LFE41:
+ 102 0072 00BF     		.align	2
+ 103              		.global	enable_USB_interrupts
+ 104              		.thumb
+ 105              		.thumb_func
+ 107              	enable_USB_interrupts:
+ 108              	.LFB55:
+ 109              		.file 2 "Libraries/uC-CSP/LPC17xx/USB/src/intenable.c"
+   1:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** #include <LPC17xx.h>
+   2:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** 
+   3:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** void enable_USB_interrupts(void)
+   4:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** {
+ 110              		.loc 2 4 0
+ 111              		.cfi_startproc
+ 112              		@ args = 0, pretend = 0, frame = 0
+ 113              		@ frame_needed = 1, uses_anonymous_args = 0
+ 114 0074 80B5     		push	{r7, lr}
+ 115              	.LCFI6:
+ 116              		.cfi_def_cfa_offset 8
+ 117              		.cfi_offset 14, -4
+ 118              		.cfi_offset 7, -8
+ 119 0076 00AF     		add	r7, sp, #0
+ 120              	.LCFI7:
+ 121              		.cfi_def_cfa_register 7
+   5:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** 	NVIC_EnableIRQ(USB_IRQn);
+ 122              		.loc 2 5 0
+ 123 0078 4FF01800 		mov	r0, #24
+ 124 007c FFF7C0FF 		bl	NVIC_EnableIRQ
+   6:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** }
+ 125              		.loc 2 6 0
+ 126 0080 80BD     		pop	{r7, pc}
+ 127              		.cfi_endproc
+ 128              	.LFE55:
+ 130 0082 00BF     		.align	2
+ 131              		.global	disable_USB_interrupts
+ 132              		.thumb
+ 133              		.thumb_func
+ 135              	disable_USB_interrupts:
+ 136              	.LFB56:
+   7:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** 
+   8:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** void disable_USB_interrupts(void)
+   9:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** {
+ 137              		.loc 2 9 0
+ 138              		.cfi_startproc
+ 139              		@ args = 0, pretend = 0, frame = 0
+ 140              		@ frame_needed = 1, uses_anonymous_args = 0
+ 141 0084 80B5     		push	{r7, lr}
+ 142              	.LCFI8:
+ 143              		.cfi_def_cfa_offset 8
+ 144              		.cfi_offset 14, -4
+ 145              		.cfi_offset 7, -8
+ 146 0086 00AF     		add	r7, sp, #0
+ 147              	.LCFI9:
+ 148              		.cfi_def_cfa_register 7
+  10:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** 	NVIC_DisableIRQ(USB_IRQn);
+ 149              		.loc 2 10 0
+ 150 0088 4FF01800 		mov	r0, #24
+ 151 008c FFF7D4FF 		bl	NVIC_DisableIRQ
+  11:Libraries/uC-CSP/LPC17xx/USB/src/intenable.c **** }
+ 152              		.loc 2 11 0
+ 153 0090 80BD     		pop	{r7, pc}
+ 154              		.cfi_endproc
+ 155              	.LFE56:
+ 157              	.Letext0:
+ 158              		.file 3 "Libraries/CM3/inc/LPC17xx.h"
+ 159              		.file 4 "/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none
+DEFINED SYMBOLS
+                            *ABS*:00000000 intenable.c
+     /tmp/ccL320BG.s:18     .text:00000000 $t
+     /tmp/ccL320BG.s:22     .text:00000000 NVIC_EnableIRQ
+     /tmp/ccL320BG.s:64     .text:00000038 NVIC_DisableIRQ
+     /tmp/ccL320BG.s:107    .text:00000074 enable_USB_interrupts
+     /tmp/ccL320BG.s:135    .text:00000084 disable_USB_interrupts
+                     .debug_frame:00000010 $d
+
+NO UNDEFINED SYMBOLS

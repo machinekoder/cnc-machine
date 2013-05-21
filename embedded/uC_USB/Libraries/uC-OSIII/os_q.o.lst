@@ -1,0 +1,2780 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"os_q.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	OSQCreate
+  20              		.thumb
+  21              		.thumb_func
+  23              	OSQCreate:
+  24              	.LFB0:
+  25              		.file 1 "Libraries/uC-OSIII/os_q.c"
+   1:Libraries/uC-OSIII/os_q.c **** /*
+   2:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+   3:Libraries/uC-OSIII/os_q.c **** *                                                      uC/OS-III
+   4:Libraries/uC-OSIII/os_q.c **** *                                                 The Real-Time Kernel
+   5:Libraries/uC-OSIII/os_q.c **** *
+   6:Libraries/uC-OSIII/os_q.c **** *                                  (c) Copyright 2009-2010; Micrium, Inc.; Weston, FL
+   7:Libraries/uC-OSIII/os_q.c **** *                          All rights reserved.  Protected by international copyright laws.
+   8:Libraries/uC-OSIII/os_q.c **** *
+   9:Libraries/uC-OSIII/os_q.c **** *                                                MESSAGE QUEUE MANAGEMENT
+  10:Libraries/uC-OSIII/os_q.c **** *
+  11:Libraries/uC-OSIII/os_q.c **** * File    : OS_Q.C
+  12:Libraries/uC-OSIII/os_q.c **** * By      : JJL
+  13:Libraries/uC-OSIII/os_q.c **** * Version : V3.01.2
+  14:Libraries/uC-OSIII/os_q.c **** *
+  15:Libraries/uC-OSIII/os_q.c **** * LICENSING TERMS:
+  16:Libraries/uC-OSIII/os_q.c **** * ---------------
+  17:Libraries/uC-OSIII/os_q.c **** *               uC/OS-III is provided in source form to registered licensees ONLY.  It is
+  18:Libraries/uC-OSIII/os_q.c **** *               illegal to distribute this source code to any third party unless you receive
+  19:Libraries/uC-OSIII/os_q.c **** *               written permission by an authorized Micrium representative.  Knowledge of
+  20:Libraries/uC-OSIII/os_q.c **** *               the source code may NOT be used to develop a similar product.
+  21:Libraries/uC-OSIII/os_q.c **** *
+  22:Libraries/uC-OSIII/os_q.c **** *               Please help us continue to provide the Embedded community with the finest
+  23:Libraries/uC-OSIII/os_q.c **** *               software available.  Your honesty is greatly appreciated.
+  24:Libraries/uC-OSIII/os_q.c **** *
+  25:Libraries/uC-OSIII/os_q.c **** *               You can contact us at www.micrium.com.
+  26:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+  27:Libraries/uC-OSIII/os_q.c **** */
+  28:Libraries/uC-OSIII/os_q.c **** 
+  29:Libraries/uC-OSIII/os_q.c **** #include <os.h>
+  30:Libraries/uC-OSIII/os_q.c **** 
+  31:Libraries/uC-OSIII/os_q.c **** #ifdef VSC_INCLUDE_SOURCE_FILE_NAMES
+  32:Libraries/uC-OSIII/os_q.c **** const  CPU_CHAR  *os_q__c = "$Id: $";
+  33:Libraries/uC-OSIII/os_q.c **** #endif
+  34:Libraries/uC-OSIII/os_q.c **** 
+  35:Libraries/uC-OSIII/os_q.c **** 
+  36:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_Q_EN > 0u
+  37:Libraries/uC-OSIII/os_q.c **** /*
+  38:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+  39:Libraries/uC-OSIII/os_q.c **** *                                               CREATE A MESSAGE QUEUE
+  40:Libraries/uC-OSIII/os_q.c **** *
+  41:Libraries/uC-OSIII/os_q.c **** * Description: This function is called by your application to create a message queue.  Message queu
+  42:Libraries/uC-OSIII/os_q.c **** *              before they can be used.
+  43:Libraries/uC-OSIII/os_q.c **** *
+  44:Libraries/uC-OSIII/os_q.c **** * Arguments  : p_q         is a pointer to the message queue
+  45:Libraries/uC-OSIII/os_q.c **** *
+  46:Libraries/uC-OSIII/os_q.c **** *              p_name      is a pointer to an ASCII string that will be used to name the message qu
+  47:Libraries/uC-OSIII/os_q.c **** *
+  48:Libraries/uC-OSIII/os_q.c **** *              max_qty     indicates the maximum size of the message queue (must be non-zero).  Not
+  49:Libraries/uC-OSIII/os_q.c **** *                          possible to have a size higher than the maximum number of OS_MSGs availa
+  50:Libraries/uC-OSIII/os_q.c **** *
+  51:Libraries/uC-OSIII/os_q.c **** *              p_err       is a pointer to a variable that will contain an error code returned by t
+  52:Libraries/uC-OSIII/os_q.c **** *
+  53:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_NONE                    the call was successful
+  54:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_CREATE_ISR              can't create from an ISR
+  55:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_ILLEGAL_CREATE_RUN_TIME if you are trying to create the Queue
+  56:Libraries/uC-OSIII/os_q.c **** *                                                               OSSafetyCriticalStart().
+  57:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_NAME                    if 'p_name' is a NULL pointer
+  58:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_OBJ_CREATED             if the message queue has already been
+  59:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_OBJ_PTR_NULL            if you passed a NULL pointer for 'p_q
+  60:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_Q_SIZE                  if the size you specified is 0
+  61:Libraries/uC-OSIII/os_q.c **** *
+  62:Libraries/uC-OSIII/os_q.c **** * Returns    : none
+  63:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+  64:Libraries/uC-OSIII/os_q.c **** */
+  65:Libraries/uC-OSIII/os_q.c **** 
+  66:Libraries/uC-OSIII/os_q.c **** void  OSQCreate (OS_Q        *p_q,
+  67:Libraries/uC-OSIII/os_q.c ****                  CPU_CHAR    *p_name,
+  68:Libraries/uC-OSIII/os_q.c ****                  OS_MSG_QTY   max_qty,
+  69:Libraries/uC-OSIII/os_q.c ****                  OS_ERR      *p_err)
+  70:Libraries/uC-OSIII/os_q.c **** 
+  71:Libraries/uC-OSIII/os_q.c **** {
+  26              		.loc 1 71 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 24
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 14, -4
+  34              		.cfi_offset 7, -8
+  35 0002 86B0     		sub	sp, sp, #24
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 32
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  41 0006 F860     		str	r0, [r7, #12]
+  42 0008 B960     		str	r1, [r7, #8]
+  43 000a 3B60     		str	r3, [r7, #0]
+  44 000c 1346     		mov	r3, r2	@ movhi
+  45 000e FB80     		strh	r3, [r7, #6]	@ movhi
+  72:Libraries/uC-OSIII/os_q.c ****     CPU_SR_ALLOC();
+  46              		.loc 1 72 0
+  47 0010 4FF00003 		mov	r3, #0
+  48 0014 7B61     		str	r3, [r7, #20]
+  73:Libraries/uC-OSIII/os_q.c **** 
+  74:Libraries/uC-OSIII/os_q.c **** 
+  75:Libraries/uC-OSIII/os_q.c **** 
+  76:Libraries/uC-OSIII/os_q.c **** #ifdef OS_SAFETY_CRITICAL
+  77:Libraries/uC-OSIII/os_q.c ****     if (p_err == (OS_ERR *)0) {
+  78:Libraries/uC-OSIII/os_q.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+  79:Libraries/uC-OSIII/os_q.c ****     }
+  80:Libraries/uC-OSIII/os_q.c **** #endif
+  81:Libraries/uC-OSIII/os_q.c **** 
+  82:Libraries/uC-OSIII/os_q.c **** #ifdef OS_SAFETY_CRITICAL_IEC61508
+  83:Libraries/uC-OSIII/os_q.c ****     if (OSSafetyCriticalStartFlag == DEF_TRUE) {
+  84:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_ILLEGAL_CREATE_RUN_TIME;
+  85:Libraries/uC-OSIII/os_q.c ****         return;
+  86:Libraries/uC-OSIII/os_q.c ****     }
+  87:Libraries/uC-OSIII/os_q.c **** #endif
+  88:Libraries/uC-OSIII/os_q.c **** 
+  89:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+  90:Libraries/uC-OSIII/os_q.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Not allowed to be called from an ISR
+  49              		.loc 1 90 0
+  50 0016 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+  51 001a C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+  52 001e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  53 0020 002B     		cmp	r3, #0
+  54 0022 04D0     		beq	.L2
+  91:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_CREATE_ISR;
+  55              		.loc 1 91 0
+  56 0024 3B68     		ldr	r3, [r7, #0]
+  57 0026 42F6E162 		movw	r2, #12001
+  58 002a 1A80     		strh	r2, [r3, #0]	@ movhi
+  92:Libraries/uC-OSIII/os_q.c ****         return;
+  59              		.loc 1 92 0
+  60 002c 8FE0     		b	.L1
+  61              	.L2:
+  93:Libraries/uC-OSIII/os_q.c ****     }
+  94:Libraries/uC-OSIII/os_q.c **** #endif
+  95:Libraries/uC-OSIII/os_q.c **** 
+  96:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_ARG_CHK_EN > 0u
+  97:Libraries/uC-OSIII/os_q.c ****     if (p_q == (OS_Q *)0) {                                 /* Validate arguments                  
+  62              		.loc 1 97 0
+  63 002e FB68     		ldr	r3, [r7, #12]
+  64 0030 002B     		cmp	r3, #0
+  65 0032 04D1     		bne	.L4
+  98:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+  66              		.loc 1 98 0
+  67 0034 3B68     		ldr	r3, [r7, #0]
+  68 0036 45F6C352 		movw	r2, #24003
+  69 003a 1A80     		strh	r2, [r3, #0]	@ movhi
+  99:Libraries/uC-OSIII/os_q.c ****         return;
+  70              		.loc 1 99 0
+  71 003c 87E0     		b	.L1
+  72              	.L4:
+ 100:Libraries/uC-OSIII/os_q.c ****     }
+ 101:Libraries/uC-OSIII/os_q.c ****     if (max_qty == (OS_MSG_QTY)0) {                         /* Cannot specify a zero size queue    
+  73              		.loc 1 101 0
+  74 003e FB88     		ldrh	r3, [r7, #6]
+  75 0040 002B     		cmp	r3, #0
+  76 0042 04D1     		bne	.L5
+ 102:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_Q_SIZE;
+  77              		.loc 1 102 0
+  78 0044 3B68     		ldr	r3, [r7, #0]
+  79 0046 46F29452 		movw	r2, #26004
+  80 004a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 103:Libraries/uC-OSIII/os_q.c ****         return;
+  81              		.loc 1 103 0
+  82 004c 7FE0     		b	.L1
+  83              	.L5:
+ 104:Libraries/uC-OSIII/os_q.c ****     }
+ 105:Libraries/uC-OSIII/os_q.c **** #endif
+ 106:Libraries/uC-OSIII/os_q.c **** 
+ 107:Libraries/uC-OSIII/os_q.c ****     OS_CRITICAL_ENTER();
+  84              		.loc 1 107 0
+  85 004e FFF7FEFF 		bl	CPU_SR_Save
+  86 0052 7861     		str	r0, [r7, #20]
+  87 0054 FFF7FEFF 		bl	CPU_IntDisMeasStart
+  88 0058 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+  89 005c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+  90 0060 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  91 0062 03F10103 		add	r3, r3, #1
+  92 0066 DAB2     		uxtb	r2, r3
+  93 0068 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+  94 006c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+  95 0070 1A70     		strb	r2, [r3, #0]
+  96 0072 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+  97 0076 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+  98 007a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  99 007c 012B     		cmp	r3, #1
+ 100 007e 01D1     		bne	.L6
+ 101              		.loc 1 107 0 is_stmt 0 discriminator 1
+ 102 0080 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 103              	.L6:
+ 104              		.loc 1 107 0 discriminator 2
+ 105 0084 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 106 0088 7869     		ldr	r0, [r7, #20]
+ 107 008a FFF7FEFF 		bl	CPU_SR_Restore
+ 108:Libraries/uC-OSIII/os_q.c ****     p_q->Type    = OS_OBJ_TYPE_Q;                           /* Mark the data structure as a message
+ 108              		.loc 1 108 0 is_stmt 1 discriminator 2
+ 109 008e FA68     		ldr	r2, [r7, #12]
+ 110 0090 45F25153 		movw	r3, #21841
+ 111 0094 C5F24553 		movt	r3, 21829
+ 112 0098 1360     		str	r3, [r2, #0]
+ 109:Libraries/uC-OSIII/os_q.c ****     p_q->NamePtr = p_name;
+ 113              		.loc 1 109 0 discriminator 2
+ 114 009a FB68     		ldr	r3, [r7, #12]
+ 115 009c BA68     		ldr	r2, [r7, #8]
+ 116 009e 5A60     		str	r2, [r3, #4]
+ 110:Libraries/uC-OSIII/os_q.c ****     OS_MsgQInit(&p_q->MsgQ,                                 /* Initialize the queue                
+ 117              		.loc 1 110 0 discriminator 2
+ 118 00a0 FB68     		ldr	r3, [r7, #12]
+ 119 00a2 03F12002 		add	r2, r3, #32
+ 120 00a6 FB88     		ldrh	r3, [r7, #6]
+ 121 00a8 1046     		mov	r0, r2
+ 122 00aa 1946     		mov	r1, r3
+ 123 00ac FFF7FEFF 		bl	OS_MsgQInit
+ 111:Libraries/uC-OSIII/os_q.c ****                 max_qty);
+ 112:Libraries/uC-OSIII/os_q.c ****     OS_PendListInit(&p_q->PendList);                        /* Initialize the waiting list         
+ 124              		.loc 1 112 0 discriminator 2
+ 125 00b0 FB68     		ldr	r3, [r7, #12]
+ 126 00b2 03F10803 		add	r3, r3, #8
+ 127 00b6 1846     		mov	r0, r3
+ 128 00b8 FFF7FEFF 		bl	OS_PendListInit
+ 113:Libraries/uC-OSIII/os_q.c **** 
+ 114:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_DBG_EN > 0u
+ 115:Libraries/uC-OSIII/os_q.c ****     OS_QDbgListAdd(p_q);
+ 129              		.loc 1 115 0 discriminator 2
+ 130 00bc F868     		ldr	r0, [r7, #12]
+ 131 00be FFF7FEFF 		bl	OS_QDbgListAdd
+ 116:Libraries/uC-OSIII/os_q.c **** #endif
+ 117:Libraries/uC-OSIII/os_q.c ****     OSQQty++;                                               /* One more queue created              
+ 132              		.loc 1 117 0 discriminator 2
+ 133 00c2 40F20003 		movw	r3, #:lower16:OSQQty
+ 134 00c6 C0F20003 		movt	r3, #:upper16:OSQQty
+ 135 00ca 1B88     		ldrh	r3, [r3, #0]
+ 136 00cc 03F10103 		add	r3, r3, #1
+ 137 00d0 9AB2     		uxth	r2, r3
+ 138 00d2 40F20003 		movw	r3, #:lower16:OSQQty
+ 139 00d6 C0F20003 		movt	r3, #:upper16:OSQQty
+ 140 00da 1A80     		strh	r2, [r3, #0]	@ movhi
+ 118:Libraries/uC-OSIII/os_q.c **** 
+ 119:Libraries/uC-OSIII/os_q.c ****     OS_CRITICAL_EXIT();
+ 141              		.loc 1 119 0 discriminator 2
+ 142 00dc FFF7FEFF 		bl	CPU_SR_Save
+ 143 00e0 7861     		str	r0, [r7, #20]
+ 144 00e2 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 145 00e6 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 146 00ea C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 147 00ee 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 148 00f0 03F1FF33 		add	r3, r3, #-1
+ 149 00f4 DAB2     		uxtb	r2, r3
+ 150 00f6 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 151 00fa C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 152 00fe 1A70     		strb	r2, [r3, #0]
+ 153 0100 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 154 0104 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 155 0108 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 156 010a 002B     		cmp	r3, #0
+ 157 010c 16D1     		bne	.L7
+ 158              		.loc 1 119 0 is_stmt 0 discriminator 1
+ 159 010e FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 160 0112 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 161 0116 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 162 011a 1B88     		ldrh	r3, [r3, #0]
+ 163 011c 002B     		cmp	r3, #0
+ 164 011e 07D0     		beq	.L8
+ 165              		.loc 1 119 0 discriminator 3
+ 166 0120 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 167 0124 7869     		ldr	r0, [r7, #20]
+ 168 0126 FFF7FEFF 		bl	CPU_SR_Restore
+ 169 012a FFF7FEFF 		bl	OS_Sched0
+ 170 012e 0AE0     		b	.L9
+ 171              	.L8:
+ 172              		.loc 1 119 0 discriminator 4
+ 173 0130 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 174 0134 7869     		ldr	r0, [r7, #20]
+ 175 0136 FFF7FEFF 		bl	CPU_SR_Restore
+ 176 013a 04E0     		b	.L9
+ 177              	.L7:
+ 178              		.loc 1 119 0 discriminator 2
+ 179 013c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 180 0140 7869     		ldr	r0, [r7, #20]
+ 181 0142 FFF7FEFF 		bl	CPU_SR_Restore
+ 182              	.L9:
+ 120:Libraries/uC-OSIII/os_q.c ****     *p_err = OS_ERR_NONE;
+ 183              		.loc 1 120 0 is_stmt 1
+ 184 0146 3B68     		ldr	r3, [r7, #0]
+ 185 0148 4FF00002 		mov	r2, #0
+ 186 014c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 187              	.L1:
+ 121:Libraries/uC-OSIII/os_q.c **** }
+ 188              		.loc 1 121 0
+ 189 014e 07F11807 		add	r7, r7, #24
+ 190 0152 BD46     		mov	sp, r7
+ 191 0154 80BD     		pop	{r7, pc}
+ 192              		.cfi_endproc
+ 193              	.LFE0:
+ 195 0156 00BF     		.align	2
+ 196              		.global	OSQDel
+ 197              		.thumb
+ 198              		.thumb_func
+ 200              	OSQDel:
+ 201              	.LFB1:
+ 122:Libraries/uC-OSIII/os_q.c **** 
+ 123:Libraries/uC-OSIII/os_q.c **** /*$PAGE*/
+ 124:Libraries/uC-OSIII/os_q.c **** /*
+ 125:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 126:Libraries/uC-OSIII/os_q.c **** *                                               DELETE A MESSAGE QUEUE
+ 127:Libraries/uC-OSIII/os_q.c **** *
+ 128:Libraries/uC-OSIII/os_q.c **** * Description: This function deletes a message queue and readies all tasks pending on the queue.
+ 129:Libraries/uC-OSIII/os_q.c **** *
+ 130:Libraries/uC-OSIII/os_q.c **** * Arguments  : p_q       is a pointer to the message queue you want to delete
+ 131:Libraries/uC-OSIII/os_q.c **** *
+ 132:Libraries/uC-OSIII/os_q.c **** *              opt       determines delete options as follows:
+ 133:Libraries/uC-OSIII/os_q.c **** *
+ 134:Libraries/uC-OSIII/os_q.c **** *                            OS_OPT_DEL_NO_PEND          Delete the queue ONLY if no task pending
+ 135:Libraries/uC-OSIII/os_q.c **** *                            OS_OPT_DEL_ALWAYS           Deletes the queue even if tasks are waitin
+ 136:Libraries/uC-OSIII/os_q.c **** *                                                        In this case, all the tasks pending will b
+ 137:Libraries/uC-OSIII/os_q.c **** *
+ 138:Libraries/uC-OSIII/os_q.c **** *              p_err     is a pointer to a variable that will contain an error code returned by thi
+ 139:Libraries/uC-OSIII/os_q.c **** *
+ 140:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_NONE                 The call was successful and the queue was 
+ 141:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_DEL_ISR              If you tried to delete the queue from an I
+ 142:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_OBJ_PTR_NULL         if you pass a NULL pointer for 'p_q'
+ 143:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_OBJ_TYPE             if the message queue was not created
+ 144:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_OPT_INVALID          An invalid option was specified
+ 145:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_TASK_WAITING         One or more tasks were waiting on the queu
+ 146:Libraries/uC-OSIII/os_q.c **** *
+ 147:Libraries/uC-OSIII/os_q.c **** * Returns    : == 0          if no tasks were waiting on the queue, or upon error.
+ 148:Libraries/uC-OSIII/os_q.c **** *              >  0          if one or more tasks waiting on the queue are now readied and informed
+ 149:Libraries/uC-OSIII/os_q.c **** *
+ 150:Libraries/uC-OSIII/os_q.c **** * Note(s)    : 1) This function must be used with care.  Tasks that would normally expect the prese
+ 151:Libraries/uC-OSIII/os_q.c **** *                 check the return code of OSQPend().
+ 152:Libraries/uC-OSIII/os_q.c **** *
+ 153:Libraries/uC-OSIII/os_q.c **** *              2) OSQAccept() callers will not know that the intended queue has been deleted.
+ 154:Libraries/uC-OSIII/os_q.c **** *
+ 155:Libraries/uC-OSIII/os_q.c **** *              3) Because ALL tasks pending on the queue will be readied, you MUST be careful in ap
+ 156:Libraries/uC-OSIII/os_q.c **** *                 queue is used for mutual exclusion because the resource(s) will no longer be guar
+ 157:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 158:Libraries/uC-OSIII/os_q.c **** */
+ 159:Libraries/uC-OSIII/os_q.c **** 
+ 160:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_Q_DEL_EN > 0u
+ 161:Libraries/uC-OSIII/os_q.c **** OS_OBJ_QTY  OSQDel (OS_Q    *p_q,
+ 162:Libraries/uC-OSIII/os_q.c ****                     OS_OPT   opt,
+ 163:Libraries/uC-OSIII/os_q.c ****                     OS_ERR  *p_err)
+ 164:Libraries/uC-OSIII/os_q.c **** {
+ 202              		.loc 1 164 0
+ 203              		.cfi_startproc
+ 204              		@ args = 0, pretend = 0, frame = 48
+ 205              		@ frame_needed = 1, uses_anonymous_args = 0
+ 206 0158 80B5     		push	{r7, lr}
+ 207              	.LCFI3:
+ 208              		.cfi_def_cfa_offset 8
+ 209              		.cfi_offset 14, -4
+ 210              		.cfi_offset 7, -8
+ 211 015a 8CB0     		sub	sp, sp, #48
+ 212              	.LCFI4:
+ 213              		.cfi_def_cfa_offset 56
+ 214 015c 00AF     		add	r7, sp, #0
+ 215              	.LCFI5:
+ 216              		.cfi_def_cfa_register 7
+ 217 015e F860     		str	r0, [r7, #12]
+ 218 0160 0B46     		mov	r3, r1
+ 219 0162 7A60     		str	r2, [r7, #4]
+ 220 0164 7B81     		strh	r3, [r7, #10]	@ movhi
+ 165:Libraries/uC-OSIII/os_q.c ****     OS_OBJ_QTY     cnt;
+ 166:Libraries/uC-OSIII/os_q.c ****     OS_OBJ_QTY     nbr_tasks;
+ 167:Libraries/uC-OSIII/os_q.c ****     OS_PEND_DATA  *p_pend_data;
+ 168:Libraries/uC-OSIII/os_q.c ****     OS_PEND_LIST  *p_pend_list;
+ 169:Libraries/uC-OSIII/os_q.c ****     OS_TCB        *p_tcb;
+ 170:Libraries/uC-OSIII/os_q.c ****     CPU_TS         ts;
+ 171:Libraries/uC-OSIII/os_q.c ****     CPU_SR_ALLOC();
+ 221              		.loc 1 171 0
+ 222 0166 4FF00003 		mov	r3, #0
+ 223 016a BB62     		str	r3, [r7, #40]
+ 172:Libraries/uC-OSIII/os_q.c **** 
+ 173:Libraries/uC-OSIII/os_q.c **** 
+ 174:Libraries/uC-OSIII/os_q.c **** 
+ 175:Libraries/uC-OSIII/os_q.c **** #ifdef OS_SAFETY_CRITICAL
+ 176:Libraries/uC-OSIII/os_q.c ****     if (p_err == (OS_ERR *)0) {
+ 177:Libraries/uC-OSIII/os_q.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 178:Libraries/uC-OSIII/os_q.c ****     }
+ 179:Libraries/uC-OSIII/os_q.c **** #endif
+ 180:Libraries/uC-OSIII/os_q.c **** 
+ 181:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 182:Libraries/uC-OSIII/os_q.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Can't delete a message queue from an
+ 224              		.loc 1 182 0
+ 225 016c 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 226 0170 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 227 0174 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 228 0176 002B     		cmp	r3, #0
+ 229 0178 06D0     		beq	.L11
+ 183:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_DEL_ISR;
+ 230              		.loc 1 183 0
+ 231 017a 7B68     		ldr	r3, [r7, #4]
+ 232 017c 43F2C922 		movw	r2, #13001
+ 233 0180 1A80     		strh	r2, [r3, #0]	@ movhi
+ 184:Libraries/uC-OSIII/os_q.c ****         return ((OS_OBJ_QTY)0);
+ 234              		.loc 1 184 0
+ 235 0182 4FF00003 		mov	r3, #0
+ 236 0186 CCE0     		b	.L12
+ 237              	.L11:
+ 185:Libraries/uC-OSIII/os_q.c ****     }
+ 186:Libraries/uC-OSIII/os_q.c **** #endif
+ 187:Libraries/uC-OSIII/os_q.c **** 
+ 188:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 189:Libraries/uC-OSIII/os_q.c ****     if (p_q == (OS_Q *)0) {                                 /* Validate arguments                  
+ 238              		.loc 1 189 0
+ 239 0188 FB68     		ldr	r3, [r7, #12]
+ 240 018a 002B     		cmp	r3, #0
+ 241 018c 06D1     		bne	.L13
+ 190:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 242              		.loc 1 190 0
+ 243 018e 7B68     		ldr	r3, [r7, #4]
+ 244 0190 45F6C352 		movw	r2, #24003
+ 245 0194 1A80     		strh	r2, [r3, #0]	@ movhi
+ 191:Libraries/uC-OSIII/os_q.c ****         return ((OS_OBJ_QTY)0);
+ 246              		.loc 1 191 0
+ 247 0196 4FF00003 		mov	r3, #0
+ 248 019a C2E0     		b	.L12
+ 249              	.L13:
+ 192:Libraries/uC-OSIII/os_q.c ****     }
+ 193:Libraries/uC-OSIII/os_q.c **** #endif
+ 194:Libraries/uC-OSIII/os_q.c **** 
+ 195:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 196:Libraries/uC-OSIII/os_q.c ****     if (p_q->Type != OS_OBJ_TYPE_Q) {                       /* Make sure message queue was created 
+ 250              		.loc 1 196 0
+ 251 019c FB68     		ldr	r3, [r7, #12]
+ 252 019e 1A68     		ldr	r2, [r3, #0]
+ 253 01a0 45F25153 		movw	r3, #21841
+ 254 01a4 C5F24553 		movt	r3, 21829
+ 255 01a8 9A42     		cmp	r2, r3
+ 256 01aa 06D0     		beq	.L14
+ 197:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 257              		.loc 1 197 0
+ 258 01ac 7B68     		ldr	r3, [r7, #4]
+ 259 01ae 45F6C452 		movw	r2, #24004
+ 260 01b2 1A80     		strh	r2, [r3, #0]	@ movhi
+ 198:Libraries/uC-OSIII/os_q.c ****         return ((OS_OBJ_QTY)0);
+ 261              		.loc 1 198 0
+ 262 01b4 4FF00003 		mov	r3, #0
+ 263 01b8 B3E0     		b	.L12
+ 264              	.L14:
+ 199:Libraries/uC-OSIII/os_q.c ****     }
+ 200:Libraries/uC-OSIII/os_q.c **** #endif
+ 201:Libraries/uC-OSIII/os_q.c **** 
+ 202:Libraries/uC-OSIII/os_q.c ****     CPU_CRITICAL_ENTER();
+ 265              		.loc 1 202 0
+ 266 01ba FFF7FEFF 		bl	CPU_SR_Save
+ 267 01be B862     		str	r0, [r7, #40]
+ 268 01c0 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 203:Libraries/uC-OSIII/os_q.c ****     p_pend_list = &p_q->PendList;
+ 269              		.loc 1 203 0
+ 270 01c4 FB68     		ldr	r3, [r7, #12]
+ 271 01c6 03F10803 		add	r3, r3, #8
+ 272 01ca 7B62     		str	r3, [r7, #36]
+ 204:Libraries/uC-OSIII/os_q.c ****     cnt         = p_pend_list->NbrEntries;
+ 273              		.loc 1 204 0
+ 274 01cc 7B6A     		ldr	r3, [r7, #36]
+ 275 01ce 1B89     		ldrh	r3, [r3, #8]	@ movhi
+ 276 01d0 FB85     		strh	r3, [r7, #46]	@ movhi
+ 205:Libraries/uC-OSIII/os_q.c ****     nbr_tasks   = cnt;
+ 277              		.loc 1 205 0
+ 278 01d2 FB8D     		ldrh	r3, [r7, #46]	@ movhi
+ 279 01d4 7B84     		strh	r3, [r7, #34]	@ movhi
+ 206:Libraries/uC-OSIII/os_q.c ****     switch (opt) {
+ 280              		.loc 1 206 0
+ 281 01d6 7B89     		ldrh	r3, [r7, #10]
+ 282 01d8 002B     		cmp	r3, #0
+ 283 01da 02D0     		beq	.L16
+ 284 01dc 012B     		cmp	r3, #1
+ 285 01de 2AD0     		beq	.L17
+ 286 01e0 94E0     		b	.L25
+ 287              	.L16:
+ 207:Libraries/uC-OSIII/os_q.c ****         case OS_OPT_DEL_NO_PEND:                            /* Delete message queue only if no task
+ 208:Libraries/uC-OSIII/os_q.c ****              if (nbr_tasks == (OS_OBJ_QTY)0) {
+ 288              		.loc 1 208 0
+ 289 01e2 7B8C     		ldrh	r3, [r7, #34]
+ 290 01e4 002B     		cmp	r3, #0
+ 291 01e6 1CD1     		bne	.L18
+ 209:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_DBG_EN > 0u
+ 210:Libraries/uC-OSIII/os_q.c ****                  OS_QDbgListRemove(p_q);
+ 292              		.loc 1 210 0
+ 293 01e8 F868     		ldr	r0, [r7, #12]
+ 294 01ea FFF7FEFF 		bl	OS_QDbgListRemove
+ 211:Libraries/uC-OSIII/os_q.c **** #endif
+ 212:Libraries/uC-OSIII/os_q.c ****                  OSQQty--;
+ 295              		.loc 1 212 0
+ 296 01ee 40F20003 		movw	r3, #:lower16:OSQQty
+ 297 01f2 C0F20003 		movt	r3, #:upper16:OSQQty
+ 298 01f6 1B88     		ldrh	r3, [r3, #0]
+ 299 01f8 03F1FF33 		add	r3, r3, #-1
+ 300 01fc 9AB2     		uxth	r2, r3
+ 301 01fe 40F20003 		movw	r3, #:lower16:OSQQty
+ 302 0202 C0F20003 		movt	r3, #:upper16:OSQQty
+ 303 0206 1A80     		strh	r2, [r3, #0]	@ movhi
+ 213:Libraries/uC-OSIII/os_q.c ****                  OS_QClr(p_q);
+ 304              		.loc 1 213 0
+ 305 0208 F868     		ldr	r0, [r7, #12]
+ 306 020a FFF7FEFF 		bl	OS_QClr
+ 214:Libraries/uC-OSIII/os_q.c ****                  CPU_CRITICAL_EXIT();
+ 307              		.loc 1 214 0
+ 308 020e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 309 0212 B86A     		ldr	r0, [r7, #40]
+ 310 0214 FFF7FEFF 		bl	CPU_SR_Restore
+ 215:Libraries/uC-OSIII/os_q.c ****                  *p_err = OS_ERR_NONE;
+ 311              		.loc 1 215 0
+ 312 0218 7B68     		ldr	r3, [r7, #4]
+ 313 021a 4FF00002 		mov	r2, #0
+ 314 021e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 216:Libraries/uC-OSIII/os_q.c ****              } else {
+ 217:Libraries/uC-OSIII/os_q.c ****                  CPU_CRITICAL_EXIT();
+ 218:Libraries/uC-OSIII/os_q.c ****                  *p_err = OS_ERR_TASK_WAITING;
+ 219:Libraries/uC-OSIII/os_q.c ****              }
+ 220:Libraries/uC-OSIII/os_q.c ****              break;
+ 315              		.loc 1 220 0
+ 316 0220 7EE0     		b	.L20
+ 317              	.L18:
+ 217:Libraries/uC-OSIII/os_q.c ****                  CPU_CRITICAL_EXIT();
+ 318              		.loc 1 217 0
+ 319 0222 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 320 0226 B86A     		ldr	r0, [r7, #40]
+ 321 0228 FFF7FEFF 		bl	CPU_SR_Restore
+ 218:Libraries/uC-OSIII/os_q.c ****                  *p_err = OS_ERR_TASK_WAITING;
+ 322              		.loc 1 218 0
+ 323 022c 7B68     		ldr	r3, [r7, #4]
+ 324 022e 47F25E12 		movw	r2, #29022
+ 325 0232 1A80     		strh	r2, [r3, #0]	@ movhi
+ 326              		.loc 1 220 0
+ 327 0234 74E0     		b	.L20
+ 328              	.L17:
+ 221:Libraries/uC-OSIII/os_q.c **** 
+ 222:Libraries/uC-OSIII/os_q.c ****         case OS_OPT_DEL_ALWAYS:                             /* Always delete the message queue     
+ 223:Libraries/uC-OSIII/os_q.c ****              OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();
+ 329              		.loc 1 223 0
+ 330 0236 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 331 023a C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 332 023e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 333 0240 03F10103 		add	r3, r3, #1
+ 334 0244 DAB2     		uxtb	r2, r3
+ 335 0246 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 336 024a C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 337 024e 1A70     		strb	r2, [r3, #0]
+ 338 0250 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 339 0254 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 340 0258 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 341 025a 012B     		cmp	r3, #1
+ 342 025c 01D1     		bne	.L21
+ 343              		.loc 1 223 0 is_stmt 0 discriminator 1
+ 344 025e FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 345              	.L21:
+ 346              		.loc 1 223 0 discriminator 2
+ 347 0262 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 348 0266 B86A     		ldr	r0, [r7, #40]
+ 349 0268 FFF7FEFF 		bl	CPU_SR_Restore
+ 224:Libraries/uC-OSIII/os_q.c ****              ts = OS_TS_GET();                              /* Get local time stamp so all tasks ge
+ 350              		.loc 1 224 0 is_stmt 1 discriminator 2
+ 351 026c FFF7FEFF 		bl	CPU_TS_TmrRd
+ 352 0270 F861     		str	r0, [r7, #28]
+ 225:Libraries/uC-OSIII/os_q.c ****              while (cnt > 0u) {                             /* Remove all tasks from the pend list 
+ 353              		.loc 1 225 0 discriminator 2
+ 354 0272 0EE0     		b	.L22
+ 355              	.L23:
+ 226:Libraries/uC-OSIII/os_q.c ****                  p_pend_data = p_pend_list->HeadPtr;
+ 356              		.loc 1 226 0
+ 357 0274 7B6A     		ldr	r3, [r7, #36]
+ 358 0276 1B68     		ldr	r3, [r3, #0]
+ 359 0278 BB61     		str	r3, [r7, #24]
+ 227:Libraries/uC-OSIII/os_q.c ****                  p_tcb       = p_pend_data->TCBPtr;
+ 360              		.loc 1 227 0
+ 361 027a BB69     		ldr	r3, [r7, #24]
+ 362 027c 9B68     		ldr	r3, [r3, #8]
+ 363 027e 7B61     		str	r3, [r7, #20]
+ 228:Libraries/uC-OSIII/os_q.c ****                  OS_PendObjDel((OS_PEND_OBJ *)((void *)p_q),
+ 364              		.loc 1 228 0
+ 365 0280 F868     		ldr	r0, [r7, #12]
+ 366 0282 7969     		ldr	r1, [r7, #20]
+ 367 0284 FA69     		ldr	r2, [r7, #28]
+ 368 0286 FFF7FEFF 		bl	OS_PendObjDel
+ 229:Libraries/uC-OSIII/os_q.c ****                                p_tcb,
+ 230:Libraries/uC-OSIII/os_q.c ****                                ts);
+ 231:Libraries/uC-OSIII/os_q.c ****                  cnt--;
+ 369              		.loc 1 231 0
+ 370 028a FB8D     		ldrh	r3, [r7, #46]	@ movhi
+ 371 028c 03F1FF33 		add	r3, r3, #-1
+ 372 0290 FB85     		strh	r3, [r7, #46]	@ movhi
+ 373              	.L22:
+ 225:Libraries/uC-OSIII/os_q.c ****              while (cnt > 0u) {                             /* Remove all tasks from the pend list 
+ 374              		.loc 1 225 0 discriminator 1
+ 375 0292 FB8D     		ldrh	r3, [r7, #46]
+ 376 0294 002B     		cmp	r3, #0
+ 377 0296 EDD1     		bne	.L23
+ 232:Libraries/uC-OSIII/os_q.c ****              }
+ 233:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_DBG_EN > 0u
+ 234:Libraries/uC-OSIII/os_q.c ****              OS_QDbgListRemove(p_q);
+ 378              		.loc 1 234 0
+ 379 0298 F868     		ldr	r0, [r7, #12]
+ 380 029a FFF7FEFF 		bl	OS_QDbgListRemove
+ 235:Libraries/uC-OSIII/os_q.c **** #endif
+ 236:Libraries/uC-OSIII/os_q.c ****              OSQQty--;
+ 381              		.loc 1 236 0
+ 382 029e 40F20003 		movw	r3, #:lower16:OSQQty
+ 383 02a2 C0F20003 		movt	r3, #:upper16:OSQQty
+ 384 02a6 1B88     		ldrh	r3, [r3, #0]
+ 385 02a8 03F1FF33 		add	r3, r3, #-1
+ 386 02ac 9AB2     		uxth	r2, r3
+ 387 02ae 40F20003 		movw	r3, #:lower16:OSQQty
+ 388 02b2 C0F20003 		movt	r3, #:upper16:OSQQty
+ 389 02b6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 237:Libraries/uC-OSIII/os_q.c ****              OS_QClr(p_q);
+ 390              		.loc 1 237 0
+ 391 02b8 F868     		ldr	r0, [r7, #12]
+ 392 02ba FFF7FEFF 		bl	OS_QClr
+ 238:Libraries/uC-OSIII/os_q.c ****              OS_CRITICAL_EXIT_NO_SCHED();
+ 393              		.loc 1 238 0
+ 394 02be FFF7FEFF 		bl	CPU_SR_Save
+ 395 02c2 B862     		str	r0, [r7, #40]
+ 396 02c4 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 397 02c8 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 398 02cc C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 399 02d0 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 400 02d2 03F1FF33 		add	r3, r3, #-1
+ 401 02d6 DAB2     		uxtb	r2, r3
+ 402 02d8 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 403 02dc C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 404 02e0 1A70     		strb	r2, [r3, #0]
+ 405 02e2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 406 02e6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 407 02ea 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 408 02ec 002B     		cmp	r3, #0
+ 409 02ee 01D1     		bne	.L24
+ 410              		.loc 1 238 0 is_stmt 0 discriminator 1
+ 411 02f0 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 412              	.L24:
+ 413              		.loc 1 238 0 discriminator 2
+ 414 02f4 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 415 02f8 B86A     		ldr	r0, [r7, #40]
+ 416 02fa FFF7FEFF 		bl	CPU_SR_Restore
+ 239:Libraries/uC-OSIII/os_q.c ****              OSSched();                                     /* Find highest priority task ready to 
+ 417              		.loc 1 239 0 is_stmt 1 discriminator 2
+ 418 02fe FFF7FEFF 		bl	OSSched
+ 240:Libraries/uC-OSIII/os_q.c ****              *p_err = OS_ERR_NONE;
+ 419              		.loc 1 240 0 discriminator 2
+ 420 0302 7B68     		ldr	r3, [r7, #4]
+ 421 0304 4FF00002 		mov	r2, #0
+ 422 0308 1A80     		strh	r2, [r3, #0]	@ movhi
+ 241:Libraries/uC-OSIII/os_q.c ****              break;
+ 423              		.loc 1 241 0 discriminator 2
+ 424 030a 09E0     		b	.L20
+ 425              	.L25:
+ 242:Libraries/uC-OSIII/os_q.c **** 
+ 243:Libraries/uC-OSIII/os_q.c ****         default:
+ 244:Libraries/uC-OSIII/os_q.c ****              CPU_CRITICAL_EXIT();
+ 426              		.loc 1 244 0
+ 427 030c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 428 0310 B86A     		ldr	r0, [r7, #40]
+ 429 0312 FFF7FEFF 		bl	CPU_SR_Restore
+ 245:Libraries/uC-OSIII/os_q.c ****              *p_err = OS_ERR_OPT_INVALID;
+ 430              		.loc 1 245 0
+ 431 0316 7B68     		ldr	r3, [r7, #4]
+ 432 0318 45F62562 		movw	r2, #24101
+ 433 031c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 246:Libraries/uC-OSIII/os_q.c ****              break;
+ 434              		.loc 1 246 0
+ 435 031e 00BF     		nop
+ 436              	.L20:
+ 247:Libraries/uC-OSIII/os_q.c ****     }
+ 248:Libraries/uC-OSIII/os_q.c ****     return (nbr_tasks);
+ 437              		.loc 1 248 0
+ 438 0320 7B8C     		ldrh	r3, [r7, #34]
+ 439              	.L12:
+ 249:Libraries/uC-OSIII/os_q.c **** }
+ 440              		.loc 1 249 0
+ 441 0322 1846     		mov	r0, r3
+ 442 0324 07F13007 		add	r7, r7, #48
+ 443 0328 BD46     		mov	sp, r7
+ 444 032a 80BD     		pop	{r7, pc}
+ 445              		.cfi_endproc
+ 446              	.LFE1:
+ 448              		.align	2
+ 449              		.global	OSQFlush
+ 450              		.thumb
+ 451              		.thumb_func
+ 453              	OSQFlush:
+ 454              	.LFB2:
+ 250:Libraries/uC-OSIII/os_q.c **** #endif
+ 251:Libraries/uC-OSIII/os_q.c **** 
+ 252:Libraries/uC-OSIII/os_q.c **** /*$PAGE*/
+ 253:Libraries/uC-OSIII/os_q.c **** /*
+ 254:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 255:Libraries/uC-OSIII/os_q.c **** *                                                     FLUSH QUEUE
+ 256:Libraries/uC-OSIII/os_q.c **** *
+ 257:Libraries/uC-OSIII/os_q.c **** * Description : This function is used to flush the contents of the message queue.
+ 258:Libraries/uC-OSIII/os_q.c **** *
+ 259:Libraries/uC-OSIII/os_q.c **** * Arguments   : p_q        is a pointer to the message queue to flush
+ 260:Libraries/uC-OSIII/os_q.c **** *
+ 261:Libraries/uC-OSIII/os_q.c **** *               p_err      is a pointer to a variable that will contain an error code returned by t
+ 262:Libraries/uC-OSIII/os_q.c **** *
+ 263:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_NONE           upon success
+ 264:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_FLUSH_ISR      if you called this function from an ISR
+ 265:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_OBJ_PTR_NULL   If you passed a NULL pointer for 'p_q'
+ 266:Libraries/uC-OSIII/os_q.c **** *                              OS_ERR_OBJ_TYPE       If you didn't create the message queue
+ 267:Libraries/uC-OSIII/os_q.c **** *
+ 268:Libraries/uC-OSIII/os_q.c **** * Returns     : The number of entries freed from the queue
+ 269:Libraries/uC-OSIII/os_q.c **** *
+ 270:Libraries/uC-OSIII/os_q.c **** * Note(s)     : 1) You should use this function with great care because, when to flush the queue, y
+ 271:Libraries/uC-OSIII/os_q.c **** *                  references to what the queue entries are pointing to and thus, you could cause '
+ 272:Libraries/uC-OSIII/os_q.c **** *                  other words, the data you are pointing to that's being referenced by the queue e
+ 273:Libraries/uC-OSIII/os_q.c **** *                  likely, need to be de-allocated (i.e. freed).
+ 274:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 275:Libraries/uC-OSIII/os_q.c **** */
+ 276:Libraries/uC-OSIII/os_q.c **** 
+ 277:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_Q_FLUSH_EN > 0u
+ 278:Libraries/uC-OSIII/os_q.c **** OS_MSG_QTY  OSQFlush (OS_Q    *p_q,
+ 279:Libraries/uC-OSIII/os_q.c ****                       OS_ERR  *p_err)
+ 280:Libraries/uC-OSIII/os_q.c **** {
+ 455              		.loc 1 280 0
+ 456              		.cfi_startproc
+ 457              		@ args = 0, pretend = 0, frame = 16
+ 458              		@ frame_needed = 1, uses_anonymous_args = 0
+ 459 032c 80B5     		push	{r7, lr}
+ 460              	.LCFI6:
+ 461              		.cfi_def_cfa_offset 8
+ 462              		.cfi_offset 14, -4
+ 463              		.cfi_offset 7, -8
+ 464 032e 84B0     		sub	sp, sp, #16
+ 465              	.LCFI7:
+ 466              		.cfi_def_cfa_offset 24
+ 467 0330 00AF     		add	r7, sp, #0
+ 468              	.LCFI8:
+ 469              		.cfi_def_cfa_register 7
+ 470 0332 7860     		str	r0, [r7, #4]
+ 471 0334 3960     		str	r1, [r7, #0]
+ 281:Libraries/uC-OSIII/os_q.c ****     OS_MSG_QTY  entries;
+ 282:Libraries/uC-OSIII/os_q.c ****     CPU_SR_ALLOC();
+ 472              		.loc 1 282 0
+ 473 0336 4FF00003 		mov	r3, #0
+ 474 033a FB60     		str	r3, [r7, #12]
+ 283:Libraries/uC-OSIII/os_q.c **** 
+ 284:Libraries/uC-OSIII/os_q.c **** 
+ 285:Libraries/uC-OSIII/os_q.c **** 
+ 286:Libraries/uC-OSIII/os_q.c **** #ifdef OS_SAFETY_CRITICAL
+ 287:Libraries/uC-OSIII/os_q.c ****     if (p_err == (OS_ERR *)0) {
+ 288:Libraries/uC-OSIII/os_q.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 289:Libraries/uC-OSIII/os_q.c ****     }
+ 290:Libraries/uC-OSIII/os_q.c **** #endif
+ 291:Libraries/uC-OSIII/os_q.c **** 
+ 292:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 293:Libraries/uC-OSIII/os_q.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Can't flush a message queue from an 
+ 475              		.loc 1 293 0
+ 476 033c 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 477 0340 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 478 0344 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 479 0346 002B     		cmp	r3, #0
+ 480 0348 06D0     		beq	.L27
+ 294:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_FLUSH_ISR;
+ 481              		.loc 1 294 0
+ 482 034a 3B68     		ldr	r3, [r7, #0]
+ 483 034c 4FF46C52 		mov	r2, #15104
+ 484 0350 1A80     		strh	r2, [r3, #0]	@ movhi
+ 295:Libraries/uC-OSIII/os_q.c ****         return ((OS_MSG_QTY)0);
+ 485              		.loc 1 295 0
+ 486 0352 4FF00003 		mov	r3, #0
+ 487 0356 7AE0     		b	.L28
+ 488              	.L27:
+ 296:Libraries/uC-OSIII/os_q.c ****     }
+ 297:Libraries/uC-OSIII/os_q.c **** #endif
+ 298:Libraries/uC-OSIII/os_q.c **** 
+ 299:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 300:Libraries/uC-OSIII/os_q.c ****     if (p_q == (OS_Q *)0) {                                 /* Validate arguments                  
+ 489              		.loc 1 300 0
+ 490 0358 7B68     		ldr	r3, [r7, #4]
+ 491 035a 002B     		cmp	r3, #0
+ 492 035c 06D1     		bne	.L29
+ 301:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 493              		.loc 1 301 0
+ 494 035e 3B68     		ldr	r3, [r7, #0]
+ 495 0360 45F6C352 		movw	r2, #24003
+ 496 0364 1A80     		strh	r2, [r3, #0]	@ movhi
+ 302:Libraries/uC-OSIII/os_q.c ****         return ((OS_MSG_QTY)0);
+ 497              		.loc 1 302 0
+ 498 0366 4FF00003 		mov	r3, #0
+ 499 036a 70E0     		b	.L28
+ 500              	.L29:
+ 303:Libraries/uC-OSIII/os_q.c ****     }
+ 304:Libraries/uC-OSIII/os_q.c **** #endif
+ 305:Libraries/uC-OSIII/os_q.c **** 
+ 306:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 307:Libraries/uC-OSIII/os_q.c ****     if (p_q->Type != OS_OBJ_TYPE_Q) {                       /* Make sure message queue was created 
+ 501              		.loc 1 307 0
+ 502 036c 7B68     		ldr	r3, [r7, #4]
+ 503 036e 1A68     		ldr	r2, [r3, #0]
+ 504 0370 45F25153 		movw	r3, #21841
+ 505 0374 C5F24553 		movt	r3, 21829
+ 506 0378 9A42     		cmp	r2, r3
+ 507 037a 06D0     		beq	.L30
+ 308:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 508              		.loc 1 308 0
+ 509 037c 3B68     		ldr	r3, [r7, #0]
+ 510 037e 45F6C452 		movw	r2, #24004
+ 511 0382 1A80     		strh	r2, [r3, #0]	@ movhi
+ 309:Libraries/uC-OSIII/os_q.c ****         return ((OS_MSG_QTY)0);
+ 512              		.loc 1 309 0
+ 513 0384 4FF00003 		mov	r3, #0
+ 514 0388 61E0     		b	.L28
+ 515              	.L30:
+ 310:Libraries/uC-OSIII/os_q.c ****     }
+ 311:Libraries/uC-OSIII/os_q.c **** #endif
+ 312:Libraries/uC-OSIII/os_q.c **** 
+ 313:Libraries/uC-OSIII/os_q.c ****     OS_CRITICAL_ENTER();
+ 516              		.loc 1 313 0
+ 517 038a FFF7FEFF 		bl	CPU_SR_Save
+ 518 038e F860     		str	r0, [r7, #12]
+ 519 0390 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 520 0394 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 521 0398 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 522 039c 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 523 039e 03F10103 		add	r3, r3, #1
+ 524 03a2 DAB2     		uxtb	r2, r3
+ 525 03a4 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 526 03a8 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 527 03ac 1A70     		strb	r2, [r3, #0]
+ 528 03ae 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 529 03b2 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 530 03b6 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 531 03b8 012B     		cmp	r3, #1
+ 532 03ba 01D1     		bne	.L31
+ 533              		.loc 1 313 0 is_stmt 0 discriminator 1
+ 534 03bc FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 535              	.L31:
+ 536              		.loc 1 313 0 discriminator 2
+ 537 03c0 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 538 03c4 F868     		ldr	r0, [r7, #12]
+ 539 03c6 FFF7FEFF 		bl	CPU_SR_Restore
+ 314:Libraries/uC-OSIII/os_q.c ****     entries = OS_MsgQFreeAll(&p_q->MsgQ);                   /* Return all OS_MSGs to the OS_MSG poo
+ 540              		.loc 1 314 0 is_stmt 1 discriminator 2
+ 541 03ca 7B68     		ldr	r3, [r7, #4]
+ 542 03cc 03F12003 		add	r3, r3, #32
+ 543 03d0 1846     		mov	r0, r3
+ 544 03d2 FFF7FEFF 		bl	OS_MsgQFreeAll
+ 545 03d6 0346     		mov	r3, r0
+ 546 03d8 7B81     		strh	r3, [r7, #10]	@ movhi
+ 315:Libraries/uC-OSIII/os_q.c ****     OS_CRITICAL_EXIT();
+ 547              		.loc 1 315 0 discriminator 2
+ 548 03da FFF7FEFF 		bl	CPU_SR_Save
+ 549 03de F860     		str	r0, [r7, #12]
+ 550 03e0 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 551 03e4 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 552 03e8 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 553 03ec 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 554 03ee 03F1FF33 		add	r3, r3, #-1
+ 555 03f2 DAB2     		uxtb	r2, r3
+ 556 03f4 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 557 03f8 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 558 03fc 1A70     		strb	r2, [r3, #0]
+ 559 03fe 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 560 0402 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 561 0406 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 562 0408 002B     		cmp	r3, #0
+ 563 040a 16D1     		bne	.L32
+ 564              		.loc 1 315 0 is_stmt 0 discriminator 1
+ 565 040c FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 566 0410 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 567 0414 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 568 0418 1B88     		ldrh	r3, [r3, #0]
+ 569 041a 002B     		cmp	r3, #0
+ 570 041c 07D0     		beq	.L33
+ 571              		.loc 1 315 0 discriminator 3
+ 572 041e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 573 0422 F868     		ldr	r0, [r7, #12]
+ 574 0424 FFF7FEFF 		bl	CPU_SR_Restore
+ 575 0428 FFF7FEFF 		bl	OS_Sched0
+ 576 042c 0AE0     		b	.L34
+ 577              	.L33:
+ 578              		.loc 1 315 0 discriminator 4
+ 579 042e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 580 0432 F868     		ldr	r0, [r7, #12]
+ 581 0434 FFF7FEFF 		bl	CPU_SR_Restore
+ 582 0438 04E0     		b	.L34
+ 583              	.L32:
+ 584              		.loc 1 315 0 discriminator 2
+ 585 043a FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 586 043e F868     		ldr	r0, [r7, #12]
+ 587 0440 FFF7FEFF 		bl	CPU_SR_Restore
+ 588              	.L34:
+ 316:Libraries/uC-OSIII/os_q.c ****     *p_err  = OS_ERR_NONE;
+ 589              		.loc 1 316 0 is_stmt 1
+ 590 0444 3B68     		ldr	r3, [r7, #0]
+ 591 0446 4FF00002 		mov	r2, #0
+ 592 044a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 317:Libraries/uC-OSIII/os_q.c ****     return ((OS_MSG_QTY)entries);
+ 593              		.loc 1 317 0
+ 594 044c 7B89     		ldrh	r3, [r7, #10]
+ 595              	.L28:
+ 318:Libraries/uC-OSIII/os_q.c **** }
+ 596              		.loc 1 318 0
+ 597 044e 1846     		mov	r0, r3
+ 598 0450 07F11007 		add	r7, r7, #16
+ 599 0454 BD46     		mov	sp, r7
+ 600 0456 80BD     		pop	{r7, pc}
+ 601              		.cfi_endproc
+ 602              	.LFE2:
+ 604              		.align	2
+ 605              		.global	OSQPend
+ 606              		.thumb
+ 607              		.thumb_func
+ 609              	OSQPend:
+ 610              	.LFB3:
+ 319:Libraries/uC-OSIII/os_q.c **** #endif
+ 320:Libraries/uC-OSIII/os_q.c **** 
+ 321:Libraries/uC-OSIII/os_q.c **** /*$PAGE*/
+ 322:Libraries/uC-OSIII/os_q.c **** /*
+ 323:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 324:Libraries/uC-OSIII/os_q.c **** *                                            PEND ON A QUEUE FOR A MESSAGE
+ 325:Libraries/uC-OSIII/os_q.c **** *
+ 326:Libraries/uC-OSIII/os_q.c **** * Description: This function waits for a message to be sent to a queue
+ 327:Libraries/uC-OSIII/os_q.c **** *
+ 328:Libraries/uC-OSIII/os_q.c **** * Arguments  : p_q           is a pointer to the message queue
+ 329:Libraries/uC-OSIII/os_q.c **** *
+ 330:Libraries/uC-OSIII/os_q.c **** *              timeout       is an optional timeout period (in clock ticks).  If non-zero, your tas
+ 331:Libraries/uC-OSIII/os_q.c **** *                            message to arrive at the queue up to the amount of time specified by t
+ 332:Libraries/uC-OSIII/os_q.c **** *                            specify 0, however, your task will wait forever at the specified queue
+ 333:Libraries/uC-OSIII/os_q.c **** *                            arrives.
+ 334:Libraries/uC-OSIII/os_q.c **** *
+ 335:Libraries/uC-OSIII/os_q.c **** *              opt           determines whether the user wants to block if the queue is empty or no
+ 336:Libraries/uC-OSIII/os_q.c **** *
+ 337:Libraries/uC-OSIII/os_q.c **** *                                OS_OPT_PEND_BLOCKING
+ 338:Libraries/uC-OSIII/os_q.c **** *                                OS_OPT_PEND_NON_BLOCKING
+ 339:Libraries/uC-OSIII/os_q.c **** *
+ 340:Libraries/uC-OSIII/os_q.c **** *              p_msg_size    is a pointer to a variable that will receive the size of the message
+ 341:Libraries/uC-OSIII/os_q.c **** *
+ 342:Libraries/uC-OSIII/os_q.c **** *              p_ts          is a pointer to a variable that will receive the timestamp of when the
+ 343:Libraries/uC-OSIII/os_q.c **** *                            received, pend aborted or the message queue deleted,  If you pass a NU
+ 344:Libraries/uC-OSIII/os_q.c **** *                            (CPU_TS *)0) then you will not get the timestamp.  In other words, pas
+ 345:Libraries/uC-OSIII/os_q.c **** *                            is valid and indicates that you don't need the timestamp.
+ 346:Libraries/uC-OSIII/os_q.c **** *
+ 347:Libraries/uC-OSIII/os_q.c **** *              p_err         is a pointer to a variable that will contain an error code returned by
+ 348:Libraries/uC-OSIII/os_q.c **** *
+ 349:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_NONE               The call was successful and your task re
+ 350:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_OBJ_PTR_NULL       if you pass a NULL pointer for 'p_q'
+ 351:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_OBJ_TYPE           if the message queue was not created
+ 352:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_PEND_ABORT         the pend was aborted
+ 353:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_PEND_ISR           if you called this function from an ISR
+ 354:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_PEND_WOULD_BLOCK   If you specified non-blocking but the qu
+ 355:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_SCHED_LOCKED       the scheduler is locked
+ 356:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_TIMEOUT            A message was not received within the sp
+ 357:Libraries/uC-OSIII/os_q.c **** *                                                          would lead to a suspension.
+ 358:Libraries/uC-OSIII/os_q.c **** *
+ 359:Libraries/uC-OSIII/os_q.c **** * Returns    : != (void *)0  is a pointer to the message received
+ 360:Libraries/uC-OSIII/os_q.c **** *              == (void *)0  if you received a NULL pointer message or,
+ 361:Libraries/uC-OSIII/os_q.c **** *                            if no message was received or,
+ 362:Libraries/uC-OSIII/os_q.c **** *                            if 'p_q' is a NULL pointer or,
+ 363:Libraries/uC-OSIII/os_q.c **** *                            if you didn't pass a pointer to a queue.
+ 364:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 365:Libraries/uC-OSIII/os_q.c **** */
+ 366:Libraries/uC-OSIII/os_q.c **** 
+ 367:Libraries/uC-OSIII/os_q.c **** void  *OSQPend (OS_Q         *p_q,
+ 368:Libraries/uC-OSIII/os_q.c ****                 OS_TICK       timeout,
+ 369:Libraries/uC-OSIII/os_q.c ****                 OS_OPT        opt,
+ 370:Libraries/uC-OSIII/os_q.c ****                 OS_MSG_SIZE  *p_msg_size,
+ 371:Libraries/uC-OSIII/os_q.c ****                 CPU_TS       *p_ts,
+ 372:Libraries/uC-OSIII/os_q.c ****                 OS_ERR       *p_err)
+ 373:Libraries/uC-OSIII/os_q.c **** {
+ 611              		.loc 1 373 0
+ 612              		.cfi_startproc
+ 613              		@ args = 8, pretend = 0, frame = 56
+ 614              		@ frame_needed = 1, uses_anonymous_args = 0
+ 615 0458 80B5     		push	{r7, lr}
+ 616              	.LCFI9:
+ 617              		.cfi_def_cfa_offset 8
+ 618              		.cfi_offset 14, -4
+ 619              		.cfi_offset 7, -8
+ 620 045a 8EB0     		sub	sp, sp, #56
+ 621              	.LCFI10:
+ 622              		.cfi_def_cfa_offset 64
+ 623 045c 00AF     		add	r7, sp, #0
+ 624              	.LCFI11:
+ 625              		.cfi_def_cfa_register 7
+ 626 045e F860     		str	r0, [r7, #12]
+ 627 0460 B960     		str	r1, [r7, #8]
+ 628 0462 3B60     		str	r3, [r7, #0]
+ 629 0464 1346     		mov	r3, r2	@ movhi
+ 630 0466 FB80     		strh	r3, [r7, #6]	@ movhi
+ 374:Libraries/uC-OSIII/os_q.c ****     OS_PEND_DATA  pend_data;
+ 375:Libraries/uC-OSIII/os_q.c ****     void         *p_void;
+ 376:Libraries/uC-OSIII/os_q.c ****     CPU_SR_ALLOC();
+ 631              		.loc 1 376 0
+ 632 0468 4FF00003 		mov	r3, #0
+ 633 046c 3B63     		str	r3, [r7, #48]
+ 377:Libraries/uC-OSIII/os_q.c **** 
+ 378:Libraries/uC-OSIII/os_q.c **** 
+ 379:Libraries/uC-OSIII/os_q.c **** 
+ 380:Libraries/uC-OSIII/os_q.c **** #ifdef OS_SAFETY_CRITICAL
+ 381:Libraries/uC-OSIII/os_q.c ****     if (p_err == (OS_ERR *)0) {
+ 382:Libraries/uC-OSIII/os_q.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 383:Libraries/uC-OSIII/os_q.c ****     }
+ 384:Libraries/uC-OSIII/os_q.c **** #endif
+ 385:Libraries/uC-OSIII/os_q.c **** 
+ 386:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 387:Libraries/uC-OSIII/os_q.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Not allowed to call from an ISR     
+ 634              		.loc 1 387 0
+ 635 046e 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 636 0472 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 637 0476 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 638 0478 002B     		cmp	r3, #0
+ 639 047a 06D0     		beq	.L36
+ 388:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_PEND_ISR;
+ 640              		.loc 1 388 0
+ 641 047c 7B6C     		ldr	r3, [r7, #68]
+ 642 047e 46F2AE12 		movw	r2, #25006
+ 643 0482 1A80     		strh	r2, [r3, #0]	@ movhi
+ 389:Libraries/uC-OSIII/os_q.c ****         return ((void *)0);
+ 644              		.loc 1 389 0
+ 645 0484 4FF00003 		mov	r3, #0
+ 646 0488 47E1     		b	.L37
+ 647              	.L36:
+ 390:Libraries/uC-OSIII/os_q.c ****     }
+ 391:Libraries/uC-OSIII/os_q.c **** #endif
+ 392:Libraries/uC-OSIII/os_q.c **** 
+ 393:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 394:Libraries/uC-OSIII/os_q.c ****     if (p_q == (OS_Q *)0) {                                 /* Validate arguments                  
+ 648              		.loc 1 394 0
+ 649 048a FB68     		ldr	r3, [r7, #12]
+ 650 048c 002B     		cmp	r3, #0
+ 651 048e 06D1     		bne	.L38
+ 395:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 652              		.loc 1 395 0
+ 653 0490 7B6C     		ldr	r3, [r7, #68]
+ 654 0492 45F6C352 		movw	r2, #24003
+ 655 0496 1A80     		strh	r2, [r3, #0]	@ movhi
+ 396:Libraries/uC-OSIII/os_q.c ****         return ((void *)0);
+ 656              		.loc 1 396 0
+ 657 0498 4FF00003 		mov	r3, #0
+ 658 049c 3DE1     		b	.L37
+ 659              	.L38:
+ 397:Libraries/uC-OSIII/os_q.c ****     }
+ 398:Libraries/uC-OSIII/os_q.c ****     if (p_msg_size == (OS_MSG_SIZE *)0) {
+ 660              		.loc 1 398 0
+ 661 049e 3B68     		ldr	r3, [r7, #0]
+ 662 04a0 002B     		cmp	r3, #0
+ 663 04a2 06D1     		bne	.L39
+ 399:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_PTR_INVALID;
+ 664              		.loc 1 399 0
+ 665 04a4 7B6C     		ldr	r3, [r7, #68]
+ 666 04a6 46F2D522 		movw	r2, #25301
+ 667 04aa 1A80     		strh	r2, [r3, #0]	@ movhi
+ 400:Libraries/uC-OSIII/os_q.c ****         return ((void *)0);
+ 668              		.loc 1 400 0
+ 669 04ac 4FF00003 		mov	r3, #0
+ 670 04b0 33E1     		b	.L37
+ 671              	.L39:
+ 401:Libraries/uC-OSIII/os_q.c ****     }
+ 402:Libraries/uC-OSIII/os_q.c ****     switch (opt) {
+ 672              		.loc 1 402 0
+ 673 04b2 FB88     		ldrh	r3, [r7, #6]
+ 674 04b4 002B     		cmp	r3, #0
+ 675 04b6 09D0     		beq	.L61
+ 676 04b8 B3F5004F 		cmp	r3, #32768
+ 677 04bc 06D0     		beq	.L61
+ 403:Libraries/uC-OSIII/os_q.c ****         case OS_OPT_PEND_BLOCKING:
+ 404:Libraries/uC-OSIII/os_q.c ****         case OS_OPT_PEND_NON_BLOCKING:
+ 405:Libraries/uC-OSIII/os_q.c ****              break;
+ 406:Libraries/uC-OSIII/os_q.c **** 
+ 407:Libraries/uC-OSIII/os_q.c ****         default:
+ 408:Libraries/uC-OSIII/os_q.c ****              *p_err = OS_ERR_OPT_INVALID;
+ 678              		.loc 1 408 0
+ 679 04be 7B6C     		ldr	r3, [r7, #68]
+ 680 04c0 45F62562 		movw	r2, #24101
+ 681 04c4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 409:Libraries/uC-OSIII/os_q.c ****              return ((void *)0);
+ 682              		.loc 1 409 0
+ 683 04c6 4FF00003 		mov	r3, #0
+ 684 04ca 26E1     		b	.L37
+ 685              	.L61:
+ 405:Libraries/uC-OSIII/os_q.c ****              break;
+ 686              		.loc 1 405 0
+ 687 04cc 00BF     		nop
+ 688              	.L42:
+ 410:Libraries/uC-OSIII/os_q.c ****     }
+ 411:Libraries/uC-OSIII/os_q.c **** #endif
+ 412:Libraries/uC-OSIII/os_q.c **** 
+ 413:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 414:Libraries/uC-OSIII/os_q.c ****     if (p_q->Type != OS_OBJ_TYPE_Q) {                       /* Make sure message queue was created 
+ 689              		.loc 1 414 0
+ 690 04ce FB68     		ldr	r3, [r7, #12]
+ 691 04d0 1A68     		ldr	r2, [r3, #0]
+ 692 04d2 45F25153 		movw	r3, #21841
+ 693 04d6 C5F24553 		movt	r3, 21829
+ 694 04da 9A42     		cmp	r2, r3
+ 695 04dc 06D0     		beq	.L43
+ 415:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 696              		.loc 1 415 0
+ 697 04de 7B6C     		ldr	r3, [r7, #68]
+ 698 04e0 45F6C452 		movw	r2, #24004
+ 699 04e4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 416:Libraries/uC-OSIII/os_q.c ****         return ((void *)0);
+ 700              		.loc 1 416 0
+ 701 04e6 4FF00003 		mov	r3, #0
+ 702 04ea 16E1     		b	.L37
+ 703              	.L43:
+ 417:Libraries/uC-OSIII/os_q.c ****     }
+ 418:Libraries/uC-OSIII/os_q.c **** #endif
+ 419:Libraries/uC-OSIII/os_q.c **** 
+ 420:Libraries/uC-OSIII/os_q.c ****     if (p_ts != (CPU_TS *)0) {
+ 704              		.loc 1 420 0
+ 705 04ec 3B6C     		ldr	r3, [r7, #64]
+ 706 04ee 002B     		cmp	r3, #0
+ 707 04f0 03D0     		beq	.L44
+ 421:Libraries/uC-OSIII/os_q.c ****        *p_ts  = (CPU_TS  )0;                                /* Initialize the returned timestamp   
+ 708              		.loc 1 421 0
+ 709 04f2 3B6C     		ldr	r3, [r7, #64]
+ 710 04f4 4FF00002 		mov	r2, #0
+ 711 04f8 1A60     		str	r2, [r3, #0]
+ 712              	.L44:
+ 422:Libraries/uC-OSIII/os_q.c ****     }
+ 423:Libraries/uC-OSIII/os_q.c **** 
+ 424:Libraries/uC-OSIII/os_q.c ****     CPU_CRITICAL_ENTER();
+ 713              		.loc 1 424 0
+ 714 04fa FFF7FEFF 		bl	CPU_SR_Save
+ 715 04fe 3863     		str	r0, [r7, #48]
+ 716 0500 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 425:Libraries/uC-OSIII/os_q.c ****     p_void = OS_MsgQGet(&p_q->MsgQ,                         /* Any message waiting in the message q
+ 717              		.loc 1 425 0
+ 718 0504 FB68     		ldr	r3, [r7, #12]
+ 719 0506 03F12003 		add	r3, r3, #32
+ 720 050a 1846     		mov	r0, r3
+ 721 050c 3968     		ldr	r1, [r7, #0]
+ 722 050e 3A6C     		ldr	r2, [r7, #64]
+ 723 0510 7B6C     		ldr	r3, [r7, #68]
+ 724 0512 FFF7FEFF 		bl	OS_MsgQGet
+ 725 0516 7863     		str	r0, [r7, #52]
+ 426:Libraries/uC-OSIII/os_q.c ****                         p_msg_size,
+ 427:Libraries/uC-OSIII/os_q.c ****                         p_ts,
+ 428:Libraries/uC-OSIII/os_q.c ****                         p_err);
+ 429:Libraries/uC-OSIII/os_q.c ****     if (*p_err == OS_ERR_NONE) {
+ 726              		.loc 1 429 0
+ 727 0518 7B6C     		ldr	r3, [r7, #68]
+ 728 051a 1B88     		ldrh	r3, [r3, #0]
+ 729 051c 002B     		cmp	r3, #0
+ 730 051e 06D1     		bne	.L45
+ 430:Libraries/uC-OSIII/os_q.c ****         CPU_CRITICAL_EXIT();
+ 731              		.loc 1 430 0
+ 732 0520 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 733 0524 386B     		ldr	r0, [r7, #48]
+ 734 0526 FFF7FEFF 		bl	CPU_SR_Restore
+ 431:Libraries/uC-OSIII/os_q.c ****         return (p_void);                                    /* Yes, Return message received        
+ 735              		.loc 1 431 0
+ 736 052a 7B6B     		ldr	r3, [r7, #52]
+ 737 052c F5E0     		b	.L37
+ 738              	.L45:
+ 432:Libraries/uC-OSIII/os_q.c ****     }
+ 433:Libraries/uC-OSIII/os_q.c **** 
+ 434:Libraries/uC-OSIII/os_q.c ****     if ((opt & OS_OPT_PEND_NON_BLOCKING) != (OS_OPT)0) {    /* Caller wants to block if not availab
+ 739              		.loc 1 434 0
+ 740 052e FB88     		ldrh	r3, [r7, #6]
+ 741 0530 1BB2     		sxth	r3, r3
+ 742 0532 002B     		cmp	r3, #0
+ 743 0534 0BDA     		bge	.L46
+ 435:Libraries/uC-OSIII/os_q.c ****         CPU_CRITICAL_EXIT();
+ 744              		.loc 1 435 0
+ 745 0536 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 746 053a 386B     		ldr	r0, [r7, #48]
+ 747 053c FFF7FEFF 		bl	CPU_SR_Restore
+ 436:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_PEND_WOULD_BLOCK;                   /* No                                  
+ 748              		.loc 1 436 0
+ 749 0540 7B6C     		ldr	r3, [r7, #68]
+ 750 0542 46F2B012 		movw	r2, #25008
+ 751 0546 1A80     		strh	r2, [r3, #0]	@ movhi
+ 437:Libraries/uC-OSIII/os_q.c ****         return ((void *)0);
+ 752              		.loc 1 437 0
+ 753 0548 4FF00003 		mov	r3, #0
+ 754 054c E5E0     		b	.L37
+ 755              	.L46:
+ 438:Libraries/uC-OSIII/os_q.c ****     } else {
+ 439:Libraries/uC-OSIII/os_q.c ****         if (OSSchedLockNestingCtr > (OS_NESTING_CTR)0) {    /* Can't pend when the scheduler is loc
+ 756              		.loc 1 439 0
+ 757 054e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 758 0552 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 759 0556 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 760 0558 002B     		cmp	r3, #0
+ 761 055a 0BD0     		beq	.L47
+ 440:Libraries/uC-OSIII/os_q.c ****             CPU_CRITICAL_EXIT();
+ 762              		.loc 1 440 0
+ 763 055c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 764 0560 386B     		ldr	r0, [r7, #48]
+ 765 0562 FFF7FEFF 		bl	CPU_SR_Restore
+ 441:Libraries/uC-OSIII/os_q.c ****             *p_err = OS_ERR_SCHED_LOCKED;
+ 766              		.loc 1 441 0
+ 767 0566 7B6C     		ldr	r3, [r7, #68]
+ 768 0568 46F66252 		movw	r2, #28002
+ 769 056c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 442:Libraries/uC-OSIII/os_q.c ****             return ((void *)0);
+ 770              		.loc 1 442 0
+ 771 056e 4FF00003 		mov	r3, #0
+ 772 0572 D2E0     		b	.L37
+ 773              	.L47:
+ 443:Libraries/uC-OSIII/os_q.c ****         }
+ 444:Libraries/uC-OSIII/os_q.c ****     }
+ 445:Libraries/uC-OSIII/os_q.c **** 
+ 446:Libraries/uC-OSIII/os_q.c ****     OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();                  /* Lock the scheduler/re-enable interru
+ 774              		.loc 1 446 0
+ 775 0574 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 776 0578 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 777 057c 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 778 057e 03F10103 		add	r3, r3, #1
+ 779 0582 DAB2     		uxtb	r2, r3
+ 780 0584 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 781 0588 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 782 058c 1A70     		strb	r2, [r3, #0]
+ 783 058e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 784 0592 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 785 0596 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 786 0598 012B     		cmp	r3, #1
+ 787 059a 01D1     		bne	.L48
+ 788              		.loc 1 446 0 is_stmt 0 discriminator 1
+ 789 059c FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 790              	.L48:
+ 791              		.loc 1 446 0 discriminator 2
+ 792 05a0 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 793 05a4 386B     		ldr	r0, [r7, #48]
+ 794 05a6 FFF7FEFF 		bl	CPU_SR_Restore
+ 447:Libraries/uC-OSIII/os_q.c ****     OS_Pend(&pend_data,                                     /* Block task pending on Message Queue 
+ 795              		.loc 1 447 0 is_stmt 1 discriminator 2
+ 796 05aa 07F11003 		add	r3, r7, #16
+ 797 05ae 1846     		mov	r0, r3
+ 798 05b0 F968     		ldr	r1, [r7, #12]
+ 799 05b2 4FF00502 		mov	r2, #5
+ 800 05b6 BB68     		ldr	r3, [r7, #8]
+ 801 05b8 FFF7FEFF 		bl	OS_Pend
+ 448:Libraries/uC-OSIII/os_q.c ****             (OS_PEND_OBJ *)((void *)p_q),
+ 449:Libraries/uC-OSIII/os_q.c ****             OS_TASK_PEND_ON_Q,
+ 450:Libraries/uC-OSIII/os_q.c ****             timeout);
+ 451:Libraries/uC-OSIII/os_q.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 802              		.loc 1 451 0 discriminator 2
+ 803 05bc FFF7FEFF 		bl	CPU_SR_Save
+ 804 05c0 3863     		str	r0, [r7, #48]
+ 805 05c2 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 806 05c6 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 807 05ca C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 808 05ce 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 809 05d0 03F1FF33 		add	r3, r3, #-1
+ 810 05d4 DAB2     		uxtb	r2, r3
+ 811 05d6 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 812 05da C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 813 05de 1A70     		strb	r2, [r3, #0]
+ 814 05e0 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 815 05e4 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 816 05e8 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 817 05ea 002B     		cmp	r3, #0
+ 818 05ec 01D1     		bne	.L49
+ 819              		.loc 1 451 0 is_stmt 0 discriminator 1
+ 820 05ee FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 821              	.L49:
+ 822              		.loc 1 451 0 discriminator 2
+ 823 05f2 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 824 05f6 386B     		ldr	r0, [r7, #48]
+ 825 05f8 FFF7FEFF 		bl	CPU_SR_Restore
+ 452:Libraries/uC-OSIII/os_q.c **** 
+ 453:Libraries/uC-OSIII/os_q.c ****     OSSched();                                              /* Find the next highest priority task 
+ 826              		.loc 1 453 0 is_stmt 1 discriminator 2
+ 827 05fc FFF7FEFF 		bl	OSSched
+ 454:Libraries/uC-OSIII/os_q.c **** 
+ 455:Libraries/uC-OSIII/os_q.c ****     CPU_CRITICAL_ENTER();
+ 828              		.loc 1 455 0 discriminator 2
+ 829 0600 FFF7FEFF 		bl	CPU_SR_Save
+ 830 0604 3863     		str	r0, [r7, #48]
+ 831 0606 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 456:Libraries/uC-OSIII/os_q.c ****     switch (OSTCBCurPtr->PendStatus) {
+ 832              		.loc 1 456 0 discriminator 2
+ 833 060a 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 834 060e C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 835 0612 1B68     		ldr	r3, [r3, #0]
+ 836 0614 93F8C130 		ldrb	r3, [r3, #193]	@ zero_extendqisi2
+ 837 0618 032B     		cmp	r3, #3
+ 838 061a 6CD8     		bhi	.L50
+ 839 061c 01A2     		adr	r2, .L55
+ 840 061e 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 841 0622 00BF     		.align	2
+ 842              	.L55:
+ 843 0624 35060000 		.word	.L51+1
+ 844 0628 75060000 		.word	.L52+1
+ 845 062c C9060000 		.word	.L53+1
+ 846 0630 A3060000 		.word	.L54+1
+ 847              	.L51:
+ 457:Libraries/uC-OSIII/os_q.c ****         case OS_STATUS_PEND_OK:                             /* Extract message from TCB (Put there 
+ 458:Libraries/uC-OSIII/os_q.c ****              p_void      = OSTCBCurPtr->MsgPtr;
+ 848              		.loc 1 458 0
+ 849 0634 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 850 0638 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 851 063c 1B68     		ldr	r3, [r3, #0]
+ 852 063e DB6B     		ldr	r3, [r3, #60]
+ 853 0640 7B63     		str	r3, [r7, #52]
+ 459:Libraries/uC-OSIII/os_q.c ****              *p_msg_size = OSTCBCurPtr->MsgSize;
+ 854              		.loc 1 459 0
+ 855 0642 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 856 0646 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 857 064a 1B68     		ldr	r3, [r3, #0]
+ 858 064c B3F84020 		ldrh	r2, [r3, #64]
+ 859 0650 3B68     		ldr	r3, [r7, #0]
+ 860 0652 1A80     		strh	r2, [r3, #0]	@ movhi
+ 460:Libraries/uC-OSIII/os_q.c ****              if (p_ts != (CPU_TS *)0) {
+ 861              		.loc 1 460 0
+ 862 0654 3B6C     		ldr	r3, [r7, #64]
+ 863 0656 002B     		cmp	r3, #0
+ 864 0658 07D0     		beq	.L56
+ 461:Libraries/uC-OSIII/os_q.c ****                 *p_ts  =  OSTCBCurPtr->TS;
+ 865              		.loc 1 461 0
+ 866 065a 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 867 065e C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 868 0662 1B68     		ldr	r3, [r3, #0]
+ 869 0664 9A6B     		ldr	r2, [r3, #56]
+ 870 0666 3B6C     		ldr	r3, [r7, #64]
+ 871 0668 1A60     		str	r2, [r3, #0]
+ 872              	.L56:
+ 462:Libraries/uC-OSIII/os_q.c ****              }
+ 463:Libraries/uC-OSIII/os_q.c ****              *p_err      = OS_ERR_NONE;
+ 873              		.loc 1 463 0
+ 874 066a 7B6C     		ldr	r3, [r7, #68]
+ 875 066c 4FF00002 		mov	r2, #0
+ 876 0670 1A80     		strh	r2, [r3, #0]	@ movhi
+ 464:Libraries/uC-OSIII/os_q.c ****              break;
+ 877              		.loc 1 464 0
+ 878 0672 4CE0     		b	.L57
+ 879              	.L52:
+ 465:Libraries/uC-OSIII/os_q.c **** 
+ 466:Libraries/uC-OSIII/os_q.c ****         case OS_STATUS_PEND_ABORT:                          /* Indicate that we aborted            
+ 467:Libraries/uC-OSIII/os_q.c ****              p_void      = (void      *)0;
+ 880              		.loc 1 467 0
+ 881 0674 4FF00003 		mov	r3, #0
+ 882 0678 7B63     		str	r3, [r7, #52]
+ 468:Libraries/uC-OSIII/os_q.c ****              *p_msg_size = (OS_MSG_SIZE)0;
+ 883              		.loc 1 468 0
+ 884 067a 3B68     		ldr	r3, [r7, #0]
+ 885 067c 4FF00002 		mov	r2, #0
+ 886 0680 1A80     		strh	r2, [r3, #0]	@ movhi
+ 469:Libraries/uC-OSIII/os_q.c ****              if (p_ts != (CPU_TS *)0) {
+ 887              		.loc 1 469 0
+ 888 0682 3B6C     		ldr	r3, [r7, #64]
+ 889 0684 002B     		cmp	r3, #0
+ 890 0686 07D0     		beq	.L58
+ 470:Libraries/uC-OSIII/os_q.c ****                 *p_ts  =  OSTCBCurPtr->TS;
+ 891              		.loc 1 470 0
+ 892 0688 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 893 068c C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 894 0690 1B68     		ldr	r3, [r3, #0]
+ 895 0692 9A6B     		ldr	r2, [r3, #56]
+ 896 0694 3B6C     		ldr	r3, [r7, #64]
+ 897 0696 1A60     		str	r2, [r3, #0]
+ 898              	.L58:
+ 471:Libraries/uC-OSIII/os_q.c ****              }
+ 472:Libraries/uC-OSIII/os_q.c ****              *p_err      = OS_ERR_PEND_ABORT;
+ 899              		.loc 1 472 0
+ 900 0698 7B6C     		ldr	r3, [r7, #68]
+ 901 069a 46F2A912 		movw	r2, #25001
+ 902 069e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 473:Libraries/uC-OSIII/os_q.c ****              break;
+ 903              		.loc 1 473 0
+ 904 06a0 35E0     		b	.L57
+ 905              	.L54:
+ 474:Libraries/uC-OSIII/os_q.c **** 
+ 475:Libraries/uC-OSIII/os_q.c ****         case OS_STATUS_PEND_TIMEOUT:                        /* Indicate that we didn't get event wi
+ 476:Libraries/uC-OSIII/os_q.c ****              p_void      = (void      *)0;
+ 906              		.loc 1 476 0
+ 907 06a2 4FF00003 		mov	r3, #0
+ 908 06a6 7B63     		str	r3, [r7, #52]
+ 477:Libraries/uC-OSIII/os_q.c ****              *p_msg_size = (OS_MSG_SIZE)0;
+ 909              		.loc 1 477 0
+ 910 06a8 3B68     		ldr	r3, [r7, #0]
+ 911 06aa 4FF00002 		mov	r2, #0
+ 912 06ae 1A80     		strh	r2, [r3, #0]	@ movhi
+ 478:Libraries/uC-OSIII/os_q.c ****              if (p_ts != (CPU_TS *)0) {
+ 913              		.loc 1 478 0
+ 914 06b0 3B6C     		ldr	r3, [r7, #64]
+ 915 06b2 002B     		cmp	r3, #0
+ 916 06b4 03D0     		beq	.L59
+ 479:Libraries/uC-OSIII/os_q.c ****                 *p_ts  = (CPU_TS  )0;
+ 917              		.loc 1 479 0
+ 918 06b6 3B6C     		ldr	r3, [r7, #64]
+ 919 06b8 4FF00002 		mov	r2, #0
+ 920 06bc 1A60     		str	r2, [r3, #0]
+ 921              	.L59:
+ 480:Libraries/uC-OSIII/os_q.c ****              }
+ 481:Libraries/uC-OSIII/os_q.c ****              *p_err      = OS_ERR_TIMEOUT;
+ 922              		.loc 1 481 0
+ 923 06be 7B6C     		ldr	r3, [r7, #68]
+ 924 06c0 47F2D922 		movw	r2, #29401
+ 925 06c4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 482:Libraries/uC-OSIII/os_q.c ****              break;
+ 926              		.loc 1 482 0
+ 927 06c6 22E0     		b	.L57
+ 928              	.L53:
+ 483:Libraries/uC-OSIII/os_q.c **** 
+ 484:Libraries/uC-OSIII/os_q.c ****         case OS_STATUS_PEND_DEL:                            /* Indicate that object pended on has b
+ 485:Libraries/uC-OSIII/os_q.c ****              p_void      = (void      *)0;
+ 929              		.loc 1 485 0
+ 930 06c8 4FF00003 		mov	r3, #0
+ 931 06cc 7B63     		str	r3, [r7, #52]
+ 486:Libraries/uC-OSIII/os_q.c ****              *p_msg_size = (OS_MSG_SIZE)0;
+ 932              		.loc 1 486 0
+ 933 06ce 3B68     		ldr	r3, [r7, #0]
+ 934 06d0 4FF00002 		mov	r2, #0
+ 935 06d4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 487:Libraries/uC-OSIII/os_q.c ****              if (p_ts != (CPU_TS *)0) {
+ 936              		.loc 1 487 0
+ 937 06d6 3B6C     		ldr	r3, [r7, #64]
+ 938 06d8 002B     		cmp	r3, #0
+ 939 06da 07D0     		beq	.L60
+ 488:Libraries/uC-OSIII/os_q.c ****                 *p_ts  =  OSTCBCurPtr->TS;
+ 940              		.loc 1 488 0
+ 941 06dc 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 942 06e0 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 943 06e4 1B68     		ldr	r3, [r3, #0]
+ 944 06e6 9A6B     		ldr	r2, [r3, #56]
+ 945 06e8 3B6C     		ldr	r3, [r7, #64]
+ 946 06ea 1A60     		str	r2, [r3, #0]
+ 947              	.L60:
+ 489:Libraries/uC-OSIII/os_q.c ****              }
+ 490:Libraries/uC-OSIII/os_q.c ****              *p_err      = OS_ERR_OBJ_DEL;
+ 948              		.loc 1 490 0
+ 949 06ec 7B6C     		ldr	r3, [r7, #68]
+ 950 06ee 45F6C252 		movw	r2, #24002
+ 951 06f2 1A80     		strh	r2, [r3, #0]	@ movhi
+ 491:Libraries/uC-OSIII/os_q.c ****              break;
+ 952              		.loc 1 491 0
+ 953 06f4 0BE0     		b	.L57
+ 954              	.L50:
+ 492:Libraries/uC-OSIII/os_q.c **** 
+ 493:Libraries/uC-OSIII/os_q.c ****         default:
+ 494:Libraries/uC-OSIII/os_q.c ****              p_void      = (void      *)0;
+ 955              		.loc 1 494 0
+ 956 06f6 4FF00003 		mov	r3, #0
+ 957 06fa 7B63     		str	r3, [r7, #52]
+ 495:Libraries/uC-OSIII/os_q.c ****              *p_msg_size = (OS_MSG_SIZE)0;
+ 958              		.loc 1 495 0
+ 959 06fc 3B68     		ldr	r3, [r7, #0]
+ 960 06fe 4FF00002 		mov	r2, #0
+ 961 0702 1A80     		strh	r2, [r3, #0]	@ movhi
+ 496:Libraries/uC-OSIII/os_q.c ****              *p_err      = OS_ERR_STATUS_INVALID;
+ 962              		.loc 1 496 0
+ 963 0704 7B6C     		ldr	r3, [r7, #68]
+ 964 0706 46F62B62 		movw	r2, #28203
+ 965 070a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 497:Libraries/uC-OSIII/os_q.c ****              break;
+ 966              		.loc 1 497 0
+ 967 070c 00BF     		nop
+ 968              	.L57:
+ 498:Libraries/uC-OSIII/os_q.c ****     }
+ 499:Libraries/uC-OSIII/os_q.c ****     CPU_CRITICAL_EXIT();
+ 969              		.loc 1 499 0
+ 970 070e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 971 0712 386B     		ldr	r0, [r7, #48]
+ 972 0714 FFF7FEFF 		bl	CPU_SR_Restore
+ 500:Libraries/uC-OSIII/os_q.c ****     return (p_void);
+ 973              		.loc 1 500 0
+ 974 0718 7B6B     		ldr	r3, [r7, #52]
+ 975              	.L37:
+ 501:Libraries/uC-OSIII/os_q.c **** }
+ 976              		.loc 1 501 0
+ 977 071a 1846     		mov	r0, r3
+ 978 071c 07F13807 		add	r7, r7, #56
+ 979 0720 BD46     		mov	sp, r7
+ 980 0722 80BD     		pop	{r7, pc}
+ 981              		.cfi_endproc
+ 982              	.LFE3:
+ 984              		.align	2
+ 985              		.global	OSQPendAbort
+ 986              		.thumb
+ 987              		.thumb_func
+ 989              	OSQPendAbort:
+ 990              	.LFB4:
+ 502:Libraries/uC-OSIII/os_q.c **** 
+ 503:Libraries/uC-OSIII/os_q.c **** 
+ 504:Libraries/uC-OSIII/os_q.c **** /*$PAGE*/
+ 505:Libraries/uC-OSIII/os_q.c **** /*
+ 506:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 507:Libraries/uC-OSIII/os_q.c **** *                                             ABORT WAITING ON A MESSAGE QUEUE
+ 508:Libraries/uC-OSIII/os_q.c **** *
+ 509:Libraries/uC-OSIII/os_q.c **** * Description: This function aborts & readies any tasks currently waiting on a queue.  This functio
+ 510:Libraries/uC-OSIII/os_q.c **** *              fault-abort the wait on the queue, rather than to normally signal the queue via OSQP
+ 511:Libraries/uC-OSIII/os_q.c **** *
+ 512:Libraries/uC-OSIII/os_q.c **** * Arguments  : p_q       is a pointer to the message queue
+ 513:Libraries/uC-OSIII/os_q.c **** *
+ 514:Libraries/uC-OSIII/os_q.c **** *              opt       determines the type of ABORT performed:
+ 515:Libraries/uC-OSIII/os_q.c **** *
+ 516:Libraries/uC-OSIII/os_q.c **** *                            OS_OPT_PEND_ABORT_1          ABORT wait for a single task (HPT) waitin
+ 517:Libraries/uC-OSIII/os_q.c **** *                            OS_OPT_PEND_ABORT_ALL        ABORT wait for ALL tasks that are  waitin
+ 518:Libraries/uC-OSIII/os_q.c **** *                            OS_OPT_POST_NO_SCHED         Do not call the scheduler
+ 519:Libraries/uC-OSIII/os_q.c **** *
+ 520:Libraries/uC-OSIII/os_q.c **** *              p_err     is a pointer to a variable that will contain an error code returned by thi
+ 521:Libraries/uC-OSIII/os_q.c **** *
+ 522:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_NONE                  At least one task waiting on the queue wa
+ 523:Libraries/uC-OSIII/os_q.c **** *                                                         informed of the aborted wait; check retur
+ 524:Libraries/uC-OSIII/os_q.c **** *                                                         number of tasks whose wait on the queue w
+ 525:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_OPT_INVALID           if you specified an invalid option
+ 526:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_OBJ_PTR_NULL          if you pass a NULL pointer for 'p_q'
+ 527:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_OBJ_TYPE              if the message queue was not created
+ 528:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_PEND_ABORT_ISR        If this function was called from an ISR
+ 529:Libraries/uC-OSIII/os_q.c **** *                            OS_ERR_PEND_ABORT_NONE       No task were pending
+ 530:Libraries/uC-OSIII/os_q.c **** *
+ 531:Libraries/uC-OSIII/os_q.c **** * Returns    : == 0          if no tasks were waiting on the queue, or upon error.
+ 532:Libraries/uC-OSIII/os_q.c **** *              >  0          if one or more tasks waiting on the queue are now readied and informed
+ 533:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 534:Libraries/uC-OSIII/os_q.c **** */
+ 535:Libraries/uC-OSIII/os_q.c **** 
+ 536:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_Q_PEND_ABORT_EN > 0u
+ 537:Libraries/uC-OSIII/os_q.c **** OS_OBJ_QTY  OSQPendAbort (OS_Q    *p_q,
+ 538:Libraries/uC-OSIII/os_q.c ****                           OS_OPT   opt,
+ 539:Libraries/uC-OSIII/os_q.c ****                           OS_ERR  *p_err)
+ 540:Libraries/uC-OSIII/os_q.c **** {
+ 991              		.loc 1 540 0
+ 992              		.cfi_startproc
+ 993              		@ args = 0, pretend = 0, frame = 40
+ 994              		@ frame_needed = 1, uses_anonymous_args = 0
+ 995 0724 80B5     		push	{r7, lr}
+ 996              	.LCFI12:
+ 997              		.cfi_def_cfa_offset 8
+ 998              		.cfi_offset 14, -4
+ 999              		.cfi_offset 7, -8
+ 1000 0726 8AB0     		sub	sp, sp, #40
+ 1001              	.LCFI13:
+ 1002              		.cfi_def_cfa_offset 48
+ 1003 0728 00AF     		add	r7, sp, #0
+ 1004              	.LCFI14:
+ 1005              		.cfi_def_cfa_register 7
+ 1006 072a F860     		str	r0, [r7, #12]
+ 1007 072c 0B46     		mov	r3, r1
+ 1008 072e 7A60     		str	r2, [r7, #4]
+ 1009 0730 7B81     		strh	r3, [r7, #10]	@ movhi
+ 541:Libraries/uC-OSIII/os_q.c ****     OS_PEND_LIST  *p_pend_list;
+ 542:Libraries/uC-OSIII/os_q.c ****     OS_TCB        *p_tcb;
+ 543:Libraries/uC-OSIII/os_q.c ****     CPU_TS         ts;
+ 544:Libraries/uC-OSIII/os_q.c ****     OS_OBJ_QTY     nbr_tasks;
+ 545:Libraries/uC-OSIII/os_q.c ****     CPU_SR_ALLOC();
+ 1010              		.loc 1 545 0
+ 1011 0732 4FF00003 		mov	r3, #0
+ 1012 0736 3B62     		str	r3, [r7, #32]
+ 546:Libraries/uC-OSIII/os_q.c **** 
+ 547:Libraries/uC-OSIII/os_q.c **** 
+ 548:Libraries/uC-OSIII/os_q.c **** 
+ 549:Libraries/uC-OSIII/os_q.c **** #ifdef OS_SAFETY_CRITICAL
+ 550:Libraries/uC-OSIII/os_q.c ****     if (p_err == (OS_ERR *)0) {
+ 551:Libraries/uC-OSIII/os_q.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 552:Libraries/uC-OSIII/os_q.c ****     }
+ 553:Libraries/uC-OSIII/os_q.c **** #endif
+ 554:Libraries/uC-OSIII/os_q.c **** 
+ 555:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 556:Libraries/uC-OSIII/os_q.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0u) {             /* Not allowed to Pend Abort from an IS
+ 1013              		.loc 1 556 0
+ 1014 0738 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 1015 073c C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 1016 0740 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1017 0742 002B     		cmp	r3, #0
+ 1018 0744 06D0     		beq	.L63
+ 557:Libraries/uC-OSIII/os_q.c ****        *p_err =  OS_ERR_PEND_ABORT_ISR;
+ 1019              		.loc 1 557 0
+ 1020 0746 7B68     		ldr	r3, [r7, #4]
+ 1021 0748 46F2AA12 		movw	r2, #25002
+ 1022 074c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 558:Libraries/uC-OSIII/os_q.c ****         return ((OS_OBJ_QTY)0u);
+ 1023              		.loc 1 558 0
+ 1024 074e 4FF00003 		mov	r3, #0
+ 1025 0752 A3E0     		b	.L64
+ 1026              	.L63:
+ 559:Libraries/uC-OSIII/os_q.c ****     }
+ 560:Libraries/uC-OSIII/os_q.c **** #endif
+ 561:Libraries/uC-OSIII/os_q.c **** 
+ 562:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 563:Libraries/uC-OSIII/os_q.c ****     if (p_q == (OS_Q *)0) {                                 /* Validate 'p_q'                      
+ 1027              		.loc 1 563 0
+ 1028 0754 FB68     		ldr	r3, [r7, #12]
+ 1029 0756 002B     		cmp	r3, #0
+ 1030 0758 06D1     		bne	.L65
+ 564:Libraries/uC-OSIII/os_q.c ****        *p_err =  OS_ERR_OBJ_PTR_NULL;
+ 1031              		.loc 1 564 0
+ 1032 075a 7B68     		ldr	r3, [r7, #4]
+ 1033 075c 45F6C352 		movw	r2, #24003
+ 1034 0760 1A80     		strh	r2, [r3, #0]	@ movhi
+ 565:Libraries/uC-OSIII/os_q.c ****         return ((OS_OBJ_QTY)0u);
+ 1035              		.loc 1 565 0
+ 1036 0762 4FF00003 		mov	r3, #0
+ 1037 0766 99E0     		b	.L64
+ 1038              	.L65:
+ 566:Libraries/uC-OSIII/os_q.c ****     }
+ 567:Libraries/uC-OSIII/os_q.c ****     switch (opt) {                                          /* Validate 'opt'                      
+ 1039              		.loc 1 567 0
+ 1040 0768 7B89     		ldrh	r3, [r7, #10]
+ 1041 076a 002B     		cmp	r3, #0
+ 1042 076c 09D0     		beq	.L77
+ 1043 076e B3F5807F 		cmp	r3, #256
+ 1044 0772 06D0     		beq	.L77
+ 568:Libraries/uC-OSIII/os_q.c ****         case OS_OPT_PEND_ABORT_1:
+ 569:Libraries/uC-OSIII/os_q.c ****         case OS_OPT_PEND_ABORT_ALL:
+ 570:Libraries/uC-OSIII/os_q.c ****              break;
+ 571:Libraries/uC-OSIII/os_q.c **** 
+ 572:Libraries/uC-OSIII/os_q.c ****         default:
+ 573:Libraries/uC-OSIII/os_q.c ****             *p_err =  OS_ERR_OPT_INVALID;
+ 1045              		.loc 1 573 0
+ 1046 0774 7B68     		ldr	r3, [r7, #4]
+ 1047 0776 45F62562 		movw	r2, #24101
+ 1048 077a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 574:Libraries/uC-OSIII/os_q.c ****              return ((OS_OBJ_QTY)0u);
+ 1049              		.loc 1 574 0
+ 1050 077c 4FF00003 		mov	r3, #0
+ 1051 0780 8CE0     		b	.L64
+ 1052              	.L77:
+ 570:Libraries/uC-OSIII/os_q.c ****              break;
+ 1053              		.loc 1 570 0
+ 1054 0782 00BF     		nop
+ 1055              	.L68:
+ 575:Libraries/uC-OSIII/os_q.c ****     }
+ 576:Libraries/uC-OSIII/os_q.c **** #endif
+ 577:Libraries/uC-OSIII/os_q.c **** 
+ 578:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 579:Libraries/uC-OSIII/os_q.c ****     if (p_q->Type != OS_OBJ_TYPE_Q) {                       /* Make sure queue was created         
+ 1056              		.loc 1 579 0
+ 1057 0784 FB68     		ldr	r3, [r7, #12]
+ 1058 0786 1A68     		ldr	r2, [r3, #0]
+ 1059 0788 45F25153 		movw	r3, #21841
+ 1060 078c C5F24553 		movt	r3, 21829
+ 1061 0790 9A42     		cmp	r2, r3
+ 1062 0792 06D0     		beq	.L69
+ 580:Libraries/uC-OSIII/os_q.c ****        *p_err =  OS_ERR_OBJ_TYPE;
+ 1063              		.loc 1 580 0
+ 1064 0794 7B68     		ldr	r3, [r7, #4]
+ 1065 0796 45F6C452 		movw	r2, #24004
+ 1066 079a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 581:Libraries/uC-OSIII/os_q.c ****         return ((OS_OBJ_QTY)0u);
+ 1067              		.loc 1 581 0
+ 1068 079c 4FF00003 		mov	r3, #0
+ 1069 07a0 7CE0     		b	.L64
+ 1070              	.L69:
+ 582:Libraries/uC-OSIII/os_q.c ****     }
+ 583:Libraries/uC-OSIII/os_q.c **** #endif
+ 584:Libraries/uC-OSIII/os_q.c **** 
+ 585:Libraries/uC-OSIII/os_q.c ****     CPU_CRITICAL_ENTER();
+ 1071              		.loc 1 585 0
+ 1072 07a2 FFF7FEFF 		bl	CPU_SR_Save
+ 1073 07a6 3862     		str	r0, [r7, #32]
+ 1074 07a8 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 586:Libraries/uC-OSIII/os_q.c ****     p_pend_list = &p_q->PendList;
+ 1075              		.loc 1 586 0
+ 1076 07ac FB68     		ldr	r3, [r7, #12]
+ 1077 07ae 03F10803 		add	r3, r3, #8
+ 1078 07b2 FB61     		str	r3, [r7, #28]
+ 587:Libraries/uC-OSIII/os_q.c ****     if (p_pend_list->NbrEntries == (OS_OBJ_QTY)0u) {        /* Any task waiting on queue?          
+ 1079              		.loc 1 587 0
+ 1080 07b4 FB69     		ldr	r3, [r7, #28]
+ 1081 07b6 1B89     		ldrh	r3, [r3, #8]
+ 1082 07b8 002B     		cmp	r3, #0
+ 1083 07ba 0BD1     		bne	.L70
+ 588:Libraries/uC-OSIII/os_q.c ****         CPU_CRITICAL_EXIT();                                /* No                                  
+ 1084              		.loc 1 588 0
+ 1085 07bc FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1086 07c0 386A     		ldr	r0, [r7, #32]
+ 1087 07c2 FFF7FEFF 		bl	CPU_SR_Restore
+ 589:Libraries/uC-OSIII/os_q.c ****        *p_err =  OS_ERR_PEND_ABORT_NONE;
+ 1088              		.loc 1 589 0
+ 1089 07c6 7B68     		ldr	r3, [r7, #4]
+ 1090 07c8 46F2AB12 		movw	r2, #25003
+ 1091 07cc 1A80     		strh	r2, [r3, #0]	@ movhi
+ 590:Libraries/uC-OSIII/os_q.c ****         return ((OS_OBJ_QTY)0u);
+ 1092              		.loc 1 590 0
+ 1093 07ce 4FF00003 		mov	r3, #0
+ 1094 07d2 63E0     		b	.L64
+ 1095              	.L70:
+ 591:Libraries/uC-OSIII/os_q.c ****     }
+ 592:Libraries/uC-OSIII/os_q.c **** 
+ 593:Libraries/uC-OSIII/os_q.c ****     OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();
+ 1096              		.loc 1 593 0
+ 1097 07d4 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1098 07d8 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1099 07dc 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1100 07de 03F10103 		add	r3, r3, #1
+ 1101 07e2 DAB2     		uxtb	r2, r3
+ 1102 07e4 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1103 07e8 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1104 07ec 1A70     		strb	r2, [r3, #0]
+ 1105 07ee 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1106 07f2 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1107 07f6 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1108 07f8 012B     		cmp	r3, #1
+ 1109 07fa 01D1     		bne	.L71
+ 1110              		.loc 1 593 0 is_stmt 0 discriminator 1
+ 1111 07fc FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 1112              	.L71:
+ 1113              		.loc 1 593 0 discriminator 2
+ 1114 0800 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1115 0804 386A     		ldr	r0, [r7, #32]
+ 1116 0806 FFF7FEFF 		bl	CPU_SR_Restore
+ 594:Libraries/uC-OSIII/os_q.c ****     nbr_tasks = 0u;
+ 1117              		.loc 1 594 0 is_stmt 1 discriminator 2
+ 1118 080a 4FF00003 		mov	r3, #0
+ 1119 080e FB84     		strh	r3, [r7, #38]	@ movhi
+ 595:Libraries/uC-OSIII/os_q.c ****     ts        = OS_TS_GET();                                /* Get local time stamp so all tasks ge
+ 1120              		.loc 1 595 0 discriminator 2
+ 1121 0810 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 1122 0814 B861     		str	r0, [r7, #24]
+ 596:Libraries/uC-OSIII/os_q.c ****     while (p_pend_list->NbrEntries > (OS_OBJ_QTY)0u) {
+ 1123              		.loc 1 596 0 discriminator 2
+ 1124 0816 10E0     		b	.L72
+ 1125              	.L74:
+ 597:Libraries/uC-OSIII/os_q.c ****         p_tcb = p_pend_list->HeadPtr->TCBPtr;
+ 1126              		.loc 1 597 0
+ 1127 0818 FB69     		ldr	r3, [r7, #28]
+ 1128 081a 1B68     		ldr	r3, [r3, #0]
+ 1129 081c 9B68     		ldr	r3, [r3, #8]
+ 1130 081e 7B61     		str	r3, [r7, #20]
+ 598:Libraries/uC-OSIII/os_q.c ****         OS_PendAbort((OS_PEND_OBJ *)((void *)p_q),
+ 1131              		.loc 1 598 0
+ 1132 0820 F868     		ldr	r0, [r7, #12]
+ 1133 0822 7969     		ldr	r1, [r7, #20]
+ 1134 0824 BA69     		ldr	r2, [r7, #24]
+ 1135 0826 FFF7FEFF 		bl	OS_PendAbort
+ 599:Libraries/uC-OSIII/os_q.c ****                      p_tcb,
+ 600:Libraries/uC-OSIII/os_q.c ****                      ts);
+ 601:Libraries/uC-OSIII/os_q.c ****         nbr_tasks++;
+ 1136              		.loc 1 601 0
+ 1137 082a FB8C     		ldrh	r3, [r7, #38]	@ movhi
+ 1138 082c 03F10103 		add	r3, r3, #1
+ 1139 0830 FB84     		strh	r3, [r7, #38]	@ movhi
+ 602:Libraries/uC-OSIII/os_q.c ****         if (opt != OS_OPT_PEND_ABORT_ALL) {                 /* Pend abort all tasks waiting?       
+ 1140              		.loc 1 602 0
+ 1141 0832 7B89     		ldrh	r3, [r7, #10]
+ 1142 0834 B3F5807F 		cmp	r3, #256
+ 1143 0838 04D1     		bne	.L78
+ 1144              	.L72:
+ 596:Libraries/uC-OSIII/os_q.c ****     while (p_pend_list->NbrEntries > (OS_OBJ_QTY)0u) {
+ 1145              		.loc 1 596 0 discriminator 1
+ 1146 083a FB69     		ldr	r3, [r7, #28]
+ 1147 083c 1B89     		ldrh	r3, [r3, #8]
+ 1148 083e 002B     		cmp	r3, #0
+ 1149 0840 EAD1     		bne	.L74
+ 1150 0842 00E0     		b	.L73
+ 1151              	.L78:
+ 603:Libraries/uC-OSIII/os_q.c ****             break;                                          /* No                                  
+ 1152              		.loc 1 603 0
+ 1153 0844 00BF     		nop
+ 1154              	.L73:
+ 604:Libraries/uC-OSIII/os_q.c ****         }
+ 605:Libraries/uC-OSIII/os_q.c ****     }
+ 606:Libraries/uC-OSIII/os_q.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 1155              		.loc 1 606 0
+ 1156 0846 FFF7FEFF 		bl	CPU_SR_Save
+ 1157 084a 3862     		str	r0, [r7, #32]
+ 1158 084c FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 1159 0850 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1160 0854 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1161 0858 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1162 085a 03F1FF33 		add	r3, r3, #-1
+ 1163 085e DAB2     		uxtb	r2, r3
+ 1164 0860 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1165 0864 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1166 0868 1A70     		strb	r2, [r3, #0]
+ 1167 086a 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1168 086e C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1169 0872 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1170 0874 002B     		cmp	r3, #0
+ 1171 0876 01D1     		bne	.L75
+ 1172              		.loc 1 606 0 is_stmt 0 discriminator 1
+ 1173 0878 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 1174              	.L75:
+ 1175              		.loc 1 606 0 discriminator 2
+ 1176 087c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1177 0880 386A     		ldr	r0, [r7, #32]
+ 1178 0882 FFF7FEFF 		bl	CPU_SR_Restore
+ 607:Libraries/uC-OSIII/os_q.c **** 
+ 608:Libraries/uC-OSIII/os_q.c ****     if ((opt & OS_OPT_POST_NO_SCHED) == (OS_OPT)0u) {
+ 1179              		.loc 1 608 0 is_stmt 1 discriminator 2
+ 1180 0886 7B89     		ldrh	r3, [r7, #10]
+ 1181 0888 1BB2     		sxth	r3, r3
+ 1182 088a 002B     		cmp	r3, #0
+ 1183 088c 01DB     		blt	.L76
+ 609:Libraries/uC-OSIII/os_q.c ****         OSSched();                                          /* Run the scheduler                   
+ 1184              		.loc 1 609 0
+ 1185 088e FFF7FEFF 		bl	OSSched
+ 1186              	.L76:
+ 610:Libraries/uC-OSIII/os_q.c ****     }
+ 611:Libraries/uC-OSIII/os_q.c **** 
+ 612:Libraries/uC-OSIII/os_q.c ****    *p_err = OS_ERR_NONE;
+ 1187              		.loc 1 612 0
+ 1188 0892 7B68     		ldr	r3, [r7, #4]
+ 1189 0894 4FF00002 		mov	r2, #0
+ 1190 0898 1A80     		strh	r2, [r3, #0]	@ movhi
+ 613:Libraries/uC-OSIII/os_q.c ****     return (nbr_tasks);
+ 1191              		.loc 1 613 0
+ 1192 089a FB8C     		ldrh	r3, [r7, #38]
+ 1193              	.L64:
+ 614:Libraries/uC-OSIII/os_q.c **** }
+ 1194              		.loc 1 614 0
+ 1195 089c 1846     		mov	r0, r3
+ 1196 089e 07F12807 		add	r7, r7, #40
+ 1197 08a2 BD46     		mov	sp, r7
+ 1198 08a4 80BD     		pop	{r7, pc}
+ 1199              		.cfi_endproc
+ 1200              	.LFE4:
+ 1202 08a6 00BF     		.align	2
+ 1203              		.global	OSQPost
+ 1204              		.thumb
+ 1205              		.thumb_func
+ 1207              	OSQPost:
+ 1208              	.LFB5:
+ 615:Libraries/uC-OSIII/os_q.c **** #endif
+ 616:Libraries/uC-OSIII/os_q.c **** 
+ 617:Libraries/uC-OSIII/os_q.c **** /*$PAGE*/
+ 618:Libraries/uC-OSIII/os_q.c **** /*
+ 619:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 620:Libraries/uC-OSIII/os_q.c **** *                                               POST MESSAGE TO A QUEUE
+ 621:Libraries/uC-OSIII/os_q.c **** *
+ 622:Libraries/uC-OSIII/os_q.c **** * Description: This function sends a message to a queue.  With the 'opt' argument, you can specify 
+ 623:Libraries/uC-OSIII/os_q.c **** *              is broadcast to all waiting tasks and/or whether you post the message to the front o
+ 624:Libraries/uC-OSIII/os_q.c **** *              or normally (FIFO) at the end of the queue.
+ 625:Libraries/uC-OSIII/os_q.c **** *
+ 626:Libraries/uC-OSIII/os_q.c **** * Arguments  : p_q           is a pointer to a message queue that must have been created by OSQCrea
+ 627:Libraries/uC-OSIII/os_q.c **** *
+ 628:Libraries/uC-OSIII/os_q.c **** *              p_void        is a pointer to the message to send.
+ 629:Libraries/uC-OSIII/os_q.c **** *
+ 630:Libraries/uC-OSIII/os_q.c **** *              msg_size      specifies the size of the message (in bytes)
+ 631:Libraries/uC-OSIII/os_q.c **** *
+ 632:Libraries/uC-OSIII/os_q.c **** *              opt           determines the type of POST performed:
+ 633:Libraries/uC-OSIII/os_q.c **** *
+ 634:Libraries/uC-OSIII/os_q.c **** *                                OS_OPT_POST_ALL          POST to ALL tasks that are waiting on the
+ 635:Libraries/uC-OSIII/os_q.c **** *                                                         can be added to either OS_OPT_POST_FIFO o
+ 636:Libraries/uC-OSIII/os_q.c **** *                                OS_OPT_POST_FIFO         POST message to end of queue (FIFO) and w
+ 637:Libraries/uC-OSIII/os_q.c **** *                                                         waiting task.
+ 638:Libraries/uC-OSIII/os_q.c **** *                                OS_OPT_POST_LIFO         POST message to the front of the queue (L
+ 639:Libraries/uC-OSIII/os_q.c **** *                                                         a single waiting task.
+ 640:Libraries/uC-OSIII/os_q.c **** *                                OS_OPT_POST_NO_SCHED     Do not call the scheduler
+ 641:Libraries/uC-OSIII/os_q.c **** *
+ 642:Libraries/uC-OSIII/os_q.c **** *                            Note(s): 1) OS_OPT_POST_NO_SCHED can be added (or OR'd) with one of th
+ 643:Libraries/uC-OSIII/os_q.c **** *                                     2) OS_OPT_POST_ALL      can be added (or OR'd) with one of th
+ 644:Libraries/uC-OSIII/os_q.c **** *                                     3) Possible combination of options are:
+ 645:Libraries/uC-OSIII/os_q.c **** *
+ 646:Libraries/uC-OSIII/os_q.c **** *                                        OS_OPT_POST_FIFO
+ 647:Libraries/uC-OSIII/os_q.c **** *                                        OS_OPT_POST_LIFO
+ 648:Libraries/uC-OSIII/os_q.c **** *                                        OS_OPT_POST_FIFO + OS_OPT_POST_ALL
+ 649:Libraries/uC-OSIII/os_q.c **** *                                        OS_OPT_POST_LIFO + OS_OPT_POST_ALL
+ 650:Libraries/uC-OSIII/os_q.c **** *                                        OS_OPT_POST_FIFO + OS_OPT_POST_NO_SCHED
+ 651:Libraries/uC-OSIII/os_q.c **** *                                        OS_OPT_POST_LIFO + OS_OPT_POST_NO_SCHED
+ 652:Libraries/uC-OSIII/os_q.c **** *                                        OS_OPT_POST_FIFO + OS_OPT_POST_ALL + OS_OPT_POST_NO_SCHED
+ 653:Libraries/uC-OSIII/os_q.c **** *                                        OS_OPT_POST_LIFO + OS_OPT_POST_ALL + OS_OPT_POST_NO_SCHED
+ 654:Libraries/uC-OSIII/os_q.c **** *
+ 655:Libraries/uC-OSIII/os_q.c **** *              p_err         is a pointer to a variable that will contain an error code returned by
+ 656:Libraries/uC-OSIII/os_q.c **** *
+ 657:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_NONE            The call was successful and the message was
+ 658:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_MSG_POOL_EMPTY  If there are no more OS_MSGs to use to plac
+ 659:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_OBJ_PTR_NULL    If 'p_q' is a NULL pointer
+ 660:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_OBJ_TYPE        If the message queue was not initialized
+ 661:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_Q_MAX           If the queue is full
+ 662:Libraries/uC-OSIII/os_q.c **** *
+ 663:Libraries/uC-OSIII/os_q.c **** * Returns    : None
+ 664:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 665:Libraries/uC-OSIII/os_q.c **** */
+ 666:Libraries/uC-OSIII/os_q.c **** 
+ 667:Libraries/uC-OSIII/os_q.c **** void  OSQPost (OS_Q        *p_q,
+ 668:Libraries/uC-OSIII/os_q.c ****                void        *p_void,
+ 669:Libraries/uC-OSIII/os_q.c ****                OS_MSG_SIZE  msg_size,
+ 670:Libraries/uC-OSIII/os_q.c ****                OS_OPT       opt,
+ 671:Libraries/uC-OSIII/os_q.c ****                OS_ERR      *p_err)
+ 672:Libraries/uC-OSIII/os_q.c **** {
+ 1209              		.loc 1 672 0
+ 1210              		.cfi_startproc
+ 1211              		@ args = 4, pretend = 0, frame = 24
+ 1212              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1213 08a8 80B5     		push	{r7, lr}
+ 1214              	.LCFI15:
+ 1215              		.cfi_def_cfa_offset 8
+ 1216              		.cfi_offset 14, -4
+ 1217              		.cfi_offset 7, -8
+ 1218 08aa 8AB0     		sub	sp, sp, #40
+ 1219              	.LCFI16:
+ 1220              		.cfi_def_cfa_offset 48
+ 1221 08ac 04AF     		add	r7, sp, #16
+ 1222              	.LCFI17:
+ 1223              		.cfi_def_cfa 7, 32
+ 1224 08ae F860     		str	r0, [r7, #12]
+ 1225 08b0 B960     		str	r1, [r7, #8]
+ 1226 08b2 FA80     		strh	r2, [r7, #6]	@ movhi
+ 1227 08b4 BB80     		strh	r3, [r7, #4]	@ movhi
+ 673:Libraries/uC-OSIII/os_q.c ****     CPU_TS  ts;
+ 674:Libraries/uC-OSIII/os_q.c **** 
+ 675:Libraries/uC-OSIII/os_q.c **** 
+ 676:Libraries/uC-OSIII/os_q.c **** 
+ 677:Libraries/uC-OSIII/os_q.c **** #ifdef OS_SAFETY_CRITICAL
+ 678:Libraries/uC-OSIII/os_q.c ****     if (p_err == (OS_ERR *)0) {
+ 679:Libraries/uC-OSIII/os_q.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 680:Libraries/uC-OSIII/os_q.c ****     }
+ 681:Libraries/uC-OSIII/os_q.c **** #endif
+ 682:Libraries/uC-OSIII/os_q.c **** 
+ 683:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 684:Libraries/uC-OSIII/os_q.c ****     if (p_q == (OS_Q *)0) {                                 /* Validate arguments                  
+ 1228              		.loc 1 684 0
+ 1229 08b6 FB68     		ldr	r3, [r7, #12]
+ 1230 08b8 002B     		cmp	r3, #0
+ 1231 08ba 04D1     		bne	.L80
+ 685:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 1232              		.loc 1 685 0
+ 1233 08bc 3B6A     		ldr	r3, [r7, #32]
+ 1234 08be 45F6C352 		movw	r2, #24003
+ 1235 08c2 1A80     		strh	r2, [r3, #0]	@ movhi
+ 686:Libraries/uC-OSIII/os_q.c ****         return;
+ 1236              		.loc 1 686 0
+ 1237 08c4 33E0     		b	.L79
+ 1238              	.L80:
+ 687:Libraries/uC-OSIII/os_q.c ****     }
+ 688:Libraries/uC-OSIII/os_q.c **** #endif
+ 689:Libraries/uC-OSIII/os_q.c **** 
+ 690:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 691:Libraries/uC-OSIII/os_q.c ****     if (p_q->Type != OS_OBJ_TYPE_Q) {                       /* Make sure message queue was created 
+ 1239              		.loc 1 691 0
+ 1240 08c6 FB68     		ldr	r3, [r7, #12]
+ 1241 08c8 1A68     		ldr	r2, [r3, #0]
+ 1242 08ca 45F25153 		movw	r3, #21841
+ 1243 08ce C5F24553 		movt	r3, 21829
+ 1244 08d2 9A42     		cmp	r2, r3
+ 1245 08d4 04D0     		beq	.L82
+ 692:Libraries/uC-OSIII/os_q.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 1246              		.loc 1 692 0
+ 1247 08d6 3B6A     		ldr	r3, [r7, #32]
+ 1248 08d8 45F6C452 		movw	r2, #24004
+ 1249 08dc 1A80     		strh	r2, [r3, #0]	@ movhi
+ 693:Libraries/uC-OSIII/os_q.c ****         return;
+ 1250              		.loc 1 693 0
+ 1251 08de 26E0     		b	.L79
+ 1252              	.L82:
+ 694:Libraries/uC-OSIII/os_q.c ****     }
+ 695:Libraries/uC-OSIII/os_q.c **** #endif
+ 696:Libraries/uC-OSIII/os_q.c **** 
+ 697:Libraries/uC-OSIII/os_q.c ****     ts = OS_TS_GET();                                       /* Get timestamp                       
+ 1253              		.loc 1 697 0
+ 1254 08e0 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 1255 08e4 7861     		str	r0, [r7, #20]
+ 698:Libraries/uC-OSIII/os_q.c **** 
+ 699:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_ISR_POST_DEFERRED_EN > 0u
+ 700:Libraries/uC-OSIII/os_q.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {
+ 1256              		.loc 1 700 0
+ 1257 08e6 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 1258 08ea C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 1259 08ee 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1260 08f0 002B     		cmp	r3, #0
+ 1261 08f2 12D0     		beq	.L83
+ 701:Libraries/uC-OSIII/os_q.c ****         OS_IntQPost((OS_OBJ_TYPE)OS_OBJ_TYPE_Q,             /* Post to ISR queue                   
+ 1262              		.loc 1 701 0
+ 1263 08f4 FB88     		ldrh	r3, [r7, #6]
+ 1264 08f6 4FF00002 		mov	r2, #0
+ 1265 08fa 0092     		str	r2, [sp, #0]
+ 1266 08fc BA88     		ldrh	r2, [r7, #4]
+ 1267 08fe 0192     		str	r2, [sp, #4]
+ 1268 0900 7A69     		ldr	r2, [r7, #20]
+ 1269 0902 0292     		str	r2, [sp, #8]
+ 1270 0904 3A6A     		ldr	r2, [r7, #32]
+ 1271 0906 0392     		str	r2, [sp, #12]
+ 1272 0908 45F25150 		movw	r0, #21841
+ 1273 090c C5F24550 		movt	r0, 21829
+ 1274 0910 F968     		ldr	r1, [r7, #12]
+ 1275 0912 BA68     		ldr	r2, [r7, #8]
+ 1276 0914 FFF7FEFF 		bl	OS_IntQPost
+ 702:Libraries/uC-OSIII/os_q.c ****                     (void      *)p_q,
+ 703:Libraries/uC-OSIII/os_q.c ****                     (void      *)p_void,
+ 704:Libraries/uC-OSIII/os_q.c ****                     (OS_MSG_SIZE)msg_size,
+ 705:Libraries/uC-OSIII/os_q.c ****                     (OS_FLAGS   )0,
+ 706:Libraries/uC-OSIII/os_q.c ****                     (OS_OPT     )opt,
+ 707:Libraries/uC-OSIII/os_q.c ****                     (CPU_TS     )ts,
+ 708:Libraries/uC-OSIII/os_q.c ****                     (OS_ERR    *)p_err);
+ 709:Libraries/uC-OSIII/os_q.c ****         return;
+ 1277              		.loc 1 709 0
+ 1278 0918 09E0     		b	.L79
+ 1279              	.L83:
+ 710:Libraries/uC-OSIII/os_q.c ****     }
+ 711:Libraries/uC-OSIII/os_q.c **** #endif
+ 712:Libraries/uC-OSIII/os_q.c **** 
+ 713:Libraries/uC-OSIII/os_q.c ****     OS_QPost(p_q,
+ 1280              		.loc 1 713 0
+ 1281 091a FA88     		ldrh	r2, [r7, #6]
+ 1282 091c BB88     		ldrh	r3, [r7, #4]
+ 1283 091e 7969     		ldr	r1, [r7, #20]
+ 1284 0920 0091     		str	r1, [sp, #0]
+ 1285 0922 396A     		ldr	r1, [r7, #32]
+ 1286 0924 0191     		str	r1, [sp, #4]
+ 1287 0926 F868     		ldr	r0, [r7, #12]
+ 1288 0928 B968     		ldr	r1, [r7, #8]
+ 1289 092a FFF7FEFF 		bl	OS_QPost
+ 1290              	.L79:
+ 714:Libraries/uC-OSIII/os_q.c ****              p_void,
+ 715:Libraries/uC-OSIII/os_q.c ****              msg_size,
+ 716:Libraries/uC-OSIII/os_q.c ****              opt,
+ 717:Libraries/uC-OSIII/os_q.c ****              ts,
+ 718:Libraries/uC-OSIII/os_q.c ****              p_err);
+ 719:Libraries/uC-OSIII/os_q.c **** }
+ 1291              		.loc 1 719 0
+ 1292 092e 07F11807 		add	r7, r7, #24
+ 1293 0932 BD46     		mov	sp, r7
+ 1294 0934 80BD     		pop	{r7, pc}
+ 1295              		.cfi_endproc
+ 1296              	.LFE5:
+ 1298              		.section	.rodata
+ 1299              		.align	2
+ 1300              	.LC0:
+ 1301 0000 3F5100   		.ascii	"?Q\000"
+ 1302              		.text
+ 1303 0936 00BF     		.align	2
+ 1304              		.global	OS_QClr
+ 1305              		.thumb
+ 1306              		.thumb_func
+ 1308              	OS_QClr:
+ 1309              	.LFB6:
+ 720:Libraries/uC-OSIII/os_q.c **** 
+ 721:Libraries/uC-OSIII/os_q.c **** /*$PAGE*/
+ 722:Libraries/uC-OSIII/os_q.c **** /*
+ 723:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 724:Libraries/uC-OSIII/os_q.c **** *                                        CLEAR THE CONTENTS OF A MESSAGE QUEUE
+ 725:Libraries/uC-OSIII/os_q.c **** *
+ 726:Libraries/uC-OSIII/os_q.c **** * Description: This function is called by OSQDel() to clear the contents of a message queue
+ 727:Libraries/uC-OSIII/os_q.c **** *
+ 728:Libraries/uC-OSIII/os_q.c **** 
+ 729:Libraries/uC-OSIII/os_q.c **** * Argument(s): p_q      is a pointer to the queue to clear
+ 730:Libraries/uC-OSIII/os_q.c **** *              ---
+ 731:Libraries/uC-OSIII/os_q.c **** *
+ 732:Libraries/uC-OSIII/os_q.c **** * Returns    : none
+ 733:Libraries/uC-OSIII/os_q.c **** *
+ 734:Libraries/uC-OSIII/os_q.c **** * Note(s)    : 1) This function is INTERNAL to uC/OS-III and your application MUST NOT call it.
+ 735:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 736:Libraries/uC-OSIII/os_q.c **** */
+ 737:Libraries/uC-OSIII/os_q.c **** 
+ 738:Libraries/uC-OSIII/os_q.c **** void  OS_QClr (OS_Q *p_q)
+ 739:Libraries/uC-OSIII/os_q.c **** {
+ 1310              		.loc 1 739 0
+ 1311              		.cfi_startproc
+ 1312              		@ args = 0, pretend = 0, frame = 8
+ 1313              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1314 0938 80B5     		push	{r7, lr}
+ 1315              	.LCFI18:
+ 1316              		.cfi_def_cfa_offset 8
+ 1317              		.cfi_offset 14, -4
+ 1318              		.cfi_offset 7, -8
+ 1319 093a 82B0     		sub	sp, sp, #8
+ 1320              	.LCFI19:
+ 1321              		.cfi_def_cfa_offset 16
+ 1322 093c 00AF     		add	r7, sp, #0
+ 1323              	.LCFI20:
+ 1324              		.cfi_def_cfa_register 7
+ 1325 093e 7860     		str	r0, [r7, #4]
+ 740:Libraries/uC-OSIII/os_q.c ****     (void)OS_MsgQFreeAll(&p_q->MsgQ);                       /* Return all OS_MSGs to the free list 
+ 1326              		.loc 1 740 0
+ 1327 0940 7B68     		ldr	r3, [r7, #4]
+ 1328 0942 03F12003 		add	r3, r3, #32
+ 1329 0946 1846     		mov	r0, r3
+ 1330 0948 FFF7FEFF 		bl	OS_MsgQFreeAll
+ 741:Libraries/uC-OSIII/os_q.c ****     p_q->Type    =  OS_OBJ_TYPE_NONE;                       /* Mark the data structure as a NONE   
+ 1331              		.loc 1 741 0
+ 1332 094c 7A68     		ldr	r2, [r7, #4]
+ 1333 094e 44F64E73 		movw	r3, #20302
+ 1334 0952 C4F24E53 		movt	r3, 17742
+ 1335 0956 1360     		str	r3, [r2, #0]
+ 742:Libraries/uC-OSIII/os_q.c ****     p_q->NamePtr = (CPU_CHAR *)((void *)"?Q");
+ 1336              		.loc 1 742 0
+ 1337 0958 7A68     		ldr	r2, [r7, #4]
+ 1338 095a 40F20003 		movw	r3, #:lower16:.LC0
+ 1339 095e C0F20003 		movt	r3, #:upper16:.LC0
+ 1340 0962 5360     		str	r3, [r2, #4]
+ 743:Libraries/uC-OSIII/os_q.c ****     OS_MsgQInit(&p_q->MsgQ,                                 /* Initialize the list of OS_MSGs      
+ 1341              		.loc 1 743 0
+ 1342 0964 7B68     		ldr	r3, [r7, #4]
+ 1343 0966 03F12003 		add	r3, r3, #32
+ 1344 096a 1846     		mov	r0, r3
+ 1345 096c 4FF00001 		mov	r1, #0
+ 1346 0970 FFF7FEFF 		bl	OS_MsgQInit
+ 744:Libraries/uC-OSIII/os_q.c ****                 0u);
+ 745:Libraries/uC-OSIII/os_q.c ****     OS_PendListInit(&p_q->PendList);                        /* Initialize the waiting list         
+ 1347              		.loc 1 745 0
+ 1348 0974 7B68     		ldr	r3, [r7, #4]
+ 1349 0976 03F10803 		add	r3, r3, #8
+ 1350 097a 1846     		mov	r0, r3
+ 1351 097c FFF7FEFF 		bl	OS_PendListInit
+ 746:Libraries/uC-OSIII/os_q.c **** }
+ 1352              		.loc 1 746 0
+ 1353 0980 07F10807 		add	r7, r7, #8
+ 1354 0984 BD46     		mov	sp, r7
+ 1355 0986 80BD     		pop	{r7, pc}
+ 1356              		.cfi_endproc
+ 1357              	.LFE6:
+ 1359              		.section	.rodata
+ 1360 0003 00       		.align	2
+ 1361              	.LC1:
+ 1362 0004 2000     		.ascii	" \000"
+ 1363 0006 0000     		.text
+ 1364              		.align	2
+ 1365              		.global	OS_QDbgListAdd
+ 1366              		.thumb
+ 1367              		.thumb_func
+ 1369              	OS_QDbgListAdd:
+ 1370              	.LFB7:
+ 747:Libraries/uC-OSIII/os_q.c **** 
+ 748:Libraries/uC-OSIII/os_q.c **** /*$PAGE*/
+ 749:Libraries/uC-OSIII/os_q.c **** /*
+ 750:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 751:Libraries/uC-OSIII/os_q.c **** *                                      ADD/REMOVE MESSAGE QUEUE TO/FROM DEBUG LIST
+ 752:Libraries/uC-OSIII/os_q.c **** *
+ 753:Libraries/uC-OSIII/os_q.c **** * Description: These functions are called by uC/OS-III to add or remove a message queue to/from a m
+ 754:Libraries/uC-OSIII/os_q.c **** *              list.
+ 755:Libraries/uC-OSIII/os_q.c **** *
+ 756:Libraries/uC-OSIII/os_q.c **** * Arguments  : p_q     is a pointer to the message queue to add/remove
+ 757:Libraries/uC-OSIII/os_q.c **** *
+ 758:Libraries/uC-OSIII/os_q.c **** * Returns    : none
+ 759:Libraries/uC-OSIII/os_q.c **** *
+ 760:Libraries/uC-OSIII/os_q.c **** * Note(s)    : These functions are INTERNAL to uC/OS-III and your application should not call it.
+ 761:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 762:Libraries/uC-OSIII/os_q.c **** */
+ 763:Libraries/uC-OSIII/os_q.c **** 
+ 764:Libraries/uC-OSIII/os_q.c **** 
+ 765:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_DBG_EN > 0u
+ 766:Libraries/uC-OSIII/os_q.c **** void  OS_QDbgListAdd (OS_Q  *p_q)
+ 767:Libraries/uC-OSIII/os_q.c **** {
+ 1371              		.loc 1 767 0
+ 1372              		.cfi_startproc
+ 1373              		@ args = 0, pretend = 0, frame = 8
+ 1374              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1375              		@ link register save eliminated.
+ 1376 0988 80B4     		push	{r7}
+ 1377              	.LCFI21:
+ 1378              		.cfi_def_cfa_offset 4
+ 1379              		.cfi_offset 7, -4
+ 1380 098a 83B0     		sub	sp, sp, #12
+ 1381              	.LCFI22:
+ 1382              		.cfi_def_cfa_offset 16
+ 1383 098c 00AF     		add	r7, sp, #0
+ 1384              	.LCFI23:
+ 1385              		.cfi_def_cfa_register 7
+ 1386 098e 7860     		str	r0, [r7, #4]
+ 768:Libraries/uC-OSIII/os_q.c ****     p_q->DbgNamePtr               = (CPU_CHAR *)((void *)" ");
+ 1387              		.loc 1 768 0
+ 1388 0990 7A68     		ldr	r2, [r7, #4]
+ 1389 0992 40F20003 		movw	r3, #:lower16:.LC1
+ 1390 0996 C0F20003 		movt	r3, #:upper16:.LC1
+ 1391 099a D361     		str	r3, [r2, #28]
+ 769:Libraries/uC-OSIII/os_q.c ****     p_q->DbgPrevPtr               = (OS_Q     *)0;
+ 1392              		.loc 1 769 0
+ 1393 099c 7B68     		ldr	r3, [r7, #4]
+ 1394 099e 4FF00002 		mov	r2, #0
+ 1395 09a2 5A61     		str	r2, [r3, #20]
+ 770:Libraries/uC-OSIII/os_q.c ****     if (OSQDbgListPtr == (OS_Q *)0) {
+ 1396              		.loc 1 770 0
+ 1397 09a4 40F20003 		movw	r3, #:lower16:OSQDbgListPtr
+ 1398 09a8 C0F20003 		movt	r3, #:upper16:OSQDbgListPtr
+ 1399 09ac 1B68     		ldr	r3, [r3, #0]
+ 1400 09ae 002B     		cmp	r3, #0
+ 1401 09b0 04D1     		bne	.L86
+ 771:Libraries/uC-OSIII/os_q.c ****         p_q->DbgNextPtr           = (OS_Q     *)0;
+ 1402              		.loc 1 771 0
+ 1403 09b2 7B68     		ldr	r3, [r7, #4]
+ 1404 09b4 4FF00002 		mov	r2, #0
+ 1405 09b8 9A61     		str	r2, [r3, #24]
+ 1406 09ba 0DE0     		b	.L87
+ 1407              	.L86:
+ 772:Libraries/uC-OSIII/os_q.c ****     } else {
+ 773:Libraries/uC-OSIII/os_q.c ****         p_q->DbgNextPtr           =  OSQDbgListPtr;
+ 1408              		.loc 1 773 0
+ 1409 09bc 40F20003 		movw	r3, #:lower16:OSQDbgListPtr
+ 1410 09c0 C0F20003 		movt	r3, #:upper16:OSQDbgListPtr
+ 1411 09c4 1A68     		ldr	r2, [r3, #0]
+ 1412 09c6 7B68     		ldr	r3, [r7, #4]
+ 1413 09c8 9A61     		str	r2, [r3, #24]
+ 774:Libraries/uC-OSIII/os_q.c ****         OSQDbgListPtr->DbgPrevPtr =  p_q;
+ 1414              		.loc 1 774 0
+ 1415 09ca 40F20003 		movw	r3, #:lower16:OSQDbgListPtr
+ 1416 09ce C0F20003 		movt	r3, #:upper16:OSQDbgListPtr
+ 1417 09d2 1B68     		ldr	r3, [r3, #0]
+ 1418 09d4 7A68     		ldr	r2, [r7, #4]
+ 1419 09d6 5A61     		str	r2, [r3, #20]
+ 1420              	.L87:
+ 775:Libraries/uC-OSIII/os_q.c ****     }
+ 776:Libraries/uC-OSIII/os_q.c ****     OSQDbgListPtr                 =  p_q;
+ 1421              		.loc 1 776 0
+ 1422 09d8 40F20003 		movw	r3, #:lower16:OSQDbgListPtr
+ 1423 09dc C0F20003 		movt	r3, #:upper16:OSQDbgListPtr
+ 1424 09e0 7A68     		ldr	r2, [r7, #4]
+ 1425 09e2 1A60     		str	r2, [r3, #0]
+ 777:Libraries/uC-OSIII/os_q.c **** }
+ 1426              		.loc 1 777 0
+ 1427 09e4 07F10C07 		add	r7, r7, #12
+ 1428 09e8 BD46     		mov	sp, r7
+ 1429 09ea 80BC     		pop	{r7}
+ 1430 09ec 7047     		bx	lr
+ 1431              		.cfi_endproc
+ 1432              	.LFE7:
+ 1434 09ee 00BF     		.align	2
+ 1435              		.global	OS_QDbgListRemove
+ 1436              		.thumb
+ 1437              		.thumb_func
+ 1439              	OS_QDbgListRemove:
+ 1440              	.LFB8:
+ 778:Libraries/uC-OSIII/os_q.c **** 
+ 779:Libraries/uC-OSIII/os_q.c **** 
+ 780:Libraries/uC-OSIII/os_q.c **** 
+ 781:Libraries/uC-OSIII/os_q.c **** void  OS_QDbgListRemove (OS_Q  *p_q)
+ 782:Libraries/uC-OSIII/os_q.c **** {
+ 1441              		.loc 1 782 0
+ 1442              		.cfi_startproc
+ 1443              		@ args = 0, pretend = 0, frame = 16
+ 1444              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1445              		@ link register save eliminated.
+ 1446 09f0 80B4     		push	{r7}
+ 1447              	.LCFI24:
+ 1448              		.cfi_def_cfa_offset 4
+ 1449              		.cfi_offset 7, -4
+ 1450 09f2 85B0     		sub	sp, sp, #20
+ 1451              	.LCFI25:
+ 1452              		.cfi_def_cfa_offset 24
+ 1453 09f4 00AF     		add	r7, sp, #0
+ 1454              	.LCFI26:
+ 1455              		.cfi_def_cfa_register 7
+ 1456 09f6 7860     		str	r0, [r7, #4]
+ 783:Libraries/uC-OSIII/os_q.c ****     OS_Q  *p_q_next;
+ 784:Libraries/uC-OSIII/os_q.c ****     OS_Q  *p_q_prev;
+ 785:Libraries/uC-OSIII/os_q.c **** 
+ 786:Libraries/uC-OSIII/os_q.c **** 
+ 787:Libraries/uC-OSIII/os_q.c ****     p_q_prev = p_q->DbgPrevPtr;
+ 1457              		.loc 1 787 0
+ 1458 09f8 7B68     		ldr	r3, [r7, #4]
+ 1459 09fa 5B69     		ldr	r3, [r3, #20]
+ 1460 09fc FB60     		str	r3, [r7, #12]
+ 788:Libraries/uC-OSIII/os_q.c ****     p_q_next = p_q->DbgNextPtr;
+ 1461              		.loc 1 788 0
+ 1462 09fe 7B68     		ldr	r3, [r7, #4]
+ 1463 0a00 9B69     		ldr	r3, [r3, #24]
+ 1464 0a02 BB60     		str	r3, [r7, #8]
+ 789:Libraries/uC-OSIII/os_q.c **** 
+ 790:Libraries/uC-OSIII/os_q.c ****     if (p_q_prev == (OS_Q *)0) {
+ 1465              		.loc 1 790 0
+ 1466 0a04 FB68     		ldr	r3, [r7, #12]
+ 1467 0a06 002B     		cmp	r3, #0
+ 1468 0a08 11D1     		bne	.L89
+ 791:Libraries/uC-OSIII/os_q.c ****         OSQDbgListPtr = p_q_next;
+ 1469              		.loc 1 791 0
+ 1470 0a0a 40F20003 		movw	r3, #:lower16:OSQDbgListPtr
+ 1471 0a0e C0F20003 		movt	r3, #:upper16:OSQDbgListPtr
+ 1472 0a12 BA68     		ldr	r2, [r7, #8]
+ 1473 0a14 1A60     		str	r2, [r3, #0]
+ 792:Libraries/uC-OSIII/os_q.c ****         if (p_q_next != (OS_Q *)0) {
+ 1474              		.loc 1 792 0
+ 1475 0a16 BB68     		ldr	r3, [r7, #8]
+ 1476 0a18 002B     		cmp	r3, #0
+ 1477 0a1a 03D0     		beq	.L90
+ 793:Libraries/uC-OSIII/os_q.c ****             p_q_next->DbgPrevPtr = (OS_Q *)0;
+ 1478              		.loc 1 793 0
+ 1479 0a1c BB68     		ldr	r3, [r7, #8]
+ 1480 0a1e 4FF00002 		mov	r2, #0
+ 1481 0a22 5A61     		str	r2, [r3, #20]
+ 1482              	.L90:
+ 794:Libraries/uC-OSIII/os_q.c ****         }
+ 795:Libraries/uC-OSIII/os_q.c ****         p_q->DbgNextPtr = (OS_Q *)0;
+ 1483              		.loc 1 795 0
+ 1484 0a24 7B68     		ldr	r3, [r7, #4]
+ 1485 0a26 4FF00002 		mov	r2, #0
+ 1486 0a2a 9A61     		str	r2, [r3, #24]
+ 1487 0a2c 19E0     		b	.L88
+ 1488              	.L89:
+ 796:Libraries/uC-OSIII/os_q.c **** 
+ 797:Libraries/uC-OSIII/os_q.c ****     } else if (p_q_next == (OS_Q *)0) {
+ 1489              		.loc 1 797 0
+ 1490 0a2e BB68     		ldr	r3, [r7, #8]
+ 1491 0a30 002B     		cmp	r3, #0
+ 1492 0a32 08D1     		bne	.L92
+ 798:Libraries/uC-OSIII/os_q.c ****         p_q_prev->DbgNextPtr = (OS_Q *)0;
+ 1493              		.loc 1 798 0
+ 1494 0a34 FB68     		ldr	r3, [r7, #12]
+ 1495 0a36 4FF00002 		mov	r2, #0
+ 1496 0a3a 9A61     		str	r2, [r3, #24]
+ 799:Libraries/uC-OSIII/os_q.c ****         p_q->DbgPrevPtr      = (OS_Q *)0;
+ 1497              		.loc 1 799 0
+ 1498 0a3c 7B68     		ldr	r3, [r7, #4]
+ 1499 0a3e 4FF00002 		mov	r2, #0
+ 1500 0a42 5A61     		str	r2, [r3, #20]
+ 1501 0a44 0DE0     		b	.L88
+ 1502              	.L92:
+ 800:Libraries/uC-OSIII/os_q.c **** 
+ 801:Libraries/uC-OSIII/os_q.c ****     } else {
+ 802:Libraries/uC-OSIII/os_q.c ****         p_q_prev->DbgNextPtr =  p_q_next;
+ 1503              		.loc 1 802 0
+ 1504 0a46 FB68     		ldr	r3, [r7, #12]
+ 1505 0a48 BA68     		ldr	r2, [r7, #8]
+ 1506 0a4a 9A61     		str	r2, [r3, #24]
+ 803:Libraries/uC-OSIII/os_q.c ****         p_q_next->DbgPrevPtr =  p_q_prev;
+ 1507              		.loc 1 803 0
+ 1508 0a4c BB68     		ldr	r3, [r7, #8]
+ 1509 0a4e FA68     		ldr	r2, [r7, #12]
+ 1510 0a50 5A61     		str	r2, [r3, #20]
+ 804:Libraries/uC-OSIII/os_q.c ****         p_q->DbgNextPtr      = (OS_Q *)0;
+ 1511              		.loc 1 804 0
+ 1512 0a52 7B68     		ldr	r3, [r7, #4]
+ 1513 0a54 4FF00002 		mov	r2, #0
+ 1514 0a58 9A61     		str	r2, [r3, #24]
+ 805:Libraries/uC-OSIII/os_q.c ****         p_q->DbgPrevPtr      = (OS_Q *)0;
+ 1515              		.loc 1 805 0
+ 1516 0a5a 7B68     		ldr	r3, [r7, #4]
+ 1517 0a5c 4FF00002 		mov	r2, #0
+ 1518 0a60 5A61     		str	r2, [r3, #20]
+ 1519              	.L88:
+ 806:Libraries/uC-OSIII/os_q.c ****     }
+ 807:Libraries/uC-OSIII/os_q.c **** }
+ 1520              		.loc 1 807 0
+ 1521 0a62 07F11407 		add	r7, r7, #20
+ 1522 0a66 BD46     		mov	sp, r7
+ 1523 0a68 80BC     		pop	{r7}
+ 1524 0a6a 7047     		bx	lr
+ 1525              		.cfi_endproc
+ 1526              	.LFE8:
+ 1528              		.align	2
+ 1529              		.global	OS_QInit
+ 1530              		.thumb
+ 1531              		.thumb_func
+ 1533              	OS_QInit:
+ 1534              	.LFB9:
+ 808:Libraries/uC-OSIII/os_q.c **** #endif
+ 809:Libraries/uC-OSIII/os_q.c **** 
+ 810:Libraries/uC-OSIII/os_q.c **** /*$PAGE*/
+ 811:Libraries/uC-OSIII/os_q.c **** /*
+ 812:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 813:Libraries/uC-OSIII/os_q.c **** *                                              MESSAGE QUEUE INITIALIZATION
+ 814:Libraries/uC-OSIII/os_q.c **** *
+ 815:Libraries/uC-OSIII/os_q.c **** * Description: This function is called by OSInit() to initialize the message queue management.
+ 816:Libraries/uC-OSIII/os_q.c **** *
+ 817:Libraries/uC-OSIII/os_q.c **** 
+ 818:Libraries/uC-OSIII/os_q.c **** * Arguments  : p_err         is a pointer to a variable that will receive an error code.
+ 819:Libraries/uC-OSIII/os_q.c **** *
+ 820:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_NONE     the call was successful
+ 821:Libraries/uC-OSIII/os_q.c **** *
+ 822:Libraries/uC-OSIII/os_q.c **** * Returns    : none
+ 823:Libraries/uC-OSIII/os_q.c **** *
+ 824:Libraries/uC-OSIII/os_q.c **** * Note(s)    : 1) This function is INTERNAL to uC/OS-III and your application MUST NOT call it.
+ 825:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 826:Libraries/uC-OSIII/os_q.c **** */
+ 827:Libraries/uC-OSIII/os_q.c **** 
+ 828:Libraries/uC-OSIII/os_q.c **** void  OS_QInit (OS_ERR *p_err)
+ 829:Libraries/uC-OSIII/os_q.c **** {
+ 1535              		.loc 1 829 0
+ 1536              		.cfi_startproc
+ 1537              		@ args = 0, pretend = 0, frame = 8
+ 1538              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1539              		@ link register save eliminated.
+ 1540 0a6c 80B4     		push	{r7}
+ 1541              	.LCFI27:
+ 1542              		.cfi_def_cfa_offset 4
+ 1543              		.cfi_offset 7, -4
+ 1544 0a6e 83B0     		sub	sp, sp, #12
+ 1545              	.LCFI28:
+ 1546              		.cfi_def_cfa_offset 16
+ 1547 0a70 00AF     		add	r7, sp, #0
+ 1548              	.LCFI29:
+ 1549              		.cfi_def_cfa_register 7
+ 1550 0a72 7860     		str	r0, [r7, #4]
+ 830:Libraries/uC-OSIII/os_q.c **** #ifdef OS_SAFETY_CRITICAL
+ 831:Libraries/uC-OSIII/os_q.c ****     if (p_err == (OS_ERR *)0) {
+ 832:Libraries/uC-OSIII/os_q.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 833:Libraries/uC-OSIII/os_q.c ****     }
+ 834:Libraries/uC-OSIII/os_q.c **** #endif
+ 835:Libraries/uC-OSIII/os_q.c **** 
+ 836:Libraries/uC-OSIII/os_q.c **** #if OS_CFG_DBG_EN > 0u
+ 837:Libraries/uC-OSIII/os_q.c ****     OSQDbgListPtr = (OS_Q *)0;
+ 1551              		.loc 1 837 0
+ 1552 0a74 40F20003 		movw	r3, #:lower16:OSQDbgListPtr
+ 1553 0a78 C0F20003 		movt	r3, #:upper16:OSQDbgListPtr
+ 1554 0a7c 4FF00002 		mov	r2, #0
+ 1555 0a80 1A60     		str	r2, [r3, #0]
+ 838:Libraries/uC-OSIII/os_q.c **** #endif
+ 839:Libraries/uC-OSIII/os_q.c **** 
+ 840:Libraries/uC-OSIII/os_q.c ****     OSQQty        = (OS_OBJ_QTY)0;
+ 1556              		.loc 1 840 0
+ 1557 0a82 40F20003 		movw	r3, #:lower16:OSQQty
+ 1558 0a86 C0F20003 		movt	r3, #:upper16:OSQQty
+ 1559 0a8a 4FF00002 		mov	r2, #0
+ 1560 0a8e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 841:Libraries/uC-OSIII/os_q.c ****     *p_err        = OS_ERR_NONE;
+ 1561              		.loc 1 841 0
+ 1562 0a90 7B68     		ldr	r3, [r7, #4]
+ 1563 0a92 4FF00002 		mov	r2, #0
+ 1564 0a96 1A80     		strh	r2, [r3, #0]	@ movhi
+ 842:Libraries/uC-OSIII/os_q.c **** }
+ 1565              		.loc 1 842 0
+ 1566 0a98 07F10C07 		add	r7, r7, #12
+ 1567 0a9c BD46     		mov	sp, r7
+ 1568 0a9e 80BC     		pop	{r7}
+ 1569 0aa0 7047     		bx	lr
+ 1570              		.cfi_endproc
+ 1571              	.LFE9:
+ 1573 0aa2 00BF     		.align	2
+ 1574              		.global	OS_QPost
+ 1575              		.thumb
+ 1576              		.thumb_func
+ 1578              	OS_QPost:
+ 1579              	.LFB10:
+ 843:Libraries/uC-OSIII/os_q.c **** 
+ 844:Libraries/uC-OSIII/os_q.c **** /*$PAGE*/
+ 845:Libraries/uC-OSIII/os_q.c **** /*
+ 846:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 847:Libraries/uC-OSIII/os_q.c **** *                                               POST MESSAGE TO A QUEUE
+ 848:Libraries/uC-OSIII/os_q.c **** *
+ 849:Libraries/uC-OSIII/os_q.c **** * Description: This function sends a message to a queue.  With the 'opt' argument, you can specify 
+ 850:Libraries/uC-OSIII/os_q.c **** *              is broadcast to all waiting tasks and/or whether you post the message to the front o
+ 851:Libraries/uC-OSIII/os_q.c **** *              or normally (FIFO) at the end of the queue.
+ 852:Libraries/uC-OSIII/os_q.c **** *
+ 853:Libraries/uC-OSIII/os_q.c **** * Arguments  : p_q           is a pointer to a message queue that must have been created by OSQCrea
+ 854:Libraries/uC-OSIII/os_q.c **** *
+ 855:Libraries/uC-OSIII/os_q.c **** *              p_void        is a pointer to the message to send.
+ 856:Libraries/uC-OSIII/os_q.c **** *
+ 857:Libraries/uC-OSIII/os_q.c **** *              msg_size      specifies the size of the message (in bytes)
+ 858:Libraries/uC-OSIII/os_q.c **** *
+ 859:Libraries/uC-OSIII/os_q.c **** *              opt           determines the type of POST performed:
+ 860:Libraries/uC-OSIII/os_q.c **** *
+ 861:Libraries/uC-OSIII/os_q.c **** *                                OS_OPT_POST_ALL          POST to ALL tasks that are waiting on the
+ 862:Libraries/uC-OSIII/os_q.c **** *
+ 863:Libraries/uC-OSIII/os_q.c **** *                                OS_OPT_POST_FIFO         POST as FIFO and wake up single waiting t
+ 864:Libraries/uC-OSIII/os_q.c **** *                                OS_OPT_POST_LIFO         POST as LIFO and wake up single waiting t
+ 865:Libraries/uC-OSIII/os_q.c **** *
+ 866:Libraries/uC-OSIII/os_q.c **** *                                OS_OPT_POST_NO_SCHED     Do not call the scheduler
+ 867:Libraries/uC-OSIII/os_q.c **** *
+ 868:Libraries/uC-OSIII/os_q.c **** *              ts            is the timestamp of the post
+ 869:Libraries/uC-OSIII/os_q.c **** *
+ 870:Libraries/uC-OSIII/os_q.c **** *              p_err         is a pointer to a variable that will contain an error code returned by
+ 871:Libraries/uC-OSIII/os_q.c **** *
+ 872:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_NONE            The call was successful and the message was
+ 873:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_MSG_POOL_EMPTY  If there are no more OS_MSGs to use to plac
+ 874:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_OBJ_PTR_NULL    If 'p_q' is a NULL pointer
+ 875:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_OBJ_TYPE        If the message queue was not initialized
+ 876:Libraries/uC-OSIII/os_q.c **** *                                OS_ERR_Q_MAX           If the queue is full
+ 877:Libraries/uC-OSIII/os_q.c **** *
+ 878:Libraries/uC-OSIII/os_q.c **** * Returns    : None
+ 879:Libraries/uC-OSIII/os_q.c **** *
+ 880:Libraries/uC-OSIII/os_q.c **** * Note(s)    : This function is INTERNAL to uC/OS-III and your application should not call it.
+ 881:Libraries/uC-OSIII/os_q.c **** ***************************************************************************************************
+ 882:Libraries/uC-OSIII/os_q.c **** */
+ 883:Libraries/uC-OSIII/os_q.c **** 
+ 884:Libraries/uC-OSIII/os_q.c **** void  OS_QPost (OS_Q        *p_q,
+ 885:Libraries/uC-OSIII/os_q.c ****                 void        *p_void,
+ 886:Libraries/uC-OSIII/os_q.c ****                 OS_MSG_SIZE  msg_size,
+ 887:Libraries/uC-OSIII/os_q.c ****                 OS_OPT       opt,
+ 888:Libraries/uC-OSIII/os_q.c ****                 CPU_TS       ts,
+ 889:Libraries/uC-OSIII/os_q.c ****                 OS_ERR      *p_err)
+ 890:Libraries/uC-OSIII/os_q.c **** {
+ 1580              		.loc 1 890 0
+ 1581              		.cfi_startproc
+ 1582              		@ args = 8, pretend = 0, frame = 40
+ 1583              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1584 0aa4 80B5     		push	{r7, lr}
+ 1585              	.LCFI30:
+ 1586              		.cfi_def_cfa_offset 8
+ 1587              		.cfi_offset 14, -4
+ 1588              		.cfi_offset 7, -8
+ 1589 0aa6 8CB0     		sub	sp, sp, #48
+ 1590              	.LCFI31:
+ 1591              		.cfi_def_cfa_offset 56
+ 1592 0aa8 02AF     		add	r7, sp, #8
+ 1593              	.LCFI32:
+ 1594              		.cfi_def_cfa 7, 48
+ 1595 0aaa F860     		str	r0, [r7, #12]
+ 1596 0aac B960     		str	r1, [r7, #8]
+ 1597 0aae FA80     		strh	r2, [r7, #6]	@ movhi
+ 1598 0ab0 BB80     		strh	r3, [r7, #4]	@ movhi
+ 891:Libraries/uC-OSIII/os_q.c ****     OS_OBJ_QTY     cnt;
+ 892:Libraries/uC-OSIII/os_q.c ****     OS_OPT         post_type;
+ 893:Libraries/uC-OSIII/os_q.c ****     OS_PEND_LIST  *p_pend_list;
+ 894:Libraries/uC-OSIII/os_q.c ****     OS_PEND_DATA  *p_pend_data;
+ 895:Libraries/uC-OSIII/os_q.c ****     OS_PEND_DATA  *p_pend_data_next;
+ 896:Libraries/uC-OSIII/os_q.c ****     OS_TCB        *p_tcb;
+ 897:Libraries/uC-OSIII/os_q.c ****     CPU_SR_ALLOC();
+ 1599              		.loc 1 897 0
+ 1600 0ab2 4FF00003 		mov	r3, #0
+ 1601 0ab6 FB61     		str	r3, [r7, #28]
+ 898:Libraries/uC-OSIII/os_q.c **** 
+ 899:Libraries/uC-OSIII/os_q.c **** 
+ 900:Libraries/uC-OSIII/os_q.c **** 
+ 901:Libraries/uC-OSIII/os_q.c ****     OS_CRITICAL_ENTER();
+ 1602              		.loc 1 901 0
+ 1603 0ab8 FFF7FEFF 		bl	CPU_SR_Save
+ 1604 0abc F861     		str	r0, [r7, #28]
+ 1605 0abe FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 1606 0ac2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1607 0ac6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1608 0aca 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1609 0acc 03F10103 		add	r3, r3, #1
+ 1610 0ad0 DAB2     		uxtb	r2, r3
+ 1611 0ad2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1612 0ad6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1613 0ada 1A70     		strb	r2, [r3, #0]
+ 1614 0adc 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1615 0ae0 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1616 0ae4 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1617 0ae6 012B     		cmp	r3, #1
+ 1618 0ae8 01D1     		bne	.L95
+ 1619              		.loc 1 901 0 is_stmt 0 discriminator 1
+ 1620 0aea FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 1621              	.L95:
+ 1622              		.loc 1 901 0 discriminator 2
+ 1623 0aee FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1624 0af2 F869     		ldr	r0, [r7, #28]
+ 1625 0af4 FFF7FEFF 		bl	CPU_SR_Restore
+ 902:Libraries/uC-OSIII/os_q.c ****     p_pend_list = &p_q->PendList;
+ 1626              		.loc 1 902 0 is_stmt 1 discriminator 2
+ 1627 0af8 FB68     		ldr	r3, [r7, #12]
+ 1628 0afa 03F10803 		add	r3, r3, #8
+ 1629 0afe BB61     		str	r3, [r7, #24]
+ 903:Libraries/uC-OSIII/os_q.c ****     if (p_pend_list->NbrEntries == (OS_OBJ_QTY)0) {         /* Any task waiting on message queue?  
+ 1630              		.loc 1 903 0 discriminator 2
+ 1631 0b00 BB69     		ldr	r3, [r7, #24]
+ 1632 0b02 1B89     		ldrh	r3, [r3, #8]
+ 1633 0b04 002B     		cmp	r3, #0
+ 1634 0b06 4ED1     		bne	.L96
+ 904:Libraries/uC-OSIII/os_q.c ****         if ((opt & OS_OPT_POST_LIFO) == (OS_OPT)0) {        /* Determine whether we post FIFO or LI
+ 1635              		.loc 1 904 0
+ 1636 0b08 BB88     		ldrh	r3, [r7, #4]
+ 1637 0b0a 03F01003 		and	r3, r3, #16
+ 1638 0b0e 002B     		cmp	r3, #0
+ 1639 0b10 03D1     		bne	.L97
+ 905:Libraries/uC-OSIII/os_q.c ****             post_type = OS_OPT_POST_FIFO;
+ 1640              		.loc 1 905 0
+ 1641 0b12 4FF00003 		mov	r3, #0
+ 1642 0b16 BB84     		strh	r3, [r7, #36]	@ movhi
+ 1643 0b18 02E0     		b	.L98
+ 1644              	.L97:
+ 906:Libraries/uC-OSIII/os_q.c ****         } else {
+ 907:Libraries/uC-OSIII/os_q.c ****             post_type = OS_OPT_POST_LIFO;
+ 1645              		.loc 1 907 0
+ 1646 0b1a 4FF01003 		mov	r3, #16
+ 1647 0b1e BB84     		strh	r3, [r7, #36]	@ movhi
+ 1648              	.L98:
+ 908:Libraries/uC-OSIII/os_q.c ****         }
+ 909:Libraries/uC-OSIII/os_q.c ****         OS_MsgQPut(&p_q->MsgQ,                              /* Place message in the message queue  
+ 1649              		.loc 1 909 0
+ 1650 0b20 FB68     		ldr	r3, [r7, #12]
+ 1651 0b22 03F12001 		add	r1, r3, #32
+ 1652 0b26 FA88     		ldrh	r2, [r7, #6]
+ 1653 0b28 BB8C     		ldrh	r3, [r7, #36]
+ 1654 0b2a 386B     		ldr	r0, [r7, #48]
+ 1655 0b2c 0090     		str	r0, [sp, #0]
+ 1656 0b2e 786B     		ldr	r0, [r7, #52]
+ 1657 0b30 0190     		str	r0, [sp, #4]
+ 1658 0b32 0846     		mov	r0, r1
+ 1659 0b34 B968     		ldr	r1, [r7, #8]
+ 1660 0b36 FFF7FEFF 		bl	OS_MsgQPut
+ 910:Libraries/uC-OSIII/os_q.c ****                    p_void,
+ 911:Libraries/uC-OSIII/os_q.c ****                    msg_size,
+ 912:Libraries/uC-OSIII/os_q.c ****                    post_type,
+ 913:Libraries/uC-OSIII/os_q.c ****                    ts,
+ 914:Libraries/uC-OSIII/os_q.c ****                    p_err);
+ 915:Libraries/uC-OSIII/os_q.c ****         OS_CRITICAL_EXIT();
+ 1661              		.loc 1 915 0
+ 1662 0b3a FFF7FEFF 		bl	CPU_SR_Save
+ 1663 0b3e F861     		str	r0, [r7, #28]
+ 1664 0b40 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 1665 0b44 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1666 0b48 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1667 0b4c 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1668 0b4e 03F1FF33 		add	r3, r3, #-1
+ 1669 0b52 DAB2     		uxtb	r2, r3
+ 1670 0b54 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1671 0b58 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1672 0b5c 1A70     		strb	r2, [r3, #0]
+ 1673 0b5e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1674 0b62 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1675 0b66 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1676 0b68 002B     		cmp	r3, #0
+ 1677 0b6a 16D1     		bne	.L99
+ 1678              		.loc 1 915 0 is_stmt 0 discriminator 1
+ 1679 0b6c FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 1680 0b70 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 1681 0b74 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 1682 0b78 1B88     		ldrh	r3, [r3, #0]
+ 1683 0b7a 002B     		cmp	r3, #0
+ 1684 0b7c 07D0     		beq	.L100
+ 1685              		.loc 1 915 0 discriminator 3
+ 1686 0b7e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1687 0b82 F869     		ldr	r0, [r7, #28]
+ 1688 0b84 FFF7FEFF 		bl	CPU_SR_Restore
+ 1689 0b88 FFF7FEFF 		bl	OS_Sched0
+ 916:Libraries/uC-OSIII/os_q.c ****         return;
+ 1690              		.loc 1 916 0 is_stmt 1 discriminator 3
+ 1691 0b8c 5CE0     		b	.L94
+ 1692              	.L100:
+ 915:Libraries/uC-OSIII/os_q.c ****         OS_CRITICAL_EXIT();
+ 1693              		.loc 1 915 0 discriminator 4
+ 1694 0b8e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1695 0b92 F869     		ldr	r0, [r7, #28]
+ 1696 0b94 FFF7FEFF 		bl	CPU_SR_Restore
+ 1697              		.loc 1 916 0 discriminator 4
+ 1698 0b98 56E0     		b	.L94
+ 1699              	.L99:
+ 915:Libraries/uC-OSIII/os_q.c ****         OS_CRITICAL_EXIT();
+ 1700              		.loc 1 915 0 discriminator 2
+ 1701 0b9a FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1702 0b9e F869     		ldr	r0, [r7, #28]
+ 1703 0ba0 FFF7FEFF 		bl	CPU_SR_Restore
+ 1704              		.loc 1 916 0 discriminator 2
+ 1705 0ba4 50E0     		b	.L94
+ 1706              	.L96:
+ 917:Libraries/uC-OSIII/os_q.c ****     }
+ 918:Libraries/uC-OSIII/os_q.c **** 
+ 919:Libraries/uC-OSIII/os_q.c ****     if ((opt & OS_OPT_POST_ALL) != (OS_OPT)0) {             /* Post message to all tasks waiting?  
+ 1707              		.loc 1 919 0
+ 1708 0ba6 BB88     		ldrh	r3, [r7, #4]
+ 1709 0ba8 03F40073 		and	r3, r3, #512
+ 1710 0bac 002B     		cmp	r3, #0
+ 1711 0bae 03D0     		beq	.L103
+ 920:Libraries/uC-OSIII/os_q.c ****         cnt = p_pend_list->NbrEntries;                      /* Yes                                 
+ 1712              		.loc 1 920 0
+ 1713 0bb0 BB69     		ldr	r3, [r7, #24]
+ 1714 0bb2 1B89     		ldrh	r3, [r3, #8]	@ movhi
+ 1715 0bb4 FB84     		strh	r3, [r7, #38]	@ movhi
+ 1716 0bb6 02E0     		b	.L104
+ 1717              	.L103:
+ 921:Libraries/uC-OSIII/os_q.c ****     } else {
+ 922:Libraries/uC-OSIII/os_q.c ****         cnt = (OS_OBJ_QTY)1;                                /* No                                  
+ 1718              		.loc 1 922 0
+ 1719 0bb8 4FF00103 		mov	r3, #1
+ 1720 0bbc FB84     		strh	r3, [r7, #38]	@ movhi
+ 1721              	.L104:
+ 923:Libraries/uC-OSIII/os_q.c ****     }
+ 924:Libraries/uC-OSIII/os_q.c ****     p_pend_data = p_pend_list->HeadPtr;
+ 1722              		.loc 1 924 0
+ 1723 0bbe BB69     		ldr	r3, [r7, #24]
+ 1724 0bc0 1B68     		ldr	r3, [r3, #0]
+ 1725 0bc2 3B62     		str	r3, [r7, #32]
+ 925:Libraries/uC-OSIII/os_q.c ****     while (cnt > 0u) {
+ 1726              		.loc 1 925 0
+ 1727 0bc4 13E0     		b	.L105
+ 1728              	.L106:
+ 926:Libraries/uC-OSIII/os_q.c ****         p_tcb            = p_pend_data->TCBPtr;
+ 1729              		.loc 1 926 0
+ 1730 0bc6 3B6A     		ldr	r3, [r7, #32]
+ 1731 0bc8 9B68     		ldr	r3, [r3, #8]
+ 1732 0bca 7B61     		str	r3, [r7, #20]
+ 927:Libraries/uC-OSIII/os_q.c ****         p_pend_data_next = p_pend_data->NextPtr;
+ 1733              		.loc 1 927 0
+ 1734 0bcc 3B6A     		ldr	r3, [r7, #32]
+ 1735 0bce 5B68     		ldr	r3, [r3, #4]
+ 1736 0bd0 3B61     		str	r3, [r7, #16]
+ 928:Libraries/uC-OSIII/os_q.c ****         OS_Post((OS_PEND_OBJ *)((void *)p_q),
+ 1737              		.loc 1 928 0
+ 1738 0bd2 FB88     		ldrh	r3, [r7, #6]
+ 1739 0bd4 3A6B     		ldr	r2, [r7, #48]
+ 1740 0bd6 0092     		str	r2, [sp, #0]
+ 1741 0bd8 F868     		ldr	r0, [r7, #12]
+ 1742 0bda 7969     		ldr	r1, [r7, #20]
+ 1743 0bdc BA68     		ldr	r2, [r7, #8]
+ 1744 0bde FFF7FEFF 		bl	OS_Post
+ 929:Libraries/uC-OSIII/os_q.c ****                 p_tcb,
+ 930:Libraries/uC-OSIII/os_q.c ****                 p_void,
+ 931:Libraries/uC-OSIII/os_q.c ****                 msg_size,
+ 932:Libraries/uC-OSIII/os_q.c ****                 ts);
+ 933:Libraries/uC-OSIII/os_q.c ****         p_pend_data = p_pend_data_next;
+ 1745              		.loc 1 933 0
+ 1746 0be2 3B69     		ldr	r3, [r7, #16]
+ 1747 0be4 3B62     		str	r3, [r7, #32]
+ 934:Libraries/uC-OSIII/os_q.c ****         cnt--;
+ 1748              		.loc 1 934 0
+ 1749 0be6 FB8C     		ldrh	r3, [r7, #38]	@ movhi
+ 1750 0be8 03F1FF33 		add	r3, r3, #-1
+ 1751 0bec FB84     		strh	r3, [r7, #38]	@ movhi
+ 1752              	.L105:
+ 925:Libraries/uC-OSIII/os_q.c ****     while (cnt > 0u) {
+ 1753              		.loc 1 925 0 discriminator 1
+ 1754 0bee FB8C     		ldrh	r3, [r7, #38]
+ 1755 0bf0 002B     		cmp	r3, #0
+ 1756 0bf2 E8D1     		bne	.L106
+ 935:Libraries/uC-OSIII/os_q.c ****     }
+ 936:Libraries/uC-OSIII/os_q.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 1757              		.loc 1 936 0
+ 1758 0bf4 FFF7FEFF 		bl	CPU_SR_Save
+ 1759 0bf8 F861     		str	r0, [r7, #28]
+ 1760 0bfa FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 1761 0bfe 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1762 0c02 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1763 0c06 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1764 0c08 03F1FF33 		add	r3, r3, #-1
+ 1765 0c0c DAB2     		uxtb	r2, r3
+ 1766 0c0e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1767 0c12 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1768 0c16 1A70     		strb	r2, [r3, #0]
+ 1769 0c18 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1770 0c1c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1771 0c20 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1772 0c22 002B     		cmp	r3, #0
+ 1773 0c24 01D1     		bne	.L107
+ 1774              		.loc 1 936 0 is_stmt 0 discriminator 1
+ 1775 0c26 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 1776              	.L107:
+ 1777              		.loc 1 936 0 discriminator 2
+ 1778 0c2a FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1779 0c2e F869     		ldr	r0, [r7, #28]
+ 1780 0c30 FFF7FEFF 		bl	CPU_SR_Restore
+ 937:Libraries/uC-OSIII/os_q.c ****     if ((opt & OS_OPT_POST_NO_SCHED) == (OS_OPT)0) {
+ 1781              		.loc 1 937 0 is_stmt 1 discriminator 2
+ 1782 0c34 BB88     		ldrh	r3, [r7, #4]
+ 1783 0c36 1BB2     		sxth	r3, r3
+ 1784 0c38 002B     		cmp	r3, #0
+ 1785 0c3a 01DB     		blt	.L108
+ 938:Libraries/uC-OSIII/os_q.c ****         OSSched();                                          /* Run the scheduler                   
+ 1786              		.loc 1 938 0
+ 1787 0c3c FFF7FEFF 		bl	OSSched
+ 1788              	.L108:
+ 939:Libraries/uC-OSIII/os_q.c ****     }
+ 940:Libraries/uC-OSIII/os_q.c ****     *p_err = OS_ERR_NONE;
+ 1789              		.loc 1 940 0
+ 1790 0c40 7B6B     		ldr	r3, [r7, #52]
+ 1791 0c42 4FF00002 		mov	r2, #0
+ 1792 0c46 1A80     		strh	r2, [r3, #0]	@ movhi
+ 1793              	.L94:
+ 941:Libraries/uC-OSIII/os_q.c **** }
+ 1794              		.loc 1 941 0
+ 1795 0c48 07F12807 		add	r7, r7, #40
+ 1796 0c4c BD46     		mov	sp, r7
+ 1797 0c4e 80BD     		pop	{r7, pc}
+ 1798              		.cfi_endproc
+ 1799              	.LFE10:
+ 1801              	.Letext0:
+ 1802              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 1803              		.file 3 "Libraries/uC-CPU/cpu_core.h"
+ 1804              		.file 4 "Libraries/uC-OSIII/os_type.h"
+ 1805              		.file 5 "Libraries/uC-OSIII/os.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 os_q.c
+     /tmp/ccFNTHPH.s:18     .text:00000000 $t
+     /tmp/ccFNTHPH.s:23     .text:00000000 OSQCreate
+     /tmp/ccFNTHPH.s:1369   .text:00000988 OS_QDbgListAdd
+     /tmp/ccFNTHPH.s:200    .text:00000158 OSQDel
+     /tmp/ccFNTHPH.s:1439   .text:000009f0 OS_QDbgListRemove
+     /tmp/ccFNTHPH.s:1308   .text:00000938 OS_QClr
+     /tmp/ccFNTHPH.s:453    .text:0000032c OSQFlush
+     /tmp/ccFNTHPH.s:609    .text:00000458 OSQPend
+     /tmp/ccFNTHPH.s:843    .text:00000624 $d
+     /tmp/ccFNTHPH.s:849    .text:00000634 $t
+     /tmp/ccFNTHPH.s:989    .text:00000724 OSQPendAbort
+     /tmp/ccFNTHPH.s:1207   .text:000008a8 OSQPost
+     /tmp/ccFNTHPH.s:1578   .text:00000aa4 OS_QPost
+     /tmp/ccFNTHPH.s:1299   .rodata:00000000 $d
+     /tmp/ccFNTHPH.s:1300   .rodata:00000000 .LC0
+     /tmp/ccFNTHPH.s:1361   .rodata:00000004 .LC1
+     /tmp/ccFNTHPH.s:1533   .text:00000a6c OS_QInit
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+OSIntNestingCtr
+CPU_SR_Save
+CPU_IntDisMeasStart
+OSSchedLockNestingCtr
+OS_SchedLockTimeMeasStart
+CPU_IntDisMeasStop
+CPU_SR_Restore
+OS_MsgQInit
+OS_PendListInit
+OSQQty
+OS_SchedLockTimeMeasStop
+OSIntQNbrEntries
+OS_Sched0
+CPU_TS_TmrRd
+OS_PendObjDel
+OSSched
+OS_MsgQFreeAll
+OS_MsgQGet
+OS_Pend
+OSTCBCurPtr
+OS_PendAbort
+OS_IntQPost
+OSQDbgListPtr
+OS_MsgQPut
+OS_Post

@@ -1,0 +1,1954 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"usbhw_lpc.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.bss
+  19              		.align	2
+  20              	_pfnDevIntHandler:
+  21 0000 00000000 		.space	4
+  22              		.align	2
+  23              	_apfnEPIntHandlers:
+  24 0004 00000000 		.space	64
+  24      00000000 
+  24      00000000 
+  24      00000000 
+  24      00000000 
+  25              		.align	2
+  26              	_pfnFrameHandler:
+  27 0044 00000000 		.space	4
+  28              		.text
+  29              		.align	2
+  30              		.thumb
+  31              		.thumb_func
+  33              	Wait4DevInt:
+  34              	.LFB55:
+  35              		.file 1 "Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c"
+   1:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /*
+   2:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPCUSB, an USB device driver for LPC microcontrollers
+   3:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Copyright (C) 2006 Bertrik Sikken (bertrik@sikken.nl)
+   4:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+   5:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Redistribution and use in source and binary forms, with or without
+   6:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	modification, are permitted provided that the following conditions are met:
+   7:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+   8:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	1. Redistributions of source code must retain the above copyright
+   9:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	   notice, this list of conditions and the following disclaimer.
+  10:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	2. Redistributions in binary form must reproduce the above copyright
+  11:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	   notice, this list of conditions and the following disclaimer in the
+  12:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	   documentation and/or other materials provided with the distribution.
+  13:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	3. The name of the author may not be used to endorse or promote products
+  14:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	   derived from this software without specific prior written permission.
+  15:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  16:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+  17:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+  18:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+  19:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+  20:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  21:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  22:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  23:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  24:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  25:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  26:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** */
+  27:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  28:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  29:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /** @file
+  30:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USB hardware layer
+  31:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+  32:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  33:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #include <lpc_types.h>
+  34:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  35:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #include <stddef.h>
+  36:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  37:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #include <usbdebug.h>
+  38:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #include <usbhw_lpc.h>
+  39:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #include <usbapi.h>
+  40:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  41:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /*  Configure LED pin functions
+  42:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  43:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   LED pin functions
+  44:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  45:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   Function            Pin Port	Bits	Pin Select Register
+  46:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   ------------------- --- -----	----	-------------------
+  47:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   P2.0 GPIO Port 2.0	xx	P2.0	1:0		PINSEL4
+  48:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   P2.1 GPIO Port 2.1	xx	P2.1	3:2		PINSEL4
+  49:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   P2.2 GPIO Port 2.2  xx  P2.2	5:4		PINSEL4
+  50:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   P2.3 GPIO Port 2.3  xx  P2.3	7:6		PINSEL4
+  51:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   P2.4 GPIO Port 2.4	xx	P2.4	9:8		PINSEL4
+  52:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   P2.5 GPIO Port 2.5	xx	P2.5  11:10		PINSEL4
+  53:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   P2.6 GPIO Port 2.6	xx	P2.6  13:12		PINSEL4
+  54:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   P2.7 GPIO Port 2.7	xx	P2.7  15:14		PINSEL4
+  55:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  56:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  OFF - LED state 0
+  57:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  ON  - LED state 1
+  58:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  59:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****   '*' as GPIO*/
+  60:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  61:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define NO_LEDS		8
+  62:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  63:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define LED_0		(1 << 0)
+  64:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define LED_1		(1 << 1)
+  65:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define LED_2		(1 << 2)
+  66:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define LED_3		(1 << 3)
+  67:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define LED_4		(1 << 4)
+  68:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define LED_5		(1 << 5)
+  69:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define LED_6		(1 << 6)
+  70:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define LED_7		(1 << 7)
+  71:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  72:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #ifdef DEBUG
+  73:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /*#define DEBUG_LED*/
+  74:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #endif
+  75:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  76:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #ifdef DEBUG_LED
+  77:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define DEBUG_LED_ON(x)		FIO2SET = (1 << x);
+  78:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define DEBUG_LED_OFF(x)	FIO2CLR = (1 << x);
+  79:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define DEBUG_LED_INIT(x)	PINSEL2 &= ~(0x3 << (2*x)); FIO2DIR |= (1 << x); DEBUG_LED_OFF(x);
+  80:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #else
+  81:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define DEBUG_LED_INIT(x)	/**< LED initialisation macro */
+  82:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define DEBUG_LED_ON(x)		/**< turn LED on */
+  83:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define DEBUG_LED_OFF(x)	/**< turn LED off */
+  84:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #endif
+  85:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  86:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /** Installed device interrupt handler */
+  87:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** static TFnDevIntHandler *_pfnDevIntHandler = NULL;
+  88:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /** Installed endpoint interrupt handlers */
+  89:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** static TFnEPIntHandler	*_apfnEPIntHandlers[16];
+  90:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /** Installed frame interrupt handlers */
+  91:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** static TFnFrameHandler	*_pfnFrameHandler = NULL;
+  92:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  93:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /** convert from endpoint address to endpoint index */
+  94:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define EP2IDX(bEP)	((((bEP)&0xF)<<1)|(((bEP)&0x80)>>7))
+  95:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /** convert from endpoint index to endpoint address */
+  96:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** #define IDX2EP(idx)	((((idx)<<7)&0x80)|(((idx)>>1)&0xF))
+  97:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  98:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+  99:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 100:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 101:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Local function to wait for a device interrupt (and clear it)
+ 102:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 103:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	dwIntr		Bitmask of interrupts to wait for
+ 104:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 105:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** static void Wait4DevInt(U32 dwIntr)
+ 106:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+  36              		.loc 1 106 0
+  37              		.cfi_startproc
+  38              		@ args = 0, pretend = 0, frame = 8
+  39              		@ frame_needed = 1, uses_anonymous_args = 0
+  40              		@ link register save eliminated.
+  41 0000 80B4     		push	{r7}
+  42              	.LCFI0:
+  43              		.cfi_def_cfa_offset 4
+  44              		.cfi_offset 7, -4
+  45 0002 83B0     		sub	sp, sp, #12
+  46              	.LCFI1:
+  47              		.cfi_def_cfa_offset 16
+  48 0004 00AF     		add	r7, sp, #0
+  49              	.LCFI2:
+  50              		.cfi_def_cfa_register 7
+  51 0006 7860     		str	r0, [r7, #4]
+ 107:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* wait for specific interrupt */
+ 108:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	while ((LPC_USB->USBDevIntSt & dwIntr) != dwIntr);
+  52              		.loc 1 108 0
+  53 0008 00BF     		nop
+  54              	.L2:
+  55              		.loc 1 108 0 is_stmt 0 discriminator 1
+  56 000a 4FF44043 		mov	r3, #49152
+  57 000e C5F20003 		movt	r3, 20480
+  58 0012 D3F80022 		ldr	r2, [r3, #512]
+  59 0016 7B68     		ldr	r3, [r7, #4]
+  60 0018 1A40     		ands	r2, r2, r3
+  61 001a 7B68     		ldr	r3, [r7, #4]
+  62 001c 9A42     		cmp	r2, r3
+  63 001e F4D1     		bne	.L2
+ 109:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* clear the interrupt bits */
+ 110:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBDevIntClr = dwIntr;
+  64              		.loc 1 110 0 is_stmt 1
+  65 0020 4FF44043 		mov	r3, #49152
+  66 0024 C5F20003 		movt	r3, 20480
+  67 0028 7A68     		ldr	r2, [r7, #4]
+  68 002a C3F80822 		str	r2, [r3, #520]
+ 111:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+  69              		.loc 1 111 0
+  70 002e 07F10C07 		add	r7, r7, #12
+  71 0032 BD46     		mov	sp, r7
+  72 0034 80BC     		pop	{r7}
+  73 0036 7047     		bx	lr
+  74              		.cfi_endproc
+  75              	.LFE55:
+  77              		.align	2
+  78              		.thumb
+  79              		.thumb_func
+  81              	USBHwCmd:
+  82              	.LFB56:
+ 112:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 113:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 114:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 115:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Local function to send a command to the USB protocol engine
+ 116:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 117:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bCmd		Command to send
+ 118:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 119:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** static void USBHwCmd(U8 bCmd)
+ 120:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+  83              		.loc 1 120 0
+  84              		.cfi_startproc
+  85              		@ args = 0, pretend = 0, frame = 8
+  86              		@ frame_needed = 1, uses_anonymous_args = 0
+  87 0038 80B5     		push	{r7, lr}
+  88              	.LCFI3:
+  89              		.cfi_def_cfa_offset 8
+  90              		.cfi_offset 14, -4
+  91              		.cfi_offset 7, -8
+  92 003a 82B0     		sub	sp, sp, #8
+  93              	.LCFI4:
+  94              		.cfi_def_cfa_offset 16
+  95 003c 00AF     		add	r7, sp, #0
+  96              	.LCFI5:
+  97              		.cfi_def_cfa_register 7
+  98 003e 0346     		mov	r3, r0
+  99 0040 FB71     		strb	r3, [r7, #7]
+ 121:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* clear CDFULL/CCEMTY */
+ 122:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBDevIntClr = CDFULL | CCEMTY;
+ 100              		.loc 1 122 0
+ 101 0042 4FF44043 		mov	r3, #49152
+ 102 0046 C5F20003 		movt	r3, 20480
+ 103 004a 4FF03002 		mov	r2, #48
+ 104 004e C3F80822 		str	r2, [r3, #520]
+ 123:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* write command code */
+ 124:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBCmdCode = 0x00000500 | (bCmd << 16);
+ 105              		.loc 1 124 0
+ 106 0052 4FF44043 		mov	r3, #49152
+ 107 0056 C5F20003 		movt	r3, 20480
+ 108 005a FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 109 005c 4FEA0242 		lsl	r2, r2, #16
+ 110 0060 42F4A062 		orr	r2, r2, #1280
+ 111 0064 C3F81022 		str	r2, [r3, #528]
+ 125:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Wait4DevInt(CCEMTY);
+ 112              		.loc 1 125 0
+ 113 0068 4FF01000 		mov	r0, #16
+ 114 006c FFF7C8FF 		bl	Wait4DevInt
+ 126:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 115              		.loc 1 126 0
+ 116 0070 07F10807 		add	r7, r7, #8
+ 117 0074 BD46     		mov	sp, r7
+ 118 0076 80BD     		pop	{r7, pc}
+ 119              		.cfi_endproc
+ 120              	.LFE56:
+ 122              		.align	2
+ 123              		.thumb
+ 124              		.thumb_func
+ 126              	USBHwCmdWrite:
+ 127              	.LFB57:
+ 127:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 128:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 129:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 130:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Local function to send a command + data to the USB protocol engine
+ 131:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 132:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bCmd		Command to send
+ 133:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bData		Data to send
+ 134:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 135:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** static void USBHwCmdWrite(U8 bCmd, U16 bData)
+ 136:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 128              		.loc 1 136 0
+ 129              		.cfi_startproc
+ 130              		@ args = 0, pretend = 0, frame = 8
+ 131              		@ frame_needed = 1, uses_anonymous_args = 0
+ 132 0078 80B5     		push	{r7, lr}
+ 133              	.LCFI6:
+ 134              		.cfi_def_cfa_offset 8
+ 135              		.cfi_offset 14, -4
+ 136              		.cfi_offset 7, -8
+ 137 007a 82B0     		sub	sp, sp, #8
+ 138              	.LCFI7:
+ 139              		.cfi_def_cfa_offset 16
+ 140 007c 00AF     		add	r7, sp, #0
+ 141              	.LCFI8:
+ 142              		.cfi_def_cfa_register 7
+ 143 007e 0246     		mov	r2, r0
+ 144 0080 0B46     		mov	r3, r1
+ 145 0082 FA71     		strb	r2, [r7, #7]
+ 146 0084 BB80     		strh	r3, [r7, #4]	@ movhi
+ 137:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* write command code */
+ 138:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmd(bCmd);
+ 147              		.loc 1 138 0
+ 148 0086 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 149 0088 1846     		mov	r0, r3
+ 150 008a FFF7D5FF 		bl	USBHwCmd
+ 139:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 140:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* write command data */
+ 141:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBCmdCode = 0x00000100 | (bData << 16);
+ 151              		.loc 1 141 0
+ 152 008e 4FF44043 		mov	r3, #49152
+ 153 0092 C5F20003 		movt	r3, 20480
+ 154 0096 BA88     		ldrh	r2, [r7, #4]
+ 155 0098 4FEA0242 		lsl	r2, r2, #16
+ 156 009c 42F48072 		orr	r2, r2, #256
+ 157 00a0 C3F81022 		str	r2, [r3, #528]
+ 142:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Wait4DevInt(CCEMTY);
+ 158              		.loc 1 142 0
+ 159 00a4 4FF01000 		mov	r0, #16
+ 160 00a8 FFF7AAFF 		bl	Wait4DevInt
+ 143:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 161              		.loc 1 143 0
+ 162 00ac 07F10807 		add	r7, r7, #8
+ 163 00b0 BD46     		mov	sp, r7
+ 164 00b2 80BD     		pop	{r7, pc}
+ 165              		.cfi_endproc
+ 166              	.LFE57:
+ 168              		.align	2
+ 169              		.thumb
+ 170              		.thumb_func
+ 172              	USBHwCmdRead:
+ 173              	.LFB58:
+ 144:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 145:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 146:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 147:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Local function to send a command to the USB protocol engine and read data
+ 148:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 149:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bCmd		Command to send
+ 150:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 151:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@return the data
+ 152:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 153:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** static U8 USBHwCmdRead(U8 bCmd)
+ 154:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 174              		.loc 1 154 0
+ 175              		.cfi_startproc
+ 176              		@ args = 0, pretend = 0, frame = 8
+ 177              		@ frame_needed = 1, uses_anonymous_args = 0
+ 178 00b4 80B5     		push	{r7, lr}
+ 179              	.LCFI9:
+ 180              		.cfi_def_cfa_offset 8
+ 181              		.cfi_offset 14, -4
+ 182              		.cfi_offset 7, -8
+ 183 00b6 82B0     		sub	sp, sp, #8
+ 184              	.LCFI10:
+ 185              		.cfi_def_cfa_offset 16
+ 186 00b8 00AF     		add	r7, sp, #0
+ 187              	.LCFI11:
+ 188              		.cfi_def_cfa_register 7
+ 189 00ba 0346     		mov	r3, r0
+ 190 00bc FB71     		strb	r3, [r7, #7]
+ 155:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* write command code */
+ 156:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmd(bCmd);
+ 191              		.loc 1 156 0
+ 192 00be FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 193 00c0 1846     		mov	r0, r3
+ 194 00c2 FFF7B9FF 		bl	USBHwCmd
+ 157:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 158:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* get data */
+ 159:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBCmdCode = 0x00000200 | (bCmd << 16);
+ 195              		.loc 1 159 0
+ 196 00c6 4FF44043 		mov	r3, #49152
+ 197 00ca C5F20003 		movt	r3, 20480
+ 198 00ce FA79     		ldrb	r2, [r7, #7]	@ zero_extendqisi2
+ 199 00d0 4FEA0242 		lsl	r2, r2, #16
+ 200 00d4 42F40072 		orr	r2, r2, #512
+ 201 00d8 C3F81022 		str	r2, [r3, #528]
+ 160:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Wait4DevInt(CDFULL);
+ 202              		.loc 1 160 0
+ 203 00dc 4FF02000 		mov	r0, #32
+ 204 00e0 FFF78EFF 		bl	Wait4DevInt
+ 161:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	return LPC_USB->USBCmdData;
+ 205              		.loc 1 161 0
+ 206 00e4 4FF44043 		mov	r3, #49152
+ 207 00e8 C5F20003 		movt	r3, 20480
+ 208 00ec D3F81432 		ldr	r3, [r3, #532]
+ 209 00f0 DBB2     		uxtb	r3, r3
+ 162:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 210              		.loc 1 162 0
+ 211 00f2 1846     		mov	r0, r3
+ 212 00f4 07F10807 		add	r7, r7, #8
+ 213 00f8 BD46     		mov	sp, r7
+ 214 00fa 80BD     		pop	{r7, pc}
+ 215              		.cfi_endproc
+ 216              	.LFE58:
+ 218              		.align	2
+ 219              		.thumb
+ 220              		.thumb_func
+ 222              	USBHwEPRealize:
+ 223              	.LFB59:
+ 163:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 164:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 165:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 166:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	'Realizes' an endpoint, meaning that buffer space is reserved for
+ 167:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	it. An endpoint needs to be realised before it can be used.
+ 168:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 169:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	From experiments, it appears that a USB reset causes USBReEP to
+ 170:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	re-initialise to 3 (= just the control endpoints).
+ 171:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	However, a USB bus reset does not disturb the USBMaxPSize settings.
+ 172:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 173:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	idx			Endpoint index
+ 174:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in] wMaxPSize	Maximum packet size for this endpoint
+ 175:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 176:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** static void USBHwEPRealize(int idx, U16 wMaxPSize)
+ 177:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 224              		.loc 1 177 0
+ 225              		.cfi_startproc
+ 226              		@ args = 0, pretend = 0, frame = 8
+ 227              		@ frame_needed = 1, uses_anonymous_args = 0
+ 228 00fc 80B5     		push	{r7, lr}
+ 229              	.LCFI12:
+ 230              		.cfi_def_cfa_offset 8
+ 231              		.cfi_offset 14, -4
+ 232              		.cfi_offset 7, -8
+ 233 00fe 82B0     		sub	sp, sp, #8
+ 234              	.LCFI13:
+ 235              		.cfi_def_cfa_offset 16
+ 236 0100 00AF     		add	r7, sp, #0
+ 237              	.LCFI14:
+ 238              		.cfi_def_cfa_register 7
+ 239 0102 7860     		str	r0, [r7, #4]
+ 240 0104 0B46     		mov	r3, r1
+ 241 0106 7B80     		strh	r3, [r7, #2]	@ movhi
+ 178:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBReEP |= (1 << idx);
+ 242              		.loc 1 178 0
+ 243 0108 4FF44043 		mov	r3, #49152
+ 244 010c C5F20003 		movt	r3, 20480
+ 245 0110 4FF44042 		mov	r2, #49152
+ 246 0114 C5F20002 		movt	r2, 20480
+ 247 0118 D2F84412 		ldr	r1, [r2, #580]
+ 248 011c 4FF00100 		mov	r0, #1
+ 249 0120 7A68     		ldr	r2, [r7, #4]
+ 250 0122 00FA02F2 		lsl	r2, r0, r2
+ 251 0126 0A43     		orrs	r2, r2, r1
+ 252 0128 C3F84422 		str	r2, [r3, #580]
+ 179:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBEpInd = idx;
+ 253              		.loc 1 179 0
+ 254 012c 4FF44043 		mov	r3, #49152
+ 255 0130 C5F20003 		movt	r3, 20480
+ 256 0134 7A68     		ldr	r2, [r7, #4]
+ 257 0136 C3F84822 		str	r2, [r3, #584]
+ 180:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBMaxPSize = wMaxPSize;
+ 258              		.loc 1 180 0
+ 259 013a 4FF44043 		mov	r3, #49152
+ 260 013e C5F20003 		movt	r3, 20480
+ 261 0142 7A88     		ldrh	r2, [r7, #2]
+ 262 0144 C3F84C22 		str	r2, [r3, #588]
+ 181:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Wait4DevInt(EP_RLZED);
+ 263              		.loc 1 181 0
+ 264 0148 4FF48070 		mov	r0, #256
+ 265 014c FFF758FF 		bl	Wait4DevInt
+ 182:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 266              		.loc 1 182 0
+ 267 0150 07F10807 		add	r7, r7, #8
+ 268 0154 BD46     		mov	sp, r7
+ 269 0156 80BD     		pop	{r7, pc}
+ 270              		.cfi_endproc
+ 271              	.LFE59:
+ 273              		.align	2
+ 274              		.thumb
+ 275              		.thumb_func
+ 277              	USBHwEPEnable:
+ 278              	.LFB60:
+ 183:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 184:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 185:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 186:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Enables or disables an endpoint
+ 187:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 188:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	idx		Endpoint index
+ 189:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	fEnable	TRUE to enable, FALSE to disable
+ 190:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 191:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** static void USBHwEPEnable(int idx, BOOL fEnable)
+ 192:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 279              		.loc 1 192 0
+ 280              		.cfi_startproc
+ 281              		@ args = 0, pretend = 0, frame = 8
+ 282              		@ frame_needed = 1, uses_anonymous_args = 0
+ 283 0158 80B5     		push	{r7, lr}
+ 284              	.LCFI15:
+ 285              		.cfi_def_cfa_offset 8
+ 286              		.cfi_offset 14, -4
+ 287              		.cfi_offset 7, -8
+ 288 015a 82B0     		sub	sp, sp, #8
+ 289              	.LCFI16:
+ 290              		.cfi_def_cfa_offset 16
+ 291 015c 00AF     		add	r7, sp, #0
+ 292              	.LCFI17:
+ 293              		.cfi_def_cfa_register 7
+ 294 015e 7860     		str	r0, [r7, #4]
+ 295 0160 0B46     		mov	r3, r1
+ 296 0162 FB70     		strb	r3, [r7, #3]
+ 193:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmdWrite(CMD_EP_SET_STATUS | idx, fEnable ? 0 : EP_DA);
+ 297              		.loc 1 193 0
+ 298 0164 7B68     		ldr	r3, [r7, #4]
+ 299 0166 DBB2     		uxtb	r3, r3
+ 300 0168 43F04003 		orr	r3, r3, #64
+ 301 016c DBB2     		uxtb	r3, r3
+ 302 016e DAB2     		uxtb	r2, r3
+ 303 0170 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 304 0172 002B     		cmp	r3, #0
+ 305 0174 02D0     		beq	.L8
+ 306              		.loc 1 193 0 is_stmt 0 discriminator 1
+ 307 0176 4FF00003 		mov	r3, #0
+ 308 017a 01E0     		b	.L9
+ 309              	.L8:
+ 310              		.loc 1 193 0 discriminator 2
+ 311 017c 4FF02003 		mov	r3, #32
+ 312              	.L9:
+ 313              		.loc 1 193 0 discriminator 3
+ 314 0180 1046     		mov	r0, r2
+ 315 0182 1946     		mov	r1, r3
+ 316 0184 FFF778FF 		bl	USBHwCmdWrite
+ 194:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 317              		.loc 1 194 0 is_stmt 1 discriminator 3
+ 318 0188 07F10807 		add	r7, r7, #8
+ 319 018c BD46     		mov	sp, r7
+ 320 018e 80BD     		pop	{r7, pc}
+ 321              		.cfi_endproc
+ 322              	.LFE60:
+ 324              		.align	2
+ 325              		.global	USBHwEPConfig
+ 326              		.thumb
+ 327              		.thumb_func
+ 329              	USBHwEPConfig:
+ 330              	.LFB61:
+ 195:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 196:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 197:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 198:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Configures an endpoint and enables it
+ 199:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 200:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bEP				Endpoint number
+ 201:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	wMaxPacketSize	Maximum packet size for this EP
+ 202:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 203:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** void USBHwEPConfig(U8 bEP, U16 wMaxPacketSize)
+ 204:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 331              		.loc 1 204 0
+ 332              		.cfi_startproc
+ 333              		@ args = 0, pretend = 0, frame = 16
+ 334              		@ frame_needed = 1, uses_anonymous_args = 0
+ 335 0190 80B5     		push	{r7, lr}
+ 336              	.LCFI18:
+ 337              		.cfi_def_cfa_offset 8
+ 338              		.cfi_offset 14, -4
+ 339              		.cfi_offset 7, -8
+ 340 0192 84B0     		sub	sp, sp, #16
+ 341              	.LCFI19:
+ 342              		.cfi_def_cfa_offset 24
+ 343 0194 00AF     		add	r7, sp, #0
+ 344              	.LCFI20:
+ 345              		.cfi_def_cfa_register 7
+ 346 0196 0246     		mov	r2, r0
+ 347 0198 0B46     		mov	r3, r1
+ 348 019a FA71     		strb	r2, [r7, #7]
+ 349 019c BB80     		strh	r3, [r7, #4]	@ movhi
+ 205:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	int idx;
+ 206:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 207:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	idx = EP2IDX(bEP);
+ 350              		.loc 1 207 0
+ 351 019e FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 352 01a0 03F00F03 		and	r3, r3, #15
+ 353 01a4 4FEA4302 		lsl	r2, r3, #1
+ 354 01a8 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 355 01aa 4FEAD313 		lsr	r3, r3, #7
+ 356 01ae DBB2     		uxtb	r3, r3
+ 357 01b0 1343     		orrs	r3, r3, r2
+ 358 01b2 FB60     		str	r3, [r7, #12]
+ 208:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 209:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* realise EP */
+ 210:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwEPRealize(idx, wMaxPacketSize);
+ 359              		.loc 1 210 0
+ 360 01b4 BB88     		ldrh	r3, [r7, #4]
+ 361 01b6 F868     		ldr	r0, [r7, #12]
+ 362 01b8 1946     		mov	r1, r3
+ 363 01ba FFF79FFF 		bl	USBHwEPRealize
+ 211:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 212:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* enable EP */
+ 213:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwEPEnable(idx, TRUE);
+ 364              		.loc 1 213 0
+ 365 01be F868     		ldr	r0, [r7, #12]
+ 366 01c0 4FF00101 		mov	r1, #1
+ 367 01c4 FFF7C8FF 		bl	USBHwEPEnable
+ 214:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 368              		.loc 1 214 0
+ 369 01c8 07F11007 		add	r7, r7, #16
+ 370 01cc BD46     		mov	sp, r7
+ 371 01ce 80BD     		pop	{r7, pc}
+ 372              		.cfi_endproc
+ 373              	.LFE61:
+ 375              		.align	2
+ 376              		.global	USBHwRegisterEPIntHandler
+ 377              		.thumb
+ 378              		.thumb_func
+ 380              	USBHwRegisterEPIntHandler:
+ 381              	.LFB62:
+ 215:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 216:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 217:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 218:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Registers an endpoint event callback
+ 219:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 220:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bEP				Endpoint number
+ 221:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	pfnHandler		Callback function
+ 222:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 223:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** void USBHwRegisterEPIntHandler(U8 bEP, TFnEPIntHandler *pfnHandler)
+ 224:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 382              		.loc 1 224 0
+ 383              		.cfi_startproc
+ 384              		@ args = 0, pretend = 0, frame = 16
+ 385              		@ frame_needed = 1, uses_anonymous_args = 0
+ 386              		@ link register save eliminated.
+ 387 01d0 80B4     		push	{r7}
+ 388              	.LCFI21:
+ 389              		.cfi_def_cfa_offset 4
+ 390              		.cfi_offset 7, -4
+ 391 01d2 85B0     		sub	sp, sp, #20
+ 392              	.LCFI22:
+ 393              		.cfi_def_cfa_offset 24
+ 394 01d4 00AF     		add	r7, sp, #0
+ 395              	.LCFI23:
+ 396              		.cfi_def_cfa_register 7
+ 397 01d6 0346     		mov	r3, r0
+ 398 01d8 3960     		str	r1, [r7, #0]
+ 399 01da FB71     		strb	r3, [r7, #7]
+ 225:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	int idx;
+ 226:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 227:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	idx = EP2IDX(bEP);
+ 400              		.loc 1 227 0
+ 401 01dc FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 402 01de 03F00F03 		and	r3, r3, #15
+ 403 01e2 4FEA4302 		lsl	r2, r3, #1
+ 404 01e6 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 405 01e8 4FEAD313 		lsr	r3, r3, #7
+ 406 01ec DBB2     		uxtb	r3, r3
+ 407 01ee 1343     		orrs	r3, r3, r2
+ 408 01f0 FB60     		str	r3, [r7, #12]
+ 228:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 229:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	ASSERT(idx<32);
+ 230:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 231:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* add handler to list of EP handlers */
+ 232:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	_apfnEPIntHandlers[idx / 2] = pfnHandler;
+ 409              		.loc 1 232 0
+ 410 01f2 FB68     		ldr	r3, [r7, #12]
+ 411 01f4 4FEAD372 		lsr	r2, r3, #31
+ 412 01f8 D318     		adds	r3, r2, r3
+ 413 01fa 4FEA6303 		asr	r3, r3, #1
+ 414 01fe 1A46     		mov	r2, r3
+ 415 0200 40F20003 		movw	r3, #:lower16:_apfnEPIntHandlers
+ 416 0204 C0F20003 		movt	r3, #:upper16:_apfnEPIntHandlers
+ 417 0208 3968     		ldr	r1, [r7, #0]
+ 418 020a 43F82210 		str	r1, [r3, r2, lsl #2]
+ 233:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 234:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* enable EP interrupt */
+ 235:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBEpIntEn |= (1 << idx);
+ 419              		.loc 1 235 0
+ 420 020e 4FF44043 		mov	r3, #49152
+ 421 0212 C5F20003 		movt	r3, 20480
+ 422 0216 4FF44042 		mov	r2, #49152
+ 423 021a C5F20002 		movt	r2, 20480
+ 424 021e D2F83412 		ldr	r1, [r2, #564]
+ 425 0222 4FF00100 		mov	r0, #1
+ 426 0226 FA68     		ldr	r2, [r7, #12]
+ 427 0228 00FA02F2 		lsl	r2, r0, r2
+ 428 022c 0A43     		orrs	r2, r2, r1
+ 429 022e C3F83422 		str	r2, [r3, #564]
+ 236:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBDevIntEn |= EP_SLOW;
+ 430              		.loc 1 236 0
+ 431 0232 4FF44043 		mov	r3, #49152
+ 432 0236 C5F20003 		movt	r3, 20480
+ 433 023a 4FF44042 		mov	r2, #49152
+ 434 023e C5F20002 		movt	r2, 20480
+ 435 0242 D2F80422 		ldr	r2, [r2, #516]
+ 436 0246 42F00402 		orr	r2, r2, #4
+ 437 024a C3F80422 		str	r2, [r3, #516]
+ 237:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 238:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	DBG("Registered handler for EP 0x%x\n", bEP);
+ 239:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 438              		.loc 1 239 0
+ 439 024e 07F11407 		add	r7, r7, #20
+ 440 0252 BD46     		mov	sp, r7
+ 441 0254 80BC     		pop	{r7}
+ 442 0256 7047     		bx	lr
+ 443              		.cfi_endproc
+ 444              	.LFE62:
+ 446              		.align	2
+ 447              		.global	USBHwRegisterDevIntHandler
+ 448              		.thumb
+ 449              		.thumb_func
+ 451              	USBHwRegisterDevIntHandler:
+ 452              	.LFB63:
+ 240:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 241:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 242:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 243:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Registers an device status callback
+ 244:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 245:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	pfnHandler	Callback function
+ 246:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 247:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** void USBHwRegisterDevIntHandler(TFnDevIntHandler *pfnHandler)
+ 248:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 453              		.loc 1 248 0
+ 454              		.cfi_startproc
+ 455              		@ args = 0, pretend = 0, frame = 8
+ 456              		@ frame_needed = 1, uses_anonymous_args = 0
+ 457              		@ link register save eliminated.
+ 458 0258 80B4     		push	{r7}
+ 459              	.LCFI24:
+ 460              		.cfi_def_cfa_offset 4
+ 461              		.cfi_offset 7, -4
+ 462 025a 83B0     		sub	sp, sp, #12
+ 463              	.LCFI25:
+ 464              		.cfi_def_cfa_offset 16
+ 465 025c 00AF     		add	r7, sp, #0
+ 466              	.LCFI26:
+ 467              		.cfi_def_cfa_register 7
+ 468 025e 7860     		str	r0, [r7, #4]
+ 249:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	_pfnDevIntHandler = pfnHandler;
+ 469              		.loc 1 249 0
+ 470 0260 40F20003 		movw	r3, #:lower16:_pfnDevIntHandler
+ 471 0264 C0F20003 		movt	r3, #:upper16:_pfnDevIntHandler
+ 472 0268 7A68     		ldr	r2, [r7, #4]
+ 473 026a 1A60     		str	r2, [r3, #0]
+ 250:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 251:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* enable device interrupt */
+ 252:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBDevIntEn |= DEV_STAT;
+ 474              		.loc 1 252 0
+ 475 026c 4FF44043 		mov	r3, #49152
+ 476 0270 C5F20003 		movt	r3, 20480
+ 477 0274 4FF44042 		mov	r2, #49152
+ 478 0278 C5F20002 		movt	r2, 20480
+ 479 027c D2F80422 		ldr	r2, [r2, #516]
+ 480 0280 42F00802 		orr	r2, r2, #8
+ 481 0284 C3F80422 		str	r2, [r3, #516]
+ 253:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 254:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	DBG("Registered handler for device status\n");
+ 255:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 482              		.loc 1 255 0
+ 483 0288 07F10C07 		add	r7, r7, #12
+ 484 028c BD46     		mov	sp, r7
+ 485 028e 80BC     		pop	{r7}
+ 486 0290 7047     		bx	lr
+ 487              		.cfi_endproc
+ 488              	.LFE63:
+ 490 0292 00BF     		.align	2
+ 491              		.global	USBHwRegisterFrameHandler
+ 492              		.thumb
+ 493              		.thumb_func
+ 495              	USBHwRegisterFrameHandler:
+ 496              	.LFB64:
+ 256:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 257:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 258:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 259:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Registers the frame callback
+ 260:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 261:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	pfnHandler	Callback function
+ 262:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 263:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** void USBHwRegisterFrameHandler(TFnFrameHandler *pfnHandler)
+ 264:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 497              		.loc 1 264 0
+ 498              		.cfi_startproc
+ 499              		@ args = 0, pretend = 0, frame = 8
+ 500              		@ frame_needed = 1, uses_anonymous_args = 0
+ 501              		@ link register save eliminated.
+ 502 0294 80B4     		push	{r7}
+ 503              	.LCFI27:
+ 504              		.cfi_def_cfa_offset 4
+ 505              		.cfi_offset 7, -4
+ 506 0296 83B0     		sub	sp, sp, #12
+ 507              	.LCFI28:
+ 508              		.cfi_def_cfa_offset 16
+ 509 0298 00AF     		add	r7, sp, #0
+ 510              	.LCFI29:
+ 511              		.cfi_def_cfa_register 7
+ 512 029a 7860     		str	r0, [r7, #4]
+ 265:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	_pfnFrameHandler = pfnHandler;
+ 513              		.loc 1 265 0
+ 514 029c 40F20003 		movw	r3, #:lower16:_pfnFrameHandler
+ 515 02a0 C0F20003 		movt	r3, #:upper16:_pfnFrameHandler
+ 516 02a4 7A68     		ldr	r2, [r7, #4]
+ 517 02a6 1A60     		str	r2, [r3, #0]
+ 266:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 267:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* enable device interrupt */
+ 268:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBDevIntEn |= FRAME;
+ 518              		.loc 1 268 0
+ 519 02a8 4FF44043 		mov	r3, #49152
+ 520 02ac C5F20003 		movt	r3, 20480
+ 521 02b0 4FF44042 		mov	r2, #49152
+ 522 02b4 C5F20002 		movt	r2, 20480
+ 523 02b8 D2F80422 		ldr	r2, [r2, #516]
+ 524 02bc 42F00102 		orr	r2, r2, #1
+ 525 02c0 C3F80422 		str	r2, [r3, #516]
+ 269:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 270:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	DBG("Registered handler for frame\n");
+ 271:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 526              		.loc 1 271 0
+ 527 02c4 07F10C07 		add	r7, r7, #12
+ 528 02c8 BD46     		mov	sp, r7
+ 529 02ca 80BC     		pop	{r7}
+ 530 02cc 7047     		bx	lr
+ 531              		.cfi_endproc
+ 532              	.LFE64:
+ 534 02ce 00BF     		.align	2
+ 535              		.global	USBHwSetAddress
+ 536              		.thumb
+ 537              		.thumb_func
+ 539              	USBHwSetAddress:
+ 540              	.LFB65:
+ 272:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 273:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 274:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 275:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Sets the USB address.
+ 276:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 277:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bAddr		Device address to set
+ 278:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 279:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** void USBHwSetAddress(U8 bAddr)
+ 280:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 541              		.loc 1 280 0
+ 542              		.cfi_startproc
+ 543              		@ args = 0, pretend = 0, frame = 8
+ 544              		@ frame_needed = 1, uses_anonymous_args = 0
+ 545 02d0 80B5     		push	{r7, lr}
+ 546              	.LCFI30:
+ 547              		.cfi_def_cfa_offset 8
+ 548              		.cfi_offset 14, -4
+ 549              		.cfi_offset 7, -8
+ 550 02d2 82B0     		sub	sp, sp, #8
+ 551              	.LCFI31:
+ 552              		.cfi_def_cfa_offset 16
+ 553 02d4 00AF     		add	r7, sp, #0
+ 554              	.LCFI32:
+ 555              		.cfi_def_cfa_register 7
+ 556 02d6 0346     		mov	r3, r0
+ 557 02d8 FB71     		strb	r3, [r7, #7]
+ 281:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmdWrite(CMD_DEV_SET_ADDRESS, DEV_EN | bAddr);
+ 558              		.loc 1 281 0
+ 559 02da FB79     		ldrb	r3, [r7, #7]
+ 560 02dc 63F07F03 		orn	r3, r3, #127
+ 561 02e0 DBB2     		uxtb	r3, r3
+ 562 02e2 4FF0D000 		mov	r0, #208
+ 563 02e6 1946     		mov	r1, r3
+ 564 02e8 FFF7C6FE 		bl	USBHwCmdWrite
+ 282:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 565              		.loc 1 282 0
+ 566 02ec 07F10807 		add	r7, r7, #8
+ 567 02f0 BD46     		mov	sp, r7
+ 568 02f2 80BD     		pop	{r7, pc}
+ 569              		.cfi_endproc
+ 570              	.LFE65:
+ 572              		.align	2
+ 573              		.global	USBHwConnect
+ 574              		.thumb
+ 575              		.thumb_func
+ 577              	USBHwConnect:
+ 578              	.LFB66:
+ 283:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 284:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 285:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 286:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Connects or disconnects from the USB bus
+ 287:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 288:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	fConnect	If TRUE, connect, otherwise disconnect
+ 289:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 290:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** void USBHwConnect(BOOL fConnect)
+ 291:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 579              		.loc 1 291 0
+ 580              		.cfi_startproc
+ 581              		@ args = 0, pretend = 0, frame = 8
+ 582              		@ frame_needed = 1, uses_anonymous_args = 0
+ 583 02f4 80B5     		push	{r7, lr}
+ 584              	.LCFI33:
+ 585              		.cfi_def_cfa_offset 8
+ 586              		.cfi_offset 14, -4
+ 587              		.cfi_offset 7, -8
+ 588 02f6 82B0     		sub	sp, sp, #8
+ 589              	.LCFI34:
+ 590              		.cfi_def_cfa_offset 16
+ 591 02f8 00AF     		add	r7, sp, #0
+ 592              	.LCFI35:
+ 593              		.cfi_def_cfa_register 7
+ 594 02fa 0346     		mov	r3, r0
+ 595 02fc FB71     		strb	r3, [r7, #7]
+ 292:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmdWrite(CMD_DEV_STATUS, fConnect ? CON : 0);
+ 596              		.loc 1 292 0
+ 597 02fe FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 598 0300 002B     		cmp	r3, #0
+ 599 0302 0CBF     		ite	eq
+ 600 0304 0023     		moveq	r3, #0
+ 601 0306 0123     		movne	r3, #1
+ 602 0308 9BB2     		uxth	r3, r3
+ 603 030a 4FF0FE00 		mov	r0, #254
+ 604 030e 1946     		mov	r1, r3
+ 605 0310 FFF7B2FE 		bl	USBHwCmdWrite
+ 293:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 606              		.loc 1 293 0
+ 607 0314 07F10807 		add	r7, r7, #8
+ 608 0318 BD46     		mov	sp, r7
+ 609 031a 80BD     		pop	{r7, pc}
+ 610              		.cfi_endproc
+ 611              	.LFE66:
+ 613              		.align	2
+ 614              		.global	USBHwNakIntEnable
+ 615              		.thumb
+ 616              		.thumb_func
+ 618              	USBHwNakIntEnable:
+ 619              	.LFB67:
+ 294:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 295:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 296:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 297:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Enables interrupt on NAK condition
+ 298:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 299:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	For IN endpoints a NAK is generated when the host wants to read data
+ 300:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	from the device, but none is available in the endpoint buffer.
+ 301:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	For OUT endpoints a NAK is generated when the host wants to write data
+ 302:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	to the device, but the endpoint buffer is still full.
+ 303:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 304:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	The endpoint interrupt handlers can distinguish regular (ACK) interrupts
+ 305:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	from NAK interrupt by checking the bits in their bEPStatus argument.
+ 306:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 307:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bIntBits	Bitmap indicating which NAK interrupts to enable
+ 308:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 309:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** void USBHwNakIntEnable(U8 bIntBits)
+ 310:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 620              		.loc 1 310 0
+ 621              		.cfi_startproc
+ 622              		@ args = 0, pretend = 0, frame = 8
+ 623              		@ frame_needed = 1, uses_anonymous_args = 0
+ 624 031c 80B5     		push	{r7, lr}
+ 625              	.LCFI36:
+ 626              		.cfi_def_cfa_offset 8
+ 627              		.cfi_offset 14, -4
+ 628              		.cfi_offset 7, -8
+ 629 031e 82B0     		sub	sp, sp, #8
+ 630              	.LCFI37:
+ 631              		.cfi_def_cfa_offset 16
+ 632 0320 00AF     		add	r7, sp, #0
+ 633              	.LCFI38:
+ 634              		.cfi_def_cfa_register 7
+ 635 0322 0346     		mov	r3, r0
+ 636 0324 FB71     		strb	r3, [r7, #7]
+ 311:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmdWrite(CMD_DEV_SET_MODE, bIntBits);
+ 637              		.loc 1 311 0
+ 638 0326 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 639 0328 9BB2     		uxth	r3, r3
+ 640 032a 4FF0F300 		mov	r0, #243
+ 641 032e 1946     		mov	r1, r3
+ 642 0330 FFF7A2FE 		bl	USBHwCmdWrite
+ 312:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 643              		.loc 1 312 0
+ 644 0334 07F10807 		add	r7, r7, #8
+ 645 0338 BD46     		mov	sp, r7
+ 646 033a 80BD     		pop	{r7, pc}
+ 647              		.cfi_endproc
+ 648              	.LFE67:
+ 650              		.align	2
+ 651              		.global	USBHwEPGetStatus
+ 652              		.thumb
+ 653              		.thumb_func
+ 655              	USBHwEPGetStatus:
+ 656              	.LFB68:
+ 313:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 314:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 315:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 316:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Gets the status from a specific endpoint.
+ 317:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 318:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bEP		Endpoint number
+ 319:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@return Endpoint status byte (containing EP_STATUS_xxx bits)
+ 320:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 321:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** U8	USBHwEPGetStatus(U8 bEP)
+ 322:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 657              		.loc 1 322 0
+ 658              		.cfi_startproc
+ 659              		@ args = 0, pretend = 0, frame = 16
+ 660              		@ frame_needed = 1, uses_anonymous_args = 0
+ 661 033c 80B5     		push	{r7, lr}
+ 662              	.LCFI39:
+ 663              		.cfi_def_cfa_offset 8
+ 664              		.cfi_offset 14, -4
+ 665              		.cfi_offset 7, -8
+ 666 033e 84B0     		sub	sp, sp, #16
+ 667              	.LCFI40:
+ 668              		.cfi_def_cfa_offset 24
+ 669 0340 00AF     		add	r7, sp, #0
+ 670              	.LCFI41:
+ 671              		.cfi_def_cfa_register 7
+ 672 0342 0346     		mov	r3, r0
+ 673 0344 FB71     		strb	r3, [r7, #7]
+ 323:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	int idx = EP2IDX(bEP);
+ 674              		.loc 1 323 0
+ 675 0346 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 676 0348 03F00F03 		and	r3, r3, #15
+ 677 034c 4FEA4302 		lsl	r2, r3, #1
+ 678 0350 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 679 0352 4FEAD313 		lsr	r3, r3, #7
+ 680 0356 DBB2     		uxtb	r3, r3
+ 681 0358 1343     		orrs	r3, r3, r2
+ 682 035a FB60     		str	r3, [r7, #12]
+ 324:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 325:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	return USBHwCmdRead(CMD_EP_SELECT | idx);
+ 683              		.loc 1 325 0
+ 684 035c FB68     		ldr	r3, [r7, #12]
+ 685 035e DBB2     		uxtb	r3, r3
+ 686 0360 1846     		mov	r0, r3
+ 687 0362 FFF7A7FE 		bl	USBHwCmdRead
+ 688 0366 0346     		mov	r3, r0
+ 326:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 689              		.loc 1 326 0
+ 690 0368 1846     		mov	r0, r3
+ 691 036a 07F11007 		add	r7, r7, #16
+ 692 036e BD46     		mov	sp, r7
+ 693 0370 80BD     		pop	{r7, pc}
+ 694              		.cfi_endproc
+ 695              	.LFE68:
+ 697 0372 00BF     		.align	2
+ 698              		.global	USBHwEPStall
+ 699              		.thumb
+ 700              		.thumb_func
+ 702              	USBHwEPStall:
+ 703              	.LFB69:
+ 327:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 328:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 329:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 330:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Sets the stalled property of an endpoint
+ 331:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 332:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bEP		Endpoint number
+ 333:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	fStall	TRUE to stall, FALSE to unstall
+ 334:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 335:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** void USBHwEPStall(U8 bEP, BOOL fStall)
+ 336:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 704              		.loc 1 336 0
+ 705              		.cfi_startproc
+ 706              		@ args = 0, pretend = 0, frame = 16
+ 707              		@ frame_needed = 1, uses_anonymous_args = 0
+ 708 0374 80B5     		push	{r7, lr}
+ 709              	.LCFI42:
+ 710              		.cfi_def_cfa_offset 8
+ 711              		.cfi_offset 14, -4
+ 712              		.cfi_offset 7, -8
+ 713 0376 84B0     		sub	sp, sp, #16
+ 714              	.LCFI43:
+ 715              		.cfi_def_cfa_offset 24
+ 716 0378 00AF     		add	r7, sp, #0
+ 717              	.LCFI44:
+ 718              		.cfi_def_cfa_register 7
+ 719 037a 0246     		mov	r2, r0
+ 720 037c 0B46     		mov	r3, r1
+ 721 037e FA71     		strb	r2, [r7, #7]
+ 722 0380 BB71     		strb	r3, [r7, #6]
+ 337:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	int idx = EP2IDX(bEP);
+ 723              		.loc 1 337 0
+ 724 0382 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 725 0384 03F00F03 		and	r3, r3, #15
+ 726 0388 4FEA4302 		lsl	r2, r3, #1
+ 727 038c FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 728 038e 4FEAD313 		lsr	r3, r3, #7
+ 729 0392 DBB2     		uxtb	r3, r3
+ 730 0394 1343     		orrs	r3, r3, r2
+ 731 0396 FB60     		str	r3, [r7, #12]
+ 338:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 339:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmdWrite(CMD_EP_SET_STATUS | idx, fStall ? EP_ST : 0);
+ 732              		.loc 1 339 0
+ 733 0398 FB68     		ldr	r3, [r7, #12]
+ 734 039a DBB2     		uxtb	r3, r3
+ 735 039c 43F04003 		orr	r3, r3, #64
+ 736 03a0 DBB2     		uxtb	r3, r3
+ 737 03a2 DAB2     		uxtb	r2, r3
+ 738 03a4 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 739 03a6 002B     		cmp	r3, #0
+ 740 03a8 0CBF     		ite	eq
+ 741 03aa 0023     		moveq	r3, #0
+ 742 03ac 0123     		movne	r3, #1
+ 743 03ae 9BB2     		uxth	r3, r3
+ 744 03b0 1046     		mov	r0, r2
+ 745 03b2 1946     		mov	r1, r3
+ 746 03b4 FFF760FE 		bl	USBHwCmdWrite
+ 340:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 747              		.loc 1 340 0
+ 748 03b8 07F11007 		add	r7, r7, #16
+ 749 03bc BD46     		mov	sp, r7
+ 750 03be 80BD     		pop	{r7, pc}
+ 751              		.cfi_endproc
+ 752              	.LFE69:
+ 754              		.align	2
+ 755              		.global	USBHwEPWrite
+ 756              		.thumb
+ 757              		.thumb_func
+ 759              	USBHwEPWrite:
+ 760              	.LFB70:
+ 341:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 342:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 343:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 344:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Writes data to an endpoint buffer
+ 345:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 346:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bEP		Endpoint number
+ 347:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	pbBuf	Endpoint data
+ 348:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	iLen	Number of bytes to write
+ 349:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 350:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@return TRUE if the data was successfully written or <0 in case of error.
+ 351:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** */
+ 352:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** int USBHwEPWrite(U8 bEP, U8 *pbBuf, int iLen)
+ 353:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 761              		.loc 1 353 0
+ 762              		.cfi_startproc
+ 763              		@ args = 0, pretend = 0, frame = 24
+ 764              		@ frame_needed = 1, uses_anonymous_args = 0
+ 765 03c0 80B5     		push	{r7, lr}
+ 766              	.LCFI45:
+ 767              		.cfi_def_cfa_offset 8
+ 768              		.cfi_offset 14, -4
+ 769              		.cfi_offset 7, -8
+ 770 03c2 86B0     		sub	sp, sp, #24
+ 771              	.LCFI46:
+ 772              		.cfi_def_cfa_offset 32
+ 773 03c4 00AF     		add	r7, sp, #0
+ 774              	.LCFI47:
+ 775              		.cfi_def_cfa_register 7
+ 776 03c6 0346     		mov	r3, r0
+ 777 03c8 B960     		str	r1, [r7, #8]
+ 778 03ca 7A60     		str	r2, [r7, #4]
+ 779 03cc FB73     		strb	r3, [r7, #15]
+ 354:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	int idx;
+ 355:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 356:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	idx = EP2IDX(bEP);
+ 780              		.loc 1 356 0
+ 781 03ce FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 782 03d0 03F00F03 		and	r3, r3, #15
+ 783 03d4 4FEA4302 		lsl	r2, r3, #1
+ 784 03d8 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 785 03da 4FEAD313 		lsr	r3, r3, #7
+ 786 03de DBB2     		uxtb	r3, r3
+ 787 03e0 1343     		orrs	r3, r3, r2
+ 788 03e2 7B61     		str	r3, [r7, #20]
+ 357:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 358:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* set write enable for specific endpoint */
+ 359:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBCtrl = WR_EN | ((bEP & 0xF) << 2);
+ 789              		.loc 1 359 0
+ 790 03e4 4FF44043 		mov	r3, #49152
+ 791 03e8 C5F20003 		movt	r3, 20480
+ 792 03ec FA7B     		ldrb	r2, [r7, #15]	@ zero_extendqisi2
+ 793 03ee 02F00F02 		and	r2, r2, #15
+ 794 03f2 4FEA8202 		lsl	r2, r2, #2
+ 795 03f6 42F00202 		orr	r2, r2, #2
+ 796 03fa C3F82822 		str	r2, [r3, #552]
+ 360:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 361:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* set packet length */
+ 362:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBTxPLen = iLen;
+ 797              		.loc 1 362 0
+ 798 03fe 4FF44043 		mov	r3, #49152
+ 799 0402 C5F20003 		movt	r3, 20480
+ 800 0406 7A68     		ldr	r2, [r7, #4]
+ 801 0408 C3F82422 		str	r2, [r3, #548]
+ 363:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 364:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* write data */
+ 365:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	while (LPC_USB->USBCtrl & WR_EN) {
+ 802              		.loc 1 365 0
+ 803 040c 20E0     		b	.L20
+ 804              	.L21:
+ 366:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		LPC_USB->USBTxData = (pbBuf[3] << 24) | (pbBuf[2] << 16) | (pbBuf[1] << 8) | pbBuf[0];
+ 805              		.loc 1 366 0
+ 806 040e 4FF44043 		mov	r3, #49152
+ 807 0412 C5F20003 		movt	r3, 20480
+ 808 0416 BA68     		ldr	r2, [r7, #8]
+ 809 0418 02F10302 		add	r2, r2, #3
+ 810 041c 1278     		ldrb	r2, [r2, #0]	@ zero_extendqisi2
+ 811 041e 4FEA0261 		lsl	r1, r2, #24
+ 812 0422 BA68     		ldr	r2, [r7, #8]
+ 813 0424 02F10202 		add	r2, r2, #2
+ 814 0428 1278     		ldrb	r2, [r2, #0]	@ zero_extendqisi2
+ 815 042a 4FEA0242 		lsl	r2, r2, #16
+ 816 042e 1143     		orrs	r1, r1, r2
+ 817 0430 BA68     		ldr	r2, [r7, #8]
+ 818 0432 02F10102 		add	r2, r2, #1
+ 819 0436 1278     		ldrb	r2, [r2, #0]	@ zero_extendqisi2
+ 820 0438 4FEA0222 		lsl	r2, r2, #8
+ 821 043c 1143     		orrs	r1, r1, r2
+ 822 043e BA68     		ldr	r2, [r7, #8]
+ 823 0440 1278     		ldrb	r2, [r2, #0]	@ zero_extendqisi2
+ 824 0442 0A43     		orrs	r2, r2, r1
+ 825 0444 C3F81C22 		str	r2, [r3, #540]
+ 367:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		pbBuf += 4;
+ 826              		.loc 1 367 0
+ 827 0448 BB68     		ldr	r3, [r7, #8]
+ 828 044a 03F10403 		add	r3, r3, #4
+ 829 044e BB60     		str	r3, [r7, #8]
+ 830              	.L20:
+ 365:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	while (LPC_USB->USBCtrl & WR_EN) {
+ 831              		.loc 1 365 0 discriminator 1
+ 832 0450 4FF44043 		mov	r3, #49152
+ 833 0454 C5F20003 		movt	r3, 20480
+ 834 0458 D3F82832 		ldr	r3, [r3, #552]
+ 835 045c 03F00203 		and	r3, r3, #2
+ 836 0460 002B     		cmp	r3, #0
+ 837 0462 D4D1     		bne	.L21
+ 368:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	}
+ 369:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 370:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* select endpoint and validate buffer */
+ 371:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmd(CMD_EP_SELECT | idx);
+ 838              		.loc 1 371 0
+ 839 0464 7B69     		ldr	r3, [r7, #20]
+ 840 0466 DBB2     		uxtb	r3, r3
+ 841 0468 1846     		mov	r0, r3
+ 842 046a FFF7E5FD 		bl	USBHwCmd
+ 372:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmd(CMD_EP_VALIDATE_BUFFER);
+ 843              		.loc 1 372 0
+ 844 046e 4FF0FA00 		mov	r0, #250
+ 845 0472 FFF7E1FD 		bl	USBHwCmd
+ 373:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 374:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	return iLen;
+ 846              		.loc 1 374 0
+ 847 0476 7B68     		ldr	r3, [r7, #4]
+ 375:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 848              		.loc 1 375 0
+ 849 0478 1846     		mov	r0, r3
+ 850 047a 07F11807 		add	r7, r7, #24
+ 851 047e BD46     		mov	sp, r7
+ 852 0480 80BD     		pop	{r7, pc}
+ 853              		.cfi_endproc
+ 854              	.LFE70:
+ 856 0482 00BF     		.align	2
+ 857              		.global	USBHwEPRead
+ 858              		.thumb
+ 859              		.thumb_func
+ 861              	USBHwEPRead:
+ 862              	.LFB71:
+ 376:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 377:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 378:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 379:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Reads data from an endpoint buffer
+ 380:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 381:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	bEP		Endpoint number
+ 382:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	pbBuf	Endpoint data
+ 383:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	iMaxLen	Maximum number of bytes to read
+ 384:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 385:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@return the number of bytes available in the EP (possibly more than iMaxLen),
+ 386:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	or <0 in case of error.
+ 387:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 388:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** int USBHwEPRead(U8 bEP, U8 *pbBuf, int iMaxLen)
+ 389:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 863              		.loc 1 389 0
+ 864              		.cfi_startproc
+ 865              		@ args = 0, pretend = 0, frame = 32
+ 866              		@ frame_needed = 1, uses_anonymous_args = 0
+ 867 0484 80B5     		push	{r7, lr}
+ 868              	.LCFI48:
+ 869              		.cfi_def_cfa_offset 8
+ 870              		.cfi_offset 14, -4
+ 871              		.cfi_offset 7, -8
+ 872 0486 88B0     		sub	sp, sp, #32
+ 873              	.LCFI49:
+ 874              		.cfi_def_cfa_offset 40
+ 875 0488 00AF     		add	r7, sp, #0
+ 876              	.LCFI50:
+ 877              		.cfi_def_cfa_register 7
+ 878 048a 0346     		mov	r3, r0
+ 879 048c B960     		str	r1, [r7, #8]
+ 880 048e 7A60     		str	r2, [r7, #4]
+ 881 0490 FB73     		strb	r3, [r7, #15]
+ 390:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	int i, idx;
+ 391:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	U32	dwData, dwLen;
+ 392:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 393:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	idx = EP2IDX(bEP);
+ 882              		.loc 1 393 0
+ 883 0492 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 884 0494 03F00F03 		and	r3, r3, #15
+ 885 0498 4FEA4302 		lsl	r2, r3, #1
+ 886 049c FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 887 049e 4FEAD313 		lsr	r3, r3, #7
+ 888 04a2 DBB2     		uxtb	r3, r3
+ 889 04a4 1343     		orrs	r3, r3, r2
+ 890 04a6 7B61     		str	r3, [r7, #20]
+ 394:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 395:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* set read enable bit for specific endpoint */
+ 396:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBCtrl = RD_EN | ((bEP & 0xF) << 2);
+ 891              		.loc 1 396 0
+ 892 04a8 4FF44043 		mov	r3, #49152
+ 893 04ac C5F20003 		movt	r3, 20480
+ 894 04b0 FA7B     		ldrb	r2, [r7, #15]	@ zero_extendqisi2
+ 895 04b2 02F00F02 		and	r2, r2, #15
+ 896 04b6 4FEA8202 		lsl	r2, r2, #2
+ 897 04ba 42F00102 		orr	r2, r2, #1
+ 898 04be C3F82822 		str	r2, [r3, #552]
+ 899              	.L23:
+ 397:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 398:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* wait for PKT_RDY */
+ 399:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	do {
+ 400:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		dwLen = LPC_USB->USBRxPLen;
+ 900              		.loc 1 400 0 discriminator 1
+ 901 04c2 4FF44043 		mov	r3, #49152
+ 902 04c6 C5F20003 		movt	r3, 20480
+ 903 04ca D3F82032 		ldr	r3, [r3, #544]
+ 904 04ce 3B61     		str	r3, [r7, #16]
+ 401:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	} while ((dwLen & PKT_RDY) == 0);
+ 905              		.loc 1 401 0 discriminator 1
+ 906 04d0 3B69     		ldr	r3, [r7, #16]
+ 907 04d2 03F40063 		and	r3, r3, #2048
+ 908 04d6 002B     		cmp	r3, #0
+ 909 04d8 F3D0     		beq	.L23
+ 402:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 403:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* packet valid? */
+ 404:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	if ((dwLen & DV) == 0) {
+ 910              		.loc 1 404 0
+ 911 04da 3B69     		ldr	r3, [r7, #16]
+ 912 04dc 03F48063 		and	r3, r3, #1024
+ 913 04e0 002B     		cmp	r3, #0
+ 914 04e2 02D1     		bne	.L24
+ 405:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		return -1;
+ 915              		.loc 1 405 0
+ 916 04e4 4FF0FF33 		mov	r3, #-1
+ 917 04e8 43E0     		b	.L25
+ 918              	.L24:
+ 406:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	}
+ 407:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 408:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* get length */
+ 409:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	dwLen &= PKT_LNGTH_MASK;
+ 919              		.loc 1 409 0
+ 920 04ea 3B69     		ldr	r3, [r7, #16]
+ 921 04ec 4FEA8353 		lsl	r3, r3, #22
+ 922 04f0 4FEA9353 		lsr	r3, r3, #22
+ 923 04f4 3B61     		str	r3, [r7, #16]
+ 410:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 411:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* get data */
+ 412:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	dwData = 0;
+ 924              		.loc 1 412 0
+ 925 04f6 4FF00003 		mov	r3, #0
+ 926 04fa BB61     		str	r3, [r7, #24]
+ 413:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	for (i = 0; i < dwLen; i++) {
+ 927              		.loc 1 413 0
+ 928 04fc 4FF00003 		mov	r3, #0
+ 929 0500 FB61     		str	r3, [r7, #28]
+ 930 0502 20E0     		b	.L26
+ 931              	.L29:
+ 414:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		if ((i % 4) == 0) {
+ 932              		.loc 1 414 0
+ 933 0504 FB69     		ldr	r3, [r7, #28]
+ 934 0506 03F00303 		and	r3, r3, #3
+ 935 050a 002B     		cmp	r3, #0
+ 936 050c 06D1     		bne	.L27
+ 415:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			dwData = LPC_USB->USBRxData;
+ 937              		.loc 1 415 0
+ 938 050e 4FF44043 		mov	r3, #49152
+ 939 0512 C5F20003 		movt	r3, 20480
+ 940 0516 D3F81832 		ldr	r3, [r3, #536]
+ 941 051a BB61     		str	r3, [r7, #24]
+ 942              	.L27:
+ 416:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		}
+ 417:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		if ((pbBuf != NULL) && (i < iMaxLen)) {
+ 943              		.loc 1 417 0
+ 944 051c BB68     		ldr	r3, [r7, #8]
+ 945 051e 002B     		cmp	r3, #0
+ 946 0520 09D0     		beq	.L28
+ 947              		.loc 1 417 0 is_stmt 0 discriminator 1
+ 948 0522 FA69     		ldr	r2, [r7, #28]
+ 949 0524 7B68     		ldr	r3, [r7, #4]
+ 950 0526 9A42     		cmp	r2, r3
+ 951 0528 05DA     		bge	.L28
+ 418:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			pbBuf[i] = dwData & 0xFF;
+ 952              		.loc 1 418 0 is_stmt 1
+ 953 052a FB69     		ldr	r3, [r7, #28]
+ 954 052c BA68     		ldr	r2, [r7, #8]
+ 955 052e D318     		adds	r3, r2, r3
+ 956 0530 BA69     		ldr	r2, [r7, #24]
+ 957 0532 D2B2     		uxtb	r2, r2
+ 958 0534 1A70     		strb	r2, [r3, #0]
+ 959              	.L28:
+ 419:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		}
+ 420:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		dwData >>= 8;
+ 960              		.loc 1 420 0
+ 961 0536 BB69     		ldr	r3, [r7, #24]
+ 962 0538 4FEA1323 		lsr	r3, r3, #8
+ 963 053c BB61     		str	r3, [r7, #24]
+ 413:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	for (i = 0; i < dwLen; i++) {
+ 964              		.loc 1 413 0
+ 965 053e FB69     		ldr	r3, [r7, #28]
+ 966 0540 03F10103 		add	r3, r3, #1
+ 967 0544 FB61     		str	r3, [r7, #28]
+ 968              	.L26:
+ 413:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	for (i = 0; i < dwLen; i++) {
+ 969              		.loc 1 413 0 is_stmt 0 discriminator 1
+ 970 0546 FA69     		ldr	r2, [r7, #28]
+ 971 0548 3B69     		ldr	r3, [r7, #16]
+ 972 054a 9A42     		cmp	r2, r3
+ 973 054c DAD3     		bcc	.L29
+ 421:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	}
+ 422:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 423:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* make sure RD_EN is clear */
+ 424:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBCtrl = 0;
+ 974              		.loc 1 424 0 is_stmt 1
+ 975 054e 4FF44043 		mov	r3, #49152
+ 976 0552 C5F20003 		movt	r3, 20480
+ 977 0556 4FF00002 		mov	r2, #0
+ 978 055a C3F82822 		str	r2, [r3, #552]
+ 425:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 426:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* select endpoint and clear buffer */
+ 427:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmd(CMD_EP_SELECT | idx);
+ 979              		.loc 1 427 0
+ 980 055e 7B69     		ldr	r3, [r7, #20]
+ 981 0560 DBB2     		uxtb	r3, r3
+ 982 0562 1846     		mov	r0, r3
+ 983 0564 FFF768FD 		bl	USBHwCmd
+ 428:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmd(CMD_EP_CLEAR_BUFFER);
+ 984              		.loc 1 428 0
+ 985 0568 4FF0F200 		mov	r0, #242
+ 986 056c FFF764FD 		bl	USBHwCmd
+ 429:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 430:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	return dwLen;
+ 987              		.loc 1 430 0
+ 988 0570 3B69     		ldr	r3, [r7, #16]
+ 989              	.L25:
+ 431:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 990              		.loc 1 431 0
+ 991 0572 1846     		mov	r0, r3
+ 992 0574 07F12007 		add	r7, r7, #32
+ 993 0578 BD46     		mov	sp, r7
+ 994 057a 80BD     		pop	{r7, pc}
+ 995              		.cfi_endproc
+ 996              	.LFE71:
+ 998              		.align	2
+ 999              		.global	USBHwConfigDevice
+ 1000              		.thumb
+ 1001              		.thumb_func
+ 1003              	USBHwConfigDevice:
+ 1004              	.LFB72:
+ 432:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 433:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 434:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 435:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Sets the 'configured' state.
+ 436:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 437:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	All registered endpoints are 'realised' and enabled, and the
+ 438:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	'configured' bit is set in the device status register.
+ 439:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 440:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@param [in]	fConfigured	If TRUE, configure device, else unconfigure
+ 441:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 442:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** void USBHwConfigDevice(BOOL fConfigured)
+ 443:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 1005              		.loc 1 443 0
+ 1006              		.cfi_startproc
+ 1007              		@ args = 0, pretend = 0, frame = 8
+ 1008              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1009 057c 80B5     		push	{r7, lr}
+ 1010              	.LCFI51:
+ 1011              		.cfi_def_cfa_offset 8
+ 1012              		.cfi_offset 14, -4
+ 1013              		.cfi_offset 7, -8
+ 1014 057e 82B0     		sub	sp, sp, #8
+ 1015              	.LCFI52:
+ 1016              		.cfi_def_cfa_offset 16
+ 1017 0580 00AF     		add	r7, sp, #0
+ 1018              	.LCFI53:
+ 1019              		.cfi_def_cfa_register 7
+ 1020 0582 0346     		mov	r3, r0
+ 1021 0584 FB71     		strb	r3, [r7, #7]
+ 444:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* set configured bit */
+ 445:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwCmdWrite(CMD_DEV_CONFIG, fConfigured ? CONF_DEVICE : 0);
+ 1022              		.loc 1 445 0
+ 1023 0586 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1024 0588 002B     		cmp	r3, #0
+ 1025 058a 0CBF     		ite	eq
+ 1026 058c 0023     		moveq	r3, #0
+ 1027 058e 0123     		movne	r3, #1
+ 1028 0590 9BB2     		uxth	r3, r3
+ 1029 0592 4FF0D800 		mov	r0, #216
+ 1030 0596 1946     		mov	r1, r3
+ 1031 0598 FFF76EFD 		bl	USBHwCmdWrite
+ 446:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 1032              		.loc 1 446 0
+ 1033 059c 07F10807 		add	r7, r7, #8
+ 1034 05a0 BD46     		mov	sp, r7
+ 1035 05a2 80BD     		pop	{r7, pc}
+ 1036              		.cfi_endproc
+ 1037              	.LFE72:
+ 1039              		.align	2
+ 1040              		.global	USBHwISR
+ 1041              		.thumb
+ 1042              		.thumb_func
+ 1044              	USBHwISR:
+ 1045              	.LFB73:
+ 447:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 448:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 449:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 450:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USB interrupt handler
+ 451:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 452:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@todo Get all 11 bits of frame number instead of just 8
+ 453:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 454:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Endpoint interrupts are mapped to the slow interrupt
+ 455:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 456:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** void USBHwISR(void)
+ 457:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 1046              		.loc 1 457 0
+ 1047              		.cfi_startproc
+ 1048              		@ args = 0, pretend = 0, frame = 24
+ 1049              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1050 05a4 80B5     		push	{r7, lr}
+ 1051              	.LCFI54:
+ 1052              		.cfi_def_cfa_offset 8
+ 1053              		.cfi_offset 14, -4
+ 1054              		.cfi_offset 7, -8
+ 1055 05a6 86B0     		sub	sp, sp, #24
+ 1056              	.LCFI55:
+ 1057              		.cfi_def_cfa_offset 32
+ 1058 05a8 00AF     		add	r7, sp, #0
+ 1059              	.LCFI56:
+ 1060              		.cfi_def_cfa_register 7
+ 458:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	U32	dwStatus;
+ 459:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	U32 dwIntBit;
+ 460:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	U8	bEPStat, bDevStat, bStat;
+ 461:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	int i;
+ 462:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	U16	wFrame;
+ 463:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 464:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* handle device interrupts */
+ 465:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	dwStatus = LPC_USB->USBDevIntSt;
+ 1061              		.loc 1 465 0
+ 1062 05aa 4FF44043 		mov	r3, #49152
+ 1063 05ae C5F20003 		movt	r3, 20480
+ 1064 05b2 D3F80032 		ldr	r3, [r3, #512]
+ 1065 05b6 3B61     		str	r3, [r7, #16]
+ 466:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 467:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* frame interrupt */
+ 468:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	if (dwStatus & FRAME) {
+ 1066              		.loc 1 468 0
+ 1067 05b8 3B69     		ldr	r3, [r7, #16]
+ 1068 05ba 03F00103 		and	r3, r3, #1
+ 1069 05be DBB2     		uxtb	r3, r3
+ 1070 05c0 002B     		cmp	r3, #0
+ 1071 05c2 1CD0     		beq	.L32
+ 469:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		/* clear int */
+ 470:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		LPC_USB->USBDevIntClr = FRAME;
+ 1072              		.loc 1 470 0
+ 1073 05c4 4FF44043 		mov	r3, #49152
+ 1074 05c8 C5F20003 		movt	r3, 20480
+ 1075 05cc 4FF00102 		mov	r2, #1
+ 1076 05d0 C3F80822 		str	r2, [r3, #520]
+ 471:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		/* call handler */
+ 472:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		if (_pfnFrameHandler != NULL) {
+ 1077              		.loc 1 472 0
+ 1078 05d4 40F20003 		movw	r3, #:lower16:_pfnFrameHandler
+ 1079 05d8 C0F20003 		movt	r3, #:upper16:_pfnFrameHandler
+ 1080 05dc 1B68     		ldr	r3, [r3, #0]
+ 1081 05de 002B     		cmp	r3, #0
+ 1082 05e0 0DD0     		beq	.L32
+ 473:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			wFrame = USBHwCmdRead(CMD_DEV_READ_CUR_FRAME_NR);
+ 1083              		.loc 1 473 0
+ 1084 05e2 4FF0F500 		mov	r0, #245
+ 1085 05e6 FFF765FD 		bl	USBHwCmdRead
+ 1086 05ea 0346     		mov	r3, r0
+ 1087 05ec FB81     		strh	r3, [r7, #14]	@ movhi
+ 474:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			_pfnFrameHandler(wFrame);
+ 1088              		.loc 1 474 0
+ 1089 05ee 40F20003 		movw	r3, #:lower16:_pfnFrameHandler
+ 1090 05f2 C0F20003 		movt	r3, #:upper16:_pfnFrameHandler
+ 1091 05f6 1B68     		ldr	r3, [r3, #0]
+ 1092 05f8 FA89     		ldrh	r2, [r7, #14]
+ 1093 05fa 1046     		mov	r0, r2
+ 1094 05fc 9847     		blx	r3
+ 1095              	.L32:
+ 475:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		}
+ 476:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	}
+ 477:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 478:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* device status interrupt */
+ 479:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	if (dwStatus & DEV_STAT) {
+ 1096              		.loc 1 479 0
+ 1097 05fe 3B69     		ldr	r3, [r7, #16]
+ 1098 0600 03F00803 		and	r3, r3, #8
+ 1099 0604 002B     		cmp	r3, #0
+ 1100 0606 25D0     		beq	.L33
+ 480:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		/*	Clear DEV_STAT interrupt before reading DEV_STAT register.
+ 481:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			This prevents corrupted device status reads, see
+ 482:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			LPC2148 User manual revision 2, 25 july 2006.
+ 483:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		*/
+ 484:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		LPC_USB->USBDevIntClr = DEV_STAT;
+ 1101              		.loc 1 484 0
+ 1102 0608 4FF44043 		mov	r3, #49152
+ 1103 060c C5F20003 		movt	r3, 20480
+ 1104 0610 4FF00802 		mov	r2, #8
+ 1105 0614 C3F80822 		str	r2, [r3, #520]
+ 485:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		bDevStat = USBHwCmdRead(CMD_DEV_STATUS);
+ 1106              		.loc 1 485 0
+ 1107 0618 4FF0FE00 		mov	r0, #254
+ 1108 061c FFF74AFD 		bl	USBHwCmdRead
+ 1109 0620 0346     		mov	r3, r0
+ 1110 0622 7B73     		strb	r3, [r7, #13]
+ 486:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		if (bDevStat & (CON_CH | SUS_CH | RST)) {
+ 1111              		.loc 1 486 0
+ 1112 0624 7B7B     		ldrb	r3, [r7, #13]	@ zero_extendqisi2
+ 1113 0626 03F01A03 		and	r3, r3, #26
+ 1114 062a 002B     		cmp	r3, #0
+ 1115 062c 12D0     		beq	.L33
+ 487:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			/* convert device status into something HW independent */
+ 488:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			bStat = ((bDevStat & CON) ? DEV_STATUS_CONNECT : 0) |
+ 1116              		.loc 1 488 0
+ 1117 062e 7B7B     		ldrb	r3, [r7, #13]
+ 1118 0630 03F01503 		and	r3, r3, #21
+ 1119 0634 3B73     		strb	r3, [r7, #12]
+ 489:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 					((bDevStat & SUS) ? DEV_STATUS_SUSPEND : 0) |
+ 490:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 					((bDevStat & RST) ? DEV_STATUS_RESET : 0);
+ 491:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			/* call handler */
+ 492:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			if (_pfnDevIntHandler != NULL) {
+ 1120              		.loc 1 492 0
+ 1121 0636 40F20003 		movw	r3, #:lower16:_pfnDevIntHandler
+ 1122 063a C0F20003 		movt	r3, #:upper16:_pfnDevIntHandler
+ 1123 063e 1B68     		ldr	r3, [r3, #0]
+ 1124 0640 002B     		cmp	r3, #0
+ 1125 0642 07D0     		beq	.L33
+ 493:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 				_pfnDevIntHandler(bStat);
+ 1126              		.loc 1 493 0
+ 1127 0644 40F20003 		movw	r3, #:lower16:_pfnDevIntHandler
+ 1128 0648 C0F20003 		movt	r3, #:upper16:_pfnDevIntHandler
+ 1129 064c 1B68     		ldr	r3, [r3, #0]
+ 1130 064e 3A7B     		ldrb	r2, [r7, #12]	@ zero_extendqisi2
+ 1131 0650 1046     		mov	r0, r2
+ 1132 0652 9847     		blx	r3
+ 1133              	.L33:
+ 494:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			}
+ 495:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		}
+ 496:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	}
+ 497:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 498:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* endpoint interrupt */
+ 499:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	if (dwStatus & EP_SLOW) {
+ 1134              		.loc 1 499 0
+ 1135 0654 3B69     		ldr	r3, [r7, #16]
+ 1136 0656 03F00403 		and	r3, r3, #4
+ 1137 065a 002B     		cmp	r3, #0
+ 1138 065c 66D0     		beq	.L31
+ 500:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		/* clear EP_SLOW */
+ 501:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		LPC_USB->USBDevIntClr = EP_SLOW;
+ 1139              		.loc 1 501 0
+ 1140 065e 4FF44043 		mov	r3, #49152
+ 1141 0662 C5F20003 		movt	r3, 20480
+ 1142 0666 4FF00402 		mov	r2, #4
+ 1143 066a C3F80822 		str	r2, [r3, #520]
+ 502:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		/* check all endpoints */
+ 503:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		for (i = 0; i < 32; i++) {
+ 1144              		.loc 1 503 0
+ 1145 066e 4FF00003 		mov	r3, #0
+ 1146 0672 7B61     		str	r3, [r7, #20]
+ 1147 0674 57E0     		b	.L35
+ 1148              	.L37:
+ 504:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			dwIntBit = (1 << i);
+ 1149              		.loc 1 504 0
+ 1150 0676 4FF00102 		mov	r2, #1
+ 1151 067a 7B69     		ldr	r3, [r7, #20]
+ 1152 067c 02FA03F3 		lsl	r3, r2, r3
+ 1153 0680 BB60     		str	r3, [r7, #8]
+ 505:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			if (LPC_USB->USBEpIntSt & dwIntBit) {
+ 1154              		.loc 1 505 0
+ 1155 0682 4FF44043 		mov	r3, #49152
+ 1156 0686 C5F20003 		movt	r3, 20480
+ 1157 068a D3F83022 		ldr	r2, [r3, #560]
+ 1158 068e BB68     		ldr	r3, [r7, #8]
+ 1159 0690 1340     		ands	r3, r3, r2
+ 1160 0692 002B     		cmp	r3, #0
+ 1161 0694 43D0     		beq	.L36
+ 506:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 				/* clear int (and retrieve status) */
+ 507:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 				LPC_USB->USBEpIntClr = dwIntBit;
+ 1162              		.loc 1 507 0
+ 1163 0696 4FF44043 		mov	r3, #49152
+ 1164 069a C5F20003 		movt	r3, 20480
+ 1165 069e BA68     		ldr	r2, [r7, #8]
+ 1166 06a0 C3F83822 		str	r2, [r3, #568]
+ 508:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 				Wait4DevInt(CDFULL);
+ 1167              		.loc 1 508 0
+ 1168 06a4 4FF02000 		mov	r0, #32
+ 1169 06a8 FFF7AAFC 		bl	Wait4DevInt
+ 509:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 				bEPStat = LPC_USB->USBCmdData;
+ 1170              		.loc 1 509 0
+ 1171 06ac 4FF44043 		mov	r3, #49152
+ 1172 06b0 C5F20003 		movt	r3, 20480
+ 1173 06b4 D3F81432 		ldr	r3, [r3, #532]
+ 1174 06b8 FB71     		strb	r3, [r7, #7]
+ 510:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 				/* convert EP pipe stat into something HW independent */
+ 511:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 				bStat = ((bEPStat & EPSTAT_FE) ? EP_STATUS_DATA : 0) |
+ 1175              		.loc 1 511 0
+ 1176 06ba FB79     		ldrb	r3, [r7, #7]
+ 1177 06bc 03F01F03 		and	r3, r3, #31
+ 1178 06c0 3B73     		strb	r3, [r7, #12]
+ 512:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 						((bEPStat & EPSTAT_ST) ? EP_STATUS_STALLED : 0) |
+ 513:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 						((bEPStat & EPSTAT_STP) ? EP_STATUS_SETUP : 0) |
+ 514:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 						((bEPStat & EPSTAT_EPN) ? EP_STATUS_NACKED : 0) |
+ 515:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 						((bEPStat & EPSTAT_PO) ? EP_STATUS_ERROR : 0);
+ 516:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 				/* call handler */
+ 517:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 				if (_apfnEPIntHandlers[i / 2] != NULL) {
+ 1179              		.loc 1 517 0
+ 1180 06c2 7B69     		ldr	r3, [r7, #20]
+ 1181 06c4 4FEAD372 		lsr	r2, r3, #31
+ 1182 06c8 D318     		adds	r3, r2, r3
+ 1183 06ca 4FEA6303 		asr	r3, r3, #1
+ 1184 06ce 1A46     		mov	r2, r3
+ 1185 06d0 40F20003 		movw	r3, #:lower16:_apfnEPIntHandlers
+ 1186 06d4 C0F20003 		movt	r3, #:upper16:_apfnEPIntHandlers
+ 1187 06d8 53F82230 		ldr	r3, [r3, r2, lsl #2]
+ 1188 06dc 002B     		cmp	r3, #0
+ 1189 06de 1ED0     		beq	.L36
+ 518:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 					_apfnEPIntHandlers[i / 2](IDX2EP(i), bStat);
+ 1190              		.loc 1 518 0
+ 1191 06e0 7B69     		ldr	r3, [r7, #20]
+ 1192 06e2 4FEAD372 		lsr	r2, r3, #31
+ 1193 06e6 D318     		adds	r3, r2, r3
+ 1194 06e8 4FEA6303 		asr	r3, r3, #1
+ 1195 06ec 1A46     		mov	r2, r3
+ 1196 06ee 40F20003 		movw	r3, #:lower16:_apfnEPIntHandlers
+ 1197 06f2 C0F20003 		movt	r3, #:upper16:_apfnEPIntHandlers
+ 1198 06f6 53F82230 		ldr	r3, [r3, r2, lsl #2]
+ 1199 06fa 7A69     		ldr	r2, [r7, #20]
+ 1200 06fc 4FEAC212 		lsl	r2, r2, #7
+ 1201 0700 D1B2     		uxtb	r1, r2
+ 1202 0702 7A69     		ldr	r2, [r7, #20]
+ 1203 0704 4FEA6202 		asr	r2, r2, #1
+ 1204 0708 D2B2     		uxtb	r2, r2
+ 1205 070a 02F00F02 		and	r2, r2, #15
+ 1206 070e D2B2     		uxtb	r2, r2
+ 1207 0710 0A43     		orrs	r2, r2, r1
+ 1208 0712 D2B2     		uxtb	r2, r2
+ 1209 0714 D1B2     		uxtb	r1, r2
+ 1210 0716 3A7B     		ldrb	r2, [r7, #12]	@ zero_extendqisi2
+ 1211 0718 0846     		mov	r0, r1
+ 1212 071a 1146     		mov	r1, r2
+ 1213 071c 9847     		blx	r3
+ 1214              	.L36:
+ 503:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		for (i = 0; i < 32; i++) {
+ 1215              		.loc 1 503 0
+ 1216 071e 7B69     		ldr	r3, [r7, #20]
+ 1217 0720 03F10103 		add	r3, r3, #1
+ 1218 0724 7B61     		str	r3, [r7, #20]
+ 1219              	.L35:
+ 503:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		for (i = 0; i < 32; i++) {
+ 1220              		.loc 1 503 0 is_stmt 0 discriminator 1
+ 1221 0726 7B69     		ldr	r3, [r7, #20]
+ 1222 0728 1F2B     		cmp	r3, #31
+ 1223 072a A4DD     		ble	.L37
+ 1224              	.L31:
+ 519:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 				}
+ 520:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 			}
+ 521:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 		}
+ 522:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	}
+ 523:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 1225              		.loc 1 523 0 is_stmt 1
+ 1226 072c 07F11807 		add	r7, r7, #24
+ 1227 0730 BD46     		mov	sp, r7
+ 1228 0732 80BD     		pop	{r7, pc}
+ 1229              		.cfi_endproc
+ 1230              	.LFE73:
+ 1232              		.align	2
+ 1233              		.global	USBHwInit
+ 1234              		.thumb
+ 1235              		.thumb_func
+ 1237              	USBHwInit:
+ 1238              	.LFB74:
+ 524:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 525:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 526:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 527:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /**
+ 528:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Initialises the USB hardware
+ 529:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 530:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	This function assumes that the hardware is connected as shown in
+ 531:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	section 10.1 of the LPC2148 data sheet:
+ 532:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	* P0.31 controls a switch to connect a 1.5k pull-up to D+ if low.
+ 533:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	* P0.23 is connected to USB VCC.
+ 534:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 535:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	Embedded artists board: make sure to disconnect P0.23 LED as it
+ 536:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	acts as a pull-up and so prevents detection of USB disconnect.
+ 537:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 538:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	@return TRUE if the hardware was successfully initialised
+ 539:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  */
+ 540:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** BOOL USBHwInit(void)
+ 541:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** {
+ 1239              		.loc 1 541 0
+ 1240              		.cfi_startproc
+ 1241              		@ args = 0, pretend = 0, frame = 0
+ 1242              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1243 0734 80B5     		push	{r7, lr}
+ 1244              	.LCFI57:
+ 1245              		.cfi_def_cfa_offset 8
+ 1246              		.cfi_offset 14, -4
+ 1247              		.cfi_offset 7, -8
+ 1248 0736 00AF     		add	r7, sp, #0
+ 1249              	.LCFI58:
+ 1250              		.cfi_def_cfa_register 7
+ 542:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** /*	CodeRed - comment out original code
+ 543:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c ****  *
+ 544:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	// configure P0.23 for Vbus sense
+ 545:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	PINSEL1 = (PINSEL1 & ~(3 << 14)) | (1 << 14);	// P0.23
+ 546:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	// configure P0.31 for CONNECT
+ 547:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	PINSEL1 = (PINSEL1 & ~(3 << 30)) | (2 << 30);	// P0.31
+ 548:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** */
+ 549:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 550:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* P2.9 -> USB_CONNECT */
+ 551:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_PINCON->PINSEL4 &= ~0x000C0000;
+ 1251              		.loc 1 551 0
+ 1252 0738 4FF44043 		mov	r3, #49152
+ 1253 073c C4F20203 		movt	r3, 16386
+ 1254 0740 4FF44042 		mov	r2, #49152
+ 1255 0744 C4F20202 		movt	r2, 16386
+ 1256 0748 1269     		ldr	r2, [r2, #16]
+ 1257 074a 22F44022 		bic	r2, r2, #786432
+ 1258 074e 1A61     		str	r2, [r3, #16]
+ 552:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_PINCON->PINSEL4 |= 0x00040000;
+ 1259              		.loc 1 552 0
+ 1260 0750 4FF44043 		mov	r3, #49152
+ 1261 0754 C4F20203 		movt	r3, 16386
+ 1262 0758 4FF44042 		mov	r2, #49152
+ 1263 075c C4F20202 		movt	r2, 16386
+ 1264 0760 1269     		ldr	r2, [r2, #16]
+ 1265 0762 42F48022 		orr	r2, r2, #262144
+ 1266 0766 1A61     		str	r2, [r3, #16]
+ 553:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 554:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* P1.18 -> USB_UP_LED */
+ 555:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* P1.30 -> VBUS */
+ 556:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_PINCON->PINSEL3 &= ~0x30000030;
+ 1267              		.loc 1 556 0
+ 1268 0768 4FF44043 		mov	r3, #49152
+ 1269 076c C4F20203 		movt	r3, 16386
+ 1270 0770 4FF44042 		mov	r2, #49152
+ 1271 0774 C4F20202 		movt	r2, 16386
+ 1272 0778 D268     		ldr	r2, [r2, #12]
+ 1273 077a 22F04052 		bic	r2, r2, #805306368
+ 1274 077e 22F03002 		bic	r2, r2, #48
+ 1275 0782 DA60     		str	r2, [r3, #12]
+ 557:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_PINCON->PINSEL3 |= 0x20000010;
+ 1276              		.loc 1 557 0
+ 1277 0784 4FF44043 		mov	r3, #49152
+ 1278 0788 C4F20203 		movt	r3, 16386
+ 1279 078c 4FF44042 		mov	r2, #49152
+ 1280 0790 C4F20202 		movt	r2, 16386
+ 1281 0794 D268     		ldr	r2, [r2, #12]
+ 1282 0796 42F00052 		orr	r2, r2, #536870912
+ 1283 079a 42F01002 		orr	r2, r2, #16
+ 1284 079e DA60     		str	r2, [r3, #12]
+ 558:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 559:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* P0.29 -> USB_D+ */
+ 560:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* P0.30 -> USB_D- */
+ 561:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_PINCON->PINSEL1 &= ~0x3C000000;
+ 1285              		.loc 1 561 0
+ 1286 07a0 4FF44043 		mov	r3, #49152
+ 1287 07a4 C4F20203 		movt	r3, 16386
+ 1288 07a8 4FF44042 		mov	r2, #49152
+ 1289 07ac C4F20202 		movt	r2, 16386
+ 1290 07b0 5268     		ldr	r2, [r2, #4]
+ 1291 07b2 22F07052 		bic	r2, r2, #1006632960
+ 1292 07b6 5A60     		str	r2, [r3, #4]
+ 562:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_PINCON->PINSEL1 |= 0x14000000;
+ 1293              		.loc 1 562 0
+ 1294 07b8 4FF44043 		mov	r3, #49152
+ 1295 07bc C4F20203 		movt	r3, 16386
+ 1296 07c0 4FF44042 		mov	r2, #49152
+ 1297 07c4 C4F20202 		movt	r2, 16386
+ 1298 07c8 5268     		ldr	r2, [r2, #4]
+ 1299 07ca 42F0A052 		orr	r2, r2, #335544320
+ 1300 07ce 5A60     		str	r2, [r3, #4]
+ 563:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 564:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 565:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* enable PUSB */
+ 566:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_SC->PCONP |= (1 << 31);
+ 1301              		.loc 1 566 0
+ 1302 07d0 4FF44043 		mov	r3, #49152
+ 1303 07d4 C4F20F03 		movt	r3, 16399
+ 1304 07d8 4FF44042 		mov	r2, #49152
+ 1305 07dc C4F20F02 		movt	r2, 16399
+ 1306 07e0 D2F8C420 		ldr	r2, [r2, #196]
+ 1307 07e4 42F00042 		orr	r2, r2, #-2147483648
+ 1308 07e8 C3F8C420 		str	r2, [r3, #196]
+ 567:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 568:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* Dev clock, AHB clock enable  */
+ 569:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBClkCtrl = 0x1A;
+ 1309              		.loc 1 569 0
+ 1310 07ec 4FF44043 		mov	r3, #49152
+ 1311 07f0 C5F20003 		movt	r3, 20480
+ 1312 07f4 4FF01A02 		mov	r2, #26
+ 1313 07f8 C3F8F42F 		str	r2, [r3, #4084]
+ 570:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	while ((LPC_USB->USBClkSt & 0x1A) != 0x1A);
+ 1314              		.loc 1 570 0
+ 1315 07fc 00BF     		nop
+ 1316              	.L39:
+ 1317              		.loc 1 570 0 is_stmt 0 discriminator 1
+ 1318 07fe 4FF44043 		mov	r3, #49152
+ 1319 0802 C5F20003 		movt	r3, 20480
+ 1320 0806 D3F8F83F 		ldr	r3, [r3, #4088]
+ 1321 080a 03F01A03 		and	r3, r3, #26
+ 1322 080e 1A2B     		cmp	r3, #26
+ 1323 0810 F5D1     		bne	.L39
+ 571:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 572:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* disable/clear all interrupts for now */
+ 573:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBDevIntEn = 0;
+ 1324              		.loc 1 573 0 is_stmt 1
+ 1325 0812 4FF44043 		mov	r3, #49152
+ 1326 0816 C5F20003 		movt	r3, 20480
+ 1327 081a 4FF00002 		mov	r2, #0
+ 1328 081e C3F80422 		str	r2, [r3, #516]
+ 574:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBDevIntClr = 0xFFFFFFFF;
+ 1329              		.loc 1 574 0
+ 1330 0822 4FF44043 		mov	r3, #49152
+ 1331 0826 C5F20003 		movt	r3, 20480
+ 1332 082a 4FF0FF32 		mov	r2, #-1
+ 1333 082e C3F80822 		str	r2, [r3, #520]
+ 575:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBDevIntPri = 0;
+ 1334              		.loc 1 575 0
+ 1335 0832 4FF44043 		mov	r3, #49152
+ 1336 0836 C5F20003 		movt	r3, 20480
+ 1337 083a 4FF00002 		mov	r2, #0
+ 1338 083e C3F82C22 		str	r2, [r3, #556]
+ 576:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 577:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBEpIntEn = 0;
+ 1339              		.loc 1 577 0
+ 1340 0842 4FF44043 		mov	r3, #49152
+ 1341 0846 C5F20003 		movt	r3, 20480
+ 1342 084a 4FF00002 		mov	r2, #0
+ 1343 084e C3F83422 		str	r2, [r3, #564]
+ 578:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBEpIntClr = 0xFFFFFFFF;
+ 1344              		.loc 1 578 0
+ 1345 0852 4FF44043 		mov	r3, #49152
+ 1346 0856 C5F20003 		movt	r3, 20480
+ 1347 085a 4FF0FF32 		mov	r2, #-1
+ 1348 085e C3F83822 		str	r2, [r3, #568]
+ 579:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	LPC_USB->USBEpIntPri = 0;
+ 1349              		.loc 1 579 0
+ 1350 0862 4FF44043 		mov	r3, #49152
+ 1351 0866 C5F20003 		movt	r3, 20480
+ 1352 086a 4FF00002 		mov	r2, #0
+ 1353 086e C3F84022 		str	r2, [r3, #576]
+ 580:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 581:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	/* by default, only ACKs generate interrupts */
+ 582:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	USBHwNakIntEnable(0);
+ 1354              		.loc 1 582 0
+ 1355 0872 4FF00000 		mov	r0, #0
+ 1356 0876 FFF7FEFF 		bl	USBHwNakIntEnable
+ 583:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 
+ 584:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** 	return TRUE;
+ 1357              		.loc 1 584 0
+ 1358 087a 4FF00103 		mov	r3, #1
+ 585:Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c **** }
+ 1359              		.loc 1 585 0
+ 1360 087e 1846     		mov	r0, r3
+ 1361 0880 80BD     		pop	{r7, pc}
+ 1362              		.cfi_endproc
+ 1363              	.LFE74:
+ 1365              	.Letext0:
+ 1366              		.file 2 "/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none
+ 1367              		.file 3 "Libraries/CM3/inc/lpc_types.h"
+ 1368              		.file 4 "Libraries/CM3/inc/LPC17xx.h"
+ 1369              		.file 5 "Libraries/uC-CSP/LPC17xx/USB/inc/usbapi.h"
+ 1370              		.file 6 "Libraries/CM3/inc/core_cm3.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 usbhw_lpc.c
+     /tmp/ccfpAe6P.s:19     .bss:00000000 $d
+     /tmp/ccfpAe6P.s:20     .bss:00000000 _pfnDevIntHandler
+     /tmp/ccfpAe6P.s:23     .bss:00000004 _apfnEPIntHandlers
+     /tmp/ccfpAe6P.s:26     .bss:00000044 _pfnFrameHandler
+     /tmp/ccfpAe6P.s:29     .text:00000000 $t
+     /tmp/ccfpAe6P.s:33     .text:00000000 Wait4DevInt
+     /tmp/ccfpAe6P.s:81     .text:00000038 USBHwCmd
+     /tmp/ccfpAe6P.s:126    .text:00000078 USBHwCmdWrite
+     /tmp/ccfpAe6P.s:172    .text:000000b4 USBHwCmdRead
+     /tmp/ccfpAe6P.s:222    .text:000000fc USBHwEPRealize
+     /tmp/ccfpAe6P.s:277    .text:00000158 USBHwEPEnable
+     /tmp/ccfpAe6P.s:329    .text:00000190 USBHwEPConfig
+     /tmp/ccfpAe6P.s:380    .text:000001d0 USBHwRegisterEPIntHandler
+     /tmp/ccfpAe6P.s:451    .text:00000258 USBHwRegisterDevIntHandler
+     /tmp/ccfpAe6P.s:495    .text:00000294 USBHwRegisterFrameHandler
+     /tmp/ccfpAe6P.s:539    .text:000002d0 USBHwSetAddress
+     /tmp/ccfpAe6P.s:577    .text:000002f4 USBHwConnect
+     /tmp/ccfpAe6P.s:618    .text:0000031c USBHwNakIntEnable
+     /tmp/ccfpAe6P.s:655    .text:0000033c USBHwEPGetStatus
+     /tmp/ccfpAe6P.s:702    .text:00000374 USBHwEPStall
+     /tmp/ccfpAe6P.s:759    .text:000003c0 USBHwEPWrite
+     /tmp/ccfpAe6P.s:861    .text:00000484 USBHwEPRead
+     /tmp/ccfpAe6P.s:1003   .text:0000057c USBHwConfigDevice
+     /tmp/ccfpAe6P.s:1044   .text:000005a4 USBHwISR
+     /tmp/ccfpAe6P.s:1237   .text:00000734 USBHwInit
+                     .debug_frame:00000010 $d
+
+NO UNDEFINED SYMBOLS

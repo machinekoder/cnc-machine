@@ -4,11 +4,12 @@
  **/
 #include "app.h"
 #include "Libraries/uC-CSP/csp.h"
+#include "
 
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
 
-#define HOMING_AMOUNT -1E9
+#define HOMING_AMOUNT -1E9     //52500
 #define CALIBRATION_AMOUNT 1E6
 
 typedef enum {
@@ -120,7 +121,7 @@ main (void)
     // DAC_Init(LPC_DAC);
     //  Led_initialize(1,29, Led>_LowActive_Yes);
     CSP_TmrInit();
-    CSP_TmrCfg (CSP_TMR_NBR_00,50000u);
+    CSP_TmrCfg (CSP_TMR_NBR_00,40000u);
     CSP_TmrCfg (CSP_TMR_NBR_01,40000u);
     CSP_TmrCfg (CSP_TMR_NBR_02,40000u);
 
@@ -157,6 +158,34 @@ static  void App_TaskStart (void *p_arg)
     CPU_Init();                                               /* Initialize the uC/CPU Services */
     OS_CSP_TickInit();                                        /* Initialize the Tick Interrupt. */
 
+    USBInit();                                                                  /* USB Initialization */
+
+  /* register descriptors */
+  USBRegisterDescriptors(abDescriptors);                           /* USB Descriptor Initialization */
+
+  /* register endpoint handlers */
+  USBHwRegisterEPIntHandler(BULK_IN_EP, BulkIn);          /* register BulkIn Handler for EP */
+  USBHwRegisterEPIntHandler(BULK_OUT_EP, BulkOut);       /* register BulkOut Handler for EP */
+  USBHwRegisterEPIntHandler(INT_IN_EP, NULL);
+
+  USBHwEPConfig(BULK_IN_EP, MAX_PACKET_SIZE);   /* Configure Packet Size for outgoing Transfer */
+  USBHwEPConfig(BULK_OUT_EP, MAX_PACKET_SIZE);  /* Configure Packet Size for incoming Transfer */
+
+
+  /* enable bulk-in interrupts on NAKs */
+  USBHwNakIntEnable(INACK_BI);
+
+  if(CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
+                 (CSP_DEV_NBR   )CSP_INT_SRC_NBR_USB_00,
+                 (CPU_FNCT_PTR  )USB_IRQHandler,
+                 (void         *)0) != DEF_OK){
+          while(DEF_TRUE);
+  }                                                                                             /* register Interrupt Handler in RTOS */
+
+  CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_USB_00);   /* Enable USB Interrupt. */
+
+  USBHwConnect(TRUE);           
+    
 #if (OS_CFG_STAT_TASK_EN > 0u)
     OSStatTaskCPUUsageInit(&err);
 #endif
@@ -216,8 +245,14 @@ static  void App_TaskStart (void *p_arg)
                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                  (OS_ERR     *)&err);
 
+    GPIO_SetDir(1,(1<<29),1);
+    GPIO_ClearValue(1,(1<<29));
     while (DEF_TRUE) {
-        OSTimeDlyHMSM(0u, 0u, 1u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
+        GPIO_SetValue(1,(1<<29));
+        OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
+        GPIO_ClearValue(1,(1<<29));
+        OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
+        
     }
 }
 
@@ -360,25 +395,32 @@ static void App_Button (void *p_arg)
 static void App_MotorSteuerung (void *p_arg)
 {
     OS_ERR       err;
+   (void)p_arg;                                                    /* Prevent Compiler Warning */
 
+  uint8_t str[] = "I'm a LPC1758\n";                                            /* Setup string for transmitting */
 
-    (void)p_arg;                                                    /* Prevent Compiler Warning */
-
-    for(;;)
+  (void)p_arg;                                              /* Prevent Compiler Warning */
+  while(DEF_TRUE) 
+  {
+   if(BulkOutSize > 0)
+   {                                                                  /* if a Message was received */
+        BulkInSize = strlen((char *)str);                                     /* calculate string length of outgoing data */
+        abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);            /* Highbyte */
+        abBulkInBuf[1]=0x00ff&(BulkInSize+1);                     /* Lowbyte  */
+        BulkInSize += 3;                                                                      /* HB + LB + \0 */
+        BulkOutSize = 0;                                                                      /* reset the Message length of the incoming buffer */
+   }
+      OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &err);
+ 
+    if (testing == TRUE)
     {
-        // setXDirection(20000);
-        // setYDirection(20000);
-        OSTimeDlyHMSM(0u, 0u, 3u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
-        if (testing == TRUE)
-        {
-            testButtons();
-            testEndstops();
-            testing = FALSE;
-        }
-        // setXDirection(-20000);
-        // setYDirection(-20000);
-        // OSTimeDlyHMSM(0u, 0u, 3u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
+        testButtons();
+        testEndstops();
+        testing = FALSE;
     }
+  }
+  
+
 
 }
 

@@ -1,0 +1,1652 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"os_time.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	OSTimeDly
+  20              		.thumb
+  21              		.thumb_func
+  23              	OSTimeDly:
+  24              	.LFB0:
+  25              		.file 1 "Libraries/uC-OSIII/os_time.c"
+   1:Libraries/uC-OSIII/os_time.c **** /*
+   2:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+   3:Libraries/uC-OSIII/os_time.c **** *                                                      uC/OS-III
+   4:Libraries/uC-OSIII/os_time.c **** *                                                 The Real-Time Kernel
+   5:Libraries/uC-OSIII/os_time.c **** *
+   6:Libraries/uC-OSIII/os_time.c **** *                                  (c) Copyright 2009-2010; Micrium, Inc.; Weston, FL
+   7:Libraries/uC-OSIII/os_time.c **** *                          All rights reserved.  Protected by international copyright laws.
+   8:Libraries/uC-OSIII/os_time.c **** *
+   9:Libraries/uC-OSIII/os_time.c **** *                                                    TIME MANAGEMENT
+  10:Libraries/uC-OSIII/os_time.c **** *
+  11:Libraries/uC-OSIII/os_time.c **** * File    : OS_TIME.C
+  12:Libraries/uC-OSIII/os_time.c **** * By      : JJL
+  13:Libraries/uC-OSIII/os_time.c **** * Version : V3.01.2
+  14:Libraries/uC-OSIII/os_time.c **** *
+  15:Libraries/uC-OSIII/os_time.c **** * LICENSING TERMS:
+  16:Libraries/uC-OSIII/os_time.c **** * ---------------
+  17:Libraries/uC-OSIII/os_time.c **** *               uC/OS-III is provided in source form to registered licensees ONLY.  It is
+  18:Libraries/uC-OSIII/os_time.c **** *               illegal to distribute this source code to any third party unless you receive
+  19:Libraries/uC-OSIII/os_time.c **** *               written permission by an authorized Micrium representative.  Knowledge of
+  20:Libraries/uC-OSIII/os_time.c **** *               the source code may NOT be used to develop a similar product.
+  21:Libraries/uC-OSIII/os_time.c **** *
+  22:Libraries/uC-OSIII/os_time.c **** *               Please help us continue to provide the Embedded community with the finest
+  23:Libraries/uC-OSIII/os_time.c **** *               software available.  Your honesty is greatly appreciated.
+  24:Libraries/uC-OSIII/os_time.c **** *
+  25:Libraries/uC-OSIII/os_time.c **** *               You can contact us at www.micrium.com.
+  26:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+  27:Libraries/uC-OSIII/os_time.c **** */
+  28:Libraries/uC-OSIII/os_time.c **** 
+  29:Libraries/uC-OSIII/os_time.c **** #include <os.h>
+  30:Libraries/uC-OSIII/os_time.c **** 
+  31:Libraries/uC-OSIII/os_time.c **** #ifdef VSC_INCLUDE_SOURCE_FILE_NAMES
+  32:Libraries/uC-OSIII/os_time.c **** const  CPU_CHAR  *os_time__c = "$Id: $";
+  33:Libraries/uC-OSIII/os_time.c **** #endif
+  34:Libraries/uC-OSIII/os_time.c **** 
+  35:Libraries/uC-OSIII/os_time.c **** /*
+  36:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+  37:Libraries/uC-OSIII/os_time.c **** *                                                  DELAY TASK 'n' TICKS
+  38:Libraries/uC-OSIII/os_time.c **** *
+  39:Libraries/uC-OSIII/os_time.c **** * Description: This function is called to delay execution of the currently running task until the s
+  40:Libraries/uC-OSIII/os_time.c **** *              system ticks expires.  This, of course, directly equates to delaying the current tas
+  41:Libraries/uC-OSIII/os_time.c **** *              expire.  No delay will result if the specified delay is 0.  If the specified delay i
+  42:Libraries/uC-OSIII/os_time.c **** *              then, a context switch will result.
+  43:Libraries/uC-OSIII/os_time.c **** *
+  44:Libraries/uC-OSIII/os_time.c **** * Arguments  : dly       is a value in 'clock ticks' that the task will either delay for or, the ta
+  45:Libraries/uC-OSIII/os_time.c **** *                        of the tick counter (OSTickCtr).  Note that specifying 0 means the task is
+  46:Libraries/uC-OSIII/os_time.c **** *
+  47:Libraries/uC-OSIII/os_time.c **** *                        depending on the option argument, the task will wake up when OSTickCtr rea
+  48:Libraries/uC-OSIII/os_time.c **** *
+  49:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_DLY      : OSTickCtr + dly
+  50:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_TIMEOUT  : OSTickCtr + dly
+  51:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_MATCH    : dly
+  52:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_PERIODIC : OSTCBCurPtr->TickCtrPrev + dly
+  53:Libraries/uC-OSIII/os_time.c **** *
+  54:Libraries/uC-OSIII/os_time.c **** *              opt       specifies whether 'dly' represents absolute or relative time; default opti
+  55:Libraries/uC-OSIII/os_time.c **** *
+  56:Libraries/uC-OSIII/os_time.c **** *                        *** OS_OPT_TIME_DLY        specifies a relative time from the current valu
+  57:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_TIMEOUT    same as OS_OPT_TIME_DLY.
+  58:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_MATCH      indicates that 'dly' specifies the absolute val
+  59:Libraries/uC-OSIII/os_time.c **** *                                                   must reach before the task will be resumed.
+  60:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_PERIODIC   indicates that 'dly' specifies the periodic val
+  61:Libraries/uC-OSIII/os_time.c **** *                                                   must reach before the task will be resumed.
+  62:Libraries/uC-OSIII/os_time.c **** *
+  63:Libraries/uC-OSIII/os_time.c **** *              p_err     is a pointer to a variable that will contain an error code from this call.
+  64:Libraries/uC-OSIII/os_time.c **** *
+  65:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_NONE            the call was successful and the delay occurred.
+  66:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_OPT_INVALID     if you specified an invalid option for this fun
+  67:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_SCHED_LOCKED    can't delay when the scheduler is locked.
+  68:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_TIME_DLY_ISR    if you called this function from an ISR.
+  69:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_TIME_ZERO_DLY   if you specified a delay of zero.
+  70:Libraries/uC-OSIII/os_time.c **** *
+  71:Libraries/uC-OSIII/os_time.c **** * Returns    : none
+  72:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+  73:Libraries/uC-OSIII/os_time.c **** */
+  74:Libraries/uC-OSIII/os_time.c **** 
+  75:Libraries/uC-OSIII/os_time.c **** void  OSTimeDly (OS_TICK   dly,
+  76:Libraries/uC-OSIII/os_time.c ****                  OS_OPT    opt,
+  77:Libraries/uC-OSIII/os_time.c ****                  OS_ERR   *p_err)
+  78:Libraries/uC-OSIII/os_time.c **** {
+  26              		.loc 1 78 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 24
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 14, -4
+  34              		.cfi_offset 7, -8
+  35 0002 86B0     		sub	sp, sp, #24
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 32
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  41 0006 F860     		str	r0, [r7, #12]
+  42 0008 0B46     		mov	r3, r1
+  43 000a 7A60     		str	r2, [r7, #4]
+  44 000c 7B81     		strh	r3, [r7, #10]	@ movhi
+  79:Libraries/uC-OSIII/os_time.c ****     CPU_SR_ALLOC();
+  45              		.loc 1 79 0
+  46 000e 4FF00003 		mov	r3, #0
+  47 0012 7B61     		str	r3, [r7, #20]
+  80:Libraries/uC-OSIII/os_time.c **** 
+  81:Libraries/uC-OSIII/os_time.c **** 
+  82:Libraries/uC-OSIII/os_time.c **** 
+  83:Libraries/uC-OSIII/os_time.c **** #ifdef OS_SAFETY_CRITICAL
+  84:Libraries/uC-OSIII/os_time.c ****     if (p_err == (OS_ERR *)0) {
+  85:Libraries/uC-OSIII/os_time.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+  86:Libraries/uC-OSIII/os_time.c ****     }
+  87:Libraries/uC-OSIII/os_time.c **** #endif
+  88:Libraries/uC-OSIII/os_time.c **** 
+  89:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+  90:Libraries/uC-OSIII/os_time.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0u) {             /* Not allowed to call from an ISR     
+  48              		.loc 1 90 0
+  49 0014 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+  50 0018 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+  51 001c 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  52 001e 002B     		cmp	r3, #0
+  53 0020 04D0     		beq	.L2
+  91:Libraries/uC-OSIII/os_time.c ****        *p_err = OS_ERR_TIME_DLY_ISR;
+  54              		.loc 1 91 0
+  55 0022 7B68     		ldr	r3, [r7, #4]
+  56 0024 47F27522 		movw	r2, #29301
+  57 0028 1A80     		strh	r2, [r3, #0]	@ movhi
+  92:Libraries/uC-OSIII/os_time.c ****         return;
+  58              		.loc 1 92 0
+  59 002a BBE0     		b	.L1
+  60              	.L2:
+  93:Libraries/uC-OSIII/os_time.c ****     }
+  94:Libraries/uC-OSIII/os_time.c **** #endif
+  95:Libraries/uC-OSIII/os_time.c **** 
+  96:Libraries/uC-OSIII/os_time.c ****     if (OSSchedLockNestingCtr > (OS_NESTING_CTR)0u) {       /* Can't delay when the scheduler is lo
+  61              		.loc 1 96 0
+  62 002c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+  63 0030 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+  64 0034 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  65 0036 002B     		cmp	r3, #0
+  66 0038 04D0     		beq	.L4
+  97:Libraries/uC-OSIII/os_time.c ****        *p_err = OS_ERR_SCHED_LOCKED;
+  67              		.loc 1 97 0
+  68 003a 7B68     		ldr	r3, [r7, #4]
+  69 003c 46F66252 		movw	r2, #28002
+  70 0040 1A80     		strh	r2, [r3, #0]	@ movhi
+  98:Libraries/uC-OSIII/os_time.c ****         return;
+  71              		.loc 1 98 0
+  72 0042 AFE0     		b	.L1
+  73              	.L4:
+  99:Libraries/uC-OSIII/os_time.c ****     }
+ 100:Libraries/uC-OSIII/os_time.c **** 
+ 101:Libraries/uC-OSIII/os_time.c ****     switch (opt) {
+  74              		.loc 1 101 0
+  75 0044 7B89     		ldrh	r3, [r7, #10]
+  76 0046 082B     		cmp	r3, #8
+  77 0048 1CD8     		bhi	.L5
+  78 004a 01A2     		adr	r2, .L8
+  79 004c 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+  80              		.align	2
+  81              	.L8:
+  82 0050 75000000 		.word	.L6+1
+  83 0054 85000000 		.word	.L5+1
+  84 0058 75000000 		.word	.L6+1
+  85 005c 85000000 		.word	.L5+1
+  86 0060 8F000000 		.word	.L15+1
+  87 0064 85000000 		.word	.L5+1
+  88 0068 85000000 		.word	.L5+1
+  89 006c 85000000 		.word	.L5+1
+  90 0070 75000000 		.word	.L6+1
+  91              	.L6:
+ 102:Libraries/uC-OSIII/os_time.c ****         case OS_OPT_TIME_DLY:
+ 103:Libraries/uC-OSIII/os_time.c ****         case OS_OPT_TIME_TIMEOUT:
+ 104:Libraries/uC-OSIII/os_time.c ****         case OS_OPT_TIME_PERIODIC:
+ 105:Libraries/uC-OSIII/os_time.c ****              if (dly == (OS_TICK)0u) {                      /* 0 means no delay!                   
+  92              		.loc 1 105 0
+  93 0074 FB68     		ldr	r3, [r7, #12]
+  94 0076 002B     		cmp	r3, #0
+  95 0078 0BD1     		bne	.L16
+ 106:Libraries/uC-OSIII/os_time.c ****                 *p_err = OS_ERR_TIME_ZERO_DLY;
+  96              		.loc 1 106 0
+  97 007a 7B68     		ldr	r3, [r7, #4]
+  98 007c 47F27E22 		movw	r2, #29310
+  99 0080 1A80     		strh	r2, [r3, #0]	@ movhi
+ 107:Libraries/uC-OSIII/os_time.c ****                  return;
+ 100              		.loc 1 107 0
+ 101 0082 8FE0     		b	.L1
+ 102              	.L5:
+ 108:Libraries/uC-OSIII/os_time.c ****              }
+ 109:Libraries/uC-OSIII/os_time.c ****              break;
+ 110:Libraries/uC-OSIII/os_time.c **** 
+ 111:Libraries/uC-OSIII/os_time.c ****         case OS_OPT_TIME_MATCH:
+ 112:Libraries/uC-OSIII/os_time.c ****              break;
+ 113:Libraries/uC-OSIII/os_time.c **** 
+ 114:Libraries/uC-OSIII/os_time.c ****         default:
+ 115:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_OPT_INVALID;
+ 103              		.loc 1 115 0
+ 104 0084 7B68     		ldr	r3, [r7, #4]
+ 105 0086 45F62562 		movw	r2, #24101
+ 106 008a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 116:Libraries/uC-OSIII/os_time.c ****              return;
+ 107              		.loc 1 116 0
+ 108 008c 8AE0     		b	.L1
+ 109              	.L15:
+ 112:Libraries/uC-OSIII/os_time.c ****              break;
+ 110              		.loc 1 112 0
+ 111 008e 00BF     		nop
+ 112 0090 00E0     		b	.L10
+ 113              	.L16:
+ 109:Libraries/uC-OSIII/os_time.c ****              break;
+ 114              		.loc 1 109 0
+ 115 0092 00BF     		nop
+ 116              	.L10:
+ 117:Libraries/uC-OSIII/os_time.c ****     }
+ 118:Libraries/uC-OSIII/os_time.c **** 
+ 119:Libraries/uC-OSIII/os_time.c ****     OS_CRITICAL_ENTER();
+ 117              		.loc 1 119 0
+ 118 0094 FFF7FEFF 		bl	CPU_SR_Save
+ 119 0098 7861     		str	r0, [r7, #20]
+ 120 009a FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 121 009e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 122 00a2 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 123 00a6 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 124 00a8 03F10103 		add	r3, r3, #1
+ 125 00ac DAB2     		uxtb	r2, r3
+ 126 00ae 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 127 00b2 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 128 00b6 1A70     		strb	r2, [r3, #0]
+ 129 00b8 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 130 00bc C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 131 00c0 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 132 00c2 012B     		cmp	r3, #1
+ 133 00c4 01D1     		bne	.L11
+ 134              		.loc 1 119 0 is_stmt 0 discriminator 1
+ 135 00c6 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 136              	.L11:
+ 137              		.loc 1 119 0 discriminator 2
+ 138 00ca FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 139 00ce 7869     		ldr	r0, [r7, #20]
+ 140 00d0 FFF7FEFF 		bl	CPU_SR_Restore
+ 120:Libraries/uC-OSIII/os_time.c ****     OSTCBCurPtr->TaskState = OS_TASK_STATE_DLY;
+ 141              		.loc 1 120 0 is_stmt 1 discriminator 2
+ 142 00d4 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 143 00d8 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 144 00dc 1B68     		ldr	r3, [r3, #0]
+ 145 00de 4FF00102 		mov	r2, #1
+ 146 00e2 83F8C220 		strb	r2, [r3, #194]
+ 121:Libraries/uC-OSIII/os_time.c ****     OS_TickListInsert(OSTCBCurPtr,
+ 147              		.loc 1 121 0 discriminator 2
+ 148 00e6 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 149 00ea C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 150 00ee 1A68     		ldr	r2, [r3, #0]
+ 151 00f0 7B89     		ldrh	r3, [r7, #10]
+ 152 00f2 1046     		mov	r0, r2
+ 153 00f4 F968     		ldr	r1, [r7, #12]
+ 154 00f6 1A46     		mov	r2, r3
+ 155 00f8 7B68     		ldr	r3, [r7, #4]
+ 156 00fa FFF7FEFF 		bl	OS_TickListInsert
+ 122:Libraries/uC-OSIII/os_time.c ****                       dly,
+ 123:Libraries/uC-OSIII/os_time.c ****                       opt,
+ 124:Libraries/uC-OSIII/os_time.c ****                       p_err);
+ 125:Libraries/uC-OSIII/os_time.c ****     if (*p_err != OS_ERR_NONE) {
+ 157              		.loc 1 125 0 discriminator 2
+ 158 00fe 7B68     		ldr	r3, [r7, #4]
+ 159 0100 1B88     		ldrh	r3, [r3, #0]
+ 160 0102 002B     		cmp	r3, #0
+ 161 0104 20D0     		beq	.L12
+ 126:Libraries/uC-OSIII/os_time.c ****          OS_CRITICAL_EXIT_NO_SCHED();
+ 162              		.loc 1 126 0
+ 163 0106 FFF7FEFF 		bl	CPU_SR_Save
+ 164 010a 7861     		str	r0, [r7, #20]
+ 165 010c FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 166 0110 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 167 0114 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 168 0118 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 169 011a 03F1FF33 		add	r3, r3, #-1
+ 170 011e DAB2     		uxtb	r2, r3
+ 171 0120 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 172 0124 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 173 0128 1A70     		strb	r2, [r3, #0]
+ 174 012a 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 175 012e C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 176 0132 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 177 0134 002B     		cmp	r3, #0
+ 178 0136 01D1     		bne	.L13
+ 179              		.loc 1 126 0 is_stmt 0 discriminator 1
+ 180 0138 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 181              	.L13:
+ 182              		.loc 1 126 0 discriminator 2
+ 183 013c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 184 0140 7869     		ldr	r0, [r7, #20]
+ 185 0142 FFF7FEFF 		bl	CPU_SR_Restore
+ 127:Libraries/uC-OSIII/os_time.c ****          return;
+ 186              		.loc 1 127 0 is_stmt 1 discriminator 2
+ 187 0146 2DE0     		b	.L1
+ 188              	.L12:
+ 128:Libraries/uC-OSIII/os_time.c ****     }
+ 129:Libraries/uC-OSIII/os_time.c ****     OS_RdyListRemove(OSTCBCurPtr);                          /* Remove current task from ready list 
+ 189              		.loc 1 129 0
+ 190 0148 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 191 014c C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 192 0150 1B68     		ldr	r3, [r3, #0]
+ 193 0152 1846     		mov	r0, r3
+ 194 0154 FFF7FEFF 		bl	OS_RdyListRemove
+ 130:Libraries/uC-OSIII/os_time.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 195              		.loc 1 130 0
+ 196 0158 FFF7FEFF 		bl	CPU_SR_Save
+ 197 015c 7861     		str	r0, [r7, #20]
+ 198 015e FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 199 0162 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 200 0166 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 201 016a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 202 016c 03F1FF33 		add	r3, r3, #-1
+ 203 0170 DAB2     		uxtb	r2, r3
+ 204 0172 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 205 0176 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 206 017a 1A70     		strb	r2, [r3, #0]
+ 207 017c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 208 0180 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 209 0184 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 210 0186 002B     		cmp	r3, #0
+ 211 0188 01D1     		bne	.L14
+ 212              		.loc 1 130 0 is_stmt 0 discriminator 1
+ 213 018a FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 214              	.L14:
+ 215              		.loc 1 130 0 discriminator 2
+ 216 018e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 217 0192 7869     		ldr	r0, [r7, #20]
+ 218 0194 FFF7FEFF 		bl	CPU_SR_Restore
+ 131:Libraries/uC-OSIII/os_time.c ****     OSSched();                                              /* Find next task to run!              
+ 219              		.loc 1 131 0 is_stmt 1 discriminator 2
+ 220 0198 FFF7FEFF 		bl	OSSched
+ 132:Libraries/uC-OSIII/os_time.c ****    *p_err = OS_ERR_NONE;
+ 221              		.loc 1 132 0 discriminator 2
+ 222 019c 7B68     		ldr	r3, [r7, #4]
+ 223 019e 4FF00002 		mov	r2, #0
+ 224 01a2 1A80     		strh	r2, [r3, #0]	@ movhi
+ 225              	.L1:
+ 133:Libraries/uC-OSIII/os_time.c **** }
+ 226              		.loc 1 133 0
+ 227 01a4 07F11807 		add	r7, r7, #24
+ 228 01a8 BD46     		mov	sp, r7
+ 229 01aa 80BD     		pop	{r7, pc}
+ 230              		.cfi_endproc
+ 231              	.LFE0:
+ 233              		.align	2
+ 234              		.global	OSTimeDlyHMSM
+ 235              		.thumb
+ 236              		.thumb_func
+ 238              	OSTimeDlyHMSM:
+ 239              	.LFB1:
+ 134:Libraries/uC-OSIII/os_time.c **** 
+ 135:Libraries/uC-OSIII/os_time.c **** /*$PAGE*/
+ 136:Libraries/uC-OSIII/os_time.c **** /*
+ 137:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+ 138:Libraries/uC-OSIII/os_time.c **** *                                             DELAY TASK FOR SPECIFIED TIME
+ 139:Libraries/uC-OSIII/os_time.c **** *
+ 140:Libraries/uC-OSIII/os_time.c **** * Description: This function is called to delay execution of the currently running task until some 
+ 141:Libraries/uC-OSIII/os_time.c **** *              call allows you to specify the delay time in HOURS, MINUTES, SECONDS and MILLISECOND
+ 142:Libraries/uC-OSIII/os_time.c **** *
+ 143:Libraries/uC-OSIII/os_time.c **** * Arguments  : hours     specifies the number of hours that the task will be delayed (max. is 999 i
+ 144:Libraries/uC-OSIII/os_time.c **** *                        1000 Hz or less otherwise, a higher value would overflow a 32-bit unsigned
+ 145:Libraries/uC-OSIII/os_time.c **** *
+ 146:Libraries/uC-OSIII/os_time.c **** *              minutes   specifies the number of minutes (max. 59 if 'opt' is OS_OPT_TIME_HMSM_STRI
+ 147:Libraries/uC-OSIII/os_time.c **** *
+ 148:Libraries/uC-OSIII/os_time.c **** *              seconds   specifies the number of seconds (max. 59 if 'opt' is OS_OPT_TIME_HMSM_STRI
+ 149:Libraries/uC-OSIII/os_time.c **** *
+ 150:Libraries/uC-OSIII/os_time.c **** *              milli     specifies the number of milliseconds (max. 999 if 'opt' is OS_OPT_TIME_HMS
+ 151:Libraries/uC-OSIII/os_time.c **** *
+ 152:Libraries/uC-OSIII/os_time.c **** *              opt       specifies time delay bit-field options logically OR'd; default options mar
+ 153:Libraries/uC-OSIII/os_time.c **** *
+ 154:Libraries/uC-OSIII/os_time.c **** *                        *** OS_OPT_TIME_DLY        specifies a relative time from the current valu
+ 155:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_TIMEOUT    same as OS_OPT_TIME_DLY.
+ 156:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_MATCH      indicates that the delay specifies the absolute
+ 157:Libraries/uC-OSIII/os_time.c **** *                                                   must reach before the task will be resumed.
+ 158:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_PERIODIC   indicates that the delay specifies the periodic
+ 159:Libraries/uC-OSIII/os_time.c **** *                                                   must reach before the task will be resumed.
+ 160:Libraries/uC-OSIII/os_time.c **** *
+ 161:Libraries/uC-OSIII/os_time.c **** *                        *** OS_OPT_TIME_HMSM_STRICT            strictly allow only hours        (0
+ 162:Libraries/uC-OSIII/os_time.c **** *                                                                                   minutes      (0
+ 163:Libraries/uC-OSIII/os_time.c **** *                                                                                   seconds      (0
+ 164:Libraries/uC-OSIII/os_time.c **** *                                                                                   milliseconds (0
+ 165:Libraries/uC-OSIII/os_time.c **** *                            OS_OPT_TIME_HMSM_NON_STRICT        allow any value of  hours        (0
+ 166:Libraries/uC-OSIII/os_time.c **** *                                                                                   minutes      (0
+ 167:Libraries/uC-OSIII/os_time.c **** *                                                                                   seconds      (0
+ 168:Libraries/uC-OSIII/os_time.c **** *                                                                                   milliseconds (0
+ 169:Libraries/uC-OSIII/os_time.c **** *
+ 170:Libraries/uC-OSIII/os_time.c **** *              p_err     is a pointer to a variable that will receive an error code from this call.
+ 171:Libraries/uC-OSIII/os_time.c **** *
+ 172:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_NONE                        If the function returns from the de
+ 173:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_OPT_INVALID                 If you specified an invalid option 
+ 174:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_SCHED_LOCKED                Can't delay when the scheduler is l
+ 175:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_TIME_DLY_ISR                If called from an ISR
+ 176:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_TIME_INVALID_HOURS          If you didn't specify a valid value
+ 177:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_TIME_INVALID_MINUTES        If you didn't specify a valid value
+ 178:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_TIME_INVALID_SECONDS        If you didn't specify a valid value
+ 179:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_TIME_INVALID_MILLISECONDS   If you didn't specify a valid value
+ 180:Libraries/uC-OSIII/os_time.c **** *                            OS_ERR_TIME_ZERO_DLY               If hours, minutes, seconds and mill
+ 181:Libraries/uC-OSIII/os_time.c **** *
+ 182:Libraries/uC-OSIII/os_time.c **** * Returns    : none
+ 183:Libraries/uC-OSIII/os_time.c **** *
+ 184:Libraries/uC-OSIII/os_time.c **** * Note(s)    : 1) The resolution on the milliseconds depends on the tick rate.  For example, you ca
+ 185:Libraries/uC-OSIII/os_time.c **** *                 if the ticker interrupts every 100 mS.  In this case, the delay would be set to 0
+ 186:Libraries/uC-OSIII/os_time.c **** *                 is rounded to the nearest tick.
+ 187:Libraries/uC-OSIII/os_time.c **** *
+ 188:Libraries/uC-OSIII/os_time.c **** *              2) Although this function allows you to delay a task for many, many hours, it's not 
+ 189:Libraries/uC-OSIII/os_time.c **** *                 a task to sleep for that long.
+ 190:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+ 191:Libraries/uC-OSIII/os_time.c **** */
+ 192:Libraries/uC-OSIII/os_time.c **** 
+ 193:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_TIME_DLY_HMSM_EN > 0u
+ 194:Libraries/uC-OSIII/os_time.c **** void  OSTimeDlyHMSM (CPU_INT16U  hours,
+ 195:Libraries/uC-OSIII/os_time.c ****                      CPU_INT16U  minutes,
+ 196:Libraries/uC-OSIII/os_time.c ****                      CPU_INT16U  seconds,
+ 197:Libraries/uC-OSIII/os_time.c ****                      CPU_INT32U  milli,
+ 198:Libraries/uC-OSIII/os_time.c ****                      OS_OPT      opt,
+ 199:Libraries/uC-OSIII/os_time.c ****                      OS_ERR     *p_err)
+ 200:Libraries/uC-OSIII/os_time.c **** {
+ 240              		.loc 1 200 0
+ 241              		.cfi_startproc
+ 242              		@ args = 8, pretend = 0, frame = 32
+ 243              		@ frame_needed = 1, uses_anonymous_args = 0
+ 244 01ac 80B5     		push	{r7, lr}
+ 245              	.LCFI3:
+ 246              		.cfi_def_cfa_offset 8
+ 247              		.cfi_offset 14, -4
+ 248              		.cfi_offset 7, -8
+ 249 01ae 88B0     		sub	sp, sp, #32
+ 250              	.LCFI4:
+ 251              		.cfi_def_cfa_offset 40
+ 252 01b0 00AF     		add	r7, sp, #0
+ 253              	.LCFI5:
+ 254              		.cfi_def_cfa_register 7
+ 255 01b2 7B60     		str	r3, [r7, #4]
+ 256 01b4 0346     		mov	r3, r0	@ movhi
+ 257 01b6 FB81     		strh	r3, [r7, #14]	@ movhi
+ 258 01b8 0B46     		mov	r3, r1	@ movhi
+ 259 01ba BB81     		strh	r3, [r7, #12]	@ movhi
+ 260 01bc 1346     		mov	r3, r2	@ movhi
+ 261 01be 7B81     		strh	r3, [r7, #10]	@ movhi
+ 201:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 202:Libraries/uC-OSIII/os_time.c ****     CPU_BOOLEAN  opt_invalid;
+ 203:Libraries/uC-OSIII/os_time.c ****     CPU_BOOLEAN  opt_non_strict;
+ 204:Libraries/uC-OSIII/os_time.c **** #endif
+ 205:Libraries/uC-OSIII/os_time.c ****     OS_OPT       opt_time;
+ 206:Libraries/uC-OSIII/os_time.c ****     OS_RATE_HZ   tick_rate;
+ 207:Libraries/uC-OSIII/os_time.c ****     OS_TICK      ticks;
+ 208:Libraries/uC-OSIII/os_time.c ****     CPU_SR_ALLOC();
+ 262              		.loc 1 208 0
+ 263 01c0 4FF00003 		mov	r3, #0
+ 264 01c4 FB61     		str	r3, [r7, #28]
+ 209:Libraries/uC-OSIII/os_time.c **** 
+ 210:Libraries/uC-OSIII/os_time.c **** 
+ 211:Libraries/uC-OSIII/os_time.c **** 
+ 212:Libraries/uC-OSIII/os_time.c **** #ifdef OS_SAFETY_CRITICAL
+ 213:Libraries/uC-OSIII/os_time.c ****     if (p_err == (OS_ERR *)0) {
+ 214:Libraries/uC-OSIII/os_time.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 215:Libraries/uC-OSIII/os_time.c ****     }
+ 216:Libraries/uC-OSIII/os_time.c **** #endif
+ 217:Libraries/uC-OSIII/os_time.c **** 
+ 218:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 219:Libraries/uC-OSIII/os_time.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0u) {             /* Not allowed to call from an ISR     
+ 265              		.loc 1 219 0
+ 266 01c6 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 267 01ca C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 268 01ce 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 269 01d0 002B     		cmp	r3, #0
+ 270 01d2 04D0     		beq	.L18
+ 220:Libraries/uC-OSIII/os_time.c ****        *p_err = OS_ERR_TIME_DLY_ISR;
+ 271              		.loc 1 220 0
+ 272 01d4 FB6A     		ldr	r3, [r7, #44]
+ 273 01d6 47F27522 		movw	r2, #29301
+ 274 01da 1A80     		strh	r2, [r3, #0]	@ movhi
+ 221:Libraries/uC-OSIII/os_time.c ****         return;
+ 275              		.loc 1 221 0
+ 276 01dc 50E1     		b	.L17
+ 277              	.L18:
+ 222:Libraries/uC-OSIII/os_time.c ****     }
+ 223:Libraries/uC-OSIII/os_time.c **** #endif
+ 224:Libraries/uC-OSIII/os_time.c **** 
+ 225:Libraries/uC-OSIII/os_time.c ****     if (OSSchedLockNestingCtr > (OS_NESTING_CTR)0u) {       /* Can't delay when the scheduler is lo
+ 278              		.loc 1 225 0
+ 279 01de 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 280 01e2 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 281 01e6 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 282 01e8 002B     		cmp	r3, #0
+ 283 01ea 04D0     		beq	.L20
+ 226:Libraries/uC-OSIII/os_time.c ****        *p_err = OS_ERR_SCHED_LOCKED;
+ 284              		.loc 1 226 0
+ 285 01ec FB6A     		ldr	r3, [r7, #44]
+ 286 01ee 46F66252 		movw	r2, #28002
+ 287 01f2 1A80     		strh	r2, [r3, #0]	@ movhi
+ 227:Libraries/uC-OSIII/os_time.c ****         return;
+ 288              		.loc 1 227 0
+ 289 01f4 44E1     		b	.L17
+ 290              	.L20:
+ 228:Libraries/uC-OSIII/os_time.c ****     }
+ 229:Libraries/uC-OSIII/os_time.c **** 
+ 230:Libraries/uC-OSIII/os_time.c ****     opt_time = opt & OS_OPT_TIME_MASK;                      /* Retrieve time options only.         
+ 291              		.loc 1 230 0
+ 292 01f6 3B8D     		ldrh	r3, [r7, #40]	@ movhi
+ 293 01f8 03F00E03 		and	r3, r3, #14
+ 294 01fc 7B83     		strh	r3, [r7, #26]	@ movhi
+ 231:Libraries/uC-OSIII/os_time.c ****     switch (opt_time) {
+ 295              		.loc 1 231 0
+ 296 01fe 7B8B     		ldrh	r3, [r7, #26]
+ 297 0200 082B     		cmp	r3, #8
+ 298 0202 26D8     		bhi	.L21
+ 299 0204 01A0     		adr	r0, .L24
+ 300 0206 50F823F0 		ldr	pc, [r0, r3, lsl #2]
+ 301 020a 00BF     		.align	2
+ 302              	.L24:
+ 303 020c 31020000 		.word	.L22+1
+ 304 0210 53020000 		.word	.L21+1
+ 305 0214 31020000 		.word	.L22+1
+ 306 0218 53020000 		.word	.L21+1
+ 307 021c 5D020000 		.word	.L39+1
+ 308 0220 53020000 		.word	.L21+1
+ 309 0224 53020000 		.word	.L21+1
+ 310 0228 53020000 		.word	.L21+1
+ 311 022c 31020000 		.word	.L22+1
+ 312              	.L22:
+ 232:Libraries/uC-OSIII/os_time.c ****         case OS_OPT_TIME_DLY:
+ 233:Libraries/uC-OSIII/os_time.c ****         case OS_OPT_TIME_TIMEOUT:
+ 234:Libraries/uC-OSIII/os_time.c ****         case OS_OPT_TIME_PERIODIC:
+ 235:Libraries/uC-OSIII/os_time.c ****              if (milli == (CPU_INT32U)0u) {                 /* Make sure we didn't specify a 0 dela
+ 313              		.loc 1 235 0
+ 314 0230 7B68     		ldr	r3, [r7, #4]
+ 315 0232 002B     		cmp	r3, #0
+ 316 0234 14D1     		bne	.L40
+ 236:Libraries/uC-OSIII/os_time.c ****                  if (seconds == (CPU_INT16U)0u) {
+ 317              		.loc 1 236 0
+ 318 0236 7B89     		ldrh	r3, [r7, #10]
+ 319 0238 002B     		cmp	r3, #0
+ 320 023a 11D1     		bne	.L40
+ 237:Libraries/uC-OSIII/os_time.c ****                      if (minutes == (CPU_INT16U)0u) {
+ 321              		.loc 1 237 0
+ 322 023c BB89     		ldrh	r3, [r7, #12]
+ 323 023e 002B     		cmp	r3, #0
+ 324 0240 0ED1     		bne	.L40
+ 238:Libraries/uC-OSIII/os_time.c ****                          if (hours == (CPU_INT16U)0u) {
+ 325              		.loc 1 238 0
+ 326 0242 FB89     		ldrh	r3, [r7, #14]
+ 327 0244 002B     		cmp	r3, #0
+ 328 0246 0BD1     		bne	.L40
+ 239:Libraries/uC-OSIII/os_time.c ****                             *p_err = OS_ERR_TIME_ZERO_DLY;
+ 329              		.loc 1 239 0
+ 330 0248 FB6A     		ldr	r3, [r7, #44]
+ 331 024a 47F27E22 		movw	r2, #29310
+ 332 024e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 240:Libraries/uC-OSIII/os_time.c ****                              return;
+ 333              		.loc 1 240 0
+ 334 0250 16E1     		b	.L17
+ 335              	.L21:
+ 241:Libraries/uC-OSIII/os_time.c ****                          }
+ 242:Libraries/uC-OSIII/os_time.c ****                      }
+ 243:Libraries/uC-OSIII/os_time.c ****                  }
+ 244:Libraries/uC-OSIII/os_time.c ****              }
+ 245:Libraries/uC-OSIII/os_time.c ****              break;
+ 246:Libraries/uC-OSIII/os_time.c **** 
+ 247:Libraries/uC-OSIII/os_time.c ****         case OS_OPT_TIME_MATCH:
+ 248:Libraries/uC-OSIII/os_time.c ****              break;
+ 249:Libraries/uC-OSIII/os_time.c **** 
+ 250:Libraries/uC-OSIII/os_time.c ****         default:
+ 251:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_OPT_INVALID;
+ 336              		.loc 1 251 0
+ 337 0252 FB6A     		ldr	r3, [r7, #44]
+ 338 0254 45F62562 		movw	r2, #24101
+ 339 0258 1A80     		strh	r2, [r3, #0]	@ movhi
+ 252:Libraries/uC-OSIII/os_time.c ****              return;
+ 340              		.loc 1 252 0
+ 341 025a 11E1     		b	.L17
+ 342              	.L39:
+ 248:Libraries/uC-OSIII/os_time.c ****              break;
+ 343              		.loc 1 248 0
+ 344 025c 00BF     		nop
+ 345 025e 00E0     		b	.L26
+ 346              	.L40:
+ 245:Libraries/uC-OSIII/os_time.c ****              break;
+ 347              		.loc 1 245 0
+ 348 0260 00BF     		nop
+ 349              	.L26:
+ 253:Libraries/uC-OSIII/os_time.c ****     }
+ 254:Libraries/uC-OSIII/os_time.c **** 
+ 255:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_ARG_CHK_EN > 0u                                  /* Validate arguments to be within rang
+ 256:Libraries/uC-OSIII/os_time.c ****     opt_invalid = DEF_BIT_IS_SET_ANY(opt, (OS_OPT)~DEF_OPT_TIME_OPTS_MASK);
+ 350              		.loc 1 256 0
+ 351 0262 3A8D     		ldrh	r2, [r7, #40]
+ 352 0264 4FF6E173 		movw	r3, #65505
+ 353 0268 1340     		ands	r3, r3, r2
+ 354 026a 002B     		cmp	r3, #0
+ 355 026c 0CBF     		ite	eq
+ 356 026e 0023     		moveq	r3, #0
+ 357 0270 0123     		movne	r3, #1
+ 358 0272 7B76     		strb	r3, [r7, #25]
+ 257:Libraries/uC-OSIII/os_time.c ****     if (opt_invalid == DEF_YES) {
+ 359              		.loc 1 257 0
+ 360 0274 7B7E     		ldrb	r3, [r7, #25]	@ zero_extendqisi2
+ 361 0276 012B     		cmp	r3, #1
+ 362 0278 04D1     		bne	.L27
+ 258:Libraries/uC-OSIII/os_time.c ****        *p_err = OS_ERR_OPT_INVALID;
+ 363              		.loc 1 258 0
+ 364 027a FB6A     		ldr	r3, [r7, #44]
+ 365 027c 45F62562 		movw	r2, #24101
+ 366 0280 1A80     		strh	r2, [r3, #0]	@ movhi
+ 259:Libraries/uC-OSIII/os_time.c ****         return;
+ 367              		.loc 1 259 0
+ 368 0282 FDE0     		b	.L17
+ 369              	.L27:
+ 260:Libraries/uC-OSIII/os_time.c ****     }
+ 261:Libraries/uC-OSIII/os_time.c **** 
+ 262:Libraries/uC-OSIII/os_time.c ****     opt_non_strict = DEF_BIT_IS_SET(opt, OS_OPT_TIME_HMSM_NON_STRICT);
+ 370              		.loc 1 262 0
+ 371 0284 3B8D     		ldrh	r3, [r7, #40]
+ 372 0286 03F01003 		and	r3, r3, #16
+ 373 028a 002B     		cmp	r3, #0
+ 374 028c 0CBF     		ite	eq
+ 375 028e 0023     		moveq	r3, #0
+ 376 0290 0123     		movne	r3, #1
+ 377 0292 3B76     		strb	r3, [r7, #24]
+ 263:Libraries/uC-OSIII/os_time.c ****     if (opt_non_strict != DEF_YES) {
+ 378              		.loc 1 263 0
+ 379 0294 3B7E     		ldrb	r3, [r7, #24]	@ zero_extendqisi2
+ 380 0296 012B     		cmp	r3, #1
+ 381 0298 21D0     		beq	.L28
+ 264:Libraries/uC-OSIII/os_time.c ****          if (milli   > (CPU_INT32U)999u) {
+ 382              		.loc 1 264 0
+ 383 029a 7A68     		ldr	r2, [r7, #4]
+ 384 029c 40F2E733 		movw	r3, #999
+ 385 02a0 9A42     		cmp	r2, r3
+ 386 02a2 04D9     		bls	.L29
+ 265:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TIME_INVALID_MILLISECONDS;
+ 387              		.loc 1 265 0
+ 388 02a4 FB6A     		ldr	r3, [r7, #44]
+ 389 02a6 47F27B22 		movw	r2, #29307
+ 390 02aa 1A80     		strh	r2, [r3, #0]	@ movhi
+ 266:Libraries/uC-OSIII/os_time.c ****              return;
+ 391              		.loc 1 266 0
+ 392 02ac E8E0     		b	.L17
+ 393              	.L29:
+ 267:Libraries/uC-OSIII/os_time.c ****          }
+ 268:Libraries/uC-OSIII/os_time.c ****          if (seconds > (CPU_INT16U)59u) {
+ 394              		.loc 1 268 0
+ 395 02ae 7B89     		ldrh	r3, [r7, #10]
+ 396 02b0 3B2B     		cmp	r3, #59
+ 397 02b2 04D9     		bls	.L30
+ 269:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TIME_INVALID_SECONDS;
+ 398              		.loc 1 269 0
+ 399 02b4 FB6A     		ldr	r3, [r7, #44]
+ 400 02b6 47F27A22 		movw	r2, #29306
+ 401 02ba 1A80     		strh	r2, [r3, #0]	@ movhi
+ 270:Libraries/uC-OSIII/os_time.c ****              return;
+ 402              		.loc 1 270 0
+ 403 02bc E0E0     		b	.L17
+ 404              	.L30:
+ 271:Libraries/uC-OSIII/os_time.c ****          }
+ 272:Libraries/uC-OSIII/os_time.c ****          if (minutes > (CPU_INT16U)59u) {
+ 405              		.loc 1 272 0
+ 406 02be BB89     		ldrh	r3, [r7, #12]
+ 407 02c0 3B2B     		cmp	r3, #59
+ 408 02c2 04D9     		bls	.L31
+ 273:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TIME_INVALID_MINUTES;
+ 409              		.loc 1 273 0
+ 410 02c4 FB6A     		ldr	r3, [r7, #44]
+ 411 02c6 47F27922 		movw	r2, #29305
+ 412 02ca 1A80     		strh	r2, [r3, #0]	@ movhi
+ 274:Libraries/uC-OSIII/os_time.c ****              return;
+ 413              		.loc 1 274 0
+ 414 02cc D8E0     		b	.L17
+ 415              	.L31:
+ 275:Libraries/uC-OSIII/os_time.c ****          }
+ 276:Libraries/uC-OSIII/os_time.c ****          if (hours   > (CPU_INT16U)99u) {
+ 416              		.loc 1 276 0
+ 417 02ce FB89     		ldrh	r3, [r7, #14]
+ 418 02d0 632B     		cmp	r3, #99
+ 419 02d2 18D9     		bls	.L32
+ 277:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TIME_INVALID_HOURS;
+ 420              		.loc 1 277 0
+ 421 02d4 FB6A     		ldr	r3, [r7, #44]
+ 422 02d6 47F27822 		movw	r2, #29304
+ 423 02da 1A80     		strh	r2, [r3, #0]	@ movhi
+ 278:Libraries/uC-OSIII/os_time.c ****              return;
+ 424              		.loc 1 278 0
+ 425 02dc D0E0     		b	.L17
+ 426              	.L28:
+ 279:Libraries/uC-OSIII/os_time.c ****          }
+ 280:Libraries/uC-OSIII/os_time.c ****     } else {
+ 281:Libraries/uC-OSIII/os_time.c ****          if (minutes > (CPU_INT16U)9999u) {
+ 427              		.loc 1 281 0
+ 428 02de BA89     		ldrh	r2, [r7, #12]
+ 429 02e0 42F20F73 		movw	r3, #9999
+ 430 02e4 9A42     		cmp	r2, r3
+ 431 02e6 04D9     		bls	.L33
+ 282:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TIME_INVALID_MINUTES;
+ 432              		.loc 1 282 0
+ 433 02e8 FB6A     		ldr	r3, [r7, #44]
+ 434 02ea 47F27922 		movw	r2, #29305
+ 435 02ee 1A80     		strh	r2, [r3, #0]	@ movhi
+ 283:Libraries/uC-OSIII/os_time.c ****              return;
+ 436              		.loc 1 283 0
+ 437 02f0 C6E0     		b	.L17
+ 438              	.L33:
+ 284:Libraries/uC-OSIII/os_time.c ****          }
+ 285:Libraries/uC-OSIII/os_time.c ****          if (hours   > (CPU_INT16U)999u) {
+ 439              		.loc 1 285 0
+ 440 02f2 FA89     		ldrh	r2, [r7, #14]
+ 441 02f4 40F2E733 		movw	r3, #999
+ 442 02f8 9A42     		cmp	r2, r3
+ 443 02fa 04D9     		bls	.L32
+ 286:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TIME_INVALID_HOURS;
+ 444              		.loc 1 286 0
+ 445 02fc FB6A     		ldr	r3, [r7, #44]
+ 446 02fe 47F27822 		movw	r2, #29304
+ 447 0302 1A80     		strh	r2, [r3, #0]	@ movhi
+ 287:Libraries/uC-OSIII/os_time.c ****              return;
+ 448              		.loc 1 287 0
+ 449 0304 BCE0     		b	.L17
+ 450              	.L32:
+ 288:Libraries/uC-OSIII/os_time.c ****          }
+ 289:Libraries/uC-OSIII/os_time.c ****     }
+ 290:Libraries/uC-OSIII/os_time.c **** #endif
+ 291:Libraries/uC-OSIII/os_time.c **** 
+ 292:Libraries/uC-OSIII/os_time.c ****                                                             /* Compute the total number of clock ti
+ 293:Libraries/uC-OSIII/os_time.c ****                                                             /* .. (rounded to the nearest tick)    
+ 294:Libraries/uC-OSIII/os_time.c ****     tick_rate = OSCfg_TickRate_Hz;
+ 451              		.loc 1 294 0
+ 452 0306 40F20003 		movw	r3, #:lower16:OSCfg_TickRate_Hz
+ 453 030a C0F20003 		movt	r3, #:upper16:OSCfg_TickRate_Hz
+ 454 030e 1B68     		ldr	r3, [r3, #0]
+ 455 0310 7B61     		str	r3, [r7, #20]
+ 295:Libraries/uC-OSIII/os_time.c ****     ticks     = ((OS_TICK)hours * (OS_TICK)3600u + (OS_TICK)minutes * (OS_TICK)60u + (OS_TICK)secon
+ 456              		.loc 1 295 0
+ 457 0312 FB89     		ldrh	r3, [r7, #14]
+ 458 0314 4FF46162 		mov	r2, #3600
+ 459 0318 02FB03F1 		mul	r1, r2, r3
+ 460 031c BA89     		ldrh	r2, [r7, #12]
+ 461 031e 1346     		mov	r3, r2
+ 462 0320 4FEA0313 		lsl	r3, r3, #4
+ 463 0324 9B1A     		subs	r3, r3, r2
+ 464 0326 4FEA8303 		lsl	r3, r3, #2
+ 465 032a CA18     		adds	r2, r1, r3
+ 466 032c 7B89     		ldrh	r3, [r7, #10]
+ 467 032e D318     		adds	r3, r2, r3
+ 468 0330 7A69     		ldr	r2, [r7, #20]
+ 469 0332 02FB03F2 		mul	r2, r2, r3
+ 296:Libraries/uC-OSIII/os_time.c ****               + (tick_rate * ((OS_TICK)milli + (OS_TICK)500u / tick_rate)) / (OS_TICK)1000u;
+ 470              		.loc 1 296 0
+ 471 0336 4FF4FA71 		mov	r1, #500
+ 472 033a 7B69     		ldr	r3, [r7, #20]
+ 473 033c B1FBF3F1 		udiv	r1, r1, r3
+ 474 0340 7B68     		ldr	r3, [r7, #4]
+ 475 0342 CB18     		adds	r3, r1, r3
+ 476 0344 7969     		ldr	r1, [r7, #20]
+ 477 0346 01FB03F1 		mul	r1, r1, r3
+ 478 034a 44F6D353 		movw	r3, #19923
+ 479 034e C1F26203 		movt	r3, 4194
+ 480 0352 A3FB0103 		umull	r0, r3, r3, r1
+ 481 0356 4FEA9313 		lsr	r3, r3, #6
+ 295:Libraries/uC-OSIII/os_time.c ****     ticks     = ((OS_TICK)hours * (OS_TICK)3600u + (OS_TICK)minutes * (OS_TICK)60u + (OS_TICK)secon
+ 482              		.loc 1 295 0
+ 483 035a D318     		adds	r3, r2, r3
+ 484 035c 3B61     		str	r3, [r7, #16]
+ 297:Libraries/uC-OSIII/os_time.c **** 
+ 298:Libraries/uC-OSIII/os_time.c ****     if (ticks > (OS_TICK)0u) {
+ 485              		.loc 1 298 0
+ 486 035e 3B69     		ldr	r3, [r7, #16]
+ 487 0360 002B     		cmp	r3, #0
+ 488 0362 00F08980 		beq	.L34
+ 299:Libraries/uC-OSIII/os_time.c ****         OS_CRITICAL_ENTER();
+ 489              		.loc 1 299 0
+ 490 0366 FFF7FEFF 		bl	CPU_SR_Save
+ 491 036a F861     		str	r0, [r7, #28]
+ 492 036c FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 493 0370 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 494 0374 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 495 0378 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 496 037a 03F10103 		add	r3, r3, #1
+ 497 037e DAB2     		uxtb	r2, r3
+ 498 0380 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 499 0384 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 500 0388 1A70     		strb	r2, [r3, #0]
+ 501 038a 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 502 038e C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 503 0392 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 504 0394 012B     		cmp	r3, #1
+ 505 0396 01D1     		bne	.L35
+ 506              		.loc 1 299 0 is_stmt 0 discriminator 1
+ 507 0398 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 508              	.L35:
+ 509              		.loc 1 299 0 discriminator 2
+ 510 039c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 511 03a0 F869     		ldr	r0, [r7, #28]
+ 512 03a2 FFF7FEFF 		bl	CPU_SR_Restore
+ 300:Libraries/uC-OSIII/os_time.c ****         OSTCBCurPtr->TaskState = OS_TASK_STATE_DLY;
+ 513              		.loc 1 300 0 is_stmt 1 discriminator 2
+ 514 03a6 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 515 03aa C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 516 03ae 1B68     		ldr	r3, [r3, #0]
+ 517 03b0 4FF00102 		mov	r2, #1
+ 518 03b4 83F8C220 		strb	r2, [r3, #194]
+ 301:Libraries/uC-OSIII/os_time.c ****         OS_TickListInsert(OSTCBCurPtr,
+ 519              		.loc 1 301 0 discriminator 2
+ 520 03b8 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 521 03bc C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 522 03c0 1A68     		ldr	r2, [r3, #0]
+ 523 03c2 7B8B     		ldrh	r3, [r7, #26]
+ 524 03c4 1046     		mov	r0, r2
+ 525 03c6 3969     		ldr	r1, [r7, #16]
+ 526 03c8 1A46     		mov	r2, r3
+ 527 03ca FB6A     		ldr	r3, [r7, #44]
+ 528 03cc FFF7FEFF 		bl	OS_TickListInsert
+ 302:Libraries/uC-OSIII/os_time.c ****                           ticks,
+ 303:Libraries/uC-OSIII/os_time.c ****                           opt_time,
+ 304:Libraries/uC-OSIII/os_time.c ****                           p_err);
+ 305:Libraries/uC-OSIII/os_time.c ****         if (*p_err != OS_ERR_NONE) {
+ 529              		.loc 1 305 0 discriminator 2
+ 530 03d0 FB6A     		ldr	r3, [r7, #44]
+ 531 03d2 1B88     		ldrh	r3, [r3, #0]
+ 532 03d4 002B     		cmp	r3, #0
+ 533 03d6 20D0     		beq	.L36
+ 306:Libraries/uC-OSIII/os_time.c ****              OS_CRITICAL_EXIT_NO_SCHED();
+ 534              		.loc 1 306 0
+ 535 03d8 FFF7FEFF 		bl	CPU_SR_Save
+ 536 03dc F861     		str	r0, [r7, #28]
+ 537 03de FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 538 03e2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 539 03e6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 540 03ea 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 541 03ec 03F1FF33 		add	r3, r3, #-1
+ 542 03f0 DAB2     		uxtb	r2, r3
+ 543 03f2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 544 03f6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 545 03fa 1A70     		strb	r2, [r3, #0]
+ 546 03fc 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 547 0400 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 548 0404 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 549 0406 002B     		cmp	r3, #0
+ 550 0408 01D1     		bne	.L37
+ 551              		.loc 1 306 0 is_stmt 0 discriminator 1
+ 552 040a FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 553              	.L37:
+ 554              		.loc 1 306 0 discriminator 2
+ 555 040e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 556 0412 F869     		ldr	r0, [r7, #28]
+ 557 0414 FFF7FEFF 		bl	CPU_SR_Restore
+ 307:Libraries/uC-OSIII/os_time.c ****              return;
+ 558              		.loc 1 307 0 is_stmt 1 discriminator 2
+ 559 0418 32E0     		b	.L17
+ 560              	.L36:
+ 308:Libraries/uC-OSIII/os_time.c ****         }
+ 309:Libraries/uC-OSIII/os_time.c ****         OS_RdyListRemove(OSTCBCurPtr);                      /* Remove current task from ready list 
+ 561              		.loc 1 309 0
+ 562 041a 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 563 041e C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 564 0422 1B68     		ldr	r3, [r3, #0]
+ 565 0424 1846     		mov	r0, r3
+ 566 0426 FFF7FEFF 		bl	OS_RdyListRemove
+ 310:Libraries/uC-OSIII/os_time.c ****         OS_CRITICAL_EXIT_NO_SCHED();
+ 567              		.loc 1 310 0
+ 568 042a FFF7FEFF 		bl	CPU_SR_Save
+ 569 042e F861     		str	r0, [r7, #28]
+ 570 0430 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 571 0434 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 572 0438 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 573 043c 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 574 043e 03F1FF33 		add	r3, r3, #-1
+ 575 0442 DAB2     		uxtb	r2, r3
+ 576 0444 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 577 0448 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 578 044c 1A70     		strb	r2, [r3, #0]
+ 579 044e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 580 0452 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 581 0456 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 582 0458 002B     		cmp	r3, #0
+ 583 045a 01D1     		bne	.L38
+ 584              		.loc 1 310 0 is_stmt 0 discriminator 1
+ 585 045c FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 586              	.L38:
+ 587              		.loc 1 310 0 discriminator 2
+ 588 0460 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 589 0464 F869     		ldr	r0, [r7, #28]
+ 590 0466 FFF7FEFF 		bl	CPU_SR_Restore
+ 311:Libraries/uC-OSIII/os_time.c ****         OSSched();                                          /* Find next task to run!              
+ 591              		.loc 1 311 0 is_stmt 1 discriminator 2
+ 592 046a FFF7FEFF 		bl	OSSched
+ 312:Libraries/uC-OSIII/os_time.c ****        *p_err = OS_ERR_NONE;
+ 593              		.loc 1 312 0 discriminator 2
+ 594 046e FB6A     		ldr	r3, [r7, #44]
+ 595 0470 4FF00002 		mov	r2, #0
+ 596 0474 1A80     		strh	r2, [r3, #0]	@ movhi
+ 597 0476 03E0     		b	.L17
+ 598              	.L34:
+ 313:Libraries/uC-OSIII/os_time.c ****     } else {
+ 314:Libraries/uC-OSIII/os_time.c ****        *p_err = OS_ERR_TIME_ZERO_DLY;
+ 599              		.loc 1 314 0
+ 600 0478 FB6A     		ldr	r3, [r7, #44]
+ 601 047a 47F27E22 		movw	r2, #29310
+ 602 047e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 603              	.L17:
+ 315:Libraries/uC-OSIII/os_time.c ****     }
+ 316:Libraries/uC-OSIII/os_time.c **** }
+ 604              		.loc 1 316 0
+ 605 0480 07F12007 		add	r7, r7, #32
+ 606 0484 BD46     		mov	sp, r7
+ 607 0486 80BD     		pop	{r7, pc}
+ 608              		.cfi_endproc
+ 609              	.LFE1:
+ 611              		.align	2
+ 612              		.global	OSTimeDlyResume
+ 613              		.thumb
+ 614              		.thumb_func
+ 616              	OSTimeDlyResume:
+ 617              	.LFB2:
+ 317:Libraries/uC-OSIII/os_time.c **** #endif
+ 318:Libraries/uC-OSIII/os_time.c **** /*$PAGE*/
+ 319:Libraries/uC-OSIII/os_time.c **** /*
+ 320:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+ 321:Libraries/uC-OSIII/os_time.c **** *                                                RESUME A DELAYED TASK
+ 322:Libraries/uC-OSIII/os_time.c **** *
+ 323:Libraries/uC-OSIII/os_time.c **** * Description: This function is used resume a task that has been delayed through a call to either O
+ 324:Libraries/uC-OSIII/os_time.c **** *              OSTimeDlyHMSM().  Note that cannot call this function to resume a task that is waiti
+ 325:Libraries/uC-OSIII/os_time.c **** *              with timeout.
+ 326:Libraries/uC-OSIII/os_time.c **** *
+ 327:Libraries/uC-OSIII/os_time.c **** * Arguments  : p_tcb    is a pointer to the TCB of the task to resume.
+ 328:Libraries/uC-OSIII/os_time.c **** *
+ 329:Libraries/uC-OSIII/os_time.c **** *              p_err    is a pointer to a variable that will receive an error code
+ 330:Libraries/uC-OSIII/os_time.c **** *
+ 331:Libraries/uC-OSIII/os_time.c **** *                           OS_ERR_NONE                  Task has been resumed
+ 332:Libraries/uC-OSIII/os_time.c **** *                           OS_ERR_STATE_INVALID         Task is in an invalid state
+ 333:Libraries/uC-OSIII/os_time.c **** *                           OS_ERR_TIME_DLY_RESUME_ISR   Task is not waiting for time to expire
+ 334:Libraries/uC-OSIII/os_time.c **** *                           OS_ERR_TIME_NOT_DLY          Task is not waiting for time to expire
+ 335:Libraries/uC-OSIII/os_time.c **** *                           OS_ERR_TASK_SUSPENDED        Task cannot be resumed, it was suspended b
+ 336:Libraries/uC-OSIII/os_time.c **** *
+ 337:Libraries/uC-OSIII/os_time.c **** * Note(s)    : none
+ 338:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+ 339:Libraries/uC-OSIII/os_time.c **** */
+ 340:Libraries/uC-OSIII/os_time.c **** 
+ 341:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_TIME_DLY_RESUME_EN > 0u
+ 342:Libraries/uC-OSIII/os_time.c **** void  OSTimeDlyResume (OS_TCB  *p_tcb,
+ 343:Libraries/uC-OSIII/os_time.c ****                        OS_ERR  *p_err)
+ 344:Libraries/uC-OSIII/os_time.c **** {
+ 618              		.loc 1 344 0
+ 619              		.cfi_startproc
+ 620              		@ args = 0, pretend = 0, frame = 16
+ 621              		@ frame_needed = 1, uses_anonymous_args = 0
+ 622 0488 80B5     		push	{r7, lr}
+ 623              	.LCFI6:
+ 624              		.cfi_def_cfa_offset 8
+ 625              		.cfi_offset 14, -4
+ 626              		.cfi_offset 7, -8
+ 627 048a 84B0     		sub	sp, sp, #16
+ 628              	.LCFI7:
+ 629              		.cfi_def_cfa_offset 24
+ 630 048c 00AF     		add	r7, sp, #0
+ 631              	.LCFI8:
+ 632              		.cfi_def_cfa_register 7
+ 633 048e 7860     		str	r0, [r7, #4]
+ 634 0490 3960     		str	r1, [r7, #0]
+ 345:Libraries/uC-OSIII/os_time.c ****     CPU_SR_ALLOC();
+ 635              		.loc 1 345 0
+ 636 0492 4FF00003 		mov	r3, #0
+ 637 0496 FB60     		str	r3, [r7, #12]
+ 346:Libraries/uC-OSIII/os_time.c **** 
+ 347:Libraries/uC-OSIII/os_time.c **** 
+ 348:Libraries/uC-OSIII/os_time.c **** 
+ 349:Libraries/uC-OSIII/os_time.c **** #ifdef OS_SAFETY_CRITICAL
+ 350:Libraries/uC-OSIII/os_time.c ****     if (p_err == (OS_ERR *)0) {
+ 351:Libraries/uC-OSIII/os_time.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 352:Libraries/uC-OSIII/os_time.c ****     }
+ 353:Libraries/uC-OSIII/os_time.c **** #endif
+ 354:Libraries/uC-OSIII/os_time.c **** 
+ 355:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 356:Libraries/uC-OSIII/os_time.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0u) {             /* Not allowed to call from an ISR     
+ 638              		.loc 1 356 0
+ 639 0498 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 640 049c C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 641 04a0 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 642 04a2 002B     		cmp	r3, #0
+ 643 04a4 04D0     		beq	.L42
+ 357:Libraries/uC-OSIII/os_time.c ****         *p_err = OS_ERR_TIME_DLY_RESUME_ISR;
+ 644              		.loc 1 357 0
+ 645 04a6 3B68     		ldr	r3, [r7, #0]
+ 646 04a8 47F27622 		movw	r2, #29302
+ 647 04ac 1A80     		strh	r2, [r3, #0]	@ movhi
+ 358:Libraries/uC-OSIII/os_time.c ****         return;
+ 648              		.loc 1 358 0
+ 649 04ae 00E1     		b	.L41
+ 650              	.L42:
+ 359:Libraries/uC-OSIII/os_time.c ****     }
+ 360:Libraries/uC-OSIII/os_time.c **** #endif
+ 361:Libraries/uC-OSIII/os_time.c **** 
+ 362:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 363:Libraries/uC-OSIII/os_time.c ****     if (p_tcb == (OS_TCB *)0u) {                            /* Not possible for the running task to
+ 651              		.loc 1 363 0
+ 652 04b0 7B68     		ldr	r3, [r7, #4]
+ 653 04b2 002B     		cmp	r3, #0
+ 654 04b4 04D1     		bne	.L44
+ 364:Libraries/uC-OSIII/os_time.c ****        *p_err = OS_ERR_TASK_NOT_DLY;
+ 655              		.loc 1 364 0
+ 656 04b6 3B68     		ldr	r3, [r7, #0]
+ 657 04b8 47F25112 		movw	r2, #29009
+ 658 04bc 1A80     		strh	r2, [r3, #0]	@ movhi
+ 365:Libraries/uC-OSIII/os_time.c ****         return;
+ 659              		.loc 1 365 0
+ 660 04be F8E0     		b	.L41
+ 661              	.L44:
+ 366:Libraries/uC-OSIII/os_time.c ****     }
+ 367:Libraries/uC-OSIII/os_time.c **** #endif
+ 368:Libraries/uC-OSIII/os_time.c **** 
+ 369:Libraries/uC-OSIII/os_time.c ****     CPU_CRITICAL_ENTER();
+ 662              		.loc 1 369 0
+ 663 04c0 FFF7FEFF 		bl	CPU_SR_Save
+ 664 04c4 F860     		str	r0, [r7, #12]
+ 665 04c6 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 370:Libraries/uC-OSIII/os_time.c ****     switch (p_tcb->TaskState) {
+ 666              		.loc 1 370 0
+ 667 04ca 7B68     		ldr	r3, [r7, #4]
+ 668 04cc 93F8C230 		ldrb	r3, [r3, #194]	@ zero_extendqisi2
+ 669 04d0 072B     		cmp	r3, #7
+ 670 04d2 00F2E280 		bhi	.L45
+ 671 04d6 01A2     		adr	r2, .L54
+ 672 04d8 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 673              		.align	2
+ 674              	.L54:
+ 675 04dc FD040000 		.word	.L46+1
+ 676 04e0 11050000 		.word	.L47+1
+ 677 04e4 A7050000 		.word	.L48+1
+ 678 04e8 BB050000 		.word	.L49+1
+ 679 04ec CF050000 		.word	.L50+1
+ 680 04f0 E3050000 		.word	.L51+1
+ 681 04f4 73060000 		.word	.L52+1
+ 682 04f8 87060000 		.word	.L53+1
+ 683              	.L46:
+ 371:Libraries/uC-OSIII/os_time.c ****         case OS_TASK_STATE_RDY:                             /* Cannot Abort delay if task is ready 
+ 372:Libraries/uC-OSIII/os_time.c ****              CPU_CRITICAL_EXIT();
+ 684              		.loc 1 372 0
+ 685 04fc FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 686 0500 F868     		ldr	r0, [r7, #12]
+ 687 0502 FFF7FEFF 		bl	CPU_SR_Restore
+ 373:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TASK_NOT_DLY;
+ 688              		.loc 1 373 0
+ 689 0506 3B68     		ldr	r3, [r7, #0]
+ 690 0508 47F25112 		movw	r2, #29009
+ 691 050c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 374:Libraries/uC-OSIII/os_time.c ****              break;
+ 692              		.loc 1 374 0
+ 693 050e CEE0     		b	.L55
+ 694              	.L47:
+ 375:Libraries/uC-OSIII/os_time.c **** 
+ 376:Libraries/uC-OSIII/os_time.c ****         case OS_TASK_STATE_DLY:
+ 377:Libraries/uC-OSIII/os_time.c ****              OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();
+ 695              		.loc 1 377 0
+ 696 0510 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 697 0514 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 698 0518 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 699 051a 03F10103 		add	r3, r3, #1
+ 700 051e DAB2     		uxtb	r2, r3
+ 701 0520 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 702 0524 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 703 0528 1A70     		strb	r2, [r3, #0]
+ 704 052a 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 705 052e C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 706 0532 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 707 0534 012B     		cmp	r3, #1
+ 708 0536 01D1     		bne	.L56
+ 709              		.loc 1 377 0 is_stmt 0 discriminator 1
+ 710 0538 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 711              	.L56:
+ 712              		.loc 1 377 0 discriminator 2
+ 713 053c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 714 0540 F868     		ldr	r0, [r7, #12]
+ 715 0542 FFF7FEFF 		bl	CPU_SR_Restore
+ 378:Libraries/uC-OSIII/os_time.c ****              p_tcb->TaskState = OS_TASK_STATE_RDY;
+ 716              		.loc 1 378 0 is_stmt 1 discriminator 2
+ 717 0546 7B68     		ldr	r3, [r7, #4]
+ 718 0548 4FF00002 		mov	r2, #0
+ 719 054c 83F8C220 		strb	r2, [r3, #194]
+ 379:Libraries/uC-OSIII/os_time.c ****              OS_TickListRemove(p_tcb);                      /* Remove task from tick list          
+ 720              		.loc 1 379 0 discriminator 2
+ 721 0550 7868     		ldr	r0, [r7, #4]
+ 722 0552 FFF7FEFF 		bl	OS_TickListRemove
+ 380:Libraries/uC-OSIII/os_time.c ****              OS_RdyListInsert(p_tcb);                       /* Add to ready list                   
+ 723              		.loc 1 380 0 discriminator 2
+ 724 0556 7868     		ldr	r0, [r7, #4]
+ 725 0558 FFF7FEFF 		bl	OS_RdyListInsert
+ 381:Libraries/uC-OSIII/os_time.c ****              OS_CRITICAL_EXIT_NO_SCHED();
+ 726              		.loc 1 381 0 discriminator 2
+ 727 055c FFF7FEFF 		bl	CPU_SR_Save
+ 728 0560 F860     		str	r0, [r7, #12]
+ 729 0562 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 730 0566 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 731 056a C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 732 056e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 733 0570 03F1FF33 		add	r3, r3, #-1
+ 734 0574 DAB2     		uxtb	r2, r3
+ 735 0576 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 736 057a C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 737 057e 1A70     		strb	r2, [r3, #0]
+ 738 0580 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 739 0584 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 740 0588 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 741 058a 002B     		cmp	r3, #0
+ 742 058c 01D1     		bne	.L57
+ 743              		.loc 1 381 0 is_stmt 0 discriminator 1
+ 744 058e FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 745              	.L57:
+ 746              		.loc 1 381 0 discriminator 2
+ 747 0592 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 748 0596 F868     		ldr	r0, [r7, #12]
+ 749 0598 FFF7FEFF 		bl	CPU_SR_Restore
+ 382:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_NONE;
+ 750              		.loc 1 382 0 is_stmt 1 discriminator 2
+ 751 059c 3B68     		ldr	r3, [r7, #0]
+ 752 059e 4FF00002 		mov	r2, #0
+ 753 05a2 1A80     		strh	r2, [r3, #0]	@ movhi
+ 383:Libraries/uC-OSIII/os_time.c ****              break;
+ 754              		.loc 1 383 0 discriminator 2
+ 755 05a4 83E0     		b	.L55
+ 756              	.L48:
+ 384:Libraries/uC-OSIII/os_time.c **** 
+ 385:Libraries/uC-OSIII/os_time.c ****         case OS_TASK_STATE_PEND:
+ 386:Libraries/uC-OSIII/os_time.c ****              CPU_CRITICAL_EXIT();
+ 757              		.loc 1 386 0
+ 758 05a6 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 759 05aa F868     		ldr	r0, [r7, #12]
+ 760 05ac FFF7FEFF 		bl	CPU_SR_Restore
+ 387:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TASK_NOT_DLY;
+ 761              		.loc 1 387 0
+ 762 05b0 3B68     		ldr	r3, [r7, #0]
+ 763 05b2 47F25112 		movw	r2, #29009
+ 764 05b6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 388:Libraries/uC-OSIII/os_time.c ****              break;
+ 765              		.loc 1 388 0
+ 766 05b8 79E0     		b	.L55
+ 767              	.L49:
+ 389:Libraries/uC-OSIII/os_time.c **** 
+ 390:Libraries/uC-OSIII/os_time.c ****         case OS_TASK_STATE_PEND_TIMEOUT:
+ 391:Libraries/uC-OSIII/os_time.c ****              CPU_CRITICAL_EXIT();
+ 768              		.loc 1 391 0
+ 769 05ba FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 770 05be F868     		ldr	r0, [r7, #12]
+ 771 05c0 FFF7FEFF 		bl	CPU_SR_Restore
+ 392:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TASK_NOT_DLY;
+ 772              		.loc 1 392 0
+ 773 05c4 3B68     		ldr	r3, [r7, #0]
+ 774 05c6 47F25112 		movw	r2, #29009
+ 775 05ca 1A80     		strh	r2, [r3, #0]	@ movhi
+ 393:Libraries/uC-OSIII/os_time.c ****              break;
+ 776              		.loc 1 393 0
+ 777 05cc 6FE0     		b	.L55
+ 778              	.L50:
+ 394:Libraries/uC-OSIII/os_time.c **** 
+ 395:Libraries/uC-OSIII/os_time.c ****         case OS_TASK_STATE_SUSPENDED:
+ 396:Libraries/uC-OSIII/os_time.c ****              CPU_CRITICAL_EXIT();
+ 779              		.loc 1 396 0
+ 780 05ce FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 781 05d2 F868     		ldr	r0, [r7, #12]
+ 782 05d4 FFF7FEFF 		bl	CPU_SR_Restore
+ 397:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TASK_NOT_DLY;
+ 783              		.loc 1 397 0
+ 784 05d8 3B68     		ldr	r3, [r7, #0]
+ 785 05da 47F25112 		movw	r2, #29009
+ 786 05de 1A80     		strh	r2, [r3, #0]	@ movhi
+ 398:Libraries/uC-OSIII/os_time.c ****              break;
+ 787              		.loc 1 398 0
+ 788 05e0 65E0     		b	.L55
+ 789              	.L51:
+ 399:Libraries/uC-OSIII/os_time.c **** 
+ 400:Libraries/uC-OSIII/os_time.c ****         case OS_TASK_STATE_DLY_SUSPENDED:
+ 401:Libraries/uC-OSIII/os_time.c ****              OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();
+ 790              		.loc 1 401 0
+ 791 05e2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 792 05e6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 793 05ea 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 794 05ec 03F10103 		add	r3, r3, #1
+ 795 05f0 DAB2     		uxtb	r2, r3
+ 796 05f2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 797 05f6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 798 05fa 1A70     		strb	r2, [r3, #0]
+ 799 05fc 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 800 0600 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 801 0604 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 802 0606 012B     		cmp	r3, #1
+ 803 0608 01D1     		bne	.L58
+ 804              		.loc 1 401 0 is_stmt 0 discriminator 1
+ 805 060a FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 806              	.L58:
+ 807              		.loc 1 401 0 discriminator 2
+ 808 060e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 809 0612 F868     		ldr	r0, [r7, #12]
+ 810 0614 FFF7FEFF 		bl	CPU_SR_Restore
+ 402:Libraries/uC-OSIII/os_time.c ****              p_tcb->TaskState = OS_TASK_STATE_SUSPENDED;
+ 811              		.loc 1 402 0 is_stmt 1 discriminator 2
+ 812 0618 7B68     		ldr	r3, [r7, #4]
+ 813 061a 4FF00402 		mov	r2, #4
+ 814 061e 83F8C220 		strb	r2, [r3, #194]
+ 403:Libraries/uC-OSIII/os_time.c ****              OS_TickListRemove(p_tcb);                      /* Remove task from tick list          
+ 815              		.loc 1 403 0 discriminator 2
+ 816 0622 7868     		ldr	r0, [r7, #4]
+ 817 0624 FFF7FEFF 		bl	OS_TickListRemove
+ 404:Libraries/uC-OSIII/os_time.c ****              OS_CRITICAL_EXIT_NO_SCHED();
+ 818              		.loc 1 404 0 discriminator 2
+ 819 0628 FFF7FEFF 		bl	CPU_SR_Save
+ 820 062c F860     		str	r0, [r7, #12]
+ 821 062e FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 822 0632 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 823 0636 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 824 063a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 825 063c 03F1FF33 		add	r3, r3, #-1
+ 826 0640 DAB2     		uxtb	r2, r3
+ 827 0642 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 828 0646 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 829 064a 1A70     		strb	r2, [r3, #0]
+ 830 064c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 831 0650 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 832 0654 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 833 0656 002B     		cmp	r3, #0
+ 834 0658 01D1     		bne	.L59
+ 835              		.loc 1 404 0 is_stmt 0 discriminator 1
+ 836 065a FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 837              	.L59:
+ 838              		.loc 1 404 0 discriminator 2
+ 839 065e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 840 0662 F868     		ldr	r0, [r7, #12]
+ 841 0664 FFF7FEFF 		bl	CPU_SR_Restore
+ 405:Libraries/uC-OSIII/os_time.c ****             *p_err            = OS_ERR_TASK_SUSPENDED;
+ 842              		.loc 1 405 0 is_stmt 1 discriminator 2
+ 843 0668 3B68     		ldr	r3, [r7, #0]
+ 844 066a 47F25912 		movw	r2, #29017
+ 845 066e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 406:Libraries/uC-OSIII/os_time.c ****              break;
+ 846              		.loc 1 406 0 discriminator 2
+ 847 0670 1DE0     		b	.L55
+ 848              	.L52:
+ 407:Libraries/uC-OSIII/os_time.c **** 
+ 408:Libraries/uC-OSIII/os_time.c ****         case OS_TASK_STATE_PEND_SUSPENDED:
+ 409:Libraries/uC-OSIII/os_time.c ****              CPU_CRITICAL_EXIT();
+ 849              		.loc 1 409 0
+ 850 0672 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 851 0676 F868     		ldr	r0, [r7, #12]
+ 852 0678 FFF7FEFF 		bl	CPU_SR_Restore
+ 410:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TASK_NOT_DLY;
+ 853              		.loc 1 410 0
+ 854 067c 3B68     		ldr	r3, [r7, #0]
+ 855 067e 47F25112 		movw	r2, #29009
+ 856 0682 1A80     		strh	r2, [r3, #0]	@ movhi
+ 411:Libraries/uC-OSIII/os_time.c ****              break;
+ 857              		.loc 1 411 0
+ 858 0684 13E0     		b	.L55
+ 859              	.L53:
+ 412:Libraries/uC-OSIII/os_time.c **** 
+ 413:Libraries/uC-OSIII/os_time.c ****         case OS_TASK_STATE_PEND_TIMEOUT_SUSPENDED:
+ 414:Libraries/uC-OSIII/os_time.c ****              CPU_CRITICAL_EXIT();
+ 860              		.loc 1 414 0
+ 861 0686 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 862 068a F868     		ldr	r0, [r7, #12]
+ 863 068c FFF7FEFF 		bl	CPU_SR_Restore
+ 415:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_TASK_NOT_DLY;
+ 864              		.loc 1 415 0
+ 865 0690 3B68     		ldr	r3, [r7, #0]
+ 866 0692 47F25112 		movw	r2, #29009
+ 867 0696 1A80     		strh	r2, [r3, #0]	@ movhi
+ 416:Libraries/uC-OSIII/os_time.c ****              break;
+ 868              		.loc 1 416 0
+ 869 0698 09E0     		b	.L55
+ 870              	.L45:
+ 417:Libraries/uC-OSIII/os_time.c **** 
+ 418:Libraries/uC-OSIII/os_time.c ****         default:
+ 419:Libraries/uC-OSIII/os_time.c ****              CPU_CRITICAL_EXIT();
+ 871              		.loc 1 419 0
+ 872 069a FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 873 069e F868     		ldr	r0, [r7, #12]
+ 874 06a0 FFF7FEFF 		bl	CPU_SR_Restore
+ 420:Libraries/uC-OSIII/os_time.c ****             *p_err = OS_ERR_STATE_INVALID;
+ 875              		.loc 1 420 0
+ 876 06a4 3B68     		ldr	r3, [r7, #0]
+ 877 06a6 46F62A62 		movw	r2, #28202
+ 878 06aa 1A80     		strh	r2, [r3, #0]	@ movhi
+ 421:Libraries/uC-OSIII/os_time.c ****              break;
+ 879              		.loc 1 421 0
+ 880 06ac 00BF     		nop
+ 881              	.L55:
+ 422:Libraries/uC-OSIII/os_time.c ****     }
+ 423:Libraries/uC-OSIII/os_time.c **** 
+ 424:Libraries/uC-OSIII/os_time.c ****     OSSched();
+ 882              		.loc 1 424 0
+ 883 06ae FFF7FEFF 		bl	OSSched
+ 884              	.L41:
+ 425:Libraries/uC-OSIII/os_time.c **** }
+ 885              		.loc 1 425 0
+ 886 06b2 07F11007 		add	r7, r7, #16
+ 887 06b6 BD46     		mov	sp, r7
+ 888 06b8 80BD     		pop	{r7, pc}
+ 889              		.cfi_endproc
+ 890              	.LFE2:
+ 892 06ba 00BF     		.align	2
+ 893              		.global	OSTimeGet
+ 894              		.thumb
+ 895              		.thumb_func
+ 897              	OSTimeGet:
+ 898              	.LFB3:
+ 426:Libraries/uC-OSIII/os_time.c **** #endif
+ 427:Libraries/uC-OSIII/os_time.c **** /*$PAGE*/
+ 428:Libraries/uC-OSIII/os_time.c **** /*
+ 429:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+ 430:Libraries/uC-OSIII/os_time.c **** *                                               GET CURRENT SYSTEM TIME
+ 431:Libraries/uC-OSIII/os_time.c **** *
+ 432:Libraries/uC-OSIII/os_time.c **** * Description: This function is used by your application to obtain the current value of the counter
+ 433:Libraries/uC-OSIII/os_time.c **** *              the number of clock ticks.
+ 434:Libraries/uC-OSIII/os_time.c **** *
+ 435:Libraries/uC-OSIII/os_time.c **** * Arguments  : p_err    is a pointer to a variable that will receive an error code
+ 436:Libraries/uC-OSIII/os_time.c **** *
+ 437:Libraries/uC-OSIII/os_time.c **** *                           OS_ERR_NONE           If the call was successful
+ 438:Libraries/uC-OSIII/os_time.c **** *
+ 439:Libraries/uC-OSIII/os_time.c **** * Returns    : The current value of OSTickCtr
+ 440:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+ 441:Libraries/uC-OSIII/os_time.c **** */
+ 442:Libraries/uC-OSIII/os_time.c **** 
+ 443:Libraries/uC-OSIII/os_time.c **** OS_TICK  OSTimeGet (OS_ERR  *p_err)
+ 444:Libraries/uC-OSIII/os_time.c **** {
+ 899              		.loc 1 444 0
+ 900              		.cfi_startproc
+ 901              		@ args = 0, pretend = 0, frame = 16
+ 902              		@ frame_needed = 1, uses_anonymous_args = 0
+ 903 06bc 80B5     		push	{r7, lr}
+ 904              	.LCFI9:
+ 905              		.cfi_def_cfa_offset 8
+ 906              		.cfi_offset 14, -4
+ 907              		.cfi_offset 7, -8
+ 908 06be 84B0     		sub	sp, sp, #16
+ 909              	.LCFI10:
+ 910              		.cfi_def_cfa_offset 24
+ 911 06c0 00AF     		add	r7, sp, #0
+ 912              	.LCFI11:
+ 913              		.cfi_def_cfa_register 7
+ 914 06c2 7860     		str	r0, [r7, #4]
+ 445:Libraries/uC-OSIII/os_time.c ****     OS_TICK  ticks;
+ 446:Libraries/uC-OSIII/os_time.c ****     CPU_SR_ALLOC();
+ 915              		.loc 1 446 0
+ 916 06c4 4FF00003 		mov	r3, #0
+ 917 06c8 FB60     		str	r3, [r7, #12]
+ 447:Libraries/uC-OSIII/os_time.c **** 
+ 448:Libraries/uC-OSIII/os_time.c **** 
+ 449:Libraries/uC-OSIII/os_time.c **** 
+ 450:Libraries/uC-OSIII/os_time.c **** #ifdef OS_SAFETY_CRITICAL
+ 451:Libraries/uC-OSIII/os_time.c ****     if (p_err == (OS_ERR *)0) {
+ 452:Libraries/uC-OSIII/os_time.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 453:Libraries/uC-OSIII/os_time.c ****     }
+ 454:Libraries/uC-OSIII/os_time.c **** #endif
+ 455:Libraries/uC-OSIII/os_time.c **** 
+ 456:Libraries/uC-OSIII/os_time.c ****     CPU_CRITICAL_ENTER();
+ 918              		.loc 1 456 0
+ 919 06ca FFF7FEFF 		bl	CPU_SR_Save
+ 920 06ce F860     		str	r0, [r7, #12]
+ 921 06d0 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 457:Libraries/uC-OSIII/os_time.c ****     ticks = OSTickCtr;
+ 922              		.loc 1 457 0
+ 923 06d4 40F20003 		movw	r3, #:lower16:OSTickCtr
+ 924 06d8 C0F20003 		movt	r3, #:upper16:OSTickCtr
+ 925 06dc 1B68     		ldr	r3, [r3, #0]
+ 926 06de BB60     		str	r3, [r7, #8]
+ 458:Libraries/uC-OSIII/os_time.c ****     CPU_CRITICAL_EXIT();
+ 927              		.loc 1 458 0
+ 928 06e0 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 929 06e4 F868     		ldr	r0, [r7, #12]
+ 930 06e6 FFF7FEFF 		bl	CPU_SR_Restore
+ 459:Libraries/uC-OSIII/os_time.c ****    *p_err = OS_ERR_NONE;
+ 931              		.loc 1 459 0
+ 932 06ea 7B68     		ldr	r3, [r7, #4]
+ 933 06ec 4FF00002 		mov	r2, #0
+ 934 06f0 1A80     		strh	r2, [r3, #0]	@ movhi
+ 460:Libraries/uC-OSIII/os_time.c ****     return (ticks);
+ 935              		.loc 1 460 0
+ 936 06f2 BB68     		ldr	r3, [r7, #8]
+ 461:Libraries/uC-OSIII/os_time.c **** }
+ 937              		.loc 1 461 0
+ 938 06f4 1846     		mov	r0, r3
+ 939 06f6 07F11007 		add	r7, r7, #16
+ 940 06fa BD46     		mov	sp, r7
+ 941 06fc 80BD     		pop	{r7, pc}
+ 942              		.cfi_endproc
+ 943              	.LFE3:
+ 945 06fe 00BF     		.align	2
+ 946              		.global	OSTimeSet
+ 947              		.thumb
+ 948              		.thumb_func
+ 950              	OSTimeSet:
+ 951              	.LFB4:
+ 462:Libraries/uC-OSIII/os_time.c **** 
+ 463:Libraries/uC-OSIII/os_time.c **** /*
+ 464:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+ 465:Libraries/uC-OSIII/os_time.c **** *                                                   SET SYSTEM CLOCK
+ 466:Libraries/uC-OSIII/os_time.c **** *
+ 467:Libraries/uC-OSIII/os_time.c **** * Description: This function sets the counter which keeps track of the number of clock ticks.
+ 468:Libraries/uC-OSIII/os_time.c **** *
+ 469:Libraries/uC-OSIII/os_time.c **** * Arguments  : ticks    is the desired tick value
+ 470:Libraries/uC-OSIII/os_time.c **** *
+ 471:Libraries/uC-OSIII/os_time.c **** *              p_err    is a pointer to a variable that will receive an error code
+ 472:Libraries/uC-OSIII/os_time.c **** *
+ 473:Libraries/uC-OSIII/os_time.c **** *                           OS_ERR_NONE           If the call was successful
+ 474:Libraries/uC-OSIII/os_time.c **** *
+ 475:Libraries/uC-OSIII/os_time.c **** * Returns    : none
+ 476:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+ 477:Libraries/uC-OSIII/os_time.c **** */
+ 478:Libraries/uC-OSIII/os_time.c **** 
+ 479:Libraries/uC-OSIII/os_time.c **** void  OSTimeSet (OS_TICK   ticks,
+ 480:Libraries/uC-OSIII/os_time.c ****                  OS_ERR   *p_err)
+ 481:Libraries/uC-OSIII/os_time.c **** {
+ 952              		.loc 1 481 0
+ 953              		.cfi_startproc
+ 954              		@ args = 0, pretend = 0, frame = 16
+ 955              		@ frame_needed = 1, uses_anonymous_args = 0
+ 956 0700 80B5     		push	{r7, lr}
+ 957              	.LCFI12:
+ 958              		.cfi_def_cfa_offset 8
+ 959              		.cfi_offset 14, -4
+ 960              		.cfi_offset 7, -8
+ 961 0702 84B0     		sub	sp, sp, #16
+ 962              	.LCFI13:
+ 963              		.cfi_def_cfa_offset 24
+ 964 0704 00AF     		add	r7, sp, #0
+ 965              	.LCFI14:
+ 966              		.cfi_def_cfa_register 7
+ 967 0706 7860     		str	r0, [r7, #4]
+ 968 0708 3960     		str	r1, [r7, #0]
+ 482:Libraries/uC-OSIII/os_time.c ****     CPU_SR_ALLOC();
+ 969              		.loc 1 482 0
+ 970 070a 4FF00003 		mov	r3, #0
+ 971 070e FB60     		str	r3, [r7, #12]
+ 483:Libraries/uC-OSIII/os_time.c **** 
+ 484:Libraries/uC-OSIII/os_time.c **** 
+ 485:Libraries/uC-OSIII/os_time.c **** 
+ 486:Libraries/uC-OSIII/os_time.c **** #ifdef OS_SAFETY_CRITICAL
+ 487:Libraries/uC-OSIII/os_time.c ****     if (p_err == (OS_ERR *)0) {
+ 488:Libraries/uC-OSIII/os_time.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 489:Libraries/uC-OSIII/os_time.c ****     }
+ 490:Libraries/uC-OSIII/os_time.c **** #endif
+ 491:Libraries/uC-OSIII/os_time.c **** 
+ 492:Libraries/uC-OSIII/os_time.c ****     CPU_CRITICAL_ENTER();
+ 972              		.loc 1 492 0
+ 973 0710 FFF7FEFF 		bl	CPU_SR_Save
+ 974 0714 F860     		str	r0, [r7, #12]
+ 975 0716 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 493:Libraries/uC-OSIII/os_time.c ****     OSTickCtr = ticks;
+ 976              		.loc 1 493 0
+ 977 071a 40F20003 		movw	r3, #:lower16:OSTickCtr
+ 978 071e C0F20003 		movt	r3, #:upper16:OSTickCtr
+ 979 0722 7A68     		ldr	r2, [r7, #4]
+ 980 0724 1A60     		str	r2, [r3, #0]
+ 494:Libraries/uC-OSIII/os_time.c ****     CPU_CRITICAL_EXIT();
+ 981              		.loc 1 494 0
+ 982 0726 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 983 072a F868     		ldr	r0, [r7, #12]
+ 984 072c FFF7FEFF 		bl	CPU_SR_Restore
+ 495:Libraries/uC-OSIII/os_time.c ****    *p_err     = OS_ERR_NONE;
+ 985              		.loc 1 495 0
+ 986 0730 3B68     		ldr	r3, [r7, #0]
+ 987 0732 4FF00002 		mov	r2, #0
+ 988 0736 1A80     		strh	r2, [r3, #0]	@ movhi
+ 496:Libraries/uC-OSIII/os_time.c **** }
+ 989              		.loc 1 496 0
+ 990 0738 07F11007 		add	r7, r7, #16
+ 991 073c BD46     		mov	sp, r7
+ 992 073e 80BD     		pop	{r7, pc}
+ 993              		.cfi_endproc
+ 994              	.LFE4:
+ 996              		.align	2
+ 997              		.global	OSTimeTick
+ 998              		.thumb
+ 999              		.thumb_func
+ 1001              	OSTimeTick:
+ 1002              	.LFB5:
+ 497:Libraries/uC-OSIII/os_time.c **** 
+ 498:Libraries/uC-OSIII/os_time.c **** /*$PAGE*/
+ 499:Libraries/uC-OSIII/os_time.c **** /*
+ 500:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+ 501:Libraries/uC-OSIII/os_time.c **** *                                                 PROCESS SYSTEM TICK
+ 502:Libraries/uC-OSIII/os_time.c **** *
+ 503:Libraries/uC-OSIII/os_time.c **** * Description: This function is used to signal to uC/OS-III the occurrence of a 'system tick' (also
+ 504:Libraries/uC-OSIII/os_time.c **** *              'clock tick').  This function should be called by the tick ISR.
+ 505:Libraries/uC-OSIII/os_time.c **** *
+ 506:Libraries/uC-OSIII/os_time.c **** * Arguments  : none
+ 507:Libraries/uC-OSIII/os_time.c **** *
+ 508:Libraries/uC-OSIII/os_time.c **** * Returns    : none
+ 509:Libraries/uC-OSIII/os_time.c **** ***************************************************************************************************
+ 510:Libraries/uC-OSIII/os_time.c **** */
+ 511:Libraries/uC-OSIII/os_time.c **** 
+ 512:Libraries/uC-OSIII/os_time.c **** void  OSTimeTick (void)
+ 513:Libraries/uC-OSIII/os_time.c **** {
+ 1003              		.loc 1 513 0
+ 1004              		.cfi_startproc
+ 1005              		@ args = 0, pretend = 0, frame = 8
+ 1006              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1007 0740 80B5     		push	{r7, lr}
+ 1008              	.LCFI15:
+ 1009              		.cfi_def_cfa_offset 8
+ 1010              		.cfi_offset 14, -4
+ 1011              		.cfi_offset 7, -8
+ 1012 0742 86B0     		sub	sp, sp, #24
+ 1013              	.LCFI16:
+ 1014              		.cfi_def_cfa_offset 32
+ 1015 0744 04AF     		add	r7, sp, #16
+ 1016              	.LCFI17:
+ 1017              		.cfi_def_cfa 7, 16
+ 514:Libraries/uC-OSIII/os_time.c ****     OS_ERR  err;
+ 515:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_ISR_POST_DEFERRED_EN > 0u
+ 516:Libraries/uC-OSIII/os_time.c ****     CPU_TS  ts;
+ 517:Libraries/uC-OSIII/os_time.c **** #endif
+ 518:Libraries/uC-OSIII/os_time.c **** 
+ 519:Libraries/uC-OSIII/os_time.c **** 
+ 520:Libraries/uC-OSIII/os_time.c ****     OSTimeTickHook();                                       /* Call user definable hook            
+ 1018              		.loc 1 520 0
+ 1019 0746 FFF7FEFF 		bl	OSTimeTickHook
+ 521:Libraries/uC-OSIII/os_time.c **** 
+ 522:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_ISR_POST_DEFERRED_EN > 0u
+ 523:Libraries/uC-OSIII/os_time.c **** 
+ 524:Libraries/uC-OSIII/os_time.c ****     ts = OS_TS_GET();                                       /* Get timestamp                       
+ 1020              		.loc 1 524 0
+ 1021 074a FFF7FEFF 		bl	CPU_TS_TmrRd
+ 1022 074e 7860     		str	r0, [r7, #4]
+ 525:Libraries/uC-OSIII/os_time.c ****     OS_IntQPost((OS_OBJ_TYPE) OS_OBJ_TYPE_TICK,             /* Post to ISR queue                   
+ 1023              		.loc 1 525 0
+ 1024 0750 40F20003 		movw	r3, #:lower16:OSPrioCur
+ 1025 0754 C0F20003 		movt	r3, #:upper16:OSPrioCur
+ 1026 0758 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1027 075a 1A46     		mov	r2, r3
+ 526:Libraries/uC-OSIII/os_time.c ****                 (void      *)&OSRdyList[OSPrioCur],
+ 1028              		.loc 1 526 0
+ 1029 075c 1346     		mov	r3, r2
+ 1030 075e 4FEA4303 		lsl	r3, r3, #1
+ 1031 0762 9B18     		adds	r3, r3, r2
+ 1032 0764 4FEA8303 		lsl	r3, r3, #2
+ 1033 0768 1A46     		mov	r2, r3
+ 525:Libraries/uC-OSIII/os_time.c ****     OS_IntQPost((OS_OBJ_TYPE) OS_OBJ_TYPE_TICK,             /* Post to ISR queue                   
+ 1034              		.loc 1 525 0
+ 1035 076a 40F20003 		movw	r3, #:lower16:OSRdyList
+ 1036 076e C0F20003 		movt	r3, #:upper16:OSRdyList
+ 1037 0772 D318     		adds	r3, r2, r3
+ 1038 0774 4FF00002 		mov	r2, #0
+ 1039 0778 0092     		str	r2, [sp, #0]
+ 1040 077a 4FF00002 		mov	r2, #0
+ 1041 077e 0192     		str	r2, [sp, #4]
+ 1042 0780 7A68     		ldr	r2, [r7, #4]
+ 1043 0782 0292     		str	r2, [sp, #8]
+ 1044 0784 07F10202 		add	r2, r7, #2
+ 1045 0788 0392     		str	r2, [sp, #12]
+ 1046 078a 44F65410 		movw	r0, #18772
+ 1047 078e C4F64330 		movt	r0, 19267
+ 1048 0792 1946     		mov	r1, r3
+ 1049 0794 4FF00002 		mov	r2, #0
+ 1050 0798 4FF00003 		mov	r3, #0
+ 1051 079c FFF7FEFF 		bl	OS_IntQPost
+ 527:Libraries/uC-OSIII/os_time.c ****                 (void      *) 0,
+ 528:Libraries/uC-OSIII/os_time.c ****                 (OS_MSG_SIZE) 0u,
+ 529:Libraries/uC-OSIII/os_time.c ****                 (OS_FLAGS   ) 0u,
+ 530:Libraries/uC-OSIII/os_time.c ****                 (OS_OPT     ) 0u,
+ 531:Libraries/uC-OSIII/os_time.c ****                 (CPU_TS     ) ts,
+ 532:Libraries/uC-OSIII/os_time.c ****                 (OS_ERR    *)&err);
+ 533:Libraries/uC-OSIII/os_time.c **** 
+ 534:Libraries/uC-OSIII/os_time.c **** #else
+ 535:Libraries/uC-OSIII/os_time.c **** 
+ 536:Libraries/uC-OSIII/os_time.c ****    (void)OSTaskSemPost((OS_TCB *)&OSTickTaskTCB,            /* Signal tick task                    
+ 537:Libraries/uC-OSIII/os_time.c ****                        (OS_OPT  ) OS_OPT_POST_NONE,
+ 538:Libraries/uC-OSIII/os_time.c ****                        (OS_ERR *)&err);
+ 539:Libraries/uC-OSIII/os_time.c **** 
+ 540:Libraries/uC-OSIII/os_time.c **** 
+ 541:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_SCHED_ROUND_ROBIN_EN > 0u
+ 542:Libraries/uC-OSIII/os_time.c ****     OS_SchedRoundRobin(&OSRdyList[OSPrioCur]);
+ 543:Libraries/uC-OSIII/os_time.c **** #endif
+ 544:Libraries/uC-OSIII/os_time.c **** 
+ 545:Libraries/uC-OSIII/os_time.c **** #if OS_CFG_TMR_EN > 0u
+ 546:Libraries/uC-OSIII/os_time.c ****     OSTmrUpdateCtr--;
+ 547:Libraries/uC-OSIII/os_time.c ****     if (OSTmrUpdateCtr == (OS_CTR)0u) {
+ 548:Libraries/uC-OSIII/os_time.c ****         OSTmrUpdateCtr = OSTmrUpdateCnt;
+ 549:Libraries/uC-OSIII/os_time.c ****         OSTaskSemPost((OS_TCB *)&OSTmrTaskTCB,              /* Signal timer task                   
+ 550:Libraries/uC-OSIII/os_time.c ****                       (OS_OPT  ) OS_OPT_POST_NONE,
+ 551:Libraries/uC-OSIII/os_time.c ****                       (OS_ERR *)&err);
+ 552:Libraries/uC-OSIII/os_time.c ****     }
+ 553:Libraries/uC-OSIII/os_time.c **** #endif
+ 554:Libraries/uC-OSIII/os_time.c **** 
+ 555:Libraries/uC-OSIII/os_time.c **** #endif
+ 556:Libraries/uC-OSIII/os_time.c **** }
+ 1052              		.loc 1 556 0
+ 1053 07a0 07F10807 		add	r7, r7, #8
+ 1054 07a4 BD46     		mov	sp, r7
+ 1055 07a6 80BD     		pop	{r7, pc}
+ 1056              		.cfi_endproc
+ 1057              	.LFE5:
+ 1059              	.Letext0:
+ 1060              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 1061              		.file 3 "Libraries/uC-CPU/cpu_core.h"
+ 1062              		.file 4 "Libraries/uC-OSIII/os_type.h"
+ 1063              		.file 5 "Libraries/uC-OSIII/os.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 os_time.c
+     /tmp/ccUSlvYc.s:18     .text:00000000 $t
+     /tmp/ccUSlvYc.s:23     .text:00000000 OSTimeDly
+     /tmp/ccUSlvYc.s:82     .text:00000050 $d
+     /tmp/ccUSlvYc.s:93     .text:00000074 $t
+     /tmp/ccUSlvYc.s:238    .text:000001ac OSTimeDlyHMSM
+     /tmp/ccUSlvYc.s:303    .text:0000020c $d
+     /tmp/ccUSlvYc.s:314    .text:00000230 $t
+     /tmp/ccUSlvYc.s:616    .text:00000488 OSTimeDlyResume
+     /tmp/ccUSlvYc.s:675    .text:000004dc $d
+     /tmp/ccUSlvYc.s:685    .text:000004fc $t
+     /tmp/ccUSlvYc.s:897    .text:000006bc OSTimeGet
+     /tmp/ccUSlvYc.s:950    .text:00000700 OSTimeSet
+     /tmp/ccUSlvYc.s:1001   .text:00000740 OSTimeTick
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+OSIntNestingCtr
+OSSchedLockNestingCtr
+CPU_SR_Save
+CPU_IntDisMeasStart
+OS_SchedLockTimeMeasStart
+CPU_IntDisMeasStop
+CPU_SR_Restore
+OSTCBCurPtr
+OS_TickListInsert
+OS_SchedLockTimeMeasStop
+OS_RdyListRemove
+OSSched
+OSCfg_TickRate_Hz
+OS_TickListRemove
+OS_RdyListInsert
+OSTickCtr
+OSTimeTickHook
+CPU_TS_TmrRd
+OSPrioCur
+OSRdyList
+OS_IntQPost

@@ -1,0 +1,2491 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"csp_dma.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.bss
+  19              		.align	2
+  20              	CSP_DMA_ChTbl:
+  21 0000 00000000 		.space	96
+  21      00000000 
+  21      00000000 
+  21      00000000 
+  21      00000000 
+  22              		.text
+  23              		.align	2
+  24              		.global	CSP_DMA_InitExt
+  25              		.thumb
+  26              		.thumb_func
+  28              	CSP_DMA_InitExt:
+  29              	.LFB0:
+  30              		.file 1 "Libraries/uC-CSP/LPC17xx/csp_dma.c"
+   1:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+   2:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+   3:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                              uC/CSP
+   4:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                        Chip Support Package
+   5:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+   6:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                            (c) Copyright 2010; Micrium, Inc.; Weston, FL
+   7:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                         (c) Copyright 2003-2010; Micrium, Inc.; Weston, FL
+   8:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+   9:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               All rights reserved. Protected by international copyright laws.
+  10:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+  11:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               uC/CSP is provided in source form to registered licensees ONLY.  It is
+  12:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               illegal to distribute this source code to any third party unless you receive
+  13:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               written permission by an authorized Micrium representative.  Knowledge of
+  14:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               the source code may NOT be used to develop a similar product.
+  15:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+  16:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               Please help us continue to provide the Embedded community with the finest
+  17:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               software available.  Your honesty is greatly appreciated.
+  18:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+  19:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               You can contact us at www.micrium.com.
+  20:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  21:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+  22:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  23:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+  24:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  25:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+  26:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                             DMA CONTROLLER
+  27:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                               NXP LPC17xx 
+  28:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+  29:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Filename      : csp_dma.c
+  30:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Version       : V1.00
+  31:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Programmer(s) : FT
+  32:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  33:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Note(s)       : 
+  34:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  35:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+  36:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  37:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  38:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+  39:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  40:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                            INCLUDE FILES
+  41:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  42:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+  43:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  44:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_MODULE
+  45:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #include  <csp.h>
+  46:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  47:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  48:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+  49:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  50:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                            LOCAL DEFINES
+  51:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  52:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+  53:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  54:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_CH_MAX_NBR                               8u
+  55:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  56:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_CH_STATE_FREE                            0u
+  57:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_CH_STATE_ALLOC                           1u
+  58:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  59:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+  60:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  61:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    REGISTER & BIT-FIELD DEFINITION
+  62:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  63:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+  64:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  65:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_ADDR_DMA_REG                          (CPU_ADDR   )(0x50004000)
+  66:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_REG_REQ_SEL                   (( *(CPU_REG32 *)0x400FC1C4))
+  67:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  68:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  69:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* ------ DMA CONFIGRATUIN REGISTER
+  70:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_REG_CFG_DMA_EN                 DEF_BIT_00      /* DMA enable.                     
+  71:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  72:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  73:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* ----- DMA CHANNEL CONTROL REGIST
+  74:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_BIT_CH_CTRL_SI                 DEF_BIT_26     
+  75:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_BIT_CH_CTRL_DI                 DEF_BIT_27
+  76:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_BIT_CH_CTRL_I                  DEF_BIT_31
+  77:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_MSK_CH_CTRL_XFER_SIZE          DEF_BIT_FIELD(12u, 0u)
+  78:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  79:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* -- DMA CHANNEL CONFIGURATION REG
+  80:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_BIT_CH_CFG_CH_EN               DEF_BIT_00
+  81:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_BIT_CH_CFG_XFER_MEM_TO_MEM     DEF_BIT_MASK(0u, 11u) 
+  82:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_BIT_CH_CFG_XFER_MEM_TO_PER     DEF_BIT_MASK(1u, 11u)
+  83:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_BIT_CH_CFG_XFER_PER_TO_MEM     DEF_BIT_MASK(2u, 11u)
+  84:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_BIT_CH_CFG_XFER_PER_TO_PER     DEF_BIT_MASK(3u, 11u)
+  85:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_MSK_CH_CFG_PER_REQ             DEF_BIT_FIELD(4u, 0u)
+  86:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_BIT_CH_CFG_IE                  DEF_BIT_14
+  87:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #define  CSP_DMA_BIT_CH_CFG_ITC                 DEF_BIT_15
+  88:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  89:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  90:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+  91:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  92:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                           LOCAL CONSTANTS
+  93:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+  94:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+  95:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  96:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  97:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+  98:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+  99:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 100:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                     DMA CONTROLLER  REGISTER
+ 101:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 102:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 103:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 104:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 105:Libraries/uC-CSP/LPC17xx/csp_dma.c **** typedef  struct csp_dma_ch {
+ 106:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT08U            State;
+ 107:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CALLBACK_PTR  CallBackFnctPtr;
+ 108:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     void                 *CallBackArgPtr;
+ 109:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #if 0
+ 110:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     void                 *Signal;                               /* #### It will added to support sy
+ 111:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #endif
+ 112:Libraries/uC-CSP/LPC17xx/csp_dma.c **** } CSP_DMA_CH;
+ 113:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 114:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 115:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 116:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 117:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                     DMA CHANNEL STATUS DATA TYPE
+ 118:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 119:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 120:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 121:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 122:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 123:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 124:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 125:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                     DMA CONTROLLER  REGISTER
+ 126:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 127:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 128:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 129:Libraries/uC-CSP/LPC17xx/csp_dma.c **** typedef  struct  csp_dma_ch_reg {                               /* ---------------- DMA CHANNEL REG
+ 130:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32  SrcAddr;                                         /* Source address.                 
+ 131:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32  DestAddr;                                        /* Destination address.            
+ 132:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32  LLI;                                             /* Link list item register.        
+ 133:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32  Ctrl;                                            /* Control register.               
+ 134:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32  Cfg;                                             /* Configuration register.         
+ 135:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32  RSVD0[3];                                        /* Reserved.                       
+ 136:Libraries/uC-CSP/LPC17xx/csp_dma.c **** } CSP_DMA_CH_REG;
+ 137:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 138:Libraries/uC-CSP/LPC17xx/csp_dma.c ****  
+ 139:Libraries/uC-CSP/LPC17xx/csp_dma.c **** typedef  struct csp_dma_reg {                                   /* --------------- DMA CONTROLLER R
+ 140:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       IntStat;                                    /* Interrupt status register.      
+ 141:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       IntTCStat;                                  /* Interrupt terminal count request
+ 142:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       IntTCClr;                                   /* Interrupt terminal count request
+ 143:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       IntErrStat;                                 /* Interrupt error status register.
+ 144:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       IntErrClr;                                  /* Interrupt error clear register  
+ 145:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       IntRawIntTC_Stat;                           /* RAW interrupt terminal count sta
+ 146:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       IntRawIntErrStat;                           /* RAW interrupt status register.  
+ 147:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       EnCh;                                       /* Enabled channel register.       
+ 148:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       SoftBurstReq;                               /* Software burst request register.
+ 149:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       SoftSingleReq;                              /* Software single request register
+ 150:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       SoftLastBurstReq;                           /* Software last burst request regi
+ 151:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       SoftLastSingleReq;                          /* Software last single request reg
+ 152:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       Cfg;                                        /* Configuration register.         
+ 153:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       Sync;                                       /* Synchronization register.       
+ 154:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_REG32       RSVD0[50];
+ 155:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH_REG  CHx[CSP_DMA_CH_MAX_NBR];                    /* DMA channel registers.          
+ 156:Libraries/uC-CSP/LPC17xx/csp_dma.c **** } CSP_DMA_REG;
+ 157:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 158:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 159:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 160:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 161:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                            LOCAL TABLES
+ 162:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 163:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 164:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 165:Libraries/uC-CSP/LPC17xx/csp_dma.c **** static  CSP_DMA_CH  CSP_DMA_ChTbl[CSP_DMA_CH_MAX_NBR];
+ 166:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 167:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 168:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 169:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 170:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                       LOCAL GLOBAL VARIABLES
+ 171:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 172:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 173:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 174:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 175:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 176:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 177:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                            LOCAL MACRO's
+ 178:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 179:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 180:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 181:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 182:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 183:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 184:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                      LOCAL FUNCTION PROTOTYPES
+ 185:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 186:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 187:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 188:Libraries/uC-CSP/LPC17xx/csp_dma.c **** static  void  CSP_DMA_IntHandler (void *p_arg);
+ 189:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 190:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 191:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 192:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 193:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                     LOCAL CONFIGURATION ERRORS
+ 194:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 195:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 196:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 197:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 198:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 199:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 200:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 201:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                           LOCAL FUNCTIONS
+ 202:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 203:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 204:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 205:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 206:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 207:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 208:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 209:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                        CSP_DMA_Init()
+ 210:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 211:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Description : Initialize DMA controller.
+ 212:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * 
+ 213:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   (1) Disable DMA controller interrupt. 
+ 214:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   (2) Enable  DMA controller clock
+ 215:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   (3) Clear all pending interrupts.
+ 216:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   (4) Initialize all DMA channels to a default state.
+ 217:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   (5) Install DMA controller interrupt handler.
+ 218:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   (6) Enable  DMA controller interrupt.
+ 219:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   
+ 220:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Argument(s) : none.
+ 221:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 222:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Return(s)   : DEF_OK,    If the DMA engine was initialize correctly, 
+ 223:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               DEF_FAIL,  Otherwise.
+ 224:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 225:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Caller(s)   : Application.
+ 226:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 227:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Note(s)     : none.
+ 228:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 229:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 230:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 231:Libraries/uC-CSP/LPC17xx/csp_dma.c **** CPU_BOOLEAN  CSP_DMA_InitExt (void)                          
+ 232:Libraries/uC-CSP/LPC17xx/csp_dma.c **** {   
+  31              		.loc 1 232 0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 16
+  34              		@ frame_needed = 1, uses_anonymous_args = 0
+  35 0000 80B5     		push	{r7, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 14, -4
+  39              		.cfi_offset 7, -8
+  40 0002 84B0     		sub	sp, sp, #16
+  41              	.LCFI1:
+  42              		.cfi_def_cfa_offset 24
+  43 0004 00AF     		add	r7, sp, #0
+  44              	.LCFI2:
+  45              		.cfi_def_cfa_register 7
+ 233:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_REG     *p_dma_reg;
+ 234:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH_REG  *p_dma_ch_reg;
+ 235:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH      *p_ch_tbl;     
+ 236:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT08U       ch_nbr;
+ 237:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 238:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 239:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_IntDis(CSP_INT_CTRL_NBR_MAIN,                           /* Disable DMA interrupts          
+  46              		.loc 1 239 0
+  47 0006 4FF00000 		mov	r0, #0
+  48 000a 4FF01A01 		mov	r1, #26
+  49 000e FFF7FEFF 		bl	CSP_IntDis
+ 240:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                CSP_INT_SRC_NBR_DMA_00);
+ 241:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 242:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_PM_PerClkEn(CSP_PM_PER_CLK_NBR_DMA_00);                 /* Enable DMA controller clock.    
+  50              		.loc 1 242 0
+  51 0012 4FF01D00 		mov	r0, #29
+  52 0016 FFF7FEFF 		bl	CSP_PM_PerClkEn
+ 243:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 244:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg            = (CSP_DMA_REG *)CSP_ADDR_DMA_REG;
+  53              		.loc 1 244 0
+  54 001a 4FF48043 		mov	r3, #16384
+  55 001e C5F20003 		movt	r3, 20480
+  56 0022 BB60     		str	r3, [r7, #8]
+ 245:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg->IntTCClr  = DEF_INT_08_MASK;                     /* Clear all pending interrupts.   
+  57              		.loc 1 245 0
+  58 0024 BB68     		ldr	r3, [r7, #8]
+  59 0026 4FF0FF02 		mov	r2, #255
+  60 002a 9A60     		str	r2, [r3, #8]
+ 246:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg->IntErrClr = DEF_INT_08_MASK;
+  61              		.loc 1 246 0
+  62 002c BB68     		ldr	r3, [r7, #8]
+  63 002e 4FF0FF02 		mov	r2, #255
+  64 0032 1A61     		str	r2, [r3, #16]
+ 247:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* Initialize DMA channels register
+ 248:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     for (ch_nbr = 0u; ch_nbr < CSP_DMA_CH_MAX_NBR; ch_nbr++) {
+  65              		.loc 1 248 0
+  66 0034 4FF00003 		mov	r3, #0
+  67 0038 FB73     		strb	r3, [r7, #15]
+  68 003a 39E0     		b	.L2
+  69              	.L3:
+ 249:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch_reg              = &(p_dma_reg->CHx[ch_nbr]);
+  70              		.loc 1 249 0 discriminator 2
+  71 003c BB68     		ldr	r3, [r7, #8]
+  72 003e 03F58072 		add	r2, r3, #256
+  73 0042 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+  74 0044 4FEA4313 		lsl	r3, r3, #5
+  75 0048 D318     		adds	r3, r2, r3
+  76 004a 7B60     		str	r3, [r7, #4]
+ 250:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_ch_tbl                  = &CSP_DMA_ChTbl[ch_nbr];
+  77              		.loc 1 250 0 discriminator 2
+  78 004c FA7B     		ldrb	r2, [r7, #15]	@ zero_extendqisi2
+  79 004e 1346     		mov	r3, r2
+  80 0050 4FEA4303 		lsl	r3, r3, #1
+  81 0054 9B18     		adds	r3, r3, r2
+  82 0056 4FEA8303 		lsl	r3, r3, #2
+  83 005a 1A46     		mov	r2, r3
+  84 005c 40F20003 		movw	r3, #:lower16:CSP_DMA_ChTbl
+  85 0060 C0F20003 		movt	r3, #:upper16:CSP_DMA_ChTbl
+  86 0064 D318     		adds	r3, r2, r3
+  87 0066 3B60     		str	r3, [r7, #0]
+ 251:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_ch_tbl->State           = CSP_DMA_CH_STATE_FREE;
+  88              		.loc 1 251 0 discriminator 2
+  89 0068 3B68     		ldr	r3, [r7, #0]
+  90 006a 4FF00002 		mov	r2, #0
+  91 006e 1A70     		strb	r2, [r3, #0]
+ 252:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_ch_tbl->CallBackFnctPtr = (CSP_DMA_CALLBACK_PTR  )0;
+  92              		.loc 1 252 0 discriminator 2
+  93 0070 3B68     		ldr	r3, [r7, #0]
+  94 0072 4FF00002 		mov	r2, #0
+  95 0076 5A60     		str	r2, [r3, #4]
+ 253:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_ch_tbl->CallBackArgPtr  = (void                 *)0;
+  96              		.loc 1 253 0 discriminator 2
+  97 0078 3B68     		ldr	r3, [r7, #0]
+  98 007a 4FF00002 		mov	r2, #0
+  99 007e 9A60     		str	r2, [r3, #8]
+ 254:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch_reg->SrcAddr     = 0u;
+ 100              		.loc 1 254 0 discriminator 2
+ 101 0080 7B68     		ldr	r3, [r7, #4]
+ 102 0082 4FF00002 		mov	r2, #0
+ 103 0086 1A60     		str	r2, [r3, #0]
+ 255:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch_reg->DestAddr    = 0u;
+ 104              		.loc 1 255 0 discriminator 2
+ 105 0088 7B68     		ldr	r3, [r7, #4]
+ 106 008a 4FF00002 		mov	r2, #0
+ 107 008e 5A60     		str	r2, [r3, #4]
+ 256:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch_reg->LLI         = 0u;
+ 108              		.loc 1 256 0 discriminator 2
+ 109 0090 7B68     		ldr	r3, [r7, #4]
+ 110 0092 4FF00002 		mov	r2, #0
+ 111 0096 9A60     		str	r2, [r3, #8]
+ 257:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch_reg->Ctrl        = DEF_BIT_NONE;
+ 112              		.loc 1 257 0 discriminator 2
+ 113 0098 7B68     		ldr	r3, [r7, #4]
+ 114 009a 4FF00002 		mov	r2, #0
+ 115 009e DA60     		str	r2, [r3, #12]
+ 258:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch_reg->Cfg         = DEF_BIT_NONE;
+ 116              		.loc 1 258 0 discriminator 2
+ 117 00a0 7B68     		ldr	r3, [r7, #4]
+ 118 00a2 4FF00002 		mov	r2, #0
+ 119 00a6 1A61     		str	r2, [r3, #16]
+ 248:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     for (ch_nbr = 0u; ch_nbr < CSP_DMA_CH_MAX_NBR; ch_nbr++) {
+ 120              		.loc 1 248 0 discriminator 2
+ 121 00a8 FB7B     		ldrb	r3, [r7, #15]
+ 122 00aa 03F10103 		add	r3, r3, #1
+ 123 00ae FB73     		strb	r3, [r7, #15]
+ 124              	.L2:
+ 248:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     for (ch_nbr = 0u; ch_nbr < CSP_DMA_CH_MAX_NBR; ch_nbr++) {
+ 125              		.loc 1 248 0 is_stmt 0 discriminator 1
+ 126 00b0 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 127 00b2 072B     		cmp	r3, #7
+ 128 00b4 C2D9     		bls	.L3
+ 259:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 260:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 261:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg->Cfg = CSP_DMA_REG_CFG_DMA_EN;                    /* Enable DMA controller.          
+ 129              		.loc 1 261 0 is_stmt 1
+ 130 00b6 BB68     		ldr	r3, [r7, #8]
+ 131 00b8 4FF00102 		mov	r2, #1
+ 132 00bc 1A63     		str	r2, [r3, #48]
+ 262:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 263:Libraries/uC-CSP/LPC17xx/csp_dma.c ****  
+ 264:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     (void)CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN, /* Install global DMA interrupt han
+ 133              		.loc 1 264 0
+ 134 00be 4FF00000 		mov	r0, #0
+ 135 00c2 4FF01A01 		mov	r1, #26
+ 136 00c6 40F20002 		movw	r2, #:lower16:CSP_DMA_IntHandler
+ 137 00ca C0F20002 		movt	r2, #:upper16:CSP_DMA_IntHandler
+ 138 00ce 4FF00003 		mov	r3, #0
+ 139 00d2 FFF7FEFF 		bl	CSP_IntVectReg
+ 265:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                          (CSP_DEV_NBR   )CSP_INT_SRC_NBR_DMA_00,
+ 266:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                          (CPU_FNCT_PTR  )CSP_DMA_IntHandler,
+ 267:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                          (void         *)0);
+ 268:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 269:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, 
+ 140              		.loc 1 269 0
+ 141 00d6 4FF00000 		mov	r0, #0
+ 142 00da 4FF01A01 		mov	r1, #26
+ 143 00de FFF7FEFF 		bl	CSP_IntEn
+ 270:Libraries/uC-CSP/LPC17xx/csp_dma.c ****               CSP_INT_SRC_NBR_DMA_00);
+ 271:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                             
+ 272:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     return (DEF_OK);
+ 144              		.loc 1 272 0
+ 145 00e2 4FF00103 		mov	r3, #1
+ 273:Libraries/uC-CSP/LPC17xx/csp_dma.c **** }
+ 146              		.loc 1 273 0
+ 147 00e6 1846     		mov	r0, r3
+ 148 00e8 07F11007 		add	r7, r7, #16
+ 149 00ec BD46     		mov	sp, r7
+ 150 00ee 80BD     		pop	{r7, pc}
+ 151              		.cfi_endproc
+ 152              	.LFE0:
+ 154              		.align	2
+ 155              		.global	CSP_DMA_CH_AllocExt
+ 156              		.thumb
+ 157              		.thumb_func
+ 159              	CSP_DMA_CH_AllocExt:
+ 160              	.LFB1:
+ 274:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 275:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 276:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 277:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 278:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                        CSP_DMA_CH_AllocExt()
+ 279:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 280:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Description : Allocate a channel for a new transaction.
+ 281:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   
+ 282:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Argument(s) : prio       Channel priority.
+ 283:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 284:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                              CSP_DMA_CH_PRIO_ANY_LOW                  Any channel available. (fro
+ 285:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                              CSP_DMA_CH_PRIO_ANY_HIGH                 Any channel available. (fro
+ 286:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                         0                             Channel at priority 0. High
+ 287:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                         1                             Channel at priority 1.
+ 288:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                         .
+ 289:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                         .
+ 290:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                         .
+ 291:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                         7                             Channel at priority 7.  Low
+ 292:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 293:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               p_ch_nbr   Pointer to the variable to return the allocated channel number.
+ 294:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 295:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Return(s)   : DEF_OK,    If the a channel was allocated, 
+ 296:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               DEF_FAIL,  Otherwise.
+ 297:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 298:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Caller(s)   : Application.
+ 299:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 300:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Note(s)     : none.
+ 301:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 302:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 303:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 304:Libraries/uC-CSP/LPC17xx/csp_dma.c **** CPU_BOOLEAN  CSP_DMA_CH_AllocExt (CSP_OPT      prio,
+ 305:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                   CSP_DEV_NBR *p_ch_nbr)
+ 306:Libraries/uC-CSP/LPC17xx/csp_dma.c **** {
+ 161              		.loc 1 306 0
+ 162              		.cfi_startproc
+ 163              		@ args = 0, pretend = 0, frame = 24
+ 164              		@ frame_needed = 1, uses_anonymous_args = 0
+ 165 00f0 80B5     		push	{r7, lr}
+ 166              	.LCFI3:
+ 167              		.cfi_def_cfa_offset 8
+ 168              		.cfi_offset 14, -4
+ 169              		.cfi_offset 7, -8
+ 170 00f2 86B0     		sub	sp, sp, #24
+ 171              	.LCFI4:
+ 172              		.cfi_def_cfa_offset 32
+ 173 00f4 00AF     		add	r7, sp, #0
+ 174              	.LCFI5:
+ 175              		.cfi_def_cfa_register 7
+ 176 00f6 0346     		mov	r3, r0
+ 177 00f8 3960     		str	r1, [r7, #0]
+ 178 00fa FB80     		strh	r3, [r7, #6]	@ movhi
+ 307:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH  *p_ch_tbl;        
+ 308:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT08U   ch_ix;
+ 309:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT08U   ch_nbr;
+ 310:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT08U   ch_alloc;
+ 311:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_BOOLEAN  found;
+ 312:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 313:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_SR_ALLOC();
+ 179              		.loc 1 313 0
+ 180 00fc 4FF00003 		mov	r3, #0
+ 181 0100 3B61     		str	r3, [r7, #16]
+ 314:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 315:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #if (CSP_CFG_ARG_CHK_EN == DEF_ENABLED)         
+ 316:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if ((prio  > CSP_DMA_CH_PRIO_LOWEST   ) &&
+ 182              		.loc 1 316 0
+ 183 0102 FB88     		ldrh	r3, [r7, #6]
+ 184 0104 002B     		cmp	r3, #0
+ 185 0106 08D0     		beq	.L5
+ 186              		.loc 1 316 0 is_stmt 0 discriminator 1
+ 187 0108 FB88     		ldrh	r3, [r7, #6]
+ 188 010a 082B     		cmp	r3, #8
+ 189 010c 05D0     		beq	.L5
+ 317:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         (prio != CSP_DMA_CH_PRIO_ANY_LOW  ) &&
+ 190              		.loc 1 317 0 is_stmt 1
+ 191 010e FB88     		ldrh	r3, [r7, #6]
+ 192 0110 092B     		cmp	r3, #9
+ 193 0112 02D0     		beq	.L5
+ 318:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         (prio != CSP_DMA_CH_PRIO_ANY_HIGH)) {
+ 319:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);    
+ 194              		.loc 1 319 0
+ 195 0114 4FF00003 		mov	r3, #0
+ 196 0118 8EE0     		b	.L6
+ 197              	.L5:
+ 320:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 321:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 322:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (p_ch_nbr == (CSP_DEV_NBR *)0) {
+ 198              		.loc 1 322 0
+ 199 011a 3B68     		ldr	r3, [r7, #0]
+ 200 011c 002B     		cmp	r3, #0
+ 201 011e 02D1     		bne	.L7
+ 323:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 202              		.loc 1 323 0
+ 203 0120 4FF00003 		mov	r3, #0
+ 204 0124 88E0     		b	.L6
+ 205              	.L7:
+ 324:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 325:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #endif
+ 326:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 327:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     found    = DEF_NO;
+ 206              		.loc 1 327 0
+ 207 0126 4FF00003 		mov	r3, #0
+ 208 012a 3B75     		strb	r3, [r7, #20]
+ 328:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     ch_alloc = 0u;
+ 209              		.loc 1 328 0
+ 210 012c 4FF00003 		mov	r3, #0
+ 211 0130 7B75     		strb	r3, [r7, #21]
+ 329:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 330:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if ((prio == CSP_DMA_CH_PRIO_ANY_LOW  ) ||
+ 212              		.loc 1 330 0
+ 213 0132 FB88     		ldrh	r3, [r7, #6]
+ 214 0134 082B     		cmp	r3, #8
+ 215 0136 02D0     		beq	.L8
+ 216              		.loc 1 330 0 is_stmt 0 discriminator 1
+ 217 0138 FB88     		ldrh	r3, [r7, #6]
+ 218 013a 092B     		cmp	r3, #9
+ 219 013c 49D1     		bne	.L9
+ 220              	.L8:
+ 331:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         (prio == CSP_DMA_CH_PRIO_ANY_HIGH)) {        
+ 332:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         ch_nbr = CSP_DMA_CH_MAX_NBR;
+ 221              		.loc 1 332 0 is_stmt 1
+ 222 013e 4FF00803 		mov	r3, #8
+ 223 0142 BB75     		strb	r3, [r7, #22]
+ 333:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         
+ 334:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         if (prio == CSP_DMA_CH_PRIO_ANY_LOW) {
+ 224              		.loc 1 334 0
+ 225 0144 FB88     		ldrh	r3, [r7, #6]
+ 226 0146 082B     		cmp	r3, #8
+ 227 0148 03D1     		bne	.L10
+ 335:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             ch_ix = CSP_DMA_CH_MAX_NBR - 1u;
+ 228              		.loc 1 335 0
+ 229 014a 4FF00703 		mov	r3, #7
+ 230 014e FB75     		strb	r3, [r7, #23]
+ 336:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         } else {
+ 337:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             ch_ix = 0u;
+ 338:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         }
+ 339:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                 
+ 340:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         while ((found  == DEF_NO) &&                            /* Search for the first channel ava
+ 231              		.loc 1 340 0
+ 232 0150 38E0     		b	.L12
+ 233              	.L10:
+ 337:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             ch_ix = 0u;
+ 234              		.loc 1 337 0
+ 235 0152 4FF00003 		mov	r3, #0
+ 236 0156 FB75     		strb	r3, [r7, #23]
+ 237              		.loc 1 340 0
+ 238 0158 34E0     		b	.L12
+ 239              	.L16:
+ 341:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                (ch_nbr != 0     )) {
+ 342:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             p_ch_tbl = &CSP_DMA_ChTbl[ch_ix];    
+ 240              		.loc 1 342 0
+ 241 015a FA7D     		ldrb	r2, [r7, #23]	@ zero_extendqisi2
+ 242 015c 1346     		mov	r3, r2
+ 243 015e 4FEA4303 		lsl	r3, r3, #1
+ 244 0162 9B18     		adds	r3, r3, r2
+ 245 0164 4FEA8303 		lsl	r3, r3, #2
+ 246 0168 1A46     		mov	r2, r3
+ 247 016a 40F20003 		movw	r3, #:lower16:CSP_DMA_ChTbl
+ 248 016e C0F20003 		movt	r3, #:upper16:CSP_DMA_ChTbl
+ 249 0172 D318     		adds	r3, r2, r3
+ 250 0174 FB60     		str	r3, [r7, #12]
+ 343:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* If the channel is available ... 
+ 344:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             if (p_ch_tbl->State == CSP_DMA_CH_STATE_FREE) {                
+ 251              		.loc 1 344 0
+ 252 0176 FB68     		ldr	r3, [r7, #12]
+ 253 0178 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 254 017a 002B     		cmp	r3, #0
+ 255 017c 12D1     		bne	.L13
+ 345:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                 
+ 346:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                 CPU_CRITICAL_ENTER();                           /* ... Mark the channel as 'ALLOC' 
+ 256              		.loc 1 346 0
+ 257 017e FFF7FEFF 		bl	CPU_SR_Save
+ 258 0182 3861     		str	r0, [r7, #16]
+ 259 0184 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 347:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                 p_ch_tbl->State = CSP_DMA_CH_STATE_ALLOC;       /* ... in the channel table.       
+ 260              		.loc 1 347 0
+ 261 0188 FB68     		ldr	r3, [r7, #12]
+ 262 018a 4FF00102 		mov	r2, #1
+ 263 018e 1A70     		strb	r2, [r3, #0]
+ 348:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                 CPU_CRITICAL_EXIT();                
+ 264              		.loc 1 348 0
+ 265 0190 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 266 0194 3869     		ldr	r0, [r7, #16]
+ 267 0196 FFF7FEFF 		bl	CPU_SR_Restore
+ 349:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                 ch_alloc = ch_ix;
+ 268              		.loc 1 349 0
+ 269 019a FB7D     		ldrb	r3, [r7, #23]
+ 270 019c 7B75     		strb	r3, [r7, #21]
+ 350:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                 found    = DEF_TRUE;
+ 271              		.loc 1 350 0
+ 272 019e 4FF00103 		mov	r3, #1
+ 273 01a2 3B75     		strb	r3, [r7, #20]
+ 274              	.L13:
+ 351:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             }
+ 352:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             ch_nbr--;
+ 275              		.loc 1 352 0
+ 276 01a4 BB7D     		ldrb	r3, [r7, #22]
+ 277 01a6 03F1FF33 		add	r3, r3, #-1
+ 278 01aa BB75     		strb	r3, [r7, #22]
+ 353:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             if (prio == CSP_DMA_CH_PRIO_ANY_LOW) {              /* Search from low to hight.       
+ 279              		.loc 1 353 0
+ 280 01ac FB88     		ldrh	r3, [r7, #6]
+ 281 01ae 082B     		cmp	r3, #8
+ 282 01b0 04D1     		bne	.L14
+ 354:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                 ch_ix--;
+ 283              		.loc 1 354 0
+ 284 01b2 FB7D     		ldrb	r3, [r7, #23]
+ 285 01b4 03F1FF33 		add	r3, r3, #-1
+ 286 01b8 FB75     		strb	r3, [r7, #23]
+ 287 01ba 03E0     		b	.L12
+ 288              	.L14:
+ 355:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             } else {
+ 356:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                 ch_ix++;                                        /* Search from high to low.        
+ 289              		.loc 1 356 0
+ 290 01bc FB7D     		ldrb	r3, [r7, #23]
+ 291 01be 03F10103 		add	r3, r3, #1
+ 292 01c2 FB75     		strb	r3, [r7, #23]
+ 293              	.L12:
+ 340:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         while ((found  == DEF_NO) &&                            /* Search for the first channel ava
+ 294              		.loc 1 340 0 discriminator 1
+ 295 01c4 3B7D     		ldrb	r3, [r7, #20]	@ zero_extendqisi2
+ 296 01c6 002B     		cmp	r3, #0
+ 297 01c8 29D1     		bne	.L19
+ 340:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         while ((found  == DEF_NO) &&                            /* Search for the first channel ava
+ 298              		.loc 1 340 0 is_stmt 0 discriminator 2
+ 299 01ca BB7D     		ldrb	r3, [r7, #22]	@ zero_extendqisi2
+ 300 01cc 002B     		cmp	r3, #0
+ 301 01ce C4D1     		bne	.L16
+ 330:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if ((prio == CSP_DMA_CH_PRIO_ANY_LOW  ) ||
+ 302              		.loc 1 330 0 is_stmt 1
+ 303 01d0 25E0     		b	.L19
+ 304              	.L9:
+ 357:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             }
+ 358:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         }
+ 359:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     } else {
+ 360:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_ch_tbl = &CSP_DMA_ChTbl[prio];
+ 305              		.loc 1 360 0
+ 306 01d2 FA88     		ldrh	r2, [r7, #6]
+ 307 01d4 1346     		mov	r3, r2
+ 308 01d6 4FEA4303 		lsl	r3, r3, #1
+ 309 01da 9B18     		adds	r3, r3, r2
+ 310 01dc 4FEA8303 		lsl	r3, r3, #2
+ 311 01e0 1A46     		mov	r2, r3
+ 312 01e2 40F20003 		movw	r3, #:lower16:CSP_DMA_ChTbl
+ 313 01e6 C0F20003 		movt	r3, #:upper16:CSP_DMA_ChTbl
+ 314 01ea D318     		adds	r3, r2, r3
+ 315 01ec FB60     		str	r3, [r7, #12]
+ 361:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         if (p_ch_tbl->State == CSP_DMA_CH_STATE_FREE) {
+ 316              		.loc 1 361 0
+ 317 01ee FB68     		ldr	r3, [r7, #12]
+ 318 01f0 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 319 01f2 002B     		cmp	r3, #0
+ 320 01f4 14D1     		bne	.L17
+ 362:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             
+ 363:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             CPU_CRITICAL_ENTER();
+ 321              		.loc 1 363 0
+ 322 01f6 FFF7FEFF 		bl	CPU_SR_Save
+ 323 01fa 3861     		str	r0, [r7, #16]
+ 324 01fc FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 364:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             p_ch_tbl->State = CSP_DMA_CH_STATE_ALLOC;            
+ 325              		.loc 1 364 0
+ 326 0200 FB68     		ldr	r3, [r7, #12]
+ 327 0202 4FF00102 		mov	r2, #1
+ 328 0206 1A70     		strb	r2, [r3, #0]
+ 365:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             CPU_CRITICAL_EXIT();
+ 329              		.loc 1 365 0
+ 330 0208 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 331 020c 3869     		ldr	r0, [r7, #16]
+ 332 020e FFF7FEFF 		bl	CPU_SR_Restore
+ 366:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             
+ 367:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             ch_alloc = prio;
+ 333              		.loc 1 367 0
+ 334 0212 FB88     		ldrh	r3, [r7, #6]	@ movhi
+ 335 0214 7B75     		strb	r3, [r7, #21]
+ 368:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             found    = DEF_YES;
+ 336              		.loc 1 368 0
+ 337 0216 4FF00103 		mov	r3, #1
+ 338 021a 3B75     		strb	r3, [r7, #20]
+ 339 021c 00E0     		b	.L17
+ 340              	.L19:
+ 330:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if ((prio == CSP_DMA_CH_PRIO_ANY_LOW  ) ||
+ 341              		.loc 1 330 0
+ 342 021e 00BF     		nop
+ 343              	.L17:
+ 369:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         }    
+ 370:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 371:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 372:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (found == DEF_NO) {
+ 344              		.loc 1 372 0
+ 345 0220 3B7D     		ldrb	r3, [r7, #20]	@ zero_extendqisi2
+ 346 0222 002B     		cmp	r3, #0
+ 347 0224 02D1     		bne	.L18
+ 373:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 348              		.loc 1 373 0
+ 349 0226 4FF00003 		mov	r3, #0
+ 350 022a 05E0     		b	.L6
+ 351              	.L18:
+ 374:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 375:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 376:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     *p_ch_nbr = (CSP_DEV_NBR)ch_alloc;
+ 352              		.loc 1 376 0
+ 353 022c 7B7D     		ldrb	r3, [r7, #21]	@ zero_extendqisi2
+ 354 022e 9AB2     		uxth	r2, r3
+ 355 0230 3B68     		ldr	r3, [r7, #0]
+ 356 0232 1A80     		strh	r2, [r3, #0]	@ movhi
+ 377:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 378:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     return (DEF_OK);
+ 357              		.loc 1 378 0
+ 358 0234 4FF00103 		mov	r3, #1
+ 359              	.L6:
+ 379:Libraries/uC-CSP/LPC17xx/csp_dma.c **** }
+ 360              		.loc 1 379 0
+ 361 0238 1846     		mov	r0, r3
+ 362 023a 07F11807 		add	r7, r7, #24
+ 363 023e BD46     		mov	sp, r7
+ 364 0240 80BD     		pop	{r7, pc}
+ 365              		.cfi_endproc
+ 366              	.LFE1:
+ 368 0242 00BF     		.align	2
+ 369              		.global	CSP_DMA_CH_FreeExt
+ 370              		.thumb
+ 371              		.thumb_func
+ 373              	CSP_DMA_CH_FreeExt:
+ 374              	.LFB2:
+ 380:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 381:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 382:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 383:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                        CSP_DMA_CH_Free()
+ 384:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 385:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Description : Free a DMA channel.
+ 386:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   
+ 387:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Argument(s) : ch_nbr   Channel number.
+ 388:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 389:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Return(s)   : DEF_OK,    If the a channel was freed, 
+ 390:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               DEF_FAIL,  Otherwise.
+ 391:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 392:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Caller(s)   : Application.
+ 393:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 394:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Note(s)     : none.
+ 395:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 396:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 397:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 398:Libraries/uC-CSP/LPC17xx/csp_dma.c **** CPU_BOOLEAN  CSP_DMA_CH_FreeExt (CSP_DEV_NBR  ch_nbr)
+ 399:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                
+ 400:Libraries/uC-CSP/LPC17xx/csp_dma.c **** {
+ 375              		.loc 1 400 0
+ 376              		.cfi_startproc
+ 377              		@ args = 0, pretend = 0, frame = 24
+ 378              		@ frame_needed = 1, uses_anonymous_args = 0
+ 379 0244 80B5     		push	{r7, lr}
+ 380              	.LCFI6:
+ 381              		.cfi_def_cfa_offset 8
+ 382              		.cfi_offset 14, -4
+ 383              		.cfi_offset 7, -8
+ 384 0246 86B0     		sub	sp, sp, #24
+ 385              	.LCFI7:
+ 386              		.cfi_def_cfa_offset 32
+ 387 0248 00AF     		add	r7, sp, #0
+ 388              	.LCFI8:
+ 389              		.cfi_def_cfa_register 7
+ 390 024a 0346     		mov	r3, r0
+ 391 024c FB80     		strh	r3, [r7, #6]	@ movhi
+ 401:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_REG     *p_dma_reg;    
+ 402:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH_REG  *p_dma_ch_reg;
+ 403:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH      *p_ch_tbl;
+ 404:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 405:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_SR_ALLOC();
+ 392              		.loc 1 405 0
+ 393 024e 4FF00003 		mov	r3, #0
+ 394 0252 7B61     		str	r3, [r7, #20]
+ 406:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 407:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #if (CSP_CFG_ARG_CHK_EN == DEF_ENABLED)         
+ 408:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (ch_nbr > CSP_DMA_CH_MAX_NBR - 1u) {
+ 395              		.loc 1 408 0
+ 396 0254 FB88     		ldrh	r3, [r7, #6]
+ 397 0256 072B     		cmp	r3, #7
+ 398 0258 02D9     		bls	.L21
+ 409:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 399              		.loc 1 409 0
+ 400 025a 4FF00003 		mov	r3, #0
+ 401 025e 48E0     		b	.L22
+ 402              	.L21:
+ 410:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 411:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #endif    
+ 412:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 413:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg    = (CSP_DMA_REG *)CSP_ADDR_DMA_REG;
+ 403              		.loc 1 413 0
+ 404 0260 4FF48043 		mov	r3, #16384
+ 405 0264 C5F20003 		movt	r3, 20480
+ 406 0268 3B61     		str	r3, [r7, #16]
+ 414:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg = &(p_dma_reg->CHx[ch_nbr]);
+ 407              		.loc 1 414 0
+ 408 026a 3B69     		ldr	r3, [r7, #16]
+ 409 026c 03F58072 		add	r2, r3, #256
+ 410 0270 FB88     		ldrh	r3, [r7, #6]
+ 411 0272 4FEA4313 		lsl	r3, r3, #5
+ 412 0276 D318     		adds	r3, r2, r3
+ 413 0278 FB60     		str	r3, [r7, #12]
+ 415:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_ch_tbl     = &CSP_DMA_ChTbl[ch_nbr];
+ 414              		.loc 1 415 0
+ 415 027a FA88     		ldrh	r2, [r7, #6]
+ 416 027c 1346     		mov	r3, r2
+ 417 027e 4FEA4303 		lsl	r3, r3, #1
+ 418 0282 9B18     		adds	r3, r3, r2
+ 419 0284 4FEA8303 		lsl	r3, r3, #2
+ 420 0288 1A46     		mov	r2, r3
+ 421 028a 40F20003 		movw	r3, #:lower16:CSP_DMA_ChTbl
+ 422 028e C0F20003 		movt	r3, #:upper16:CSP_DMA_ChTbl
+ 423 0292 D318     		adds	r3, r2, r3
+ 424 0294 BB60     		str	r3, [r7, #8]
+ 416:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         
+ 417:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_CRITICAL_ENTER();
+ 425              		.loc 1 417 0
+ 426 0296 FFF7FEFF 		bl	CPU_SR_Save
+ 427 029a 7861     		str	r0, [r7, #20]
+ 428 029c FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 418:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg->IntTCClr    = DEF_BIT(ch_nbr);                   /* Clear all pending interrupts.   
+ 429              		.loc 1 418 0
+ 430 02a0 FB88     		ldrh	r3, [r7, #6]
+ 431 02a2 4FF00102 		mov	r2, #1
+ 432 02a6 02FA03F2 		lsl	r2, r2, r3
+ 433 02aa 3B69     		ldr	r3, [r7, #16]
+ 434 02ac 9A60     		str	r2, [r3, #8]
+ 419:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg->IntErrClr   = DEF_BIT(ch_nbr);    
+ 435              		.loc 1 419 0
+ 436 02ae FB88     		ldrh	r3, [r7, #6]
+ 437 02b0 4FF00102 		mov	r2, #1
+ 438 02b4 02FA03F2 		lsl	r2, r2, r3
+ 439 02b8 3B69     		ldr	r3, [r7, #16]
+ 440 02ba 1A61     		str	r2, [r3, #16]
+ 420:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_ch_tbl->State        = CSP_DMA_CH_STATE_FREE;             /* Free the channel.               
+ 441              		.loc 1 420 0
+ 442 02bc BB68     		ldr	r3, [r7, #8]
+ 443 02be 4FF00002 		mov	r2, #0
+ 444 02c2 1A70     		strb	r2, [r3, #0]
+ 421:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->SrcAddr  = DEF_BIT_NONE;                      /* Unitialize DMA channel cfg & ctr
+ 445              		.loc 1 421 0
+ 446 02c4 FB68     		ldr	r3, [r7, #12]
+ 447 02c6 4FF00002 		mov	r2, #0
+ 448 02ca 1A60     		str	r2, [r3, #0]
+ 422:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->DestAddr = DEF_BIT_NONE;
+ 449              		.loc 1 422 0
+ 450 02cc FB68     		ldr	r3, [r7, #12]
+ 451 02ce 4FF00002 		mov	r2, #0
+ 452 02d2 5A60     		str	r2, [r3, #4]
+ 423:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->Cfg      = DEF_BIT_NONE;
+ 453              		.loc 1 423 0
+ 454 02d4 FB68     		ldr	r3, [r7, #12]
+ 455 02d6 4FF00002 		mov	r2, #0
+ 456 02da 1A61     		str	r2, [r3, #16]
+ 424:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->Ctrl     = DEF_BIT_NONE;       
+ 457              		.loc 1 424 0
+ 458 02dc FB68     		ldr	r3, [r7, #12]
+ 459 02de 4FF00002 		mov	r2, #0
+ 460 02e2 DA60     		str	r2, [r3, #12]
+ 425:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_CRITICAL_EXIT();
+ 461              		.loc 1 425 0
+ 462 02e4 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 463 02e8 7869     		ldr	r0, [r7, #20]
+ 464 02ea FFF7FEFF 		bl	CPU_SR_Restore
+ 426:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 427:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     return (DEF_OK);
+ 465              		.loc 1 427 0
+ 466 02ee 4FF00103 		mov	r3, #1
+ 467              	.L22:
+ 428:Libraries/uC-CSP/LPC17xx/csp_dma.c **** }
+ 468              		.loc 1 428 0
+ 469 02f2 1846     		mov	r0, r3
+ 470 02f4 07F11807 		add	r7, r7, #24
+ 471 02f8 BD46     		mov	sp, r7
+ 472 02fa 80BD     		pop	{r7, pc}
+ 473              		.cfi_endproc
+ 474              	.LFE2:
+ 476              		.align	2
+ 477              		.global	CSP_DMA_CH_CfgExt
+ 478              		.thumb
+ 479              		.thumb_func
+ 481              	CSP_DMA_CH_CfgExt:
+ 482              	.LFB3:
+ 429:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 430:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 431:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 432:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 433:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                        CSP_DMA_CH_CfgExt()
+ 434:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 435:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Description : Configure a channel for a new DMA transmission.
+ 436:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   
+ 437:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Argument(s) : ch_nbr           Channel number.
+ 438:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 439:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               xfer_type        DMA transfer type.
+ 440:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 441:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_TYPE_MEM_TO_MEM    Memory     to memory
+ 442:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_TYPE_PER_TO_MEM    Peripheral to memory.
+ 443:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_TYPE_MEM_TO_PER    Memory     to Peripheral.
+ 444:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_TYPE_PER_TO_PER    Peripheral to Peripheral.
+ 445:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 446:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *              src_burst_size    Source burst size minus 1 (see note #1, #1a).
+ 447:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                              
+ 448:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *              src_width         Source transfer width. 
+ 449:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CPU_WORD_SIZE_08   byte ( 8-bit)
+ 450:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CPU_WORD_SIZE_16   byte (16-bit)
+ 451:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CPU_WORD_SIZE_32   byte (32-bit)
+ 452:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 453:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *              dest_burst_size   Source burst size minus 1. (see note #1, #1a).
+ 454:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 455:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 456:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *              dest_width        Destination transfer width.
+ 457:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CPU_WORD_SIZE_08   byte ( 8-bit)
+ 458:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CPU_WORD_SIZE_16   byte (16-bit)
+ 459:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CPU_WORD_SIZE_32   byte (32-bit)
+ 460:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 461:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *              src_req           Source request peripheral. 
+ 462:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_SSP_00_TX 
+ 463:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_SSP_00_RX
+ 464:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_SSP_01_TX
+ 465:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_SSP_01_RX
+ 466:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_ADC
+ 467:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_I2S_00
+ 468:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_I2S_01
+ 469:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_DAC
+ 470:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_UART_00_TX
+ 471:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_UART_00_RX
+ 472:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_UART_01_TX
+ 473:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_UART_01_RX
+ 474:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_UART_02_TX
+ 475:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_UART_02_RX
+ 476:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_UART_03_TX
+ 477:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_UART_03_RX
+ 478:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_TMR_00_MATCH_0
+ 479:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_TMR_00_MATCH_1
+ 480:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_TMR_01_MATCH_0
+ 481:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_TMR_01_MATCH_1
+ 482:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_TMR_02_MATCH_0
+ 483:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_TMR_02_MATCH_1
+ 484:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_TMR_03_MATCH_0
+ 485:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                    CSP_DMA_XFER_PER_REQ_TMR_03_MATCH_1
+ 486:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 487:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               dest_req          Destination request peripheral.  (same as 'src_req' argument)
+ 488:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 489:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 490:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Return(s)   : DEF_OK,    If the a channel was configured, 
+ 491:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               DEF_FAIL,  Otherwise.
+ 492:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 493:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Caller(s)   : Application.
+ 494:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 495:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Note(s)     : (1) The LPC17xx DMA controller only allows the following burst size values:
+ 496:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   1, 4, 8, 16, 32, 64, 128, 256.
+ 497:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 498:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   (a) If a burst size values is different from the allowed values, the next power
+ 499:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                       be selected.
+ 500:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 501:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               (2) Only the following values are accepted for source/destination transfer width.
+ 502:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   CPU_WORD_SIZE_08, CPU_WORD_SIZE_16, CPU_WORD_SIZE_32.
+ 503:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 504:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               (3) The value of the DMA source request peripheral is ignored if the source of the 
+ 505:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   transfer is from memory.
+ 506:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 507:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               (4) The value of the DMA destination request peripheral is ignored if the destinati
+ 508:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   transfer is to memory.
+ 509:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 510:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               (5) The callback function should be defined as:
+ 511:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 512:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   void   MyCallback (CSP_DEV_NBR  ch_nbr, 
+ 513:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                      CPU_INT16U   xfer_size_rem,
+ 514:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                      void         *p_arg,
+ 515:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                      CPU_BOOLEAN   status)
+ 516:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 517:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   where,
+ 518:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 519:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                     ch_nbr           DMA channel number.
+ 520:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                     xfer_size_rem    Remaining transfer size.
+ 521:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                     p_arg            Pointer to the callback argument.
+ 522:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                     status           DEF_OK    if the DMA completes the transfer with no errors.
+ 523:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                      DEF_FAIL, otherwise.
+ 524:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 525:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 526:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 527:Libraries/uC-CSP/LPC17xx/csp_dma.c **** CPU_BOOLEAN  CSP_DMA_CH_CfgExt (CSP_DEV_NBR   ch_nbr,
+ 528:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                 CSP_OPT       xfer_type,
+ 529:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                 CSP_OPT       src_burst_size,
+ 530:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                 CSP_OPT       src_width,
+ 531:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                 CSP_OPT       dest_burst_size,
+ 532:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                 CSP_OPT       dest_width,
+ 533:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                 CSP_DEV_NBR   src_req,
+ 534:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                 CSP_DEV_NBR   dest_req)
+ 535:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                 
+ 536:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 537:Libraries/uC-CSP/LPC17xx/csp_dma.c **** {   CSP_DMA_REG     *p_dma_reg;
+ 483              		.loc 1 537 0
+ 484              		.cfi_startproc
+ 485              		@ args = 16, pretend = 0, frame = 32
+ 486              		@ frame_needed = 1, uses_anonymous_args = 0
+ 487 02fc 80B5     		push	{r7, lr}
+ 488              	.LCFI9:
+ 489              		.cfi_def_cfa_offset 8
+ 490              		.cfi_offset 14, -4
+ 491              		.cfi_offset 7, -8
+ 492 02fe 88B0     		sub	sp, sp, #32
+ 493              	.LCFI10:
+ 494              		.cfi_def_cfa_offset 40
+ 495 0300 00AF     		add	r7, sp, #0
+ 496              	.LCFI11:
+ 497              		.cfi_def_cfa_register 7
+ 498 0302 F880     		strh	r0, [r7, #6]	@ movhi
+ 499 0304 B980     		strh	r1, [r7, #4]	@ movhi
+ 500 0306 7A80     		strh	r2, [r7, #2]	@ movhi
+ 501 0308 3B80     		strh	r3, [r7, #0]	@ movhi
+ 538:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH_REG  *p_dma_ch_reg;
+ 539:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT32U       reg_cfg;
+ 540:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT32U       reg_ctrl;
+ 541:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT32U       reg_val;
+ 542:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_SR_ALLOC();
+ 502              		.loc 1 542 0
+ 503 030a 4FF00003 		mov	r3, #0
+ 504 030e 7B61     		str	r3, [r7, #20]
+ 543:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 544:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* ------------------ ARGUMENTS CHE
+ 545:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #if (CSP_CFG_ARG_CHK_EN == DEF_ENABLED)
+ 546:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (ch_nbr > CSP_DMA_CH_MAX_NBR - 1u) {                     /* Invalid channel number?         
+ 505              		.loc 1 546 0
+ 506 0310 FB88     		ldrh	r3, [r7, #6]
+ 507 0312 072B     		cmp	r3, #7
+ 508 0314 02D9     		bls	.L24
+ 547:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 509              		.loc 1 547 0
+ 510 0316 4FF00003 		mov	r3, #0
+ 511 031a 5DE1     		b	.L25
+ 512              	.L24:
+ 548:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 549:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* Channel not available?          
+ 550:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (CSP_DMA_ChTbl[ch_nbr].State != CSP_DMA_CH_STATE_ALLOC) {
+ 513              		.loc 1 550 0
+ 514 031c F988     		ldrh	r1, [r7, #6]
+ 515 031e 40F20002 		movw	r2, #:lower16:CSP_DMA_ChTbl
+ 516 0322 C0F20002 		movt	r2, #:upper16:CSP_DMA_ChTbl
+ 517 0326 0B46     		mov	r3, r1
+ 518 0328 4FEA4303 		lsl	r3, r3, #1
+ 519 032c 5B18     		adds	r3, r3, r1
+ 520 032e 4FEA8303 		lsl	r3, r3, #2
+ 521 0332 D318     		adds	r3, r2, r3
+ 522 0334 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 523 0336 012B     		cmp	r3, #1
+ 524 0338 02D0     		beq	.L26
+ 551:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 525              		.loc 1 551 0
+ 526 033a 4FF00003 		mov	r3, #0
+ 527 033e 4BE1     		b	.L25
+ 528              	.L26:
+ 552:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 553:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 554:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if ((src_width != CPU_WORD_SIZE_08) &&                      /* Check src width parameter.      
+ 529              		.loc 1 554 0
+ 530 0340 3B88     		ldrh	r3, [r7, #0]
+ 531 0342 012B     		cmp	r3, #1
+ 532 0344 08D0     		beq	.L27
+ 533              		.loc 1 554 0 is_stmt 0 discriminator 1
+ 534 0346 3B88     		ldrh	r3, [r7, #0]
+ 535 0348 022B     		cmp	r3, #2
+ 536 034a 05D0     		beq	.L27
+ 555:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         (src_width != CPU_WORD_SIZE_16) &&
+ 537              		.loc 1 555 0 is_stmt 1
+ 538 034c 3B88     		ldrh	r3, [r7, #0]
+ 539 034e 042B     		cmp	r3, #4
+ 540 0350 02D0     		beq	.L27
+ 556:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         (src_width != CPU_WORD_SIZE_32)) {
+ 557:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 541              		.loc 1 557 0
+ 542 0352 4FF00003 		mov	r3, #0
+ 543 0356 3FE1     		b	.L25
+ 544              	.L27:
+ 558:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 559:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 560:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if ((dest_width != CPU_WORD_SIZE_08) &&                     /* Check src width parameter.      
+ 545              		.loc 1 560 0
+ 546 0358 BB8D     		ldrh	r3, [r7, #44]
+ 547 035a 012B     		cmp	r3, #1
+ 548 035c 08D0     		beq	.L28
+ 549              		.loc 1 560 0 is_stmt 0 discriminator 1
+ 550 035e BB8D     		ldrh	r3, [r7, #44]
+ 551 0360 022B     		cmp	r3, #2
+ 552 0362 05D0     		beq	.L28
+ 561:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         (dest_width != CPU_WORD_SIZE_16) &&
+ 553              		.loc 1 561 0 is_stmt 1
+ 554 0364 BB8D     		ldrh	r3, [r7, #44]
+ 555 0366 042B     		cmp	r3, #4
+ 556 0368 02D0     		beq	.L28
+ 562:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         (dest_width != CPU_WORD_SIZE_32)) {
+ 563:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 557              		.loc 1 563 0
+ 558 036a 4FF00003 		mov	r3, #0
+ 559 036e 33E1     		b	.L25
+ 560              	.L28:
+ 564:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 565:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #endif
+ 566:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* Channel configuration.          
+ 567:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     reg_cfg  = DEF_BIT_NONE; 
+ 561              		.loc 1 567 0
+ 562 0370 4FF00003 		mov	r3, #0
+ 563 0374 FB61     		str	r3, [r7, #28]
+ 568:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     reg_ctrl = DEF_BIT_NONE;
+ 564              		.loc 1 568 0
+ 565 0376 4FF00003 		mov	r3, #0
+ 566 037a 3B61     		str	r3, [r7, #16]
+ 569:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 570:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (src_burst_size == 255u) {                               /* Set the source/destination burst
+ 567              		.loc 1 570 0
+ 568 037c 7B88     		ldrh	r3, [r7, #2]
+ 569 037e FF2B     		cmp	r3, #255
+ 570 0380 03D1     		bne	.L29
+ 571:Libraries/uC-CSP/LPC17xx/csp_dma.c ****        reg_val   = 7u;
+ 571              		.loc 1 571 0
+ 572 0382 4FF00703 		mov	r3, #7
+ 573 0386 BB61     		str	r3, [r7, #24]
+ 574 0388 0EE0     		b	.L30
+ 575              	.L29:
+ 572:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     } else if (src_burst_size >= 4u) {
+ 576              		.loc 1 572 0
+ 577 038a 7B88     		ldrh	r3, [r7, #2]
+ 578 038c 032B     		cmp	r3, #3
+ 579 038e 08D9     		bls	.L31
+ 573:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         reg_val  = (DEF_INT_32_NBR_BITS - CPU_CntLeadZeros(src_burst_size) - 2u);        
+ 580              		.loc 1 573 0
+ 581 0390 7B88     		ldrh	r3, [r7, #2]
+ 582 0392 1846     		mov	r0, r3
+ 583 0394 FFF7FEFF 		bl	CPU_CntLeadZeros
+ 584 0398 0346     		mov	r3, r0
+ 585 039a C3F11E03 		rsb	r3, r3, #30
+ 586 039e BB61     		str	r3, [r7, #24]
+ 587 03a0 02E0     		b	.L30
+ 588              	.L31:
+ 574:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     } else {
+ 575:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         reg_val  = DEF_BIT_NONE; 
+ 589              		.loc 1 575 0
+ 590 03a2 4FF00003 		mov	r3, #0
+ 591 03a6 BB61     		str	r3, [r7, #24]
+ 592              	.L30:
+ 576:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 577:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             
+ 578:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_SET(reg_ctrl, reg_val << 12u);
+ 593              		.loc 1 578 0
+ 594 03a8 BB69     		ldr	r3, [r7, #24]
+ 595 03aa 4FEA0333 		lsl	r3, r3, #12
+ 596 03ae 3A69     		ldr	r2, [r7, #16]
+ 597 03b0 1343     		orrs	r3, r3, r2
+ 598 03b2 3B61     		str	r3, [r7, #16]
+ 579:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 580:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (dest_burst_size == 255u) {
+ 599              		.loc 1 580 0
+ 600 03b4 3B8D     		ldrh	r3, [r7, #40]
+ 601 03b6 FF2B     		cmp	r3, #255
+ 602 03b8 03D1     		bne	.L32
+ 581:Libraries/uC-CSP/LPC17xx/csp_dma.c ****        reg_val  = 7u;
+ 603              		.loc 1 581 0
+ 604 03ba 4FF00703 		mov	r3, #7
+ 605 03be BB61     		str	r3, [r7, #24]
+ 606 03c0 0EE0     		b	.L33
+ 607              	.L32:
+ 582:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     } else if (dest_burst_size >= 4u) {
+ 608              		.loc 1 582 0
+ 609 03c2 3B8D     		ldrh	r3, [r7, #40]
+ 610 03c4 032B     		cmp	r3, #3
+ 611 03c6 08D9     		bls	.L34
+ 583:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         reg_val = (DEF_INT_32_NBR_BITS - CPU_CntLeadZeros(dest_burst_size) - 2u);        
+ 612              		.loc 1 583 0
+ 613 03c8 3B8D     		ldrh	r3, [r7, #40]
+ 614 03ca 1846     		mov	r0, r3
+ 615 03cc FFF7FEFF 		bl	CPU_CntLeadZeros
+ 616 03d0 0346     		mov	r3, r0
+ 617 03d2 C3F11E03 		rsb	r3, r3, #30
+ 618 03d6 BB61     		str	r3, [r7, #24]
+ 619 03d8 02E0     		b	.L33
+ 620              	.L34:
+ 584:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     } else {
+ 585:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         reg_val = DEF_BIT_NONE;
+ 621              		.loc 1 585 0
+ 622 03da 4FF00003 		mov	r3, #0
+ 623 03de BB61     		str	r3, [r7, #24]
+ 624              	.L33:
+ 586:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 587:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 588:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_SET(reg_ctrl, reg_val           << 15u);
+ 625              		.loc 1 588 0
+ 626 03e0 BB69     		ldr	r3, [r7, #24]
+ 627 03e2 4FEAC333 		lsl	r3, r3, #15
+ 628 03e6 3A69     		ldr	r2, [r7, #16]
+ 629 03e8 1343     		orrs	r3, r3, r2
+ 630 03ea 3B61     		str	r3, [r7, #16]
+ 589:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_SET(reg_ctrl, (src_width  - 1u) << 18u);
+ 631              		.loc 1 589 0
+ 632 03ec 3B88     		ldrh	r3, [r7, #0]
+ 633 03ee 03F1FF33 		add	r3, r3, #-1
+ 634 03f2 4FEA8343 		lsl	r3, r3, #18
+ 635 03f6 3A69     		ldr	r2, [r7, #16]
+ 636 03f8 1343     		orrs	r3, r3, r2
+ 637 03fa 3B61     		str	r3, [r7, #16]
+ 590:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_SET(reg_ctrl, (dest_width - 1u) << 21u);
+ 638              		.loc 1 590 0
+ 639 03fc BB8D     		ldrh	r3, [r7, #44]
+ 640 03fe 03F1FF33 		add	r3, r3, #-1
+ 641 0402 4FEA4353 		lsl	r3, r3, #21
+ 642 0406 3A69     		ldr	r2, [r7, #16]
+ 643 0408 1343     		orrs	r3, r3, r2
+ 644 040a 3B61     		str	r3, [r7, #16]
+ 591:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 592:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 593:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 594:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* Set the transfer type.          
+ 595:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     switch (xfer_type) {
+ 645              		.loc 1 595 0
+ 646 040c BB88     		ldrh	r3, [r7, #4]
+ 647 040e 032B     		cmp	r3, #3
+ 648 0410 19D8     		bhi	.L35
+ 649 0412 01A2     		adr	r2, .L40
+ 650 0414 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 651              		.align	2
+ 652              	.L40:
+ 653 0418 4D040000 		.word	.L50+1
+ 654 041c 33040000 		.word	.L37+1
+ 655 0420 29040000 		.word	.L38+1
+ 656 0424 3D040000 		.word	.L39+1
+ 657              	.L38:
+ 596:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         case CSP_DMA_XFER_TYPE_MEM_TO_PER:
+ 597:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              DEF_BIT_SET(reg_cfg, CSP_DMA_BIT_CH_CFG_XFER_MEM_TO_PER);              
+ 658              		.loc 1 597 0
+ 659 0428 FB69     		ldr	r3, [r7, #28]
+ 660 042a 43F40063 		orr	r3, r3, #2048
+ 661 042e FB61     		str	r3, [r7, #28]
+ 598:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              break;
+ 662              		.loc 1 598 0
+ 663 0430 0DE0     		b	.L41
+ 664              	.L37:
+ 599:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 600:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         case CSP_DMA_XFER_TYPE_MEM_TO_MEM:
+ 601:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              DEF_BIT_SET(reg_cfg, CSP_DMA_BIT_CH_CFG_XFER_MEM_TO_MEM);              
+ 602:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              break;
+ 603:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 604:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         case CSP_DMA_XFER_TYPE_PER_TO_MEM:
+ 605:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              DEF_BIT_SET(reg_cfg, CSP_DMA_BIT_CH_CFG_XFER_PER_TO_MEM);              
+ 665              		.loc 1 605 0
+ 666 0432 FB69     		ldr	r3, [r7, #28]
+ 667 0434 43F48053 		orr	r3, r3, #4096
+ 668 0438 FB61     		str	r3, [r7, #28]
+ 606:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              break;
+ 669              		.loc 1 606 0
+ 670 043a 08E0     		b	.L41
+ 671              	.L39:
+ 607:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 608:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         case CSP_DMA_XFER_TYPE_PER_TO_PER:
+ 609:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              DEF_BIT_SET(reg_cfg, CSP_DMA_BIT_CH_CFG_XFER_PER_TO_PER);
+ 672              		.loc 1 609 0
+ 673 043c FB69     		ldr	r3, [r7, #28]
+ 674 043e 43F4C053 		orr	r3, r3, #6144
+ 675 0442 FB61     		str	r3, [r7, #28]
+ 610:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              break;
+ 676              		.loc 1 610 0
+ 677 0444 03E0     		b	.L41
+ 678              	.L35:
+ 611:Libraries/uC-CSP/LPC17xx/csp_dma.c ****    
+ 612:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         default:
+ 613:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              return (DEF_FAIL);
+ 679              		.loc 1 613 0
+ 680 0446 4FF00003 		mov	r3, #0
+ 681 044a C5E0     		b	.L25
+ 682              	.L50:
+ 602:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              break;
+ 683              		.loc 1 602 0
+ 684 044c 00BF     		nop
+ 685              	.L41:
+ 614:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 615:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* Configure source request signal 
+ 616:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* ... transfer from peripheral?   
+ 617:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (((xfer_type == CSP_DMA_XFER_TYPE_PER_TO_MEM       )  || 
+ 686              		.loc 1 617 0
+ 687 044e BB88     		ldrh	r3, [r7, #4]
+ 688 0450 012B     		cmp	r3, #1
+ 689 0452 02D0     		beq	.L42
+ 690              		.loc 1 617 0 is_stmt 0 discriminator 1
+ 691 0454 BB88     		ldrh	r3, [r7, #4]
+ 692 0456 032B     		cmp	r3, #3
+ 693 0458 4CD1     		bne	.L43
+ 694              	.L42:
+ 618:Libraries/uC-CSP/LPC17xx/csp_dma.c ****          (xfer_type == CSP_DMA_XFER_TYPE_PER_TO_PER       ))) {    
+ 619:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         
+ 620:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         if (src_req < CSP_DMA_XFER_PER_REQ_UART_00_TX) {
+ 695              		.loc 1 620 0 is_stmt 1
+ 696 045a 3B8E     		ldrh	r3, [r7, #48]
+ 697 045c 072B     		cmp	r3, #7
+ 698 045e 41D9     		bls	.L44
+ 621:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             ;    
+ 622:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         } else if (src_req < CSP_DMA_XFER_PER_REQ_TMR_00_MATCH_0) {
+ 699              		.loc 1 622 0
+ 700 0460 3B8E     		ldrh	r3, [r7, #48]
+ 701 0462 0F2B     		cmp	r3, #15
+ 702 0464 1ED8     		bhi	.L45
+ 623:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             CPU_CRITICAL_ENTER();
+ 703              		.loc 1 623 0
+ 704 0466 FFF7FEFF 		bl	CPU_SR_Save
+ 705 046a 7861     		str	r0, [r7, #20]
+ 706 046c FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 624:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             DEF_BIT_CLR(CSP_DMA_REG_REQ_SEL, DEF_BIT(src_req - CSP_DMA_XFER_PER_REQ_UART_00_TX));
+ 707              		.loc 1 624 0
+ 708 0470 4CF2C413 		movw	r3, #49604
+ 709 0474 C4F20F03 		movt	r3, 16399
+ 710 0478 4CF2C412 		movw	r2, #49604
+ 711 047c C4F20F02 		movt	r2, 16399
+ 712 0480 1168     		ldr	r1, [r2, #0]
+ 713 0482 3A8E     		ldrh	r2, [r7, #48]
+ 714 0484 A2F10802 		sub	r2, r2, #8
+ 715 0488 4FF00100 		mov	r0, #1
+ 716 048c 00FA02F2 		lsl	r2, r0, r2
+ 717 0490 6FEA0202 		mvn	r2, r2
+ 718 0494 0A40     		ands	r2, r2, r1
+ 719 0496 1A60     		str	r2, [r3, #0]
+ 625:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             CPU_CRITICAL_EXIT();
+ 720              		.loc 1 625 0
+ 721 0498 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 722 049c 7869     		ldr	r0, [r7, #20]
+ 723 049e FFF7FEFF 		bl	CPU_SR_Restore
+ 724 04a2 1FE0     		b	.L44
+ 725              	.L45:
+ 626:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         } else {
+ 627:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             src_req -= CSP_DMA_XFER_PER_REQ_UART_00_TX;
+ 726              		.loc 1 627 0
+ 727 04a4 3B8E     		ldrh	r3, [r7, #48]	@ movhi
+ 728 04a6 A3F10803 		sub	r3, r3, #8
+ 729 04aa 3B86     		strh	r3, [r7, #48]	@ movhi
+ 628:Libraries/uC-CSP/LPC17xx/csp_dma.c ****    
+ 629:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             CPU_CRITICAL_ENTER();
+ 730              		.loc 1 629 0
+ 731 04ac FFF7FEFF 		bl	CPU_SR_Save
+ 732 04b0 7861     		str	r0, [r7, #20]
+ 733 04b2 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 630:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             DEF_BIT_SET(CSP_DMA_REG_REQ_SEL, DEF_BIT(src_req - CSP_DMA_XFER_PER_REQ_UART_00_TX)); 
+ 734              		.loc 1 630 0
+ 735 04b6 4CF2C413 		movw	r3, #49604
+ 736 04ba C4F20F03 		movt	r3, 16399
+ 737 04be 4CF2C412 		movw	r2, #49604
+ 738 04c2 C4F20F02 		movt	r2, 16399
+ 739 04c6 1168     		ldr	r1, [r2, #0]
+ 740 04c8 3A8E     		ldrh	r2, [r7, #48]
+ 741 04ca A2F10802 		sub	r2, r2, #8
+ 742 04ce 4FF00100 		mov	r0, #1
+ 743 04d2 00FA02F2 		lsl	r2, r0, r2
+ 744 04d6 0A43     		orrs	r2, r2, r1
+ 745 04d8 1A60     		str	r2, [r3, #0]
+ 631:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             CPU_CRITICAL_EXIT();
+ 746              		.loc 1 631 0
+ 747 04da FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 748 04de 7869     		ldr	r0, [r7, #20]
+ 749 04e0 FFF7FEFF 		bl	CPU_SR_Restore
+ 750              	.L44:
+ 632:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         }
+ 633:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         DEF_BIT_SET(reg_cfg, (src_req & CSP_DMA_MSK_CH_CFG_PER_REQ) << 1u);                
+ 751              		.loc 1 633 0
+ 752 04e4 3B8E     		ldrh	r3, [r7, #48]
+ 753 04e6 03F00F03 		and	r3, r3, #15
+ 754 04ea 4FEA4303 		lsl	r3, r3, #1
+ 755 04ee FA69     		ldr	r2, [r7, #28]
+ 756 04f0 1343     		orrs	r3, r3, r2
+ 757 04f2 FB61     		str	r3, [r7, #28]
+ 758              	.L43:
+ 634:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 635:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 636:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 637:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (((xfer_type  == CSP_DMA_XFER_TYPE_MEM_TO_PER       )  || 
+ 759              		.loc 1 637 0
+ 760 04f4 BB88     		ldrh	r3, [r7, #4]
+ 761 04f6 022B     		cmp	r3, #2
+ 762 04f8 02D0     		beq	.L46
+ 763              		.loc 1 637 0 is_stmt 0 discriminator 1
+ 764 04fa BB88     		ldrh	r3, [r7, #4]
+ 765 04fc 032B     		cmp	r3, #3
+ 766 04fe 4CD1     		bne	.L47
+ 767              	.L46:
+ 638:Libraries/uC-CSP/LPC17xx/csp_dma.c ****          (xfer_type  == CSP_DMA_XFER_TYPE_PER_TO_PER       ))) {
+ 639:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 640:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         if (dest_req < CSP_DMA_XFER_PER_REQ_UART_00_TX) {
+ 768              		.loc 1 640 0 is_stmt 1
+ 769 0500 BB8E     		ldrh	r3, [r7, #52]
+ 770 0502 072B     		cmp	r3, #7
+ 771 0504 41D9     		bls	.L48
+ 641:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             ;    
+ 642:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         } else if (dest_req < CSP_DMA_XFER_PER_REQ_TMR_00_MATCH_0) {
+ 772              		.loc 1 642 0
+ 773 0506 BB8E     		ldrh	r3, [r7, #52]
+ 774 0508 0F2B     		cmp	r3, #15
+ 775 050a 1ED8     		bhi	.L49
+ 643:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             CPU_CRITICAL_ENTER();
+ 776              		.loc 1 643 0
+ 777 050c FFF7FEFF 		bl	CPU_SR_Save
+ 778 0510 7861     		str	r0, [r7, #20]
+ 779 0512 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 644:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             DEF_BIT_CLR(CSP_DMA_REG_REQ_SEL, DEF_BIT(dest_req - CSP_DMA_XFER_PER_REQ_UART_00_TX));
+ 780              		.loc 1 644 0
+ 781 0516 4CF2C413 		movw	r3, #49604
+ 782 051a C4F20F03 		movt	r3, 16399
+ 783 051e 4CF2C412 		movw	r2, #49604
+ 784 0522 C4F20F02 		movt	r2, 16399
+ 785 0526 1168     		ldr	r1, [r2, #0]
+ 786 0528 BA8E     		ldrh	r2, [r7, #52]
+ 787 052a A2F10802 		sub	r2, r2, #8
+ 788 052e 4FF00100 		mov	r0, #1
+ 789 0532 00FA02F2 		lsl	r2, r0, r2
+ 790 0536 6FEA0202 		mvn	r2, r2
+ 791 053a 0A40     		ands	r2, r2, r1
+ 792 053c 1A60     		str	r2, [r3, #0]
+ 645:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             CPU_CRITICAL_EXIT();
+ 793              		.loc 1 645 0
+ 794 053e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 795 0542 7869     		ldr	r0, [r7, #20]
+ 796 0544 FFF7FEFF 		bl	CPU_SR_Restore
+ 797 0548 1FE0     		b	.L48
+ 798              	.L49:
+ 646:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         } else {
+ 647:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             dest_req -= CSP_DMA_XFER_PER_REQ_UART_00_TX;
+ 799              		.loc 1 647 0
+ 800 054a BB8E     		ldrh	r3, [r7, #52]	@ movhi
+ 801 054c A3F10803 		sub	r3, r3, #8
+ 802 0550 BB86     		strh	r3, [r7, #52]	@ movhi
+ 648:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 649:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             CPU_CRITICAL_ENTER();            
+ 803              		.loc 1 649 0
+ 804 0552 FFF7FEFF 		bl	CPU_SR_Save
+ 805 0556 7861     		str	r0, [r7, #20]
+ 806 0558 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 650:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             DEF_BIT_SET(CSP_DMA_REG_REQ_SEL, DEF_BIT(dest_req - CSP_DMA_XFER_PER_REQ_UART_00_TX)); 
+ 807              		.loc 1 650 0
+ 808 055c 4CF2C413 		movw	r3, #49604
+ 809 0560 C4F20F03 		movt	r3, 16399
+ 810 0564 4CF2C412 		movw	r2, #49604
+ 811 0568 C4F20F02 		movt	r2, 16399
+ 812 056c 1168     		ldr	r1, [r2, #0]
+ 813 056e BA8E     		ldrh	r2, [r7, #52]
+ 814 0570 A2F10802 		sub	r2, r2, #8
+ 815 0574 4FF00100 		mov	r0, #1
+ 816 0578 00FA02F2 		lsl	r2, r0, r2
+ 817 057c 0A43     		orrs	r2, r2, r1
+ 818 057e 1A60     		str	r2, [r3, #0]
+ 651:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             CPU_CRITICAL_EXIT();
+ 819              		.loc 1 651 0
+ 820 0580 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 821 0584 7869     		ldr	r0, [r7, #20]
+ 822 0586 FFF7FEFF 		bl	CPU_SR_Restore
+ 823              	.L48:
+ 652:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         }
+ 653:Libraries/uC-CSP/LPC17xx/csp_dma.c ****              
+ 654:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         DEF_BIT_SET(reg_cfg, (dest_req & CSP_DMA_MSK_CH_CFG_PER_REQ) << 6u);        
+ 824              		.loc 1 654 0
+ 825 058a BB8E     		ldrh	r3, [r7, #52]
+ 826 058c 03F00F03 		and	r3, r3, #15
+ 827 0590 4FEA8313 		lsl	r3, r3, #6
+ 828 0594 FA69     		ldr	r2, [r7, #28]
+ 829 0596 1343     		orrs	r3, r3, r2
+ 830 0598 FB61     		str	r3, [r7, #28]
+ 831              	.L47:
+ 655:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 656:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 657:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg    = (CSP_DMA_REG *)CSP_ADDR_DMA_REG;                  
+ 832              		.loc 1 657 0
+ 833 059a 4FF48043 		mov	r3, #16384
+ 834 059e C5F20003 		movt	r3, 20480
+ 835 05a2 FB60     		str	r3, [r7, #12]
+ 658:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg = &(p_dma_reg->CHx[ch_nbr]);
+ 836              		.loc 1 658 0
+ 837 05a4 FB68     		ldr	r3, [r7, #12]
+ 838 05a6 03F58072 		add	r2, r3, #256
+ 839 05aa FB88     		ldrh	r3, [r7, #6]
+ 840 05ac 4FEA4313 		lsl	r3, r3, #5
+ 841 05b0 D318     		adds	r3, r2, r3
+ 842 05b2 BB60     		str	r3, [r7, #8]
+ 659:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 660:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_CRITICAL_ENTER();
+ 843              		.loc 1 660 0
+ 844 05b4 FFF7FEFF 		bl	CPU_SR_Save
+ 845 05b8 7861     		str	r0, [r7, #20]
+ 846 05ba FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 661:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->Cfg      = (CPU_INT32U)reg_cfg;   
+ 847              		.loc 1 661 0
+ 848 05be BB68     		ldr	r3, [r7, #8]
+ 849 05c0 FA69     		ldr	r2, [r7, #28]
+ 850 05c2 1A61     		str	r2, [r3, #16]
+ 662:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->Ctrl     = (CPU_INT32U)reg_ctrl;       
+ 851              		.loc 1 662 0
+ 852 05c4 BB68     		ldr	r3, [r7, #8]
+ 853 05c6 3A69     		ldr	r2, [r7, #16]
+ 854 05c8 DA60     		str	r2, [r3, #12]
+ 663:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_CRITICAL_EXIT();
+ 855              		.loc 1 663 0
+ 856 05ca FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 857 05ce 7869     		ldr	r0, [r7, #20]
+ 858 05d0 FFF7FEFF 		bl	CPU_SR_Restore
+ 664:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 665:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     return (DEF_OK);
+ 859              		.loc 1 665 0
+ 860 05d4 4FF00103 		mov	r3, #1
+ 861              	.L25:
+ 666:Libraries/uC-CSP/LPC17xx/csp_dma.c **** }
+ 862              		.loc 1 666 0
+ 863 05d8 1846     		mov	r0, r3
+ 864 05da 07F12007 		add	r7, r7, #32
+ 865 05de BD46     		mov	sp, r7
+ 866 05e0 80BD     		pop	{r7, pc}
+ 867              		.cfi_endproc
+ 868              	.LFE3:
+ 870 05e2 00BF     		.align	2
+ 871              		.global	CSP_DMA_XferStartExt
+ 872              		.thumb
+ 873              		.thumb_func
+ 875              	CSP_DMA_XferStartExt:
+ 876              	.LFB4:
+ 667:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 668:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 669:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 670:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 671:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                        CSP_DMA_XferStartExt()
+ 672:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 673:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Description : Initialize unattended DMA transfer.
+ 674:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   
+ 675:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Argument(s) : ch_nbr       Channel number.
+ 676:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 677:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               p_dest        Pointer to destination memory buffer.
+ 678:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 679:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               p_src         Pointer to source      memory buffer.
+ 680:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 681:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               xfer_size     Transfer size.
+ 682:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 683:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               opt           Transfer pptions flags.
+ 684:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 685:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                 CSP_DMA_OPT_FLAG_XFER_SRC_INC   Source address is incremented.
+ 686:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                 CSP_DMA_OPT_FLAG_XFER_DEST_INC  Destination address is incremente
+ 687:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 688:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Return(s)   : DEF_OK,    If the a trasnfer was initialized, 
+ 689:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               DEF_FAIL,  Otherwise.
+ 690:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 691:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Caller(s)   : Application.
+ 692:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 693:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Note(s)     : none.
+ 694:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 695:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 696:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 697:Libraries/uC-CSP/LPC17xx/csp_dma.c **** CPU_BOOLEAN  CSP_DMA_XferStartExt (CSP_DEV_NBR     ch_nbr,
+ 698:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                    void           *p_dest,
+ 699:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                    void           *p_src,                                   
+ 700:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                    CPU_SIZE_T      xfer_size,
+ 701:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                    CSP_OPT_FLAGS   opt)
+ 702:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 703:Libraries/uC-CSP/LPC17xx/csp_dma.c **** {   
+ 877              		.loc 1 703 0
+ 878              		.cfi_startproc
+ 879              		@ args = 4, pretend = 0, frame = 32
+ 880              		@ frame_needed = 1, uses_anonymous_args = 0
+ 881 05e4 80B5     		push	{r7, lr}
+ 882              	.LCFI12:
+ 883              		.cfi_def_cfa_offset 8
+ 884              		.cfi_offset 14, -4
+ 885              		.cfi_offset 7, -8
+ 886 05e6 88B0     		sub	sp, sp, #32
+ 887              	.LCFI13:
+ 888              		.cfi_def_cfa_offset 40
+ 889 05e8 00AF     		add	r7, sp, #0
+ 890              	.LCFI14:
+ 891              		.cfi_def_cfa_register 7
+ 892 05ea B960     		str	r1, [r7, #8]
+ 893 05ec 7A60     		str	r2, [r7, #4]
+ 894 05ee 3B60     		str	r3, [r7, #0]
+ 895 05f0 0346     		mov	r3, r0	@ movhi
+ 896 05f2 FB81     		strh	r3, [r7, #14]	@ movhi
+ 704:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_REG     *p_dma_reg;
+ 705:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH_REG  *p_dma_ch_reg;
+ 706:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT32U       reg_ctrl;    
+ 707:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_SR_ALLOC();
+ 897              		.loc 1 707 0
+ 898 05f4 4FF00003 		mov	r3, #0
+ 899 05f8 BB61     		str	r3, [r7, #24]
+ 708:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 709:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* ------------------ ARGUMENTS CHE
+ 710:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #if (CSP_CFG_ARG_CHK_EN == DEF_ENABLED)             
+ 711:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (ch_nbr > CSP_DMA_CH_MAX_NBR - 1u) {                     /* Invalid channel number?         
+ 900              		.loc 1 711 0
+ 901 05fa FB89     		ldrh	r3, [r7, #14]
+ 902 05fc 072B     		cmp	r3, #7
+ 903 05fe 02D9     		bls	.L52
+ 712:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 904              		.loc 1 712 0
+ 905 0600 4FF00003 		mov	r3, #0
+ 906 0604 6DE0     		b	.L53
+ 907              	.L52:
+ 713:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 714:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* Channel not available?          
+ 715:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (CSP_DMA_ChTbl[ch_nbr].State != CSP_DMA_CH_STATE_ALLOC) {
+ 908              		.loc 1 715 0
+ 909 0606 F989     		ldrh	r1, [r7, #14]
+ 910 0608 40F20002 		movw	r2, #:lower16:CSP_DMA_ChTbl
+ 911 060c C0F20002 		movt	r2, #:upper16:CSP_DMA_ChTbl
+ 912 0610 0B46     		mov	r3, r1
+ 913 0612 4FEA4303 		lsl	r3, r3, #1
+ 914 0616 5B18     		adds	r3, r3, r1
+ 915 0618 4FEA8303 		lsl	r3, r3, #2
+ 916 061c D318     		adds	r3, r2, r3
+ 917 061e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 918 0620 012B     		cmp	r3, #1
+ 919 0622 02D0     		beq	.L54
+ 716:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 920              		.loc 1 716 0
+ 921 0624 4FF00003 		mov	r3, #0
+ 922 0628 5BE0     		b	.L53
+ 923              	.L54:
+ 717:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 718:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 719:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if ((p_dest == (void *)0) ||                                /* Null pointers?                  
+ 924              		.loc 1 719 0
+ 925 062a BB68     		ldr	r3, [r7, #8]
+ 926 062c 002B     		cmp	r3, #0
+ 927 062e 02D0     		beq	.L55
+ 928              		.loc 1 719 0 is_stmt 0 discriminator 1
+ 929 0630 7B68     		ldr	r3, [r7, #4]
+ 930 0632 002B     		cmp	r3, #0
+ 931 0634 02D1     		bne	.L56
+ 932              	.L55:
+ 720:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         (p_src  == (void *)0)) {
+ 721:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 933              		.loc 1 721 0 is_stmt 1
+ 934 0636 4FF00003 		mov	r3, #0
+ 935 063a 52E0     		b	.L53
+ 936              	.L56:
+ 722:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }    
+ 723:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #endif    
+ 724:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 725:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg    = (CSP_DMA_REG *)CSP_ADDR_DMA_REG;                  
+ 937              		.loc 1 725 0
+ 938 063c 4FF48043 		mov	r3, #16384
+ 939 0640 C5F20003 		movt	r3, 20480
+ 940 0644 7B61     		str	r3, [r7, #20]
+ 726:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg = &(p_dma_reg->CHx[ch_nbr]);
+ 941              		.loc 1 726 0
+ 942 0646 7B69     		ldr	r3, [r7, #20]
+ 943 0648 03F58072 		add	r2, r3, #256
+ 944 064c FB89     		ldrh	r3, [r7, #14]
+ 945 064e 4FEA4313 		lsl	r3, r3, #5
+ 946 0652 D318     		adds	r3, r2, r3
+ 947 0654 3B61     		str	r3, [r7, #16]
+ 727:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     reg_ctrl     = p_dma_ch_reg->Ctrl;
+ 948              		.loc 1 727 0
+ 949 0656 3B69     		ldr	r3, [r7, #16]
+ 950 0658 DB68     		ldr	r3, [r3, #12]
+ 951 065a FB61     		str	r3, [r7, #28]
+ 728:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 729:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_CLR(reg_ctrl, CSP_DMA_MSK_CH_CTRL_XFER_SIZE |
+ 952              		.loc 1 729 0
+ 953 065c FA69     		ldr	r2, [r7, #28]
+ 954 065e 4FF47043 		mov	r3, #61440
+ 955 0662 C7F2FF33 		movt	r3, 29695
+ 956 0666 1340     		ands	r3, r3, r2
+ 957 0668 FB61     		str	r3, [r7, #28]
+ 730:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                           CSP_DMA_BIT_CH_CTRL_SI        |
+ 731:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                           CSP_DMA_BIT_CH_CTRL_DI        |
+ 732:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                           CSP_DMA_BIT_CH_CTRL_I);
+ 733:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 734:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_SET(reg_ctrl, (xfer_size & CSP_DMA_MSK_CH_CTRL_XFER_SIZE));
+ 958              		.loc 1 734 0
+ 959 066a 3B68     		ldr	r3, [r7, #0]
+ 960 066c 4FEA0353 		lsl	r3, r3, #20
+ 961 0670 4FEA1353 		lsr	r3, r3, #20
+ 962 0674 FA69     		ldr	r2, [r7, #28]
+ 963 0676 1343     		orrs	r3, r3, r2
+ 964 0678 FB61     		str	r3, [r7, #28]
+ 735:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 736:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (DEF_BIT_IS_SET(opt, CSP_DMA_OPT_FLAG_XFER_SRC_INC)) {
+ 965              		.loc 1 736 0
+ 966 067a 3B8D     		ldrh	r3, [r7, #40]
+ 967 067c 03F00103 		and	r3, r3, #1
+ 968 0680 DBB2     		uxtb	r3, r3
+ 969 0682 002B     		cmp	r3, #0
+ 970 0684 03D0     		beq	.L57
+ 737:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         DEF_BIT_SET(reg_ctrl, CSP_DMA_BIT_CH_CTRL_SI);
+ 971              		.loc 1 737 0
+ 972 0686 FB69     		ldr	r3, [r7, #28]
+ 973 0688 43F08063 		orr	r3, r3, #67108864
+ 974 068c FB61     		str	r3, [r7, #28]
+ 975              	.L57:
+ 738:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 739:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 740:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (DEF_BIT_IS_SET(opt, CSP_DMA_OPT_FLAG_XFER_DEST_INC)) {
+ 976              		.loc 1 740 0
+ 977 068e 3B8D     		ldrh	r3, [r7, #40]
+ 978 0690 03F00203 		and	r3, r3, #2
+ 979 0694 002B     		cmp	r3, #0
+ 980 0696 03D0     		beq	.L58
+ 741:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         DEF_BIT_SET(reg_ctrl, CSP_DMA_BIT_CH_CTRL_DI);        
+ 981              		.loc 1 741 0
+ 982 0698 FB69     		ldr	r3, [r7, #28]
+ 983 069a 43F00063 		orr	r3, r3, #134217728
+ 984 069e FB61     		str	r3, [r7, #28]
+ 985              	.L58:
+ 742:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }        
+ 743:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 744:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 745:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_CRITICAL_ENTER();
+ 986              		.loc 1 745 0
+ 987 06a0 FFF7FEFF 		bl	CPU_SR_Save
+ 988 06a4 B861     		str	r0, [r7, #24]
+ 989 06a6 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 746:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->SrcAddr     = (CPU_INT32U )p_src;
+ 990              		.loc 1 746 0
+ 991 06aa 7A68     		ldr	r2, [r7, #4]
+ 992 06ac 3B69     		ldr	r3, [r7, #16]
+ 993 06ae 1A60     		str	r2, [r3, #0]
+ 747:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->DestAddr    = (CPU_INT32U )p_dest;       
+ 994              		.loc 1 747 0
+ 995 06b0 BA68     		ldr	r2, [r7, #8]
+ 996 06b2 3B69     		ldr	r3, [r7, #16]
+ 997 06b4 5A60     		str	r2, [r3, #4]
+ 748:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->Ctrl        = reg_ctrl;
+ 998              		.loc 1 748 0
+ 999 06b6 3B69     		ldr	r3, [r7, #16]
+ 1000 06b8 FA69     		ldr	r2, [r7, #28]
+ 1001 06ba DA60     		str	r2, [r3, #12]
+ 749:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_CLR(p_dma_ch_reg->Cfg, CSP_DMA_BIT_CH_CFG_ITC   | 
+ 1002              		.loc 1 749 0
+ 1003 06bc 3B69     		ldr	r3, [r7, #16]
+ 1004 06be 1B69     		ldr	r3, [r3, #16]
+ 1005 06c0 23F44042 		bic	r2, r3, #49152
+ 1006 06c4 3B69     		ldr	r3, [r7, #16]
+ 1007 06c6 1A61     		str	r2, [r3, #16]
+ 750:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                    CSP_DMA_BIT_CH_CFG_IE);
+ 751:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_SET(p_dma_ch_reg->Cfg, CSP_DMA_BIT_CH_CFG_CH_EN); 
+ 1008              		.loc 1 751 0
+ 1009 06c8 3B69     		ldr	r3, [r7, #16]
+ 1010 06ca 1B69     		ldr	r3, [r3, #16]
+ 1011 06cc 43F00102 		orr	r2, r3, #1
+ 1012 06d0 3B69     		ldr	r3, [r7, #16]
+ 1013 06d2 1A61     		str	r2, [r3, #16]
+ 752:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_CRITICAL_EXIT();
+ 1014              		.loc 1 752 0
+ 1015 06d4 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1016 06d8 B869     		ldr	r0, [r7, #24]
+ 1017 06da FFF7FEFF 		bl	CPU_SR_Restore
+ 753:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 754:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     return (DEF_OK);
+ 1018              		.loc 1 754 0
+ 1019 06de 4FF00103 		mov	r3, #1
+ 1020              	.L53:
+ 755:Libraries/uC-CSP/LPC17xx/csp_dma.c **** }
+ 1021              		.loc 1 755 0
+ 1022 06e2 1846     		mov	r0, r3
+ 1023 06e4 07F12007 		add	r7, r7, #32
+ 1024 06e8 BD46     		mov	sp, r7
+ 1025 06ea 80BD     		pop	{r7, pc}
+ 1026              		.cfi_endproc
+ 1027              	.LFE4:
+ 1029              		.align	2
+ 1030              		.global	CSP_DMA_XferAsyncStartExt
+ 1031              		.thumb
+ 1032              		.thumb_func
+ 1034              	CSP_DMA_XferAsyncStartExt:
+ 1035              	.LFB5:
+ 756:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 757:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 758:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 759:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 760:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                        CSP_DMA_XferStartExt()
+ 761:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 762:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Description : Initialize an asynchronous DMA transfer.
+ 763:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   
+ 764:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Argument(s) : ch_nbr        Channel number.
+ 765:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *  
+ 766:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               p_dest        Pointer to destination memory buffer.
+ 767:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 768:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               p_src         Pointer to source      memory buffer.
+ 769:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 770:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               xfer_size     Transfer size.
+ 771:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 772:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 773:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               callback   Pointer to  DMA callback function. (see note #1)
+ 774:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 775:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               p_arg      Pointer to DMA callback function argument.
+ 776:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 777:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               opt           Transfer pptions flags.
+ 778:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 779:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                 CSP_DMA_OPT_FLAG_XFER_SRC_INC   Source address is incremented.
+ 780:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                 CSP_DMA_OPT_FLAG_XFER_DEST_INC  Destination address is incremente
+ 781:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 782:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Return(s)   : DEF_OK,    If the asynchronous DMA transfer was initialized.
+ 783:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               DEF_FAIL,  Otherwise.
+ 784:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 785:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Caller(s)   : Application.
+ 786:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 787:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Note(s)     : (1) The callback function should be defined as:
+ 788:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 789:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *               void   MyCallback (CSP_DEV_NBR  ch_nbr, 
+ 790:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                  CPU_INT16U   xfer_size_rem,
+ 791:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                  void         *p_arg,
+ 792:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                  CPU_BOOLEAN   status)
+ 793:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 794:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                where,
+ 795:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 796:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                     ch_nbr           DMA channel number.
+ 797:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                     xfer_size_rem    Remianing transfer size.
+ 798:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                     p_arg            Pointer to the callback argument.
+ 799:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                     status           DEF_OK    if the DMA stop the trasnfer with not error.
+ 800:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                      DEF_FAIL, otherwise.
+ 801:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 802:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 803:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 804:Libraries/uC-CSP/LPC17xx/csp_dma.c **** CPU_BOOLEAN  CSP_DMA_XferAsyncStartExt (CSP_DEV_NBR            ch_nbr, 
+ 805:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                         void                  *p_dest,                             
+ 806:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                         void                  *p_src,
+ 807:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                         CPU_SIZE_T             xfer_size,
+ 808:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                         CSP_DMA_CALLBACK_PTR   callback,
+ 809:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                         void                  *p_arg,
+ 810:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                         CSP_OPT_FLAGS          opt)
+ 811:Libraries/uC-CSP/LPC17xx/csp_dma.c **** {
+ 1036              		.loc 1 811 0
+ 1037              		.cfi_startproc
+ 1038              		@ args = 12, pretend = 0, frame = 40
+ 1039              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1040 06ec 80B5     		push	{r7, lr}
+ 1041              	.LCFI15:
+ 1042              		.cfi_def_cfa_offset 8
+ 1043              		.cfi_offset 14, -4
+ 1044              		.cfi_offset 7, -8
+ 1045 06ee 8AB0     		sub	sp, sp, #40
+ 1046              	.LCFI16:
+ 1047              		.cfi_def_cfa_offset 48
+ 1048 06f0 00AF     		add	r7, sp, #0
+ 1049              	.LCFI17:
+ 1050              		.cfi_def_cfa_register 7
+ 1051 06f2 B960     		str	r1, [r7, #8]
+ 1052 06f4 7A60     		str	r2, [r7, #4]
+ 1053 06f6 3B60     		str	r3, [r7, #0]
+ 1054 06f8 0346     		mov	r3, r0	@ movhi
+ 1055 06fa FB81     		strh	r3, [r7, #14]	@ movhi
+ 812:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_REG     *p_dma_reg;
+ 813:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH_REG  *p_dma_ch_reg; 
+ 814:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH      *p_dma_ch;
+ 815:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT32U       reg_ctrl;
+ 816:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_SR_ALLOC();
+ 1056              		.loc 1 816 0
+ 1057 06fc 4FF00003 		mov	r3, #0
+ 1058 0700 3B62     		str	r3, [r7, #32]
+ 817:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 818:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #if (CSP_CFG_ARG_CHK_EN == DEF_ENABLED)             
+ 819:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (ch_nbr > CSP_DMA_CH_MAX_NBR - 1u) {                     /* Invalid channel number?         
+ 1059              		.loc 1 819 0
+ 1060 0702 FB89     		ldrh	r3, [r7, #14]
+ 1061 0704 072B     		cmp	r3, #7
+ 1062 0706 02D9     		bls	.L60
+ 820:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 1063              		.loc 1 820 0
+ 1064 0708 4FF00003 		mov	r3, #0
+ 1065 070c 8BE0     		b	.L61
+ 1066              	.L60:
+ 821:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 822:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* Channel not available?          
+ 823:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (CSP_DMA_ChTbl[ch_nbr].State != CSP_DMA_CH_STATE_ALLOC) {
+ 1067              		.loc 1 823 0
+ 1068 070e F989     		ldrh	r1, [r7, #14]
+ 1069 0710 40F20002 		movw	r2, #:lower16:CSP_DMA_ChTbl
+ 1070 0714 C0F20002 		movt	r2, #:upper16:CSP_DMA_ChTbl
+ 1071 0718 0B46     		mov	r3, r1
+ 1072 071a 4FEA4303 		lsl	r3, r3, #1
+ 1073 071e 5B18     		adds	r3, r3, r1
+ 1074 0720 4FEA8303 		lsl	r3, r3, #2
+ 1075 0724 D318     		adds	r3, r2, r3
+ 1076 0726 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1077 0728 012B     		cmp	r3, #1
+ 1078 072a 02D0     		beq	.L62
+ 824:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 1079              		.loc 1 824 0
+ 1080 072c 4FF00003 		mov	r3, #0
+ 1081 0730 79E0     		b	.L61
+ 1082              	.L62:
+ 825:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 826:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 827:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (callback == (CSP_DMA_CALLBACK_PTR )0) {
+ 1083              		.loc 1 827 0
+ 1084 0732 3B6B     		ldr	r3, [r7, #48]
+ 1085 0734 002B     		cmp	r3, #0
+ 1086 0736 02D1     		bne	.L63
+ 828:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 1087              		.loc 1 828 0
+ 1088 0738 4FF00003 		mov	r3, #0
+ 1089 073c 73E0     		b	.L61
+ 1090              	.L63:
+ 829:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 830:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 831:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if ((p_dest  == (void *)0) ||
+ 1091              		.loc 1 831 0
+ 1092 073e BB68     		ldr	r3, [r7, #8]
+ 1093 0740 002B     		cmp	r3, #0
+ 1094 0742 02D0     		beq	.L64
+ 1095              		.loc 1 831 0 is_stmt 0 discriminator 1
+ 1096 0744 7B68     		ldr	r3, [r7, #4]
+ 1097 0746 002B     		cmp	r3, #0
+ 1098 0748 02D1     		bne	.L65
+ 1099              	.L64:
+ 832:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         (p_src   == (void *)0)) {
+ 833:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         return (DEF_FAIL);
+ 1100              		.loc 1 833 0 is_stmt 1
+ 1101 074a 4FF00003 		mov	r3, #0
+ 1102 074e 6AE0     		b	.L61
+ 1103              	.L65:
+ 834:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 835:Libraries/uC-CSP/LPC17xx/csp_dma.c **** #endif    
+ 836:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 837:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg    = (CSP_DMA_REG *)CSP_ADDR_DMA_REG;                  
+ 1104              		.loc 1 837 0
+ 1105 0750 4FF48043 		mov	r3, #16384
+ 1106 0754 C5F20003 		movt	r3, 20480
+ 1107 0758 FB61     		str	r3, [r7, #28]
+ 838:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg = &(p_dma_reg->CHx[ch_nbr]);
+ 1108              		.loc 1 838 0
+ 1109 075a FB69     		ldr	r3, [r7, #28]
+ 1110 075c 03F58072 		add	r2, r3, #256
+ 1111 0760 FB89     		ldrh	r3, [r7, #14]
+ 1112 0762 4FEA4313 		lsl	r3, r3, #5
+ 1113 0766 D318     		adds	r3, r2, r3
+ 1114 0768 BB61     		str	r3, [r7, #24]
+ 839:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch     = &(CSP_DMA_ChTbl[ch_nbr]);    
+ 1115              		.loc 1 839 0
+ 1116 076a FA89     		ldrh	r2, [r7, #14]
+ 1117 076c 1346     		mov	r3, r2
+ 1118 076e 4FEA4303 		lsl	r3, r3, #1
+ 1119 0772 9B18     		adds	r3, r3, r2
+ 1120 0774 4FEA8303 		lsl	r3, r3, #2
+ 1121 0778 1A46     		mov	r2, r3
+ 1122 077a 40F20003 		movw	r3, #:lower16:CSP_DMA_ChTbl
+ 1123 077e C0F20003 		movt	r3, #:upper16:CSP_DMA_ChTbl
+ 1124 0782 D318     		adds	r3, r2, r3
+ 1125 0784 7B61     		str	r3, [r7, #20]
+ 840:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     reg_ctrl     = p_dma_ch_reg->Ctrl;
+ 1126              		.loc 1 840 0
+ 1127 0786 BB69     		ldr	r3, [r7, #24]
+ 1128 0788 DB68     		ldr	r3, [r3, #12]
+ 1129 078a 7B62     		str	r3, [r7, #36]
+ 841:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 842:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_CLR(reg_ctrl, CSP_DMA_MSK_CH_CTRL_XFER_SIZE |       /* Clears the xfer size mask.      
+ 1130              		.loc 1 842 0
+ 1131 078c 7A6A     		ldr	r2, [r7, #36]
+ 1132 078e 4FF47043 		mov	r3, #61440
+ 1133 0792 CFF2FF33 		movt	r3, 62463
+ 1134 0796 1340     		ands	r3, r3, r2
+ 1135 0798 7B62     		str	r3, [r7, #36]
+ 843:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                           CSP_DMA_BIT_CH_CTRL_SI        |       /* Clears the source increment flag
+ 844:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                           CSP_DMA_BIT_CH_CTRL_DI);              /* Clears the destination increment
+ 845:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 846:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_SET(reg_ctrl, xfer_size & CSP_DMA_MSK_CH_CTRL_XFER_SIZE);
+ 1136              		.loc 1 846 0
+ 1137 079a 3B68     		ldr	r3, [r7, #0]
+ 1138 079c 4FEA0353 		lsl	r3, r3, #20
+ 1139 07a0 4FEA1353 		lsr	r3, r3, #20
+ 1140 07a4 7A6A     		ldr	r2, [r7, #36]
+ 1141 07a6 1343     		orrs	r3, r3, r2
+ 1142 07a8 7B62     		str	r3, [r7, #36]
+ 847:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_SET(reg_ctrl, CSP_DMA_BIT_CH_CTRL_I);
+ 1143              		.loc 1 847 0
+ 1144 07aa 7B6A     		ldr	r3, [r7, #36]
+ 1145 07ac 43F00043 		orr	r3, r3, #-2147483648
+ 1146 07b0 7B62     		str	r3, [r7, #36]
+ 848:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 849:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (DEF_BIT_IS_SET(opt, CSP_DMA_OPT_FLAG_XFER_SRC_INC)) {
+ 1147              		.loc 1 849 0
+ 1148 07b2 3B8F     		ldrh	r3, [r7, #56]
+ 1149 07b4 03F00103 		and	r3, r3, #1
+ 1150 07b8 DBB2     		uxtb	r3, r3
+ 1151 07ba 002B     		cmp	r3, #0
+ 1152 07bc 03D0     		beq	.L66
+ 850:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         DEF_BIT_SET(reg_ctrl, CSP_DMA_BIT_CH_CTRL_SI);
+ 1153              		.loc 1 850 0
+ 1154 07be 7B6A     		ldr	r3, [r7, #36]
+ 1155 07c0 43F08063 		orr	r3, r3, #67108864
+ 1156 07c4 7B62     		str	r3, [r7, #36]
+ 1157              	.L66:
+ 851:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 852:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 853:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     if (DEF_BIT_IS_SET(opt, CSP_DMA_OPT_FLAG_XFER_DEST_INC)) {
+ 1158              		.loc 1 853 0
+ 1159 07c6 3B8F     		ldrh	r3, [r7, #56]
+ 1160 07c8 03F00203 		and	r3, r3, #2
+ 1161 07cc 002B     		cmp	r3, #0
+ 1162 07ce 03D0     		beq	.L67
+ 854:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         DEF_BIT_SET(reg_ctrl, CSP_DMA_BIT_CH_CTRL_DI);        
+ 1163              		.loc 1 854 0
+ 1164 07d0 7B6A     		ldr	r3, [r7, #36]
+ 1165 07d2 43F00063 		orr	r3, r3, #134217728
+ 1166 07d6 7B62     		str	r3, [r7, #36]
+ 1167              	.L67:
+ 855:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }        
+ 856:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         
+ 857:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_CRITICAL_ENTER();    
+ 1168              		.loc 1 857 0
+ 1169 07d8 FFF7FEFF 		bl	CPU_SR_Save
+ 1170 07dc 3862     		str	r0, [r7, #32]
+ 1171 07de FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 858:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->SrcAddr     = (CPU_INT32U )p_src;
+ 1172              		.loc 1 858 0
+ 1173 07e2 7A68     		ldr	r2, [r7, #4]
+ 1174 07e4 BB69     		ldr	r3, [r7, #24]
+ 1175 07e6 1A60     		str	r2, [r3, #0]
+ 859:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->DestAddr    = (CPU_INT32U )p_dest;       
+ 1176              		.loc 1 859 0
+ 1177 07e8 BA68     		ldr	r2, [r7, #8]
+ 1178 07ea BB69     		ldr	r3, [r7, #24]
+ 1179 07ec 5A60     		str	r2, [r3, #4]
+ 860:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch->CallBackFnctPtr = callback;
+ 1180              		.loc 1 860 0
+ 1181 07ee 7B69     		ldr	r3, [r7, #20]
+ 1182 07f0 3A6B     		ldr	r2, [r7, #48]
+ 1183 07f2 5A60     		str	r2, [r3, #4]
+ 861:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch->CallBackArgPtr  = p_arg;    
+ 1184              		.loc 1 861 0
+ 1185 07f4 7B69     		ldr	r3, [r7, #20]
+ 1186 07f6 7A6B     		ldr	r2, [r7, #52]
+ 1187 07f8 9A60     		str	r2, [r3, #8]
+ 862:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_ch_reg->Ctrl        = reg_ctrl;
+ 1188              		.loc 1 862 0
+ 1189 07fa BB69     		ldr	r3, [r7, #24]
+ 1190 07fc 7A6A     		ldr	r2, [r7, #36]
+ 1191 07fe DA60     		str	r2, [r3, #12]
+ 863:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 864:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_SET(p_dma_ch_reg->Cfg, CSP_DMA_BIT_CH_CFG_ITC   | 
+ 1192              		.loc 1 864 0
+ 1193 0800 BB69     		ldr	r3, [r7, #24]
+ 1194 0802 1B69     		ldr	r3, [r3, #16]
+ 1195 0804 43F44042 		orr	r2, r3, #49152
+ 1196 0808 BB69     		ldr	r3, [r7, #24]
+ 1197 080a 1A61     		str	r2, [r3, #16]
+ 865:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                    CSP_DMA_BIT_CH_CFG_IE);     
+ 866:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     DEF_BIT_SET(p_dma_ch_reg->Cfg, CSP_DMA_BIT_CH_CFG_CH_EN);
+ 1198              		.loc 1 866 0
+ 1199 080c BB69     		ldr	r3, [r7, #24]
+ 1200 080e 1B69     		ldr	r3, [r3, #16]
+ 1201 0810 43F00102 		orr	r2, r3, #1
+ 1202 0814 BB69     		ldr	r3, [r7, #24]
+ 1203 0816 1A61     		str	r2, [r3, #16]
+ 867:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 868:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_CRITICAL_EXIT();
+ 1204              		.loc 1 868 0
+ 1205 0818 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1206 081c 386A     		ldr	r0, [r7, #32]
+ 1207 081e FFF7FEFF 		bl	CPU_SR_Restore
+ 869:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         
+ 870:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     return (DEF_OK);
+ 1208              		.loc 1 870 0
+ 1209 0822 4FF00103 		mov	r3, #1
+ 1210              	.L61:
+ 871:Libraries/uC-CSP/LPC17xx/csp_dma.c **** }
+ 1211              		.loc 1 871 0
+ 1212 0826 1846     		mov	r0, r3
+ 1213 0828 07F12807 		add	r7, r7, #40
+ 1214 082c BD46     		mov	sp, r7
+ 1215 082e 80BD     		pop	{r7, pc}
+ 1216              		.cfi_endproc
+ 1217              	.LFE5:
+ 1219              		.align	2
+ 1220              		.global	CSP_DMA_XferSizeMaxGetExt
+ 1221              		.thumb
+ 1222              		.thumb_func
+ 1224              	CSP_DMA_XferSizeMaxGetExt:
+ 1225              	.LFB6:
+ 872:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 873:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 874:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 875:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 876:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                     CSP_DMA_XferSizeMaxGetExt()
+ 877:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 878:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Description : Get maximum DMA transfer size.
+ 879:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   
+ 880:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Argument(s) : ch_nbr        Channel number.
+ 881:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 882:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Return(s)   : The maximum DMA transfer size.
+ 883:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 884:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Caller(s)   : Application.
+ 885:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 886:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Note(s)     : none.
+ 887:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 888:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 889:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 890:Libraries/uC-CSP/LPC17xx/csp_dma.c **** CPU_INT32U  CSP_DMA_XferSizeMaxGetExt (CSP_DEV_NBR  ch_nbr)
+ 891:Libraries/uC-CSP/LPC17xx/csp_dma.c **** {
+ 1226              		.loc 1 891 0
+ 1227              		.cfi_startproc
+ 1228              		@ args = 0, pretend = 0, frame = 8
+ 1229              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1230              		@ link register save eliminated.
+ 1231 0830 80B4     		push	{r7}
+ 1232              	.LCFI18:
+ 1233              		.cfi_def_cfa_offset 4
+ 1234              		.cfi_offset 7, -4
+ 1235 0832 83B0     		sub	sp, sp, #12
+ 1236              	.LCFI19:
+ 1237              		.cfi_def_cfa_offset 16
+ 1238 0834 00AF     		add	r7, sp, #0
+ 1239              	.LCFI20:
+ 1240              		.cfi_def_cfa_register 7
+ 1241 0836 0346     		mov	r3, r0
+ 1242 0838 FB80     		strh	r3, [r7, #6]	@ movhi
+ 892:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     (void)ch_nbr;
+ 893:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 894:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 895:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     return (DEF_BIT_FIELD(12u, 0u));
+ 1243              		.loc 1 895 0
+ 1244 083a 40F6FF73 		movw	r3, #4095
+ 896:Libraries/uC-CSP/LPC17xx/csp_dma.c **** }
+ 1245              		.loc 1 896 0
+ 1246 083e 1846     		mov	r0, r3
+ 1247 0840 07F10C07 		add	r7, r7, #12
+ 1248 0844 BD46     		mov	sp, r7
+ 1249 0846 80BC     		pop	{r7}
+ 1250 0848 7047     		bx	lr
+ 1251              		.cfi_endproc
+ 1252              	.LFE6:
+ 1254 084a 00BF     		.align	2
+ 1255              		.thumb
+ 1256              		.thumb_func
+ 1258              	CSP_DMA_IntHandler:
+ 1259              	.LFB7:
+ 897:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 898:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 899:Libraries/uC-CSP/LPC17xx/csp_dma.c **** /*
+ 900:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 901:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                                         CSP_DMA_IntHandler()
+ 902:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 903:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Description : DMA interrupt global handler.
+ 904:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *              
+ 905:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   (1) Check all the channles for pending interrupts
+ 906:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   (2) Call call back functions.
+ 907:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *                   
+ 908:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Argument(s) : p_arg   Interrupt service routine argument.
+ 909:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 910:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Return(s)   : none.
+ 911:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 912:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Caller(s)   : Application.
+ 913:Libraries/uC-CSP/LPC17xx/csp_dma.c **** *
+ 914:Libraries/uC-CSP/LPC17xx/csp_dma.c **** * Note(s)     : none
+ 915:Libraries/uC-CSP/LPC17xx/csp_dma.c **** ***************************************************************************************************
+ 916:Libraries/uC-CSP/LPC17xx/csp_dma.c **** */
+ 917:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 918:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 919:Libraries/uC-CSP/LPC17xx/csp_dma.c **** static  void  CSP_DMA_IntHandler (void *p_arg)
+ 920:Libraries/uC-CSP/LPC17xx/csp_dma.c **** {    
+ 1260              		.loc 1 920 0
+ 1261              		.cfi_startproc
+ 1262              		@ args = 0, pretend = 0, frame = 48
+ 1263              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1264 084c 90B5     		push	{r4, r7, lr}
+ 1265              	.LCFI21:
+ 1266              		.cfi_def_cfa_offset 12
+ 1267              		.cfi_offset 14, -4
+ 1268              		.cfi_offset 7, -8
+ 1269              		.cfi_offset 4, -12
+ 1270 084e 8DB0     		sub	sp, sp, #52
+ 1271              	.LCFI22:
+ 1272              		.cfi_def_cfa_offset 64
+ 1273 0850 00AF     		add	r7, sp, #0
+ 1274              	.LCFI23:
+ 1275              		.cfi_def_cfa_register 7
+ 1276 0852 7860     		str	r0, [r7, #4]
+ 921:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_REG           *p_dma_reg;
+ 922:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH_REG        *p_dma_ch_reg; 
+ 923:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CH            *p_dma_ch;
+ 924:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     void                  *p_callback_arg;
+ 925:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DMA_CALLBACK_PTR   callback_fnct;
+ 926:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CSP_DEV_NBR            ch_nbr;
+ 927:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT32U             int_tc_stat;
+ 928:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT32U             int_err_stat;
+ 929:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_BOOLEAN            status;
+ 930:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     CPU_INT16U             xfer_size_rem;
+ 931:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 932:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 933:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     p_dma_reg    = (CSP_DMA_REG *)CSP_ADDR_DMA_REG;    
+ 1277              		.loc 1 933 0
+ 1278 0854 4FF48043 		mov	r3, #16384
+ 1279 0858 C5F20003 		movt	r3, 20480
+ 1280 085c 3B62     		str	r3, [r7, #32]
+ 934:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     int_tc_stat  = p_dma_reg->IntTCStat  & DEF_BIT_FIELD(8u, 0u);
+ 1281              		.loc 1 934 0
+ 1282 085e 3B6A     		ldr	r3, [r7, #32]
+ 1283 0860 5B68     		ldr	r3, [r3, #4]
+ 1284 0862 DBB2     		uxtb	r3, r3
+ 1285 0864 FB62     		str	r3, [r7, #44]
+ 935:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     int_err_stat = p_dma_reg->IntErrStat & DEF_BIT_FIELD(8u, 0u);
+ 1286              		.loc 1 935 0
+ 1287 0866 3B6A     		ldr	r3, [r7, #32]
+ 1288 0868 DB68     		ldr	r3, [r3, #12]
+ 1289 086a DBB2     		uxtb	r3, r3
+ 1290 086c BB62     		str	r3, [r7, #40]
+ 936:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 937:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* --------- INTERRUPT TERMINAL COU
+ 938:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     while (int_tc_stat != DEF_BIT_NONE) {                       
+ 1291              		.loc 1 938 0
+ 1292 086e 61E0     		b	.L70
+ 1293              	.L73:
+ 939:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* Get current DMA channel number  
+ 940:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         ch_nbr               = 31u - CPU_CntLeadZeros(int_tc_stat);
+ 1294              		.loc 1 940 0
+ 1295 0870 F86A     		ldr	r0, [r7, #44]
+ 1296 0872 FFF7FEFF 		bl	CPU_CntLeadZeros
+ 1297 0876 0346     		mov	r3, r0
+ 1298 0878 9BB2     		uxth	r3, r3
+ 1299 087a C3F11F03 		rsb	r3, r3, #31
+ 1300 087e FB83     		strh	r3, [r7, #30]	@ movhi
+ 941:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch_reg         = &(p_dma_reg->CHx[ch_nbr]);
+ 1301              		.loc 1 941 0
+ 1302 0880 3B6A     		ldr	r3, [r7, #32]
+ 1303 0882 03F58072 		add	r2, r3, #256
+ 1304 0886 FB8B     		ldrh	r3, [r7, #30]
+ 1305 0888 4FEA4313 		lsl	r3, r3, #5
+ 1306 088c D318     		adds	r3, r2, r3
+ 1307 088e BB61     		str	r3, [r7, #24]
+ 942:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch             = &(CSP_DMA_ChTbl[ch_nbr]);
+ 1308              		.loc 1 942 0
+ 1309 0890 FA8B     		ldrh	r2, [r7, #30]
+ 1310 0892 1346     		mov	r3, r2
+ 1311 0894 4FEA4303 		lsl	r3, r3, #1
+ 1312 0898 9B18     		adds	r3, r3, r2
+ 1313 089a 4FEA8303 		lsl	r3, r3, #2
+ 1314 089e 1A46     		mov	r2, r3
+ 1315 08a0 40F20003 		movw	r3, #:lower16:CSP_DMA_ChTbl
+ 1316 08a4 C0F20003 		movt	r3, #:upper16:CSP_DMA_ChTbl
+ 1317 08a8 D318     		adds	r3, r2, r3
+ 1318 08aa 7B61     		str	r3, [r7, #20]
+ 943:Libraries/uC-CSP/LPC17xx/csp_dma.c **** 
+ 944:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         callback_fnct        = p_dma_ch->CallBackFnctPtr;       /* Get the callback function       
+ 1319              		.loc 1 944 0
+ 1320 08ac 7B69     		ldr	r3, [r7, #20]
+ 1321 08ae 5B68     		ldr	r3, [r3, #4]
+ 1322 08b0 3B61     		str	r3, [r7, #16]
+ 945:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_callback_arg       = p_dma_ch->CallBackArgPtr;        /* Get the callback argument pointe
+ 1323              		.loc 1 945 0
+ 1324 08b2 7B69     		ldr	r3, [r7, #20]
+ 1325 08b4 9B68     		ldr	r3, [r3, #8]
+ 1326 08b6 FB60     		str	r3, [r7, #12]
+ 946:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* Get the remaining transfer size.
+ 947:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         xfer_size_rem        = p_dma_ch_reg->Ctrl & DEF_BIT_FIELD(12u, 0u);
+ 1327              		.loc 1 947 0
+ 1328 08b8 BB69     		ldr	r3, [r7, #24]
+ 1329 08ba DB68     		ldr	r3, [r3, #12]
+ 1330 08bc 9BB2     		uxth	r3, r3
+ 1331 08be 4FEA0353 		lsl	r3, r3, #20
+ 1332 08c2 4FEA1353 		lsr	r3, r3, #20
+ 1333 08c6 7B81     		strh	r3, [r7, #10]	@ movhi
+ 948:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_reg->IntTCClr  = DEF_BIT(ch_nbr);                 /* Clear the terminal count interru
+ 1334              		.loc 1 948 0
+ 1335 08c8 FB8B     		ldrh	r3, [r7, #30]
+ 1336 08ca 4FF00102 		mov	r2, #1
+ 1337 08ce 02FA03F2 		lsl	r2, r2, r3
+ 1338 08d2 3B6A     		ldr	r3, [r7, #32]
+ 1339 08d4 9A60     		str	r2, [r3, #8]
+ 949:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         
+ 950:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         if (DEF_BIT_IS_SET(int_err_stat, DEF_BIT(ch_nbr))) {    /* If an error occured in the chann
+ 1340              		.loc 1 950 0
+ 1341 08d6 FB8B     		ldrh	r3, [r7, #30]
+ 1342 08d8 4FF00102 		mov	r2, #1
+ 1343 08dc 02FA03F2 		lsl	r2, r2, r3
+ 1344 08e0 BB6A     		ldr	r3, [r7, #40]
+ 1345 08e2 1A40     		ands	r2, r2, r3
+ 1346 08e4 FB8B     		ldrh	r3, [r7, #30]
+ 1347 08e6 4FF00101 		mov	r1, #1
+ 1348 08ea 01FA03F3 		lsl	r3, r1, r3
+ 1349 08ee 9A42     		cmp	r2, r3
+ 1350 08f0 0BD1     		bne	.L71
+ 951:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             status                = DEF_FAIL;                   /* ... set the status, and clear th
+ 1351              		.loc 1 951 0
+ 1352 08f2 4FF00003 		mov	r3, #0
+ 1353 08f6 87F82730 		strb	r3, [r7, #39]
+ 952:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             p_dma_reg->IntErrClr = DEF_BIT(ch_nbr);
+ 1354              		.loc 1 952 0
+ 1355 08fa FB8B     		ldrh	r3, [r7, #30]
+ 1356 08fc 4FF00102 		mov	r2, #1
+ 1357 0900 02FA03F2 		lsl	r2, r2, r3
+ 1358 0904 3B6A     		ldr	r3, [r7, #32]
+ 1359 0906 1A61     		str	r2, [r3, #16]
+ 1360 0908 03E0     		b	.L72
+ 1361              	.L71:
+ 953:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         } else {
+ 954:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             status                = DEF_OK;                     
+ 1362              		.loc 1 954 0
+ 1363 090a 4FF00103 		mov	r3, #1
+ 1364 090e 87F82730 		strb	r3, [r7, #39]
+ 1365              	.L72:
+ 955:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         }
+ 956:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             
+ 957:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         callback_fnct(ch_nbr,                                   /* Call the callback function.     
+ 1366              		.loc 1 957 0
+ 1367 0912 F98B     		ldrh	r1, [r7, #30]
+ 1368 0914 7A89     		ldrh	r2, [r7, #10]
+ 1369 0916 97F82730 		ldrb	r3, [r7, #39]	@ zero_extendqisi2
+ 1370 091a 3C69     		ldr	r4, [r7, #16]
+ 1371 091c 0846     		mov	r0, r1
+ 1372 091e 1146     		mov	r1, r2
+ 1373 0920 FA68     		ldr	r2, [r7, #12]
+ 1374 0922 A047     		blx	r4
+ 958:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                       xfer_size_rem,
+ 959:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                       p_callback_arg,
+ 960:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                       status);
+ 961:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* Read the terminal count and erro
+ 962:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         int_tc_stat  = p_dma_reg->IntTCStat  & DEF_BIT_FIELD(8u, 0u);
+ 1375              		.loc 1 962 0
+ 1376 0924 3B6A     		ldr	r3, [r7, #32]
+ 1377 0926 5B68     		ldr	r3, [r3, #4]
+ 1378 0928 DBB2     		uxtb	r3, r3
+ 1379 092a FB62     		str	r3, [r7, #44]
+ 963:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         int_err_stat = p_dma_reg->IntErrStat & DEF_BIT_FIELD(8u, 0u);                            
+ 1380              		.loc 1 963 0
+ 1381 092c 3B6A     		ldr	r3, [r7, #32]
+ 1382 092e DB68     		ldr	r3, [r3, #12]
+ 1383 0930 DBB2     		uxtb	r3, r3
+ 1384 0932 BB62     		str	r3, [r7, #40]
+ 1385              	.L70:
+ 938:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     while (int_tc_stat != DEF_BIT_NONE) {                       
+ 1386              		.loc 1 938 0 discriminator 1
+ 1387 0934 FB6A     		ldr	r3, [r7, #44]
+ 1388 0936 002B     		cmp	r3, #0
+ 1389 0938 9AD1     		bne	.L73
+ 964:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 965:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                                                                 /* --------------- ERROR INTERRUPT 
+ 966:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     int_err_stat = p_dma_reg->IntErrStat & DEF_BIT_FIELD(8u, 0u);
+ 1390              		.loc 1 966 0
+ 1391 093a 3B6A     		ldr	r3, [r7, #32]
+ 1392 093c DB68     		ldr	r3, [r3, #12]
+ 1393 093e DBB2     		uxtb	r3, r3
+ 1394 0940 BB62     		str	r3, [r7, #40]
+ 967:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     
+ 968:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     while (int_err_stat != DEF_BIT_NONE) {
+ 1395              		.loc 1 968 0
+ 1396 0942 47E0     		b	.L74
+ 1397              	.L75:
+ 969:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         ch_nbr               = 31u - CPU_CntLeadZeros(int_err_stat);
+ 1398              		.loc 1 969 0
+ 1399 0944 B86A     		ldr	r0, [r7, #40]
+ 1400 0946 FFF7FEFF 		bl	CPU_CntLeadZeros
+ 1401 094a 0346     		mov	r3, r0
+ 1402 094c 9BB2     		uxth	r3, r3
+ 1403 094e C3F11F03 		rsb	r3, r3, #31
+ 1404 0952 FB83     		strh	r3, [r7, #30]	@ movhi
+ 970:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch_reg         = &(p_dma_reg->CHx[ch_nbr]);
+ 1405              		.loc 1 970 0
+ 1406 0954 3B6A     		ldr	r3, [r7, #32]
+ 1407 0956 03F58072 		add	r2, r3, #256
+ 1408 095a FB8B     		ldrh	r3, [r7, #30]
+ 1409 095c 4FEA4313 		lsl	r3, r3, #5
+ 1410 0960 D318     		adds	r3, r2, r3
+ 1411 0962 BB61     		str	r3, [r7, #24]
+ 971:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch             = &(CSP_DMA_ChTbl[ch_nbr]);
+ 1412              		.loc 1 971 0
+ 1413 0964 FA8B     		ldrh	r2, [r7, #30]
+ 1414 0966 1346     		mov	r3, r2
+ 1415 0968 4FEA4303 		lsl	r3, r3, #1
+ 1416 096c 9B18     		adds	r3, r3, r2
+ 1417 096e 4FEA8303 		lsl	r3, r3, #2
+ 1418 0972 1A46     		mov	r2, r3
+ 1419 0974 40F20003 		movw	r3, #:lower16:CSP_DMA_ChTbl
+ 1420 0978 C0F20003 		movt	r3, #:upper16:CSP_DMA_ChTbl
+ 1421 097c D318     		adds	r3, r2, r3
+ 1422 097e 7B61     		str	r3, [r7, #20]
+ 972:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         callback_fnct        = p_dma_ch->CallBackFnctPtr;
+ 1423              		.loc 1 972 0
+ 1424 0980 7B69     		ldr	r3, [r7, #20]
+ 1425 0982 5B68     		ldr	r3, [r3, #4]
+ 1426 0984 3B61     		str	r3, [r7, #16]
+ 973:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_callback_arg       = p_dma_ch->CallBackArgPtr;
+ 1427              		.loc 1 973 0
+ 1428 0986 7B69     		ldr	r3, [r7, #20]
+ 1429 0988 9B68     		ldr	r3, [r3, #8]
+ 1430 098a FB60     		str	r3, [r7, #12]
+ 974:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_ch->State      = CSP_DMA_CH_STATE_ALLOC;          /* Set the channel state = 'ALLOC' 
+ 1431              		.loc 1 974 0
+ 1432 098c 7B69     		ldr	r3, [r7, #20]
+ 1433 098e 4FF00102 		mov	r2, #1
+ 1434 0992 1A70     		strb	r2, [r3, #0]
+ 975:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         xfer_size_rem        = p_dma_ch_reg->Ctrl & DEF_BIT_FIELD(12u, 0u);        
+ 1435              		.loc 1 975 0
+ 1436 0994 BB69     		ldr	r3, [r7, #24]
+ 1437 0996 DB68     		ldr	r3, [r3, #12]
+ 1438 0998 9BB2     		uxth	r3, r3
+ 1439 099a 4FEA0353 		lsl	r3, r3, #20
+ 1440 099e 4FEA1353 		lsr	r3, r3, #20
+ 1441 09a2 7B81     		strh	r3, [r7, #10]	@ movhi
+ 976:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         status               = DEF_FAIL;
+ 1442              		.loc 1 976 0
+ 1443 09a4 4FF00003 		mov	r3, #0
+ 1444 09a8 87F82730 		strb	r3, [r7, #39]
+ 977:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         p_dma_reg->IntErrClr = DEF_BIT(ch_nbr);
+ 1445              		.loc 1 977 0
+ 1446 09ac FB8B     		ldrh	r3, [r7, #30]
+ 1447 09ae 4FF00102 		mov	r2, #1
+ 1448 09b2 02FA03F2 		lsl	r2, r2, r3
+ 1449 09b6 3B6A     		ldr	r3, [r7, #32]
+ 1450 09b8 1A61     		str	r2, [r3, #16]
+ 978:Libraries/uC-CSP/LPC17xx/csp_dma.c ****             
+ 979:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         callback_fnct(ch_nbr,
+ 1451              		.loc 1 979 0
+ 1452 09ba F98B     		ldrh	r1, [r7, #30]
+ 1453 09bc 7A89     		ldrh	r2, [r7, #10]
+ 1454 09be 97F82730 		ldrb	r3, [r7, #39]	@ zero_extendqisi2
+ 1455 09c2 3C69     		ldr	r4, [r7, #16]
+ 1456 09c4 0846     		mov	r0, r1
+ 1457 09c6 1146     		mov	r1, r2
+ 1458 09c8 FA68     		ldr	r2, [r7, #12]
+ 1459 09ca A047     		blx	r4
+ 980:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                       xfer_size_rem,
+ 981:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                       p_callback_arg,
+ 982:Libraries/uC-CSP/LPC17xx/csp_dma.c ****                       status);
+ 983:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         
+ 984:Libraries/uC-CSP/LPC17xx/csp_dma.c ****         int_err_stat = p_dma_reg->IntErrStat & DEF_BIT_FIELD(8u, 0u);                            
+ 1460              		.loc 1 984 0
+ 1461 09cc 3B6A     		ldr	r3, [r7, #32]
+ 1462 09ce DB68     		ldr	r3, [r3, #12]
+ 1463 09d0 DBB2     		uxtb	r3, r3
+ 1464 09d2 BB62     		str	r3, [r7, #40]
+ 1465              	.L74:
+ 968:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     while (int_err_stat != DEF_BIT_NONE) {
+ 1466              		.loc 1 968 0 discriminator 1
+ 1467 09d4 BB6A     		ldr	r3, [r7, #40]
+ 1468 09d6 002B     		cmp	r3, #0
+ 1469 09d8 B4D1     		bne	.L75
+ 985:Libraries/uC-CSP/LPC17xx/csp_dma.c ****     }
+ 986:Libraries/uC-CSP/LPC17xx/csp_dma.c **** }
+ 1470              		.loc 1 986 0
+ 1471 09da 07F13407 		add	r7, r7, #52
+ 1472 09de BD46     		mov	sp, r7
+ 1473 09e0 90BD     		pop	{r4, r7, pc}
+ 1474              		.cfi_endproc
+ 1475              	.LFE7:
+ 1477              	.Letext0:
+ 1478              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 1479              		.file 3 "Libraries/uC-CSP/csp_types.h"
+ 1480              		.file 4 "Libraries/uC-CSP/LPC17xx/csp_grp.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 csp_dma.c
+     /tmp/ccDnpf9x.s:19     .bss:00000000 $d
+     /tmp/ccDnpf9x.s:20     .bss:00000000 CSP_DMA_ChTbl
+     /tmp/ccDnpf9x.s:23     .text:00000000 $t
+     /tmp/ccDnpf9x.s:28     .text:00000000 CSP_DMA_InitExt
+     /tmp/ccDnpf9x.s:1258   .text:0000084c CSP_DMA_IntHandler
+     /tmp/ccDnpf9x.s:159    .text:000000f0 CSP_DMA_CH_AllocExt
+     /tmp/ccDnpf9x.s:373    .text:00000244 CSP_DMA_CH_FreeExt
+     /tmp/ccDnpf9x.s:481    .text:000002fc CSP_DMA_CH_CfgExt
+     /tmp/ccDnpf9x.s:653    .text:00000418 $d
+     /tmp/ccDnpf9x.s:659    .text:00000428 $t
+     /tmp/ccDnpf9x.s:875    .text:000005e4 CSP_DMA_XferStartExt
+     /tmp/ccDnpf9x.s:1034   .text:000006ec CSP_DMA_XferAsyncStartExt
+     /tmp/ccDnpf9x.s:1224   .text:00000830 CSP_DMA_XferSizeMaxGetExt
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+CSP_IntDis
+CSP_PM_PerClkEn
+CSP_IntVectReg
+CSP_IntEn
+CPU_SR_Save
+CPU_IntDisMeasStart
+CPU_IntDisMeasStop
+CPU_SR_Restore
+CPU_CntLeadZeros

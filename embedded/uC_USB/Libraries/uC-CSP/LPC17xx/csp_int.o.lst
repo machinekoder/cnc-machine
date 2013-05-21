@@ -1,0 +1,1378 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"csp_int.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.bss
+  19              		.align	2
+  20              	CSP_MainVectTbl:
+  21 0000 00000000 		.space	560
+  21      00000000 
+  21      00000000 
+  21      00000000 
+  21      00000000 
+  22              		.text
+  23              		.align	2
+  24              		.global	CSP_IntClr
+  25              		.thumb
+  26              		.thumb_func
+  28              	CSP_IntClr:
+  29              	.LFB0:
+  30              		.file 1 "Libraries/uC-CSP/LPC17xx/csp_int.c"
+   1:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+   2:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+   3:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                              uC/CSP
+   4:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                        Chip Support Package
+   5:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+   6:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                            (c) Copyright 2010; Micrium, Inc.; Weston, FL
+   7:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                         (c) Copyright 2003-2010; Micrium, Inc.; Weston, FL
+   8:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+   9:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               All rights reserved. Protected by international copyright laws.
+  10:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+  11:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               uC/CSP is provided in source form to registered licensees ONLY.  It is
+  12:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               illegal to distribute this source code to any third party unless you receive
+  13:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               written permission by an authorized Micrium representative.  Knowledge of
+  14:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               the source code may NOT be used to develop a similar product.
+  15:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+  16:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               Please help us continue to provide the Embedded community with the finest
+  17:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               software available.  Your honesty is greatly appreciated.
+  18:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+  19:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               You can contact us at www.micrium.com.
+  20:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  21:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+  22:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  23:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+  24:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  25:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+  26:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                         INTERRUPT MANAGEMENT
+  27:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                            NXP  LPC17XX
+  28:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+  29:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Filename      : csp_int.c
+  30:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Version       : V1.00
+  31:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Programmer(s) : FT
+  32:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  33:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)       :
+  34:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  35:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+  36:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  37:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  38:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+  39:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  40:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                            INCLUDE FILES
+  41:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  42:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+  43:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  44:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define    CSP_INT_MODULE
+  45:Libraries/uC-CSP/LPC17xx/csp_int.c **** #include   <csp.h>
+  46:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  47:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  48:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+  49:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  50:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                          DEFAULT CONFIGURATION
+  51:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  52:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+  53:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  54:Libraries/uC-CSP/LPC17xx/csp_int.c **** #ifndef  CSP_DEV_USB_OTG_EN
+  55:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_DEV_USB_OTG_EN                  DEF_DISABLED
+  56:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+  57:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  58:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  59:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+  60:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  61:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                            LOCAL DEFINES
+  62:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  63:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+  64:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  65:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                                 /* ------------ USB STATUS REGISTER
+  66:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_REG_USBINTST                   ( *(CPU_REG32 *)(0x400FC1C0))
+  67:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  68:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_BIT_USBINTST_INT_REQ_LP        DEF_BIT_00      /* USB Low priority request  (Devic
+  69:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_BIT_USBINTST_INT_REQ_HP        DEF_BIT_01      /* USB High priority request (Devic
+  70:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_BIT_USBINTST_INT_REQ_DMA       DEF_BIT_02      /* USB DMA Request (Device)        
+  71:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_BIT_USBINTST_INT_HOST          DEF_BIT_03      /* USB Host interrupt              
+  72:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_BIT_USBINTST_INT_ATX           DEF_BIT_04      /* USB ATX interrupt               
+  73:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_BIT_USBINTST_INT_OTG           DEF_BIT_05      /* USB OTG interrupt               
+  74:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_BIT_USBINTST_INT_I2C           DEF_BIT_06      /* USB I2C interrupt               
+  75:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_BIT_USBINTST_INT_NEED_CLK      DEF_BIT_08      /* USB Need clock interrupt        
+  76:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  77:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                                 /* USB Device interrupt bit-field  
+  78:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_BIT_USBINTST_INT_DEV          (CSP_INT_BIT_USBINTST_INT_REQ_LP  | \
+  79:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                 CSP_INT_BIT_USBINTST_INT_REQ_HP  | \
+  80:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                 CSP_INT_BIT_USBINTST_INT_REQ_DMA)
+  81:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  82:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+  83:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  84:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                           LOCAL CONSTANTS
+  85:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  86:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+  87:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  88:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  89:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  90:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+  91:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  92:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                           LOCAL DATA TYPES
+  93:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  94:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+  95:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  96:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+  97:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+  98:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+  99:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                            LOCAL TABLES
+ 100:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 101:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 102:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 103:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 104:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 105:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                     INTERRUPT VECTOR TABLE
+ 106:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 107:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s) (1) 'CSP_MainVectTbl[]' store all the interrupts handlers for the external interrupts
+ 108:Libraries/uC-CSP/LPC17xx/csp_int.c **** *             on the LPC17xx devices.
+ 109:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 110:Libraries/uC-CSP/LPC17xx/csp_int.c **** *         (2) 'CSP_USB_VectTbl[]' store all the interrupts handlers for the shared USB global inter
+ 111:Libraries/uC-CSP/LPC17xx/csp_int.c **** *              handler.
+ 112:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 113:Libraries/uC-CSP/LPC17xx/csp_int.c **** *              (a) USB shared handler is only enable for parts that have an OTG controller.
+ 114:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 115:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 116:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                                 /* NVIC external interrupts vector 
+ 117:Libraries/uC-CSP/LPC17xx/csp_int.c **** static  CSP_INT_VECT  CSP_MainVectTbl[CSP_INT_SRC_NBR_MAX];
+ 118:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 119:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_DEV_USB_OTG_EN == DEF_ENABLED)
+ 120:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                                 /* USB Interrupt vector table      
+ 121:Libraries/uC-CSP/LPC17xx/csp_int.c **** static  CSP_INT_VECT  CSP_USB_VectTbl[CSP_INT_USB_SRC_MAX_NBR];
+ 122:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 123:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 124:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 125:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 126:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                       LOCAL GLOBAL VARIABLES
+ 127:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 128:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 129:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 130:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 131:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 132:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 133:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                            LOCAL MACRO's
+ 134:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 135:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 136:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 137:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_DEV_USB_OTG_EN == DEF_ENABLED)
+ 138:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_USB_DISPATCH(p_int_vect,      \
+ 139:Libraries/uC-CSP/LPC17xx/csp_int.c ****                               usb_stat,        \
+ 140:Libraries/uC-CSP/LPC17xx/csp_int.c ****                               usb_stat_msk,    \
+ 141:Libraries/uC-CSP/LPC17xx/csp_int.c ****                               usb_src_nbr)              {    if (DEF_BIT_IS_SET_ANY((usb_stat), (us
+ 142:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                                   (p_int_vect) = &CSP_USB_VectTbl[(
+ 143:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                                   CSP_IntVectDeref((p_int_vect));  
+ 144:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                              }                                     
+ 145:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                          }
+ 146:Libraries/uC-CSP/LPC17xx/csp_int.c **** #else
+ 147:Libraries/uC-CSP/LPC17xx/csp_int.c **** #define  CSP_INT_USB_DISPATCH(p_int_vect,      \
+ 148:Libraries/uC-CSP/LPC17xx/csp_int.c ****                               usb_stat,        \
+ 149:Libraries/uC-CSP/LPC17xx/csp_int.c ****                               usb_stat_msk,    \
+ 150:Libraries/uC-CSP/LPC17xx/csp_int.c ****                               usb_src_nbr)
+ 151:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 152:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 153:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 154:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 155:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 156:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 157:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 158:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                      LOCAL FUNCTION PROTOTYPES
+ 159:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 160:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 161:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 162:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_DEV_USB_OTG_EN == DEF_ENABLED)
+ 163:Libraries/uC-CSP/LPC17xx/csp_int.c **** static  void  CSP_IntUSB_Handler    (void *p_arg);
+ 164:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 165:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 166:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 167:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 168:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                     LOCAL CONFIGURATION ERRORS
+ 169:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 170:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 171:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 172:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 173:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 174:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 175:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 176:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                           LOCAL FUNCTIONS
+ 177:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 178:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 179:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 180:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 181:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 182:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 183:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 184:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                            CSP_IntClr()
+ 185:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 186:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : Clear an interrupt source on a specific interrupt controller.
+ 187:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 188:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : int_ctrl   Interrupt controller number (see note #1).
+ 189:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 190:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               src_nbr    Interrupt source number (see note #2).
+ 191:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 192:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : None.
+ 193:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 194:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Caller(s)   : Application.
+ 195:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 196:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : (1) Interrupt controllers numbers identifiers can be found in 'csp_grp.h'
+ 197:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 198:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                       CSP_INT_CTRL_NBR_XX'  where 'XX" is the name of the interrupt controller.
+ 199:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 200:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               (2) Interrupt source identifiers can be found in 'csp_grp.h' as CSP_INT
+ 201:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 202:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                       CSP_INT_SRC_NBR_XX      where XX is the peripheral or interrupt source name
+ 203:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                               Main interrupt controller only.
+ 204:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 205:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                       CSP_INT_XX_SRC_NBR_YY   where xx is the name of the interrupt controller or
+ 206:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                               handler and YY is the peripheral or source name.
+ 207:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 208:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               (3) The pending status can be only cleared  for the NVIC's external sources.
+ 209:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 210:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                   (a) The pending status cannot be cleared in a source from a a shared interrupt
+ 211:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                       handler.
+ 212:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 213:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 214:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 215:Libraries/uC-CSP/LPC17xx/csp_int.c **** void  CSP_IntClr (CSP_DEV_NBR  int_ctrl,
+ 216:Libraries/uC-CSP/LPC17xx/csp_int.c ****                   CSP_DEV_NBR  src_nbr)
+ 217:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+  31              		.loc 1 217 0
+  32              		.cfi_startproc
+  33              		@ args = 0, pretend = 0, frame = 8
+  34              		@ frame_needed = 1, uses_anonymous_args = 0
+  35 0000 80B5     		push	{r7, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 14, -4
+  39              		.cfi_offset 7, -8
+  40 0002 82B0     		sub	sp, sp, #8
+  41              	.LCFI1:
+  42              		.cfi_def_cfa_offset 16
+  43 0004 00AF     		add	r7, sp, #0
+  44              	.LCFI2:
+  45              		.cfi_def_cfa_register 7
+  46 0006 0246     		mov	r2, r0
+  47 0008 0B46     		mov	r3, r1
+  48 000a FA80     		strh	r2, [r7, #6]	@ movhi
+  49 000c BB80     		strh	r3, [r7, #4]	@ movhi
+ 218:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if ((int_ctrl == CSP_INT_CTRL_NBR_MAIN) &&
+  50              		.loc 1 218 0
+  51 000e FB88     		ldrh	r3, [r7, #6]
+  52 0010 002B     		cmp	r3, #0
+  53 0012 0AD1     		bne	.L1
+  54              		.loc 1 218 0 is_stmt 0 discriminator 1
+  55 0014 BB88     		ldrh	r3, [r7, #4]
+  56 0016 222B     		cmp	r3, #34
+  57 0018 07D8     		bhi	.L1
+ 219:Libraries/uC-CSP/LPC17xx/csp_int.c ****         (src_nbr   < CSP_INT_SRC_NBR_MAX  )) {
+ 220:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CPU_IntSrcPendClr(src_nbr + CPU_INT_EXT0);
+  58              		.loc 1 220 0 is_stmt 1
+  59 001a BB88     		ldrh	r3, [r7, #4]	@ movhi
+  60 001c DBB2     		uxtb	r3, r3
+  61 001e 03F11003 		add	r3, r3, #16
+  62 0022 DBB2     		uxtb	r3, r3
+  63 0024 1846     		mov	r0, r3
+  64 0026 FFF7FEFF 		bl	CPU_IntSrcPendClr
+  65              	.L1:
+ 221:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 222:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+  66              		.loc 1 222 0
+  67 002a 07F10807 		add	r7, r7, #8
+  68 002e BD46     		mov	sp, r7
+  69 0030 80BD     		pop	{r7, pc}
+  70              		.cfi_endproc
+  71              	.LFE0:
+  73 0032 00BF     		.align	2
+  74              		.global	CSP_IntDis
+  75              		.thumb
+  76              		.thumb_func
+  78              	CSP_IntDis:
+  79              	.LFB1:
+ 223:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 224:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 225:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 226:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 227:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                          CSP_IntDis()
+ 228:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 229:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : Disable an interrupt source from a specific interrupt controller.
+ 230:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 231:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : int_ctrl   Interrupt controller number. (see 'CSP_IntClr()' note #1).
+ 232:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 233:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               src_nbr    Interrupt source number. (see 'CSP_IntClr()' note #2).
+ 234:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 235:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : None.
+ 236:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 237:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Caller(s)   : Application.
+ 238:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 239:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : (1) Only the NVIC's external sources can be disabled.
+ 240:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 241:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 242:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 243:Libraries/uC-CSP/LPC17xx/csp_int.c **** void  CSP_IntDis (CSP_DEV_NBR  int_ctrl,
+ 244:Libraries/uC-CSP/LPC17xx/csp_int.c ****                   CSP_DEV_NBR  src_nbr)
+ 245:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+  80              		.loc 1 245 0
+  81              		.cfi_startproc
+  82              		@ args = 0, pretend = 0, frame = 8
+  83              		@ frame_needed = 1, uses_anonymous_args = 0
+  84 0034 80B5     		push	{r7, lr}
+  85              	.LCFI3:
+  86              		.cfi_def_cfa_offset 8
+  87              		.cfi_offset 14, -4
+  88              		.cfi_offset 7, -8
+  89 0036 82B0     		sub	sp, sp, #8
+  90              	.LCFI4:
+  91              		.cfi_def_cfa_offset 16
+  92 0038 00AF     		add	r7, sp, #0
+  93              	.LCFI5:
+  94              		.cfi_def_cfa_register 7
+  95 003a 0246     		mov	r2, r0
+  96 003c 0B46     		mov	r3, r1
+  97 003e FA80     		strh	r2, [r7, #6]	@ movhi
+  98 0040 BB80     		strh	r3, [r7, #4]	@ movhi
+ 246:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if ((int_ctrl == CSP_INT_CTRL_NBR_MAIN) &&
+  99              		.loc 1 246 0
+ 100 0042 FB88     		ldrh	r3, [r7, #6]
+ 101 0044 002B     		cmp	r3, #0
+ 102 0046 0AD1     		bne	.L3
+ 103              		.loc 1 246 0 is_stmt 0 discriminator 1
+ 104 0048 BB88     		ldrh	r3, [r7, #4]
+ 105 004a 222B     		cmp	r3, #34
+ 106 004c 07D8     		bhi	.L3
+ 247:Libraries/uC-CSP/LPC17xx/csp_int.c ****         (src_nbr   < CSP_INT_SRC_NBR_MAX  )) {
+ 248:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CPU_IntSrcDis(src_nbr + CPU_INT_EXT0);
+ 107              		.loc 1 248 0 is_stmt 1
+ 108 004e BB88     		ldrh	r3, [r7, #4]	@ movhi
+ 109 0050 DBB2     		uxtb	r3, r3
+ 110 0052 03F11003 		add	r3, r3, #16
+ 111 0056 DBB2     		uxtb	r3, r3
+ 112 0058 1846     		mov	r0, r3
+ 113 005a FFF7FEFF 		bl	CPU_IntSrcDis
+ 114              	.L3:
+ 249:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 250:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+ 115              		.loc 1 250 0
+ 116 005e 07F10807 		add	r7, r7, #8
+ 117 0062 BD46     		mov	sp, r7
+ 118 0064 80BD     		pop	{r7, pc}
+ 119              		.cfi_endproc
+ 120              	.LFE1:
+ 122 0066 00BF     		.align	2
+ 123              		.global	CSP_IntDisAll
+ 124              		.thumb
+ 125              		.thumb_func
+ 127              	CSP_IntDisAll:
+ 128              	.LFB2:
+ 251:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 252:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 253:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 254:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 255:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                          CSP_IntDisAll()
+ 256:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 257:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : Disable all interrupts on a specific interrupt controller.
+ 258:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 259:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : int_ctrl   Interrupt controller number. (see 'CSP_IntClr()' note #1).
+ 260:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 261:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : None.
+ 262:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 263:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Caller(s)   : Application.
+ 264:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 265:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : None.
+ 266:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 267:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 268:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 269:Libraries/uC-CSP/LPC17xx/csp_int.c **** void  CSP_IntDisAll (CSP_DEV_NBR  int_ctrl)
+ 270:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+ 129              		.loc 1 270 0
+ 130              		.cfi_startproc
+ 131              		@ args = 0, pretend = 0, frame = 16
+ 132              		@ frame_needed = 1, uses_anonymous_args = 0
+ 133              		@ link register save eliminated.
+ 134 0068 80B4     		push	{r7}
+ 135              	.LCFI6:
+ 136              		.cfi_def_cfa_offset 4
+ 137              		.cfi_offset 7, -4
+ 138 006a 85B0     		sub	sp, sp, #20
+ 139              	.LCFI7:
+ 140              		.cfi_def_cfa_offset 24
+ 141 006c 00AF     		add	r7, sp, #0
+ 142              	.LCFI8:
+ 143              		.cfi_def_cfa_register 7
+ 144 006e 0346     		mov	r3, r0
+ 145 0070 FB80     		strh	r3, [r7, #6]	@ movhi
+ 271:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_DEV_NBR  int_src;
+ 272:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_DEV_NBR  int_src_grp;
+ 273:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 274:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if (int_ctrl == CSP_INT_CTRL_NBR_MAIN) {
+ 146              		.loc 1 274 0
+ 147 0072 FB88     		ldrh	r3, [r7, #6]
+ 148 0074 002B     		cmp	r3, #0
+ 149 0076 1CD1     		bne	.L5
+ 275:Libraries/uC-CSP/LPC17xx/csp_int.c ****         int_src     = 0u;
+ 150              		.loc 1 275 0
+ 151 0078 4FF00003 		mov	r3, #0
+ 152 007c FB81     		strh	r3, [r7, #14]	@ movhi
+ 276:Libraries/uC-CSP/LPC17xx/csp_int.c ****         int_src_grp = 0u;
+ 153              		.loc 1 276 0
+ 154 007e 4FF00003 		mov	r3, #0
+ 155 0082 BB81     		strh	r3, [r7, #12]	@ movhi
+ 277:Libraries/uC-CSP/LPC17xx/csp_int.c ****         while (int_src < CSP_INT_SRC_NBR_MAX) {
+ 156              		.loc 1 277 0
+ 157 0084 12E0     		b	.L7
+ 158              	.L8:
+ 278:Libraries/uC-CSP/LPC17xx/csp_int.c ****             CPU_REG_NVIC_CLREN(int_src_grp) = DEF_BIT_FIELD(32u, 0u);
+ 159              		.loc 1 278 0
+ 160 0086 BA89     		ldrh	r2, [r7, #12]
+ 161 0088 43F66003 		movw	r3, #14432
+ 162 008c C3F60003 		movt	r3, 14336
+ 163 0090 D318     		adds	r3, r2, r3
+ 164 0092 4FEA8303 		lsl	r3, r3, #2
+ 165 0096 4FF0FF32 		mov	r2, #-1
+ 166 009a 1A60     		str	r2, [r3, #0]
+ 279:Libraries/uC-CSP/LPC17xx/csp_int.c ****             int_src_grp++;
+ 167              		.loc 1 279 0
+ 168 009c BB89     		ldrh	r3, [r7, #12]	@ movhi
+ 169 009e 03F10103 		add	r3, r3, #1
+ 170 00a2 BB81     		strh	r3, [r7, #12]	@ movhi
+ 280:Libraries/uC-CSP/LPC17xx/csp_int.c ****             int_src += 32u;
+ 171              		.loc 1 280 0
+ 172 00a4 FB89     		ldrh	r3, [r7, #14]	@ movhi
+ 173 00a6 03F12003 		add	r3, r3, #32
+ 174 00aa FB81     		strh	r3, [r7, #14]	@ movhi
+ 175              	.L7:
+ 277:Libraries/uC-CSP/LPC17xx/csp_int.c ****         while (int_src < CSP_INT_SRC_NBR_MAX) {
+ 176              		.loc 1 277 0 discriminator 1
+ 177 00ac FB89     		ldrh	r3, [r7, #14]
+ 178 00ae 222B     		cmp	r3, #34
+ 179 00b0 E9D9     		bls	.L8
+ 180              	.L5:
+ 281:Libraries/uC-CSP/LPC17xx/csp_int.c ****         }
+ 282:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 283:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+ 181              		.loc 1 283 0
+ 182 00b2 07F11407 		add	r7, r7, #20
+ 183 00b6 BD46     		mov	sp, r7
+ 184 00b8 80BC     		pop	{r7}
+ 185 00ba 7047     		bx	lr
+ 186              		.cfi_endproc
+ 187              	.LFE2:
+ 189              		.align	2
+ 190              		.global	CSP_IntEn
+ 191              		.thumb
+ 192              		.thumb_func
+ 194              	CSP_IntEn:
+ 195              	.LFB3:
+ 284:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 285:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 286:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 287:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 288:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                          CSP_IntEn()
+ 289:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 290:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : Enable an interrupt source on a specific interrupt controller.
+ 291:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 292:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : int_ctrl   Interrupt controller number. (see 'CSP_IntClr()' note #1).
+ 293:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 294:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               src_nbr    Interrupt source number. (see 'CSP_IntClr()' note #2).
+ 295:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 296:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : None.
+ 297:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 298:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Caller(s)   : Application.
+ 299:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 300:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : None.
+ 301:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 302:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 303:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 304:Libraries/uC-CSP/LPC17xx/csp_int.c **** void  CSP_IntEn (CSP_DEV_NBR  int_ctrl,
+ 305:Libraries/uC-CSP/LPC17xx/csp_int.c ****                  CSP_DEV_NBR  src_nbr)
+ 306:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+ 196              		.loc 1 306 0
+ 197              		.cfi_startproc
+ 198              		@ args = 0, pretend = 0, frame = 8
+ 199              		@ frame_needed = 1, uses_anonymous_args = 0
+ 200 00bc 80B5     		push	{r7, lr}
+ 201              	.LCFI9:
+ 202              		.cfi_def_cfa_offset 8
+ 203              		.cfi_offset 14, -4
+ 204              		.cfi_offset 7, -8
+ 205 00be 82B0     		sub	sp, sp, #8
+ 206              	.LCFI10:
+ 207              		.cfi_def_cfa_offset 16
+ 208 00c0 00AF     		add	r7, sp, #0
+ 209              	.LCFI11:
+ 210              		.cfi_def_cfa_register 7
+ 211 00c2 0246     		mov	r2, r0
+ 212 00c4 0B46     		mov	r3, r1
+ 213 00c6 FA80     		strh	r2, [r7, #6]	@ movhi
+ 214 00c8 BB80     		strh	r3, [r7, #4]	@ movhi
+ 307:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if ((int_ctrl == CSP_INT_CTRL_NBR_MAIN) &&
+ 215              		.loc 1 307 0
+ 216 00ca FB88     		ldrh	r3, [r7, #6]
+ 217 00cc 002B     		cmp	r3, #0
+ 218 00ce 0AD1     		bne	.L9
+ 219              		.loc 1 307 0 is_stmt 0 discriminator 1
+ 220 00d0 BB88     		ldrh	r3, [r7, #4]
+ 221 00d2 222B     		cmp	r3, #34
+ 222 00d4 07D8     		bhi	.L9
+ 308:Libraries/uC-CSP/LPC17xx/csp_int.c ****         (src_nbr   < CSP_INT_SRC_NBR_MAX  )) {
+ 309:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CPU_IntSrcEn(src_nbr + CPU_INT_EXT0);
+ 223              		.loc 1 309 0 is_stmt 1
+ 224 00d6 BB88     		ldrh	r3, [r7, #4]	@ movhi
+ 225 00d8 DBB2     		uxtb	r3, r3
+ 226 00da 03F11003 		add	r3, r3, #16
+ 227 00de DBB2     		uxtb	r3, r3
+ 228 00e0 1846     		mov	r0, r3
+ 229 00e2 FFF7FEFF 		bl	CPU_IntSrcEn
+ 230              	.L9:
+ 310:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 311:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+ 231              		.loc 1 311 0
+ 232 00e6 07F10807 		add	r7, r7, #8
+ 233 00ea BD46     		mov	sp, r7
+ 234 00ec 80BD     		pop	{r7, pc}
+ 235              		.cfi_endproc
+ 236              	.LFE3:
+ 238 00ee 00BF     		.align	2
+ 239              		.global	CSP_IntInit
+ 240              		.thumb
+ 241              		.thumb_func
+ 243              	CSP_IntInit:
+ 244              	.LFB4:
+ 312:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 313:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 314:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 315:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 316:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                          CSP_IntInit()
+ 317:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 318:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : Initiailze all interrupt controllers.
+ 319:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                   (1) Disable all interrupts.
+ 320:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                   (2) Clear all pending interrupts.
+ 321:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                   (3) Initialize all vector interrupt tables.
+ 322:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                   (4) Install all shared interrupt handlers.
+ 323:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 324:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : None.
+ 325:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 326:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : None.
+ 327:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 328:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Caller(s)   : Application.
+ 329:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 330:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : None.
+ 331:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 332:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 333:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 334:Libraries/uC-CSP/LPC17xx/csp_int.c **** void  CSP_IntInit  (void)
+ 335:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+ 245              		.loc 1 335 0
+ 246              		.cfi_startproc
+ 247              		@ args = 0, pretend = 0, frame = 16
+ 248              		@ frame_needed = 1, uses_anonymous_args = 0
+ 249 00f0 80B5     		push	{r7, lr}
+ 250              	.LCFI12:
+ 251              		.cfi_def_cfa_offset 8
+ 252              		.cfi_offset 14, -4
+ 253              		.cfi_offset 7, -8
+ 254 00f2 84B0     		sub	sp, sp, #16
+ 255              	.LCFI13:
+ 256              		.cfi_def_cfa_offset 24
+ 257 00f4 00AF     		add	r7, sp, #0
+ 258              	.LCFI14:
+ 259              		.cfi_def_cfa_register 7
+ 336:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_INT08U     src_nbr;
+ 337:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_VECT  *p_int_vect;
+ 338:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_SR_ALLOC();
+ 260              		.loc 1 338 0
+ 261 00f6 4FF00003 		mov	r3, #0
+ 262 00fa BB60     		str	r3, [r7, #8]
+ 339:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 340:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 341:Libraries/uC-CSP/LPC17xx/csp_int.c ****     p_int_vect = &CSP_MainVectTbl[0];
+ 263              		.loc 1 341 0
+ 264 00fc 40F20003 		movw	r3, #:lower16:CSP_MainVectTbl
+ 265 0100 C0F20003 		movt	r3, #:upper16:CSP_MainVectTbl
+ 266 0104 7B60     		str	r3, [r7, #4]
+ 342:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 343:Libraries/uC-CSP/LPC17xx/csp_int.c ****     for (src_nbr = 0u; src_nbr < CSP_INT_SRC_NBR_MAX; src_nbr++) {
+ 267              		.loc 1 343 0
+ 268 0106 4FF00003 		mov	r3, #0
+ 269 010a FB73     		strb	r3, [r7, #15]
+ 270 010c 27E0     		b	.L12
+ 271              	.L13:
+ 344:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CPU_IntSrcDis(src_nbr + CPU_INT_EXT0);                           /* Disable external interr
+ 272              		.loc 1 344 0 discriminator 2
+ 273 010e FB7B     		ldrb	r3, [r7, #15]
+ 274 0110 03F11003 		add	r3, r3, #16
+ 275 0114 DBB2     		uxtb	r3, r3
+ 276 0116 1846     		mov	r0, r3
+ 277 0118 FFF7FEFF 		bl	CPU_IntSrcDis
+ 345:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CPU_IntSrcPendClr(src_nbr + CPU_INT_EXT0);
+ 278              		.loc 1 345 0 discriminator 2
+ 279 011c FB7B     		ldrb	r3, [r7, #15]
+ 280 011e 03F11003 		add	r3, r3, #16
+ 281 0122 DBB2     		uxtb	r3, r3
+ 282 0124 1846     		mov	r0, r3
+ 283 0126 FFF7FEFF 		bl	CPU_IntSrcPendClr
+ 346:Libraries/uC-CSP/LPC17xx/csp_int.c ****         p_int_vect = &CSP_MainVectTbl[src_nbr];
+ 284              		.loc 1 346 0 discriminator 2
+ 285 012a FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 286 012c 4FEA0312 		lsl	r2, r3, #4
+ 287 0130 40F20003 		movw	r3, #:lower16:CSP_MainVectTbl
+ 288 0134 C0F20003 		movt	r3, #:upper16:CSP_MainVectTbl
+ 289 0138 D318     		adds	r3, r2, r3
+ 290 013a 7B60     		str	r3, [r7, #4]
+ 347:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 348:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CPU_CRITICAL_ENTER();
+ 291              		.loc 1 348 0 discriminator 2
+ 292 013c FFF7FEFF 		bl	CPU_SR_Save
+ 293 0140 B860     		str	r0, [r7, #8]
+ 294 0142 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 349:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CSP_IntVectClr(p_int_vect);                             /* Initialize main vector table ent
+ 295              		.loc 1 349 0 discriminator 2
+ 296 0146 7868     		ldr	r0, [r7, #4]
+ 297 0148 FFF7FEFF 		bl	CSP_IntVectClr
+ 350:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CPU_CRITICAL_EXIT();
+ 298              		.loc 1 350 0 discriminator 2
+ 299 014c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 300 0150 B868     		ldr	r0, [r7, #8]
+ 301 0152 FFF7FEFF 		bl	CPU_SR_Restore
+ 343:Libraries/uC-CSP/LPC17xx/csp_int.c ****     for (src_nbr = 0u; src_nbr < CSP_INT_SRC_NBR_MAX; src_nbr++) {
+ 302              		.loc 1 343 0 discriminator 2
+ 303 0156 FB7B     		ldrb	r3, [r7, #15]
+ 304 0158 03F10103 		add	r3, r3, #1
+ 305 015c FB73     		strb	r3, [r7, #15]
+ 306              	.L12:
+ 343:Libraries/uC-CSP/LPC17xx/csp_int.c ****     for (src_nbr = 0u; src_nbr < CSP_INT_SRC_NBR_MAX; src_nbr++) {
+ 307              		.loc 1 343 0 is_stmt 0 discriminator 1
+ 308 015e FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 309 0160 222B     		cmp	r3, #34
+ 310 0162 D4D9     		bls	.L13
+ 351:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 352:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 353:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_DEV_USB_OTG_EN == DEF_ENABLED)
+ 354:Libraries/uC-CSP/LPC17xx/csp_int.c ****     for (src_nbr = 0u; src_nbr < CSP_INT_USB_SRC_MAX_NBR; src_nbr++ ) {
+ 355:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 356:Libraries/uC-CSP/LPC17xx/csp_int.c ****         p_int_vect = &CSP_USB_VectTbl[src_nbr];
+ 357:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 358:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CPU_CRITICAL_ENTER();                                   /* Initialize USB shared handler th
+ 359:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CSP_IntVectClr(p_int_vect);
+ 360:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CPU_CRITICAL_EXIT();
+ 361:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 362:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 363:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                                 /* Install the USB shared handler. 
+ 364:Libraries/uC-CSP/LPC17xx/csp_int.c ****     src_nbr    = CSP_INT_SRC_NBR_USB_00;
+ 311              		.loc 1 364 0 is_stmt 1
+ 312 0164 4FF01803 		mov	r3, #24
+ 313 0168 FB73     		strb	r3, [r7, #15]
+ 365:Libraries/uC-CSP/LPC17xx/csp_int.c ****     p_int_vect = &CSP_MainVectTbl[src_nbr];
+ 314              		.loc 1 365 0
+ 315 016a FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 316 016c 4FEA0312 		lsl	r2, r3, #4
+ 317 0170 40F20003 		movw	r3, #:lower16:CSP_MainVectTbl
+ 318 0174 C0F20003 		movt	r3, #:upper16:CSP_MainVectTbl
+ 319 0178 D318     		adds	r3, r2, r3
+ 320 017a 7B60     		str	r3, [r7, #4]
+ 366:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 367:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_CRITICAL_ENTER();
+ 321              		.loc 1 367 0
+ 322 017c FFF7FEFF 		bl	CPU_SR_Save
+ 323 0180 B860     		str	r0, [r7, #8]
+ 324 0182 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 368:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*    CSP_IntVectSet((CSP_INT_VECT *)p_int_vect,
+ 369:Libraries/uC-CSP/LPC17xx/csp_int.c ****                    (CPU_FNCT_PTR  )USB_IRQHandler,
+ 370:Libraries/uC-CSP/LPC17xx/csp_int.c ****                    (void *        )0);*/
+ 371:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_CRITICAL_EXIT();
+ 325              		.loc 1 371 0
+ 326 0186 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 327 018a B868     		ldr	r0, [r7, #8]
+ 328 018c FFF7FEFF 		bl	CPU_SR_Restore
+ 372:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+ 329              		.loc 1 372 0
+ 330 0190 07F11007 		add	r7, r7, #16
+ 331 0194 BD46     		mov	sp, r7
+ 332 0196 80BD     		pop	{r7, pc}
+ 333              		.cfi_endproc
+ 334              	.LFE4:
+ 336              		.align	2
+ 337              		.global	CSP_IntSrcCfg
+ 338              		.thumb
+ 339              		.thumb_func
+ 341              	CSP_IntSrcCfg:
+ 342              	.LFB5:
+ 373:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 374:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 375:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 376:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 377:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                          CSP_IntUSB_Handler()
+ 378:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 379:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : USB ISR handler.
+ 380:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 381:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : p_arg    Interrupt ISR argument (not used)
+ 382:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 383:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : None.
+ 384:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 385:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Caller(s)   : This is an ISR.
+ 386:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 387:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : (1) This funtion dispatch a Interrupt service routine for everyinterrupt line of
+ 388:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                   the NVIC's USB channel.
+ 389:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 390:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 391:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 392:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_DEV_USB_OTG_EN == DEF_ENABLED)
+ 393:Libraries/uC-CSP/LPC17xx/csp_int.c **** static  void  CSP_IntUSB_Handler (void  *p_arg)
+ 394:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+ 395:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_VECT   *p_int_vect;
+ 396:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_INT32U      usb_int_stat;
+ 397:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 398:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 399:Libraries/uC-CSP/LPC17xx/csp_int.c ****     usb_int_stat = CSP_INT_REG_USBINTST;
+ 400:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 401:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_USB_DISPATCH(p_int_vect,
+ 402:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          usb_int_stat,
+ 403:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          CSP_INT_BIT_USBINTST_INT_DEV,
+ 404:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          CSP_INT_USB_SRC_NBR_DEV);
+ 405:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 406:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_USB_DISPATCH(p_int_vect,
+ 407:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          usb_int_stat,
+ 408:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          CSP_INT_BIT_USBINTST_INT_HOST,
+ 409:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          CSP_INT_USB_SRC_NBR_HOST);
+ 410:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 411:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_USB_DISPATCH(p_int_vect,
+ 412:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          usb_int_stat,
+ 413:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          CSP_INT_BIT_USBINTST_INT_ATX,
+ 414:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          CSP_INT_USB_SRC_NBR_ATX);
+ 415:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 416:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_USB_DISPATCH(p_int_vect,
+ 417:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          usb_int_stat,
+ 418:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          CSP_INT_BIT_USBINTST_INT_OTG,
+ 419:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          CSP_INT_USB_SRC_NBR_OTG);
+ 420:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 421:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_USB_DISPATCH(p_int_vect,
+ 422:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          usb_int_stat,
+ 423:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          CSP_INT_BIT_USBINTST_INT_I2C,
+ 424:Libraries/uC-CSP/LPC17xx/csp_int.c ****                          CSP_INT_USB_SRC_NBR_I2C);
+ 425:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+ 426:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 427:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 428:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 429:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 430:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 431:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                          CSP_IntSrcCfg()
+ 432:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 433:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : Configure an interrupt source.
+ 434:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 435:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : int_ctrl   Interrupt controller number. (see 'CSP_IntClr()' note #1).
+ 436:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 437:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               src_nbr    Interrupt source number. (see 'CSP_IntClr()' note #2).
+ 438:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 439:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               src_prio   Interrupt source priority.
+ 440:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 441:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               src_pol    Interrupt source polarity:
+ 442:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                              CSP_INT_POL_LEVEL_HIGH           Interrupt is activated on a high le
+ 443:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                              CSP_INT_POL_LEVEL_LOW            Interrupt is activated on a low lev
+ 444:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 445:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                              CSP_INT_POL_EDGE_RISING          Interrupt is activated on the risin
+ 446:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                              CSP_INT_POL_EDGE_FALLING         Interrupt is activated on the falli
+ 447:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                              CSP_INT_POL_EDGE_BOTH            Interrupt is activated on both edge
+ 448:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 449:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 450:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : DEF_OK,    if the interrupt source was configured
+ 451:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               DEF_FAIL,  otherwise.
+ 452:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 453:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : (1) Interrupt source priority is determined by the interrupt controller implementat
+ 454:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                   The maximum and minimum values are defined in the family definition file 'csp_g
+ 455:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 456:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : None.
+ 457:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 458:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 459:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 460:Libraries/uC-CSP/LPC17xx/csp_int.c **** CPU_BOOLEAN  CSP_IntSrcCfg (CSP_DEV_NBR  int_ctrl,
+ 461:Libraries/uC-CSP/LPC17xx/csp_int.c ****                             CSP_DEV_NBR  src_nbr,
+ 462:Libraries/uC-CSP/LPC17xx/csp_int.c ****                             CSP_OPT      src_prio,
+ 463:Libraries/uC-CSP/LPC17xx/csp_int.c ****                             CSP_OPT      src_pol)
+ 464:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 465:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+ 343              		.loc 1 465 0
+ 344              		.cfi_startproc
+ 345              		@ args = 0, pretend = 0, frame = 16
+ 346              		@ frame_needed = 1, uses_anonymous_args = 0
+ 347 0198 80B5     		push	{r7, lr}
+ 348              	.LCFI15:
+ 349              		.cfi_def_cfa_offset 8
+ 350              		.cfi_offset 14, -4
+ 351              		.cfi_offset 7, -8
+ 352 019a 84B0     		sub	sp, sp, #16
+ 353              	.LCFI16:
+ 354              		.cfi_def_cfa_offset 24
+ 355 019c 00AF     		add	r7, sp, #0
+ 356              	.LCFI17:
+ 357              		.cfi_def_cfa_register 7
+ 358 019e F880     		strh	r0, [r7, #6]	@ movhi
+ 359 01a0 B980     		strh	r1, [r7, #4]	@ movhi
+ 360 01a2 7A80     		strh	r2, [r7, #2]	@ movhi
+ 361 01a4 3B80     		strh	r3, [r7, #0]	@ movhi
+ 466:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_BOOLEAN  err;
+ 467:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 468:Libraries/uC-CSP/LPC17xx/csp_int.c ****     err = DEF_FAIL;
+ 362              		.loc 1 468 0
+ 363 01a6 4FF00003 		mov	r3, #0
+ 364 01aa FB73     		strb	r3, [r7, #15]
+ 469:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 470:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if ((int_ctrl == CSP_INT_CTRL_NBR_MAIN) &&
+ 365              		.loc 1 470 0
+ 366 01ac FB88     		ldrh	r3, [r7, #6]
+ 367 01ae 002B     		cmp	r3, #0
+ 368 01b0 12D1     		bne	.L15
+ 369              		.loc 1 470 0 is_stmt 0 discriminator 1
+ 370 01b2 BB88     		ldrh	r3, [r7, #4]
+ 371 01b4 222B     		cmp	r3, #34
+ 372 01b6 0FD8     		bhi	.L15
+ 471:Libraries/uC-CSP/LPC17xx/csp_int.c ****         (src_nbr   < CSP_INT_SRC_NBR_MAX  ) &&
+ 373              		.loc 1 471 0 is_stmt 1
+ 374 01b8 7B88     		ldrh	r3, [r7, #2]
+ 375 01ba FE2B     		cmp	r3, #254
+ 376 01bc 0CD8     		bhi	.L15
+ 472:Libraries/uC-CSP/LPC17xx/csp_int.c ****         (src_prio  < 0xFF                 )) {
+ 473:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CPU_IntSrcPrioSet(src_nbr + 16u, CPU_INT_EXT0);
+ 377              		.loc 1 473 0
+ 378 01be BB88     		ldrh	r3, [r7, #4]	@ movhi
+ 379 01c0 DBB2     		uxtb	r3, r3
+ 380 01c2 03F11003 		add	r3, r3, #16
+ 381 01c6 DBB2     		uxtb	r3, r3
+ 382 01c8 1846     		mov	r0, r3
+ 383 01ca 4FF01001 		mov	r1, #16
+ 384 01ce FFF7FEFF 		bl	CPU_IntSrcPrioSet
+ 474:Libraries/uC-CSP/LPC17xx/csp_int.c ****         err = DEF_OK;
+ 385              		.loc 1 474 0
+ 386 01d2 4FF00103 		mov	r3, #1
+ 387 01d6 FB73     		strb	r3, [r7, #15]
+ 388              	.L15:
+ 475:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 476:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 477:Libraries/uC-CSP/LPC17xx/csp_int.c ****     return (err);
+ 389              		.loc 1 477 0
+ 390 01d8 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 478:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+ 391              		.loc 1 478 0
+ 392 01da 1846     		mov	r0, r3
+ 393 01dc 07F11007 		add	r7, r7, #16
+ 394 01e0 BD46     		mov	sp, r7
+ 395 01e2 80BD     		pop	{r7, pc}
+ 396              		.cfi_endproc
+ 397              	.LFE5:
+ 399              		.align	2
+ 400              		.global	CSP_IntVectReg
+ 401              		.thumb
+ 402              		.thumb_func
+ 404              	CSP_IntVectReg:
+ 405              	.LFB6:
+ 479:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 480:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 481:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 482:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 483:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                          CSP_IntVectReg()
+ 484:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 485:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : Register an interrupt service routine handler for a specific interrupt controller.
+ 486:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 487:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : int_ctrl    Interrupt controller number. (see 'CSP_IntClr()' note #1).
+ 488:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 489:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               src_nbr     Interrupt source number. (see 'CSP_IntClr()' note #2).
+ 490:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 491:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               isr_fnct    Pointer to the interrupt service routine (ISR).
+ 492:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 493:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               p_arg       Pointer to the argument of the interrupt service routine (ISR).
+ 494:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 495:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : DEF_OK,    If the vector was registered successfully.
+ 496:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               DEF_FAIL,  otherwise.
+ 497:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 498:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Caller(s)   : Application.
+ 499:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 500:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : None.
+ 501:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 502:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 503:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 504:Libraries/uC-CSP/LPC17xx/csp_int.c **** CPU_BOOLEAN  CSP_IntVectReg (CSP_DEV_NBR    int_ctrl,
+ 505:Libraries/uC-CSP/LPC17xx/csp_int.c ****                              CSP_DEV_NBR    src_nbr,
+ 506:Libraries/uC-CSP/LPC17xx/csp_int.c ****                              CPU_FNCT_PTR   isr_fnct,
+ 507:Libraries/uC-CSP/LPC17xx/csp_int.c ****                              void          *p_arg)
+ 508:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+ 406              		.loc 1 508 0
+ 407              		.cfi_startproc
+ 408              		@ args = 0, pretend = 0, frame = 24
+ 409              		@ frame_needed = 1, uses_anonymous_args = 0
+ 410 01e4 80B5     		push	{r7, lr}
+ 411              	.LCFI18:
+ 412              		.cfi_def_cfa_offset 8
+ 413              		.cfi_offset 14, -4
+ 414              		.cfi_offset 7, -8
+ 415 01e6 86B0     		sub	sp, sp, #24
+ 416              	.LCFI19:
+ 417              		.cfi_def_cfa_offset 32
+ 418 01e8 00AF     		add	r7, sp, #0
+ 419              	.LCFI20:
+ 420              		.cfi_def_cfa_register 7
+ 421 01ea BA60     		str	r2, [r7, #8]
+ 422 01ec 7B60     		str	r3, [r7, #4]
+ 423 01ee 0346     		mov	r3, r0	@ movhi
+ 424 01f0 FB81     		strh	r3, [r7, #14]	@ movhi
+ 425 01f2 0B46     		mov	r3, r1	@ movhi
+ 426 01f4 BB81     		strh	r3, [r7, #12]	@ movhi
+ 509:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_VECT  *p_int_vect;
+ 510:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_SR_ALLOC();
+ 427              		.loc 1 510 0
+ 428 01f6 4FF00003 		mov	r3, #0
+ 429 01fa 7B61     		str	r3, [r7, #20]
+ 511:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 512:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_CFG_ARG_CHK_EN == DEF_ENABLED)
+ 513:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if (isr_fnct == (CPU_FNCT_PTR)0) {
+ 430              		.loc 1 513 0
+ 431 01fc BB68     		ldr	r3, [r7, #8]
+ 432 01fe 002B     		cmp	r3, #0
+ 433 0200 02D1     		bne	.L17
+ 514:Libraries/uC-CSP/LPC17xx/csp_int.c ****         return (DEF_FAIL);
+ 434              		.loc 1 514 0
+ 435 0202 4FF00003 		mov	r3, #0
+ 436 0206 29E0     		b	.L18
+ 437              	.L17:
+ 515:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 516:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 517:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if ((int_ctrl == CSP_INT_CTRL_NBR_MAIN) &&
+ 438              		.loc 1 517 0
+ 439 0208 FB89     		ldrh	r3, [r7, #14]
+ 440 020a 002B     		cmp	r3, #0
+ 441 020c 05D1     		bne	.L19
+ 442              		.loc 1 517 0 is_stmt 0 discriminator 1
+ 443 020e BB89     		ldrh	r3, [r7, #12]
+ 444 0210 222B     		cmp	r3, #34
+ 445 0212 02D9     		bls	.L19
+ 518:Libraries/uC-CSP/LPC17xx/csp_int.c ****         (src_nbr  >= CSP_INT_SRC_NBR_MAX  )) {
+ 519:Libraries/uC-CSP/LPC17xx/csp_int.c ****         return (DEF_FAIL);
+ 446              		.loc 1 519 0 is_stmt 1
+ 447 0214 4FF00003 		mov	r3, #0
+ 448 0218 20E0     		b	.L18
+ 449              	.L19:
+ 520:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 521:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 522:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_DEV_USB_OTG_EN == DEF_ENABLED)
+ 523:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if ((int_ctrl == CSP_INT_CTRL_NBR_USB) &&
+ 524:Libraries/uC-CSP/LPC17xx/csp_int.c ****         (src_nbr  >= CSP_INT_SRC_NBR_MAX  )) {
+ 525:Libraries/uC-CSP/LPC17xx/csp_int.c ****         return (DEF_FAIL);
+ 526:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 527:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 528:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 529:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 530:Libraries/uC-CSP/LPC17xx/csp_int.c ****     switch (int_ctrl) {
+ 450              		.loc 1 530 0
+ 451 021a FB89     		ldrh	r3, [r7, #14]
+ 452 021c 002B     		cmp	r3, #0
+ 453 021e 1BD1     		bne	.L23
+ 454              	.L21:
+ 531:Libraries/uC-CSP/LPC17xx/csp_int.c ****         case CSP_INT_CTRL_NBR_MAIN:                             /* Install interrupt ISR in the NVI
+ 532:Libraries/uC-CSP/LPC17xx/csp_int.c ****              p_int_vect = &CSP_MainVectTbl[src_nbr];
+ 455              		.loc 1 532 0
+ 456 0220 BB89     		ldrh	r3, [r7, #12]
+ 457 0222 4FEA0312 		lsl	r2, r3, #4
+ 458 0226 40F20003 		movw	r3, #:lower16:CSP_MainVectTbl
+ 459 022a C0F20003 		movt	r3, #:upper16:CSP_MainVectTbl
+ 460 022e D318     		adds	r3, r2, r3
+ 461 0230 3B61     		str	r3, [r7, #16]
+ 533:Libraries/uC-CSP/LPC17xx/csp_int.c ****              break;
+ 462              		.loc 1 533 0
+ 463 0232 00BF     		nop
+ 534:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 535:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_DEV_USB_OTG_EN == DEF_ENABLED)
+ 536:Libraries/uC-CSP/LPC17xx/csp_int.c ****         case CSP_INT_CTRL_NBR_USB:                              /* Install interrupt ISR in the USB
+ 537:Libraries/uC-CSP/LPC17xx/csp_int.c ****              p_int_vect = &CSP_USB_VectTbl[src_nbr];
+ 538:Libraries/uC-CSP/LPC17xx/csp_int.c ****              break;
+ 539:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 540:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 541:Libraries/uC-CSP/LPC17xx/csp_int.c ****         default:
+ 542:Libraries/uC-CSP/LPC17xx/csp_int.c ****              return (DEF_FAIL);
+ 543:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 544:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 545:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_CRITICAL_ENTER();
+ 464              		.loc 1 545 0
+ 465 0234 FFF7FEFF 		bl	CPU_SR_Save
+ 466 0238 7861     		str	r0, [r7, #20]
+ 467 023a FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 546:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 547:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_IntVectSet((CSP_INT_VECT *)p_int_vect,
+ 468              		.loc 1 547 0
+ 469 023e 3869     		ldr	r0, [r7, #16]
+ 470 0240 B968     		ldr	r1, [r7, #8]
+ 471 0242 7A68     		ldr	r2, [r7, #4]
+ 472 0244 FFF7FEFF 		bl	CSP_IntVectSet
+ 548:Libraries/uC-CSP/LPC17xx/csp_int.c ****                    (CPU_FNCT_PTR  )isr_fnct,
+ 549:Libraries/uC-CSP/LPC17xx/csp_int.c ****                    (void *        )p_arg);
+ 550:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 551:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_CRITICAL_EXIT();
+ 473              		.loc 1 551 0
+ 474 0248 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 475 024c 7869     		ldr	r0, [r7, #20]
+ 476 024e FFF7FEFF 		bl	CPU_SR_Restore
+ 552:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 553:Libraries/uC-CSP/LPC17xx/csp_int.c ****     return (DEF_OK);
+ 477              		.loc 1 553 0
+ 478 0252 4FF00103 		mov	r3, #1
+ 479 0256 01E0     		b	.L18
+ 480              	.L23:
+ 542:Libraries/uC-CSP/LPC17xx/csp_int.c ****              return (DEF_FAIL);
+ 481              		.loc 1 542 0
+ 482 0258 4FF00003 		mov	r3, #0
+ 483              	.L18:
+ 554:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+ 484              		.loc 1 554 0
+ 485 025c 1846     		mov	r0, r3
+ 486 025e 07F11807 		add	r7, r7, #24
+ 487 0262 BD46     		mov	sp, r7
+ 488 0264 80BD     		pop	{r7, pc}
+ 489              		.cfi_endproc
+ 490              	.LFE6:
+ 492 0266 00BF     		.align	2
+ 493              		.global	CSP_IntVectUnreg
+ 494              		.thumb
+ 495              		.thumb_func
+ 497              	CSP_IntVectUnreg:
+ 498              	.LFB7:
+ 555:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 556:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 557:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 558:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 559:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                          CSP_IntVectUnreg()
+ 560:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 561:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : Un-register an interrupt vector.
+ 562:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 563:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : int_ctrl   Interrupt controller number. (see 'CSP_IntClr()' note #1).
+ 564:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 565:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               src_nbr    Interrupt source number. (see 'CSP_IntClr()' note #2).
+ 566:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 567:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : DEF_OK,     If the vector was unregistered successfully.
+ 568:Libraries/uC-CSP/LPC17xx/csp_int.c **** *               DEF_FAIL,   otherwise.
+ 569:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 570:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Caller(s)   : Application.
+ 571:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 572:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : None.
+ 573:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 574:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 575:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 576:Libraries/uC-CSP/LPC17xx/csp_int.c **** CPU_BOOLEAN  CSP_IntVectUnreg (CSP_DEV_NBR  int_ctrl,
+ 577:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                CSP_DEV_NBR  src_nbr)
+ 578:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+ 499              		.loc 1 578 0
+ 500              		.cfi_startproc
+ 501              		@ args = 0, pretend = 0, frame = 16
+ 502              		@ frame_needed = 1, uses_anonymous_args = 0
+ 503 0268 80B5     		push	{r7, lr}
+ 504              	.LCFI21:
+ 505              		.cfi_def_cfa_offset 8
+ 506              		.cfi_offset 14, -4
+ 507              		.cfi_offset 7, -8
+ 508 026a 84B0     		sub	sp, sp, #16
+ 509              	.LCFI22:
+ 510              		.cfi_def_cfa_offset 24
+ 511 026c 00AF     		add	r7, sp, #0
+ 512              	.LCFI23:
+ 513              		.cfi_def_cfa_register 7
+ 514 026e 0246     		mov	r2, r0
+ 515 0270 0B46     		mov	r3, r1
+ 516 0272 FA80     		strh	r2, [r7, #6]	@ movhi
+ 517 0274 BB80     		strh	r3, [r7, #4]	@ movhi
+ 579:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_VECT  *p_int_vect;
+ 580:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_SR_ALLOC();
+ 518              		.loc 1 580 0
+ 519 0276 4FF00003 		mov	r3, #0
+ 520 027a FB60     		str	r3, [r7, #12]
+ 581:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 582:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 583:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_CFG_ARG_CHK_EN == DEF_ENABLED)
+ 584:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if ((int_ctrl == CSP_INT_CTRL_NBR_MAIN) &&
+ 521              		.loc 1 584 0
+ 522 027c FB88     		ldrh	r3, [r7, #6]
+ 523 027e 002B     		cmp	r3, #0
+ 524 0280 05D1     		bne	.L25
+ 525              		.loc 1 584 0 is_stmt 0 discriminator 1
+ 526 0282 BB88     		ldrh	r3, [r7, #4]
+ 527 0284 222B     		cmp	r3, #34
+ 528 0286 02D9     		bls	.L25
+ 585:Libraries/uC-CSP/LPC17xx/csp_int.c ****         (src_nbr  >= CSP_INT_SRC_NBR_MAX  )) {
+ 586:Libraries/uC-CSP/LPC17xx/csp_int.c ****         return (DEF_FAIL);
+ 529              		.loc 1 586 0 is_stmt 1
+ 530 0288 4FF00003 		mov	r3, #0
+ 531 028c 1EE0     		b	.L26
+ 532              	.L25:
+ 587:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 588:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 589:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_DEV_USB_OTG_EN == DEF_ENABLED)
+ 590:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if ((int_ctrl == CSP_INT_CTRL_NBR_USB) &&
+ 591:Libraries/uC-CSP/LPC17xx/csp_int.c ****         (src_nbr  >= CSP_INT_SRC_NBR_MAX  )) {
+ 592:Libraries/uC-CSP/LPC17xx/csp_int.c ****         return (DEF_FAIL);
+ 593:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 594:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 595:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 596:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 597:Libraries/uC-CSP/LPC17xx/csp_int.c ****     switch (int_ctrl) {
+ 533              		.loc 1 597 0
+ 534 028e FB88     		ldrh	r3, [r7, #6]
+ 535 0290 002B     		cmp	r3, #0
+ 536 0292 19D1     		bne	.L30
+ 537              	.L28:
+ 598:Libraries/uC-CSP/LPC17xx/csp_int.c ****         case CSP_INT_CTRL_NBR_MAIN:                             /* Install interrupt ISR in the NVI
+ 599:Libraries/uC-CSP/LPC17xx/csp_int.c ****              p_int_vect = &CSP_MainVectTbl[src_nbr];
+ 538              		.loc 1 599 0
+ 539 0294 BB88     		ldrh	r3, [r7, #4]
+ 540 0296 4FEA0312 		lsl	r2, r3, #4
+ 541 029a 40F20003 		movw	r3, #:lower16:CSP_MainVectTbl
+ 542 029e C0F20003 		movt	r3, #:upper16:CSP_MainVectTbl
+ 543 02a2 D318     		adds	r3, r2, r3
+ 544 02a4 BB60     		str	r3, [r7, #8]
+ 600:Libraries/uC-CSP/LPC17xx/csp_int.c ****              break;
+ 545              		.loc 1 600 0
+ 546 02a6 00BF     		nop
+ 601:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 602:Libraries/uC-CSP/LPC17xx/csp_int.c **** #if (CSP_DEV_USB_OTG_EN == DEF_ENABLED)
+ 603:Libraries/uC-CSP/LPC17xx/csp_int.c ****         case CSP_INT_CTRL_NBR_USB:                              /* Install interrupt ISR in the USB
+ 604:Libraries/uC-CSP/LPC17xx/csp_int.c ****              p_int_vect = &CSP_USB_VectTbl[src_nbr];
+ 605:Libraries/uC-CSP/LPC17xx/csp_int.c ****              break;
+ 606:Libraries/uC-CSP/LPC17xx/csp_int.c **** #endif
+ 607:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 608:Libraries/uC-CSP/LPC17xx/csp_int.c ****         default:
+ 609:Libraries/uC-CSP/LPC17xx/csp_int.c ****              return (DEF_FAIL);
+ 610:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 611:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 612:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_CRITICAL_ENTER();
+ 547              		.loc 1 612 0
+ 548 02a8 FFF7FEFF 		bl	CPU_SR_Save
+ 549 02ac F860     		str	r0, [r7, #12]
+ 550 02ae FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 613:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 614:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_IntVectClr(p_int_vect);
+ 551              		.loc 1 614 0
+ 552 02b2 B868     		ldr	r0, [r7, #8]
+ 553 02b4 FFF7FEFF 		bl	CSP_IntVectClr
+ 615:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 616:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_CRITICAL_EXIT();
+ 554              		.loc 1 616 0
+ 555 02b8 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 556 02bc F868     		ldr	r0, [r7, #12]
+ 557 02be FFF7FEFF 		bl	CPU_SR_Restore
+ 617:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 618:Libraries/uC-CSP/LPC17xx/csp_int.c ****     return (DEF_OK);
+ 558              		.loc 1 618 0
+ 559 02c2 4FF00103 		mov	r3, #1
+ 560 02c6 01E0     		b	.L26
+ 561              	.L30:
+ 609:Libraries/uC-CSP/LPC17xx/csp_int.c ****              return (DEF_FAIL);
+ 562              		.loc 1 609 0
+ 563 02c8 4FF00003 		mov	r3, #0
+ 564              	.L26:
+ 619:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+ 565              		.loc 1 619 0
+ 566 02cc 1846     		mov	r0, r3
+ 567 02ce 07F11007 		add	r7, r7, #16
+ 568 02d2 BD46     		mov	sp, r7
+ 569 02d4 80BD     		pop	{r7, pc}
+ 570              		.cfi_endproc
+ 571              	.LFE7:
+ 573 02d6 00BF     		.align	2
+ 574              		.global	CSP_IntHandler
+ 575              		.thumb
+ 576              		.thumb_func
+ 578              	CSP_IntHandler:
+ 579              	.LFB8:
+ 620:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 621:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 622:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 623:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 624:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                          CSP_IntHandler()
+ 625:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 626:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : Global interrupt handler.
+ 627:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 628:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : None.
+ 629:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 630:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : None.
+ 631:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 632:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Caller(s)   : Application.
+ 633:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 634:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : None.
+ 635:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 636:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 637:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 638:Libraries/uC-CSP/LPC17xx/csp_int.c **** void  CSP_IntHandler (void)
+ 639:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+ 580              		.loc 1 639 0
+ 581              		.cfi_startproc
+ 582              		@ args = 0, pretend = 0, frame = 16
+ 583              		@ frame_needed = 1, uses_anonymous_args = 0
+ 584 02d8 80B5     		push	{r7, lr}
+ 585              	.LCFI24:
+ 586              		.cfi_def_cfa_offset 8
+ 587              		.cfi_offset 14, -4
+ 588              		.cfi_offset 7, -8
+ 589 02da 84B0     		sub	sp, sp, #16
+ 590              	.LCFI25:
+ 591              		.cfi_def_cfa_offset 24
+ 592 02dc 00AF     		add	r7, sp, #0
+ 593              	.LCFI26:
+ 594              		.cfi_def_cfa_register 7
+ 640:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_VECT  *p_int_vect;
+ 641:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_DEV_NBR    src_nbr;
+ 642:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CPU_INT32U     reg_val;
+ 643:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 644:Libraries/uC-CSP/LPC17xx/csp_int.c ****                                                                 /* Query the NVIC interrupt control
+ 645:Libraries/uC-CSP/LPC17xx/csp_int.c ****     reg_val  = (CPU_REG_NVIC_ICSR & CPU_MSK_NVIC_ICSR_VECT_ACTIVE);
+ 595              		.loc 1 645 0
+ 596 02de 4EF60453 		movw	r3, #60676
+ 597 02e2 CEF20003 		movt	r3, 57344
+ 598 02e6 1B68     		ldr	r3, [r3, #0]
+ 599 02e8 4FEAC353 		lsl	r3, r3, #23
+ 600 02ec 4FEAD353 		lsr	r3, r3, #23
+ 601 02f0 FB60     		str	r3, [r7, #12]
+ 646:Libraries/uC-CSP/LPC17xx/csp_int.c ****     src_nbr  = (CSP_DEV_NBR)reg_val -  CPU_INT_EXT0;
+ 602              		.loc 1 646 0
+ 603 02f2 FB68     		ldr	r3, [r7, #12]
+ 604 02f4 9BB2     		uxth	r3, r3
+ 605 02f6 A3F11003 		sub	r3, r3, #16
+ 606 02fa 7B81     		strh	r3, [r7, #10]	@ movhi
+ 647:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 648:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if (src_nbr < CSP_INT_SRC_NBR_MAX) {
+ 607              		.loc 1 648 0
+ 608 02fc 7B89     		ldrh	r3, [r7, #10]
+ 609 02fe 222B     		cmp	r3, #34
+ 610 0300 0BD8     		bhi	.L31
+ 649:Libraries/uC-CSP/LPC17xx/csp_int.c ****         p_int_vect = &CSP_MainVectTbl[src_nbr];
+ 611              		.loc 1 649 0
+ 612 0302 7B89     		ldrh	r3, [r7, #10]
+ 613 0304 4FEA0312 		lsl	r2, r3, #4
+ 614 0308 40F20003 		movw	r3, #:lower16:CSP_MainVectTbl
+ 615 030c C0F20003 		movt	r3, #:upper16:CSP_MainVectTbl
+ 616 0310 D318     		adds	r3, r2, r3
+ 617 0312 7B60     		str	r3, [r7, #4]
+ 650:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 651:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CSP_IntVectDeref(p_int_vect);                           /* Call Dereferencing funtion      
+ 618              		.loc 1 651 0
+ 619 0314 7868     		ldr	r0, [r7, #4]
+ 620 0316 FFF7FEFF 		bl	CSP_IntVectDeref
+ 621              	.L31:
+ 652:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 653:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+ 622              		.loc 1 653 0
+ 623 031a 07F11007 		add	r7, r7, #16
+ 624 031e BD46     		mov	sp, r7
+ 625 0320 80BD     		pop	{r7, pc}
+ 626              		.cfi_endproc
+ 627              	.LFE8:
+ 629 0322 00BF     		.align	2
+ 630              		.global	CSP_IntHandlerSrc
+ 631              		.thumb
+ 632              		.thumb_func
+ 634              	CSP_IntHandlerSrc:
+ 635              	.LFB9:
+ 654:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 655:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 656:Libraries/uC-CSP/LPC17xx/csp_int.c **** /*
+ 657:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 658:Libraries/uC-CSP/LPC17xx/csp_int.c **** *                                       CSP_IntHandlerSrc()
+ 659:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 660:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Description : Global interrupt handler.
+ 661:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 662:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Argument(s) : src_nbr      Interrupt source number.
+ 663:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 664:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Return(s)   : None.
+ 665:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 666:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Caller(s)   : Application.
+ 667:Libraries/uC-CSP/LPC17xx/csp_int.c **** *
+ 668:Libraries/uC-CSP/LPC17xx/csp_int.c **** * Note(s)     : None.
+ 669:Libraries/uC-CSP/LPC17xx/csp_int.c **** ***************************************************************************************************
+ 670:Libraries/uC-CSP/LPC17xx/csp_int.c **** */
+ 671:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 672:Libraries/uC-CSP/LPC17xx/csp_int.c **** void  CSP_IntHandlerSrc (CSP_DEV_NBR  src_nbr)
+ 673:Libraries/uC-CSP/LPC17xx/csp_int.c **** {
+ 636              		.loc 1 673 0
+ 637              		.cfi_startproc
+ 638              		@ args = 0, pretend = 0, frame = 16
+ 639              		@ frame_needed = 1, uses_anonymous_args = 0
+ 640 0324 80B5     		push	{r7, lr}
+ 641              	.LCFI27:
+ 642              		.cfi_def_cfa_offset 8
+ 643              		.cfi_offset 14, -4
+ 644              		.cfi_offset 7, -8
+ 645 0326 84B0     		sub	sp, sp, #16
+ 646              	.LCFI28:
+ 647              		.cfi_def_cfa_offset 24
+ 648 0328 00AF     		add	r7, sp, #0
+ 649              	.LCFI29:
+ 650              		.cfi_def_cfa_register 7
+ 651 032a 0346     		mov	r3, r0
+ 652 032c FB80     		strh	r3, [r7, #6]	@ movhi
+ 674:Libraries/uC-CSP/LPC17xx/csp_int.c ****     CSP_INT_VECT  *p_int_vect;
+ 675:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 676:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 677:Libraries/uC-CSP/LPC17xx/csp_int.c ****     if (src_nbr < CSP_INT_SRC_NBR_MAX) {
+ 653              		.loc 1 677 0
+ 654 032e FB88     		ldrh	r3, [r7, #6]
+ 655 0330 222B     		cmp	r3, #34
+ 656 0332 0BD8     		bhi	.L33
+ 678:Libraries/uC-CSP/LPC17xx/csp_int.c ****         p_int_vect = &CSP_MainVectTbl[src_nbr];
+ 657              		.loc 1 678 0
+ 658 0334 FB88     		ldrh	r3, [r7, #6]
+ 659 0336 4FEA0312 		lsl	r2, r3, #4
+ 660 033a 40F20003 		movw	r3, #:lower16:CSP_MainVectTbl
+ 661 033e C0F20003 		movt	r3, #:upper16:CSP_MainVectTbl
+ 662 0342 D318     		adds	r3, r2, r3
+ 663 0344 FB60     		str	r3, [r7, #12]
+ 679:Libraries/uC-CSP/LPC17xx/csp_int.c **** 
+ 680:Libraries/uC-CSP/LPC17xx/csp_int.c ****         CSP_IntVectDeref(p_int_vect);                           /* Call Dereferencing funtion      
+ 664              		.loc 1 680 0
+ 665 0346 F868     		ldr	r0, [r7, #12]
+ 666 0348 FFF7FEFF 		bl	CSP_IntVectDeref
+ 667              	.L33:
+ 681:Libraries/uC-CSP/LPC17xx/csp_int.c ****     }
+ 682:Libraries/uC-CSP/LPC17xx/csp_int.c **** }
+ 668              		.loc 1 682 0
+ 669 034c 07F11007 		add	r7, r7, #16
+ 670 0350 BD46     		mov	sp, r7
+ 671 0352 80BD     		pop	{r7, pc}
+ 672              		.cfi_endproc
+ 673              	.LFE9:
+ 675              	.Letext0:
+ 676              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 677              		.file 3 "Libraries/uC-CPU/cpu_core.h"
+ 678              		.file 4 "Libraries/uC-CSP/csp_types.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 csp_int.c
+     /tmp/ccxkDAVp.s:19     .bss:00000000 $d
+     /tmp/ccxkDAVp.s:20     .bss:00000000 CSP_MainVectTbl
+     /tmp/ccxkDAVp.s:23     .text:00000000 $t
+     /tmp/ccxkDAVp.s:28     .text:00000000 CSP_IntClr
+     /tmp/ccxkDAVp.s:78     .text:00000034 CSP_IntDis
+     /tmp/ccxkDAVp.s:127    .text:00000068 CSP_IntDisAll
+     /tmp/ccxkDAVp.s:194    .text:000000bc CSP_IntEn
+     /tmp/ccxkDAVp.s:243    .text:000000f0 CSP_IntInit
+     /tmp/ccxkDAVp.s:341    .text:00000198 CSP_IntSrcCfg
+     /tmp/ccxkDAVp.s:404    .text:000001e4 CSP_IntVectReg
+     /tmp/ccxkDAVp.s:497    .text:00000268 CSP_IntVectUnreg
+     /tmp/ccxkDAVp.s:578    .text:000002d8 CSP_IntHandler
+     /tmp/ccxkDAVp.s:634    .text:00000324 CSP_IntHandlerSrc
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+CPU_IntSrcPendClr
+CPU_IntSrcDis
+CPU_IntSrcEn
+CPU_SR_Save
+CPU_IntDisMeasStart
+CSP_IntVectClr
+CPU_IntDisMeasStop
+CPU_SR_Restore
+CPU_IntSrcPrioSet
+CSP_IntVectSet
+CSP_IntVectDeref

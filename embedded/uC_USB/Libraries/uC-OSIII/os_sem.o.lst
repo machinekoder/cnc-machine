@@ -1,0 +1,2613 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"os_sem.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	OSSemCreate
+  20              		.thumb
+  21              		.thumb_func
+  23              	OSSemCreate:
+  24              	.LFB0:
+  25              		.file 1 "Libraries/uC-OSIII/os_sem.c"
+   1:Libraries/uC-OSIII/os_sem.c **** /*
+   2:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+   3:Libraries/uC-OSIII/os_sem.c **** *                                                      uC/OS-III
+   4:Libraries/uC-OSIII/os_sem.c **** *                                                 The Real-Time Kernel
+   5:Libraries/uC-OSIII/os_sem.c **** *
+   6:Libraries/uC-OSIII/os_sem.c **** *                                  (c) Copyright 2009-2010; Micrium, Inc.; Weston, FL
+   7:Libraries/uC-OSIII/os_sem.c **** *                          All rights reserved.  Protected by international copyright laws.
+   8:Libraries/uC-OSIII/os_sem.c **** *
+   9:Libraries/uC-OSIII/os_sem.c **** *                                                  SEMAPHORE MANAGEMENT
+  10:Libraries/uC-OSIII/os_sem.c **** *
+  11:Libraries/uC-OSIII/os_sem.c **** * File    : OS_SEM.C
+  12:Libraries/uC-OSIII/os_sem.c **** * By      : JJL
+  13:Libraries/uC-OSIII/os_sem.c **** * Version : V3.01.2
+  14:Libraries/uC-OSIII/os_sem.c **** *
+  15:Libraries/uC-OSIII/os_sem.c **** * LICENSING TERMS:
+  16:Libraries/uC-OSIII/os_sem.c **** * ---------------
+  17:Libraries/uC-OSIII/os_sem.c **** *               uC/OS-III is provided in source form to registered licensees ONLY.  It is
+  18:Libraries/uC-OSIII/os_sem.c **** *               illegal to distribute this source code to any third party unless you receive
+  19:Libraries/uC-OSIII/os_sem.c **** *               written permission by an authorized Micrium representative.  Knowledge of
+  20:Libraries/uC-OSIII/os_sem.c **** *               the source code may NOT be used to develop a similar product.
+  21:Libraries/uC-OSIII/os_sem.c **** *
+  22:Libraries/uC-OSIII/os_sem.c **** *               Please help us continue to provide the Embedded community with the finest
+  23:Libraries/uC-OSIII/os_sem.c **** *               software available.  Your honesty is greatly appreciated.
+  24:Libraries/uC-OSIII/os_sem.c **** *
+  25:Libraries/uC-OSIII/os_sem.c **** *               You can contact us at www.micrium.com.
+  26:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+  27:Libraries/uC-OSIII/os_sem.c **** */
+  28:Libraries/uC-OSIII/os_sem.c **** 
+  29:Libraries/uC-OSIII/os_sem.c **** #include <os.h>
+  30:Libraries/uC-OSIII/os_sem.c **** 
+  31:Libraries/uC-OSIII/os_sem.c **** #ifdef VSC_INCLUDE_SOURCE_FILE_NAMES
+  32:Libraries/uC-OSIII/os_sem.c **** const  CPU_CHAR  *os_sem__c = "$Id: $";
+  33:Libraries/uC-OSIII/os_sem.c **** #endif
+  34:Libraries/uC-OSIII/os_sem.c **** 
+  35:Libraries/uC-OSIII/os_sem.c **** 
+  36:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_SEM_EN > 0u
+  37:Libraries/uC-OSIII/os_sem.c **** /*
+  38:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+  39:Libraries/uC-OSIII/os_sem.c **** *                                                  CREATE A SEMAPHORE
+  40:Libraries/uC-OSIII/os_sem.c **** *
+  41:Libraries/uC-OSIII/os_sem.c **** * Description: This function creates a semaphore.
+  42:Libraries/uC-OSIII/os_sem.c **** *
+  43:Libraries/uC-OSIII/os_sem.c **** * Arguments  : p_sem         is a pointer to the semaphore to initialize.  Your application is resp
+  44:Libraries/uC-OSIII/os_sem.c **** *                            allocating storage for the semaphore.
+  45:Libraries/uC-OSIII/os_sem.c **** *
+  46:Libraries/uC-OSIII/os_sem.c **** *              p_name        is a pointer to the name you would like to give the semaphore.
+  47:Libraries/uC-OSIII/os_sem.c **** *
+  48:Libraries/uC-OSIII/os_sem.c **** *              cnt           is the initial value for the semaphore.
+  49:Libraries/uC-OSIII/os_sem.c **** *                            If used to share resources, you should initialize to the number of res
+  50:Libraries/uC-OSIII/os_sem.c **** *                            If used to signal the occurrence of event(s) then you should initializ
+  51:Libraries/uC-OSIII/os_sem.c **** *
+  52:Libraries/uC-OSIII/os_sem.c **** *              p_err         is a pointer to a variable that will contain an error code returned by
+  53:Libraries/uC-OSIII/os_sem.c **** *
+  54:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_NONE                    if the call was successful
+  55:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_CREATE_ISR              if you called this function from an
+  56:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_ILLEGAL_CREATE_RUN_TIME if you are trying to create the sem
+  57:Libraries/uC-OSIII/os_sem.c **** *                                                                 called OSSafetyCriticalStart().
+  58:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_NAME                    if 'p_name' is a NULL pointer
+  59:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_OBJ_CREATED             if the semaphore has already been c
+  60:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_OBJ_PTR_NULL            if 'p_sem'  is a NULL pointer
+  61:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_OBJ_TYPE                if 'p_sem' has already been initial
+  62:Libraries/uC-OSIII/os_sem.c **** *                                                               object type
+  63:Libraries/uC-OSIII/os_sem.c **** *
+  64:Libraries/uC-OSIII/os_sem.c **** * Returns    : none
+  65:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+  66:Libraries/uC-OSIII/os_sem.c **** */
+  67:Libraries/uC-OSIII/os_sem.c **** 
+  68:Libraries/uC-OSIII/os_sem.c **** void  OSSemCreate (OS_SEM      *p_sem,
+  69:Libraries/uC-OSIII/os_sem.c ****                    CPU_CHAR    *p_name,
+  70:Libraries/uC-OSIII/os_sem.c ****                    OS_SEM_CTR   cnt,
+  71:Libraries/uC-OSIII/os_sem.c ****                    OS_ERR      *p_err)
+  72:Libraries/uC-OSIII/os_sem.c **** {
+  26              		.loc 1 72 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 24
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 14, -4
+  34              		.cfi_offset 7, -8
+  35 0002 86B0     		sub	sp, sp, #24
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 32
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  41 0006 F860     		str	r0, [r7, #12]
+  42 0008 B960     		str	r1, [r7, #8]
+  43 000a 7A60     		str	r2, [r7, #4]
+  44 000c 3B60     		str	r3, [r7, #0]
+  73:Libraries/uC-OSIII/os_sem.c ****     CPU_SR_ALLOC();
+  45              		.loc 1 73 0
+  46 000e 4FF00003 		mov	r3, #0
+  47 0012 7B61     		str	r3, [r7, #20]
+  74:Libraries/uC-OSIII/os_sem.c **** 
+  75:Libraries/uC-OSIII/os_sem.c **** 
+  76:Libraries/uC-OSIII/os_sem.c **** 
+  77:Libraries/uC-OSIII/os_sem.c **** #ifdef OS_SAFETY_CRITICAL
+  78:Libraries/uC-OSIII/os_sem.c ****     if (p_err == (OS_ERR *)0) {
+  79:Libraries/uC-OSIII/os_sem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+  80:Libraries/uC-OSIII/os_sem.c ****     }
+  81:Libraries/uC-OSIII/os_sem.c **** #endif
+  82:Libraries/uC-OSIII/os_sem.c **** 
+  83:Libraries/uC-OSIII/os_sem.c **** #ifdef OS_SAFETY_CRITICAL_IEC61508
+  84:Libraries/uC-OSIII/os_sem.c ****     if (OSSafetyCriticalStartFlag == DEF_TRUE) {
+  85:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_ILLEGAL_CREATE_RUN_TIME;
+  86:Libraries/uC-OSIII/os_sem.c ****         return;
+  87:Libraries/uC-OSIII/os_sem.c ****     }
+  88:Libraries/uC-OSIII/os_sem.c **** #endif
+  89:Libraries/uC-OSIII/os_sem.c **** 
+  90:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+  91:Libraries/uC-OSIII/os_sem.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Not allowed to be called from an ISR
+  48              		.loc 1 91 0
+  49 0014 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+  50 0018 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+  51 001c 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  52 001e 002B     		cmp	r3, #0
+  53 0020 04D0     		beq	.L2
+  92:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_CREATE_ISR;
+  54              		.loc 1 92 0
+  55 0022 3B68     		ldr	r3, [r7, #0]
+  56 0024 42F6E162 		movw	r2, #12001
+  57 0028 1A80     		strh	r2, [r3, #0]	@ movhi
+  93:Libraries/uC-OSIII/os_sem.c ****         return;
+  58              		.loc 1 93 0
+  59 002a 3BE0     		b	.L1
+  60              	.L2:
+  94:Libraries/uC-OSIII/os_sem.c ****     }
+  95:Libraries/uC-OSIII/os_sem.c **** #endif
+  96:Libraries/uC-OSIII/os_sem.c **** 
+  97:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_ARG_CHK_EN > 0u
+  98:Libraries/uC-OSIII/os_sem.c ****     if (p_sem == (OS_SEM *)0) {                             /* Validate 'p_sem'                    
+  61              		.loc 1 98 0
+  62 002c FB68     		ldr	r3, [r7, #12]
+  63 002e 002B     		cmp	r3, #0
+  64 0030 04D1     		bne	.L4
+  99:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+  65              		.loc 1 99 0
+  66 0032 3B68     		ldr	r3, [r7, #0]
+  67 0034 45F6C352 		movw	r2, #24003
+  68 0038 1A80     		strh	r2, [r3, #0]	@ movhi
+ 100:Libraries/uC-OSIII/os_sem.c ****         return;
+  69              		.loc 1 100 0
+  70 003a 33E0     		b	.L1
+  71              	.L4:
+ 101:Libraries/uC-OSIII/os_sem.c ****     }
+ 102:Libraries/uC-OSIII/os_sem.c **** #endif
+ 103:Libraries/uC-OSIII/os_sem.c **** 
+ 104:Libraries/uC-OSIII/os_sem.c ****     CPU_CRITICAL_ENTER();
+  72              		.loc 1 104 0
+  73 003c FFF7FEFF 		bl	CPU_SR_Save
+  74 0040 7861     		str	r0, [r7, #20]
+  75 0042 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 105:Libraries/uC-OSIII/os_sem.c ****     p_sem->Type    = OS_OBJ_TYPE_SEM;                       /* Mark the data structure as a semapho
+  76              		.loc 1 105 0
+  77 0046 FA68     		ldr	r2, [r7, #12]
+  78 0048 44F25353 		movw	r3, #17747
+  79 004c C4F24D13 		movt	r3, 16717
+  80 0050 1360     		str	r3, [r2, #0]
+ 106:Libraries/uC-OSIII/os_sem.c ****     p_sem->Ctr     = cnt;                                   /* Set semaphore value                 
+  81              		.loc 1 106 0
+  82 0052 FB68     		ldr	r3, [r7, #12]
+  83 0054 7A68     		ldr	r2, [r7, #4]
+  84 0056 1A62     		str	r2, [r3, #32]
+ 107:Libraries/uC-OSIII/os_sem.c ****     p_sem->TS      = (CPU_TS)0;
+  85              		.loc 1 107 0
+  86 0058 FB68     		ldr	r3, [r7, #12]
+  87 005a 4FF00002 		mov	r2, #0
+  88 005e 5A62     		str	r2, [r3, #36]
+ 108:Libraries/uC-OSIII/os_sem.c ****     p_sem->NamePtr = p_name;                                /* Save the name of the semaphore      
+  89              		.loc 1 108 0
+  90 0060 FB68     		ldr	r3, [r7, #12]
+  91 0062 BA68     		ldr	r2, [r7, #8]
+  92 0064 5A60     		str	r2, [r3, #4]
+ 109:Libraries/uC-OSIII/os_sem.c ****     OS_PendListInit(&p_sem->PendList);                      /* Initialize the waiting list         
+  93              		.loc 1 109 0
+  94 0066 FB68     		ldr	r3, [r7, #12]
+  95 0068 03F10803 		add	r3, r3, #8
+  96 006c 1846     		mov	r0, r3
+  97 006e FFF7FEFF 		bl	OS_PendListInit
+ 110:Libraries/uC-OSIII/os_sem.c **** 
+ 111:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_DBG_EN > 0u
+ 112:Libraries/uC-OSIII/os_sem.c ****     OS_SemDbgListAdd(p_sem);
+  98              		.loc 1 112 0
+  99 0072 F868     		ldr	r0, [r7, #12]
+ 100 0074 FFF7FEFF 		bl	OS_SemDbgListAdd
+ 113:Libraries/uC-OSIII/os_sem.c **** #endif
+ 114:Libraries/uC-OSIII/os_sem.c ****     OSSemQty++;
+ 101              		.loc 1 114 0
+ 102 0078 40F20003 		movw	r3, #:lower16:OSSemQty
+ 103 007c C0F20003 		movt	r3, #:upper16:OSSemQty
+ 104 0080 1B88     		ldrh	r3, [r3, #0]
+ 105 0082 03F10103 		add	r3, r3, #1
+ 106 0086 9AB2     		uxth	r2, r3
+ 107 0088 40F20003 		movw	r3, #:lower16:OSSemQty
+ 108 008c C0F20003 		movt	r3, #:upper16:OSSemQty
+ 109 0090 1A80     		strh	r2, [r3, #0]	@ movhi
+ 115:Libraries/uC-OSIII/os_sem.c **** 
+ 116:Libraries/uC-OSIII/os_sem.c ****     CPU_CRITICAL_EXIT();
+ 110              		.loc 1 116 0
+ 111 0092 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 112 0096 7869     		ldr	r0, [r7, #20]
+ 113 0098 FFF7FEFF 		bl	CPU_SR_Restore
+ 117:Libraries/uC-OSIII/os_sem.c ****     *p_err = OS_ERR_NONE;
+ 114              		.loc 1 117 0
+ 115 009c 3B68     		ldr	r3, [r7, #0]
+ 116 009e 4FF00002 		mov	r2, #0
+ 117 00a2 1A80     		strh	r2, [r3, #0]	@ movhi
+ 118              	.L1:
+ 118:Libraries/uC-OSIII/os_sem.c **** }
+ 119              		.loc 1 118 0
+ 120 00a4 07F11807 		add	r7, r7, #24
+ 121 00a8 BD46     		mov	sp, r7
+ 122 00aa 80BD     		pop	{r7, pc}
+ 123              		.cfi_endproc
+ 124              	.LFE0:
+ 126              		.align	2
+ 127              		.global	OSSemDel
+ 128              		.thumb
+ 129              		.thumb_func
+ 131              	OSSemDel:
+ 132              	.LFB1:
+ 119:Libraries/uC-OSIII/os_sem.c **** 
+ 120:Libraries/uC-OSIII/os_sem.c **** /*$PAGE*/
+ 121:Libraries/uC-OSIII/os_sem.c **** /*
+ 122:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 123:Libraries/uC-OSIII/os_sem.c **** *                                                  DELETE A SEMAPHORE
+ 124:Libraries/uC-OSIII/os_sem.c **** *
+ 125:Libraries/uC-OSIII/os_sem.c **** * Description: This function deletes a semaphore.
+ 126:Libraries/uC-OSIII/os_sem.c **** *
+ 127:Libraries/uC-OSIII/os_sem.c **** * Arguments  : p_sem         is a pointer to the semaphore to delete
+ 128:Libraries/uC-OSIII/os_sem.c **** *
+ 129:Libraries/uC-OSIII/os_sem.c **** *              opt           determines delete options as follows:
+ 130:Libraries/uC-OSIII/os_sem.c **** *
+ 131:Libraries/uC-OSIII/os_sem.c **** *                                OS_OPT_DEL_NO_PEND          Delete semaphore ONLY if no task pendi
+ 132:Libraries/uC-OSIII/os_sem.c **** *                                OS_OPT_DEL_ALWAYS           Deletes the semaphore even if tasks ar
+ 133:Libraries/uC-OSIII/os_sem.c **** *                                                            In this case, all the tasks pending wi
+ 134:Libraries/uC-OSIII/os_sem.c **** *
+ 135:Libraries/uC-OSIII/os_sem.c **** *              p_err         is a pointer to a variable that will contain an error code returned by
+ 136:Libraries/uC-OSIII/os_sem.c **** *
+ 137:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_NONE                 The call was successful and the semaph
+ 138:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_DEL_ISR              If you attempted to delete the semapho
+ 139:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_OBJ_PTR_NULL         If 'p_sem' is a NULL pointer.
+ 140:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_OBJ_TYPE             If 'p_sem' is not pointing at a semaph
+ 141:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_OPT_INVALID          An invalid option was specified
+ 142:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_TASK_WAITING         One or more tasks were waiting on the 
+ 143:Libraries/uC-OSIII/os_sem.c **** *
+ 144:Libraries/uC-OSIII/os_sem.c **** * Returns    : == 0          if no tasks were waiting on the semaphore, or upon error.
+ 145:Libraries/uC-OSIII/os_sem.c **** *              >  0          if one or more tasks waiting on the semaphore are now readied and info
+ 146:Libraries/uC-OSIII/os_sem.c **** *
+ 147:Libraries/uC-OSIII/os_sem.c **** * Note(s)    : 1) This function must be used with care.  Tasks that would normally expect the prese
+ 148:Libraries/uC-OSIII/os_sem.c **** *                 MUST check the return code of OSSemPend().
+ 149:Libraries/uC-OSIII/os_sem.c **** *              2) OSSemAccept() callers will not know that the intended semaphore has been deleted.
+ 150:Libraries/uC-OSIII/os_sem.c **** *              3) Because ALL tasks pending on the semaphore will be readied, you MUST be careful i
+ 151:Libraries/uC-OSIII/os_sem.c **** *                 the semaphore is used for mutual exclusion because the resource(s) will no longer
+ 152:Libraries/uC-OSIII/os_sem.c **** *                 semaphore.
+ 153:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 154:Libraries/uC-OSIII/os_sem.c **** */
+ 155:Libraries/uC-OSIII/os_sem.c **** 
+ 156:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_SEM_DEL_EN > 0u
+ 157:Libraries/uC-OSIII/os_sem.c **** OS_OBJ_QTY  OSSemDel (OS_SEM  *p_sem,
+ 158:Libraries/uC-OSIII/os_sem.c ****                       OS_OPT   opt,
+ 159:Libraries/uC-OSIII/os_sem.c ****                       OS_ERR  *p_err)
+ 160:Libraries/uC-OSIII/os_sem.c **** {
+ 133              		.loc 1 160 0
+ 134              		.cfi_startproc
+ 135              		@ args = 0, pretend = 0, frame = 48
+ 136              		@ frame_needed = 1, uses_anonymous_args = 0
+ 137 00ac 80B5     		push	{r7, lr}
+ 138              	.LCFI3:
+ 139              		.cfi_def_cfa_offset 8
+ 140              		.cfi_offset 14, -4
+ 141              		.cfi_offset 7, -8
+ 142 00ae 8CB0     		sub	sp, sp, #48
+ 143              	.LCFI4:
+ 144              		.cfi_def_cfa_offset 56
+ 145 00b0 00AF     		add	r7, sp, #0
+ 146              	.LCFI5:
+ 147              		.cfi_def_cfa_register 7
+ 148 00b2 F860     		str	r0, [r7, #12]
+ 149 00b4 0B46     		mov	r3, r1
+ 150 00b6 7A60     		str	r2, [r7, #4]
+ 151 00b8 7B81     		strh	r3, [r7, #10]	@ movhi
+ 161:Libraries/uC-OSIII/os_sem.c ****     OS_OBJ_QTY     cnt;
+ 162:Libraries/uC-OSIII/os_sem.c ****     OS_OBJ_QTY     nbr_tasks;
+ 163:Libraries/uC-OSIII/os_sem.c ****     OS_PEND_DATA  *p_pend_data;
+ 164:Libraries/uC-OSIII/os_sem.c ****     OS_PEND_LIST  *p_pend_list;
+ 165:Libraries/uC-OSIII/os_sem.c ****     OS_TCB        *p_tcb;
+ 166:Libraries/uC-OSIII/os_sem.c ****     CPU_TS         ts;
+ 167:Libraries/uC-OSIII/os_sem.c ****     CPU_SR_ALLOC();
+ 152              		.loc 1 167 0
+ 153 00ba 4FF00003 		mov	r3, #0
+ 154 00be BB62     		str	r3, [r7, #40]
+ 168:Libraries/uC-OSIII/os_sem.c **** 
+ 169:Libraries/uC-OSIII/os_sem.c **** 
+ 170:Libraries/uC-OSIII/os_sem.c **** 
+ 171:Libraries/uC-OSIII/os_sem.c **** #ifdef OS_SAFETY_CRITICAL
+ 172:Libraries/uC-OSIII/os_sem.c ****     if (p_err == (OS_ERR *)0) {
+ 173:Libraries/uC-OSIII/os_sem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 174:Libraries/uC-OSIII/os_sem.c ****     }
+ 175:Libraries/uC-OSIII/os_sem.c **** #endif
+ 176:Libraries/uC-OSIII/os_sem.c **** 
+ 177:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 178:Libraries/uC-OSIII/os_sem.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Not allowed to delete a semaphore fr
+ 155              		.loc 1 178 0
+ 156 00c0 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 157 00c4 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 158 00c8 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 159 00ca 002B     		cmp	r3, #0
+ 160 00cc 06D0     		beq	.L6
+ 179:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_DEL_ISR;
+ 161              		.loc 1 179 0
+ 162 00ce 7B68     		ldr	r3, [r7, #4]
+ 163 00d0 43F2C922 		movw	r2, #13001
+ 164 00d4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 180:Libraries/uC-OSIII/os_sem.c ****         return ((OS_OBJ_QTY)0);
+ 165              		.loc 1 180 0
+ 166 00d6 4FF00003 		mov	r3, #0
+ 167 00da CCE0     		b	.L7
+ 168              	.L6:
+ 181:Libraries/uC-OSIII/os_sem.c ****     }
+ 182:Libraries/uC-OSIII/os_sem.c **** #endif
+ 183:Libraries/uC-OSIII/os_sem.c **** 
+ 184:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 185:Libraries/uC-OSIII/os_sem.c ****     if (p_sem == (OS_SEM *)0) {                             /* Validate pointer to semaphore       
+ 169              		.loc 1 185 0
+ 170 00dc FB68     		ldr	r3, [r7, #12]
+ 171 00de 002B     		cmp	r3, #0
+ 172 00e0 06D1     		bne	.L8
+ 186:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 173              		.loc 1 186 0
+ 174 00e2 7B68     		ldr	r3, [r7, #4]
+ 175 00e4 45F6C352 		movw	r2, #24003
+ 176 00e8 1A80     		strh	r2, [r3, #0]	@ movhi
+ 187:Libraries/uC-OSIII/os_sem.c ****         return ((OS_OBJ_QTY)0);
+ 177              		.loc 1 187 0
+ 178 00ea 4FF00003 		mov	r3, #0
+ 179 00ee C2E0     		b	.L7
+ 180              	.L8:
+ 188:Libraries/uC-OSIII/os_sem.c ****     }
+ 189:Libraries/uC-OSIII/os_sem.c **** #endif
+ 190:Libraries/uC-OSIII/os_sem.c **** 
+ 191:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 192:Libraries/uC-OSIII/os_sem.c ****     if (p_sem->Type != OS_OBJ_TYPE_SEM) {                   /* Make sure semaphore was created     
+ 181              		.loc 1 192 0
+ 182 00f0 FB68     		ldr	r3, [r7, #12]
+ 183 00f2 1A68     		ldr	r2, [r3, #0]
+ 184 00f4 44F25353 		movw	r3, #17747
+ 185 00f8 C4F24D13 		movt	r3, 16717
+ 186 00fc 9A42     		cmp	r2, r3
+ 187 00fe 06D0     		beq	.L9
+ 193:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 188              		.loc 1 193 0
+ 189 0100 7B68     		ldr	r3, [r7, #4]
+ 190 0102 45F6C452 		movw	r2, #24004
+ 191 0106 1A80     		strh	r2, [r3, #0]	@ movhi
+ 194:Libraries/uC-OSIII/os_sem.c ****         return ((OS_OBJ_QTY)0);
+ 192              		.loc 1 194 0
+ 193 0108 4FF00003 		mov	r3, #0
+ 194 010c B3E0     		b	.L7
+ 195              	.L9:
+ 195:Libraries/uC-OSIII/os_sem.c ****     }
+ 196:Libraries/uC-OSIII/os_sem.c **** #endif
+ 197:Libraries/uC-OSIII/os_sem.c **** 
+ 198:Libraries/uC-OSIII/os_sem.c ****     CPU_CRITICAL_ENTER();
+ 196              		.loc 1 198 0
+ 197 010e FFF7FEFF 		bl	CPU_SR_Save
+ 198 0112 B862     		str	r0, [r7, #40]
+ 199 0114 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 199:Libraries/uC-OSIII/os_sem.c ****     p_pend_list = &p_sem->PendList;
+ 200              		.loc 1 199 0
+ 201 0118 FB68     		ldr	r3, [r7, #12]
+ 202 011a 03F10803 		add	r3, r3, #8
+ 203 011e 7B62     		str	r3, [r7, #36]
+ 200:Libraries/uC-OSIII/os_sem.c ****     cnt         = p_pend_list->NbrEntries;
+ 204              		.loc 1 200 0
+ 205 0120 7B6A     		ldr	r3, [r7, #36]
+ 206 0122 1B89     		ldrh	r3, [r3, #8]	@ movhi
+ 207 0124 FB85     		strh	r3, [r7, #46]	@ movhi
+ 201:Libraries/uC-OSIII/os_sem.c ****     nbr_tasks   = cnt;
+ 208              		.loc 1 201 0
+ 209 0126 FB8D     		ldrh	r3, [r7, #46]	@ movhi
+ 210 0128 7B84     		strh	r3, [r7, #34]	@ movhi
+ 202:Libraries/uC-OSIII/os_sem.c ****     switch (opt) {
+ 211              		.loc 1 202 0
+ 212 012a 7B89     		ldrh	r3, [r7, #10]
+ 213 012c 002B     		cmp	r3, #0
+ 214 012e 02D0     		beq	.L11
+ 215 0130 012B     		cmp	r3, #1
+ 216 0132 2AD0     		beq	.L12
+ 217 0134 94E0     		b	.L20
+ 218              	.L11:
+ 203:Libraries/uC-OSIII/os_sem.c ****         case OS_OPT_DEL_NO_PEND:                            /* Delete semaphore only if no task wai
+ 204:Libraries/uC-OSIII/os_sem.c ****              if (nbr_tasks == (OS_OBJ_QTY)0) {
+ 219              		.loc 1 204 0
+ 220 0136 7B8C     		ldrh	r3, [r7, #34]
+ 221 0138 002B     		cmp	r3, #0
+ 222 013a 1CD1     		bne	.L13
+ 205:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_DBG_EN > 0u
+ 206:Libraries/uC-OSIII/os_sem.c ****                  OS_SemDbgListRemove(p_sem);
+ 223              		.loc 1 206 0
+ 224 013c F868     		ldr	r0, [r7, #12]
+ 225 013e FFF7FEFF 		bl	OS_SemDbgListRemove
+ 207:Libraries/uC-OSIII/os_sem.c **** #endif
+ 208:Libraries/uC-OSIII/os_sem.c ****                  OSSemQty--;
+ 226              		.loc 1 208 0
+ 227 0142 40F20003 		movw	r3, #:lower16:OSSemQty
+ 228 0146 C0F20003 		movt	r3, #:upper16:OSSemQty
+ 229 014a 1B88     		ldrh	r3, [r3, #0]
+ 230 014c 03F1FF33 		add	r3, r3, #-1
+ 231 0150 9AB2     		uxth	r2, r3
+ 232 0152 40F20003 		movw	r3, #:lower16:OSSemQty
+ 233 0156 C0F20003 		movt	r3, #:upper16:OSSemQty
+ 234 015a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 209:Libraries/uC-OSIII/os_sem.c ****                  OS_SemClr(p_sem);
+ 235              		.loc 1 209 0
+ 236 015c F868     		ldr	r0, [r7, #12]
+ 237 015e FFF7FEFF 		bl	OS_SemClr
+ 210:Libraries/uC-OSIII/os_sem.c ****                  CPU_CRITICAL_EXIT();
+ 238              		.loc 1 210 0
+ 239 0162 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 240 0166 B86A     		ldr	r0, [r7, #40]
+ 241 0168 FFF7FEFF 		bl	CPU_SR_Restore
+ 211:Libraries/uC-OSIII/os_sem.c ****                  *p_err = OS_ERR_NONE;
+ 242              		.loc 1 211 0
+ 243 016c 7B68     		ldr	r3, [r7, #4]
+ 244 016e 4FF00002 		mov	r2, #0
+ 245 0172 1A80     		strh	r2, [r3, #0]	@ movhi
+ 212:Libraries/uC-OSIII/os_sem.c ****              } else {
+ 213:Libraries/uC-OSIII/os_sem.c ****                  CPU_CRITICAL_EXIT();
+ 214:Libraries/uC-OSIII/os_sem.c ****                  *p_err = OS_ERR_TASK_WAITING;
+ 215:Libraries/uC-OSIII/os_sem.c ****              }
+ 216:Libraries/uC-OSIII/os_sem.c ****              break;
+ 246              		.loc 1 216 0
+ 247 0174 7EE0     		b	.L15
+ 248              	.L13:
+ 213:Libraries/uC-OSIII/os_sem.c ****                  CPU_CRITICAL_EXIT();
+ 249              		.loc 1 213 0
+ 250 0176 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 251 017a B86A     		ldr	r0, [r7, #40]
+ 252 017c FFF7FEFF 		bl	CPU_SR_Restore
+ 214:Libraries/uC-OSIII/os_sem.c ****                  *p_err = OS_ERR_TASK_WAITING;
+ 253              		.loc 1 214 0
+ 254 0180 7B68     		ldr	r3, [r7, #4]
+ 255 0182 47F25E12 		movw	r2, #29022
+ 256 0186 1A80     		strh	r2, [r3, #0]	@ movhi
+ 257              		.loc 1 216 0
+ 258 0188 74E0     		b	.L15
+ 259              	.L12:
+ 217:Libraries/uC-OSIII/os_sem.c **** 
+ 218:Libraries/uC-OSIII/os_sem.c ****         case OS_OPT_DEL_ALWAYS:                             /* Always delete the semaphore         
+ 219:Libraries/uC-OSIII/os_sem.c ****              OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();
+ 260              		.loc 1 219 0
+ 261 018a 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 262 018e C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 263 0192 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 264 0194 03F10103 		add	r3, r3, #1
+ 265 0198 DAB2     		uxtb	r2, r3
+ 266 019a 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 267 019e C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 268 01a2 1A70     		strb	r2, [r3, #0]
+ 269 01a4 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 270 01a8 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 271 01ac 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 272 01ae 012B     		cmp	r3, #1
+ 273 01b0 01D1     		bne	.L16
+ 274              		.loc 1 219 0 is_stmt 0 discriminator 1
+ 275 01b2 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 276              	.L16:
+ 277              		.loc 1 219 0 discriminator 2
+ 278 01b6 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 279 01ba B86A     		ldr	r0, [r7, #40]
+ 280 01bc FFF7FEFF 		bl	CPU_SR_Restore
+ 220:Libraries/uC-OSIII/os_sem.c ****              ts = OS_TS_GET();                              /* Get local time stamp so all tasks ge
+ 281              		.loc 1 220 0 is_stmt 1 discriminator 2
+ 282 01c0 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 283 01c4 F861     		str	r0, [r7, #28]
+ 221:Libraries/uC-OSIII/os_sem.c ****              while (cnt > 0u) {                             /* Remove all tasks on the pend list   
+ 284              		.loc 1 221 0 discriminator 2
+ 285 01c6 0EE0     		b	.L17
+ 286              	.L18:
+ 222:Libraries/uC-OSIII/os_sem.c ****                  p_pend_data = p_pend_list->HeadPtr;
+ 287              		.loc 1 222 0
+ 288 01c8 7B6A     		ldr	r3, [r7, #36]
+ 289 01ca 1B68     		ldr	r3, [r3, #0]
+ 290 01cc BB61     		str	r3, [r7, #24]
+ 223:Libraries/uC-OSIII/os_sem.c ****                  p_tcb       = p_pend_data->TCBPtr;
+ 291              		.loc 1 223 0
+ 292 01ce BB69     		ldr	r3, [r7, #24]
+ 293 01d0 9B68     		ldr	r3, [r3, #8]
+ 294 01d2 7B61     		str	r3, [r7, #20]
+ 224:Libraries/uC-OSIII/os_sem.c ****                  OS_PendObjDel((OS_PEND_OBJ *)((void *)p_sem),
+ 295              		.loc 1 224 0
+ 296 01d4 F868     		ldr	r0, [r7, #12]
+ 297 01d6 7969     		ldr	r1, [r7, #20]
+ 298 01d8 FA69     		ldr	r2, [r7, #28]
+ 299 01da FFF7FEFF 		bl	OS_PendObjDel
+ 225:Libraries/uC-OSIII/os_sem.c ****                                p_tcb,
+ 226:Libraries/uC-OSIII/os_sem.c ****                                ts);
+ 227:Libraries/uC-OSIII/os_sem.c ****                  cnt--;
+ 300              		.loc 1 227 0
+ 301 01de FB8D     		ldrh	r3, [r7, #46]	@ movhi
+ 302 01e0 03F1FF33 		add	r3, r3, #-1
+ 303 01e4 FB85     		strh	r3, [r7, #46]	@ movhi
+ 304              	.L17:
+ 221:Libraries/uC-OSIII/os_sem.c ****              while (cnt > 0u) {                             /* Remove all tasks on the pend list   
+ 305              		.loc 1 221 0 discriminator 1
+ 306 01e6 FB8D     		ldrh	r3, [r7, #46]
+ 307 01e8 002B     		cmp	r3, #0
+ 308 01ea EDD1     		bne	.L18
+ 228:Libraries/uC-OSIII/os_sem.c ****              }
+ 229:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_DBG_EN > 0u
+ 230:Libraries/uC-OSIII/os_sem.c ****              OS_SemDbgListRemove(p_sem);
+ 309              		.loc 1 230 0
+ 310 01ec F868     		ldr	r0, [r7, #12]
+ 311 01ee FFF7FEFF 		bl	OS_SemDbgListRemove
+ 231:Libraries/uC-OSIII/os_sem.c **** #endif
+ 232:Libraries/uC-OSIII/os_sem.c ****              OSSemQty--;
+ 312              		.loc 1 232 0
+ 313 01f2 40F20003 		movw	r3, #:lower16:OSSemQty
+ 314 01f6 C0F20003 		movt	r3, #:upper16:OSSemQty
+ 315 01fa 1B88     		ldrh	r3, [r3, #0]
+ 316 01fc 03F1FF33 		add	r3, r3, #-1
+ 317 0200 9AB2     		uxth	r2, r3
+ 318 0202 40F20003 		movw	r3, #:lower16:OSSemQty
+ 319 0206 C0F20003 		movt	r3, #:upper16:OSSemQty
+ 320 020a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 233:Libraries/uC-OSIII/os_sem.c ****              OS_SemClr(p_sem);
+ 321              		.loc 1 233 0
+ 322 020c F868     		ldr	r0, [r7, #12]
+ 323 020e FFF7FEFF 		bl	OS_SemClr
+ 234:Libraries/uC-OSIII/os_sem.c ****              OS_CRITICAL_EXIT_NO_SCHED();
+ 324              		.loc 1 234 0
+ 325 0212 FFF7FEFF 		bl	CPU_SR_Save
+ 326 0216 B862     		str	r0, [r7, #40]
+ 327 0218 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 328 021c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 329 0220 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 330 0224 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 331 0226 03F1FF33 		add	r3, r3, #-1
+ 332 022a DAB2     		uxtb	r2, r3
+ 333 022c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 334 0230 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 335 0234 1A70     		strb	r2, [r3, #0]
+ 336 0236 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 337 023a C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 338 023e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 339 0240 002B     		cmp	r3, #0
+ 340 0242 01D1     		bne	.L19
+ 341              		.loc 1 234 0 is_stmt 0 discriminator 1
+ 342 0244 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 343              	.L19:
+ 344              		.loc 1 234 0 discriminator 2
+ 345 0248 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 346 024c B86A     		ldr	r0, [r7, #40]
+ 347 024e FFF7FEFF 		bl	CPU_SR_Restore
+ 235:Libraries/uC-OSIII/os_sem.c ****              OSSched();                                     /* Find highest priority task ready to 
+ 348              		.loc 1 235 0 is_stmt 1 discriminator 2
+ 349 0252 FFF7FEFF 		bl	OSSched
+ 236:Libraries/uC-OSIII/os_sem.c ****              *p_err = OS_ERR_NONE;
+ 350              		.loc 1 236 0 discriminator 2
+ 351 0256 7B68     		ldr	r3, [r7, #4]
+ 352 0258 4FF00002 		mov	r2, #0
+ 353 025c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 237:Libraries/uC-OSIII/os_sem.c ****              break;
+ 354              		.loc 1 237 0 discriminator 2
+ 355 025e 09E0     		b	.L15
+ 356              	.L20:
+ 238:Libraries/uC-OSIII/os_sem.c **** 
+ 239:Libraries/uC-OSIII/os_sem.c ****         default:
+ 240:Libraries/uC-OSIII/os_sem.c ****              CPU_CRITICAL_EXIT();
+ 357              		.loc 1 240 0
+ 358 0260 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 359 0264 B86A     		ldr	r0, [r7, #40]
+ 360 0266 FFF7FEFF 		bl	CPU_SR_Restore
+ 241:Libraries/uC-OSIII/os_sem.c ****              *p_err = OS_ERR_OPT_INVALID;
+ 361              		.loc 1 241 0
+ 362 026a 7B68     		ldr	r3, [r7, #4]
+ 363 026c 45F62562 		movw	r2, #24101
+ 364 0270 1A80     		strh	r2, [r3, #0]	@ movhi
+ 242:Libraries/uC-OSIII/os_sem.c ****              break;
+ 365              		.loc 1 242 0
+ 366 0272 00BF     		nop
+ 367              	.L15:
+ 243:Libraries/uC-OSIII/os_sem.c ****     }
+ 244:Libraries/uC-OSIII/os_sem.c ****     return ((OS_OBJ_QTY)nbr_tasks);
+ 368              		.loc 1 244 0
+ 369 0274 7B8C     		ldrh	r3, [r7, #34]
+ 370              	.L7:
+ 245:Libraries/uC-OSIII/os_sem.c **** }
+ 371              		.loc 1 245 0
+ 372 0276 1846     		mov	r0, r3
+ 373 0278 07F13007 		add	r7, r7, #48
+ 374 027c BD46     		mov	sp, r7
+ 375 027e 80BD     		pop	{r7, pc}
+ 376              		.cfi_endproc
+ 377              	.LFE1:
+ 379              		.align	2
+ 380              		.global	OSSemPend
+ 381              		.thumb
+ 382              		.thumb_func
+ 384              	OSSemPend:
+ 385              	.LFB2:
+ 246:Libraries/uC-OSIII/os_sem.c **** #endif
+ 247:Libraries/uC-OSIII/os_sem.c **** 
+ 248:Libraries/uC-OSIII/os_sem.c **** /*$PAGE*/
+ 249:Libraries/uC-OSIII/os_sem.c **** /*
+ 250:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 251:Libraries/uC-OSIII/os_sem.c **** *                                                  PEND ON SEMAPHORE
+ 252:Libraries/uC-OSIII/os_sem.c **** *
+ 253:Libraries/uC-OSIII/os_sem.c **** * Description: This function waits for a semaphore.
+ 254:Libraries/uC-OSIII/os_sem.c **** *
+ 255:Libraries/uC-OSIII/os_sem.c **** * Arguments  : p_sem         is a pointer to the semaphore
+ 256:Libraries/uC-OSIII/os_sem.c **** *
+ 257:Libraries/uC-OSIII/os_sem.c **** *              timeout       is an optional timeout period (in clock ticks).  If non-zero, your tas
+ 258:Libraries/uC-OSIII/os_sem.c **** *                            resource up to the amount of time (in 'ticks') specified by this argum
+ 259:Libraries/uC-OSIII/os_sem.c **** *                            0, however, your task will wait forever at the specified semaphore or,
+ 260:Libraries/uC-OSIII/os_sem.c **** *                            becomes available (or the event occurs).
+ 261:Libraries/uC-OSIII/os_sem.c **** *
+ 262:Libraries/uC-OSIII/os_sem.c **** *              opt           determines whether the user wants to block if the semaphore is not ava
+ 263:Libraries/uC-OSIII/os_sem.c **** *
+ 264:Libraries/uC-OSIII/os_sem.c **** *                                OS_OPT_PEND_BLOCKING
+ 265:Libraries/uC-OSIII/os_sem.c **** *                                OS_OPT_PEND_NON_BLOCKING
+ 266:Libraries/uC-OSIII/os_sem.c **** *
+ 267:Libraries/uC-OSIII/os_sem.c **** *              p_ts          is a pointer to a variable that will receive the timestamp of when the
+ 268:Libraries/uC-OSIII/os_sem.c **** *                            or pend aborted or the semaphore deleted.  If you pass a NULL pointer 
+ 269:Libraries/uC-OSIII/os_sem.c **** *                            then you will not get the timestamp.  In other words, passing a NULL p
+ 270:Libraries/uC-OSIII/os_sem.c **** *                            and indicates that you don't need the timestamp.
+ 271:Libraries/uC-OSIII/os_sem.c **** *
+ 272:Libraries/uC-OSIII/os_sem.c **** *              p_err         is a pointer to a variable that will contain an error code returned by
+ 273:Libraries/uC-OSIII/os_sem.c **** *
+ 274:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_NONE               The call was successful and your task ow
+ 275:Libraries/uC-OSIII/os_sem.c **** *                                                          or, the event you are waiting for occurr
+ 276:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_OBJ_DEL            If 'p_sem' was deleted
+ 277:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_OBJ_PTR_NULL       If 'p_sem' is a NULL pointer.
+ 278:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_OBJ_TYPE           If 'p_sem' is not pointing at a semaphor
+ 279:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_OPT_INVALID        If you specified an invalid value for 'o
+ 280:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_PEND_ABORT         If the pend was aborted by another task
+ 281:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_PEND_ISR           If you called this function from an ISR 
+ 282:Libraries/uC-OSIII/os_sem.c **** *                                                          would lead to a suspension.
+ 283:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_PEND_WOULD_BLOCK   If you specified non-blocking but the se
+ 284:Libraries/uC-OSIII/os_sem.c **** *                                                          available.
+ 285:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_SCHED_LOCKED       If you called this function when the sch
+ 286:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_STATUS_INVALID     Pend status is invalid
+ 287:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_TIMEOUT            The semaphore was not received within th
+ 288:Libraries/uC-OSIII/os_sem.c **** *                                                          timeout.
+ 289:Libraries/uC-OSIII/os_sem.c **** *
+ 290:Libraries/uC-OSIII/os_sem.c **** *
+ 291:Libraries/uC-OSIII/os_sem.c **** * Returns    : The current value of the semaphore counter or 0 if not available.
+ 292:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 293:Libraries/uC-OSIII/os_sem.c **** */
+ 294:Libraries/uC-OSIII/os_sem.c **** 
+ 295:Libraries/uC-OSIII/os_sem.c **** OS_SEM_CTR  OSSemPend (OS_SEM   *p_sem,
+ 296:Libraries/uC-OSIII/os_sem.c ****                        OS_TICK   timeout,
+ 297:Libraries/uC-OSIII/os_sem.c ****                        OS_OPT    opt,
+ 298:Libraries/uC-OSIII/os_sem.c ****                        CPU_TS   *p_ts,
+ 299:Libraries/uC-OSIII/os_sem.c ****                        OS_ERR   *p_err)
+ 300:Libraries/uC-OSIII/os_sem.c **** {
+ 386              		.loc 1 300 0
+ 387              		.cfi_startproc
+ 388              		@ args = 4, pretend = 0, frame = 56
+ 389              		@ frame_needed = 1, uses_anonymous_args = 0
+ 390 0280 80B5     		push	{r7, lr}
+ 391              	.LCFI6:
+ 392              		.cfi_def_cfa_offset 8
+ 393              		.cfi_offset 14, -4
+ 394              		.cfi_offset 7, -8
+ 395 0282 8EB0     		sub	sp, sp, #56
+ 396              	.LCFI7:
+ 397              		.cfi_def_cfa_offset 64
+ 398 0284 00AF     		add	r7, sp, #0
+ 399              	.LCFI8:
+ 400              		.cfi_def_cfa_register 7
+ 401 0286 F860     		str	r0, [r7, #12]
+ 402 0288 B960     		str	r1, [r7, #8]
+ 403 028a 3B60     		str	r3, [r7, #0]
+ 404 028c 1346     		mov	r3, r2	@ movhi
+ 405 028e FB80     		strh	r3, [r7, #6]	@ movhi
+ 301:Libraries/uC-OSIII/os_sem.c ****     OS_SEM_CTR    ctr;
+ 302:Libraries/uC-OSIII/os_sem.c ****     OS_PEND_DATA  pend_data;
+ 303:Libraries/uC-OSIII/os_sem.c ****     CPU_SR_ALLOC();
+ 406              		.loc 1 303 0
+ 407 0290 4FF00003 		mov	r3, #0
+ 408 0294 7B63     		str	r3, [r7, #52]
+ 304:Libraries/uC-OSIII/os_sem.c **** 
+ 305:Libraries/uC-OSIII/os_sem.c **** 
+ 306:Libraries/uC-OSIII/os_sem.c **** 
+ 307:Libraries/uC-OSIII/os_sem.c **** #ifdef OS_SAFETY_CRITICAL
+ 308:Libraries/uC-OSIII/os_sem.c ****     if (p_err == (OS_ERR *)0) {
+ 309:Libraries/uC-OSIII/os_sem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 310:Libraries/uC-OSIII/os_sem.c ****     }
+ 311:Libraries/uC-OSIII/os_sem.c **** #endif
+ 312:Libraries/uC-OSIII/os_sem.c **** 
+ 313:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 314:Libraries/uC-OSIII/os_sem.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Not allowed to call from an ISR     
+ 409              		.loc 1 314 0
+ 410 0296 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 411 029a C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 412 029e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 413 02a0 002B     		cmp	r3, #0
+ 414 02a2 06D0     		beq	.L22
+ 315:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_PEND_ISR;
+ 415              		.loc 1 315 0
+ 416 02a4 3B6C     		ldr	r3, [r7, #64]
+ 417 02a6 46F2AE12 		movw	r2, #25006
+ 418 02aa 1A80     		strh	r2, [r3, #0]	@ movhi
+ 316:Libraries/uC-OSIII/os_sem.c ****         return ((OS_SEM_CTR)0);
+ 419              		.loc 1 316 0
+ 420 02ac 4FF00003 		mov	r3, #0
+ 421 02b0 27E1     		b	.L23
+ 422              	.L22:
+ 317:Libraries/uC-OSIII/os_sem.c ****     }
+ 318:Libraries/uC-OSIII/os_sem.c **** #endif
+ 319:Libraries/uC-OSIII/os_sem.c **** 
+ 320:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 321:Libraries/uC-OSIII/os_sem.c ****     if (p_sem == (OS_SEM *)0) {                             /* Validate arguments                  
+ 423              		.loc 1 321 0
+ 424 02b2 FB68     		ldr	r3, [r7, #12]
+ 425 02b4 002B     		cmp	r3, #0
+ 426 02b6 06D1     		bne	.L24
+ 322:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 427              		.loc 1 322 0
+ 428 02b8 3B6C     		ldr	r3, [r7, #64]
+ 429 02ba 45F6C352 		movw	r2, #24003
+ 430 02be 1A80     		strh	r2, [r3, #0]	@ movhi
+ 323:Libraries/uC-OSIII/os_sem.c ****         return ((OS_SEM_CTR)0);
+ 431              		.loc 1 323 0
+ 432 02c0 4FF00003 		mov	r3, #0
+ 433 02c4 1DE1     		b	.L23
+ 434              	.L24:
+ 324:Libraries/uC-OSIII/os_sem.c ****     }
+ 325:Libraries/uC-OSIII/os_sem.c **** 
+ 326:Libraries/uC-OSIII/os_sem.c ****     switch (opt) {
+ 435              		.loc 1 326 0
+ 436 02c6 FB88     		ldrh	r3, [r7, #6]
+ 437 02c8 002B     		cmp	r3, #0
+ 438 02ca 09D0     		beq	.L47
+ 439 02cc B3F5004F 		cmp	r3, #32768
+ 440 02d0 06D0     		beq	.L47
+ 327:Libraries/uC-OSIII/os_sem.c ****         case OS_OPT_PEND_BLOCKING:
+ 328:Libraries/uC-OSIII/os_sem.c ****         case OS_OPT_PEND_NON_BLOCKING:
+ 329:Libraries/uC-OSIII/os_sem.c ****              break;
+ 330:Libraries/uC-OSIII/os_sem.c **** 
+ 331:Libraries/uC-OSIII/os_sem.c ****         default:
+ 332:Libraries/uC-OSIII/os_sem.c ****              *p_err = OS_ERR_OPT_INVALID;
+ 441              		.loc 1 332 0
+ 442 02d2 3B6C     		ldr	r3, [r7, #64]
+ 443 02d4 45F62562 		movw	r2, #24101
+ 444 02d8 1A80     		strh	r2, [r3, #0]	@ movhi
+ 333:Libraries/uC-OSIII/os_sem.c ****              return ((OS_SEM_CTR)0);
+ 445              		.loc 1 333 0
+ 446 02da 4FF00003 		mov	r3, #0
+ 447 02de 10E1     		b	.L23
+ 448              	.L47:
+ 329:Libraries/uC-OSIII/os_sem.c ****              break;
+ 449              		.loc 1 329 0
+ 450 02e0 00BF     		nop
+ 451              	.L27:
+ 334:Libraries/uC-OSIII/os_sem.c ****     }
+ 335:Libraries/uC-OSIII/os_sem.c **** #endif
+ 336:Libraries/uC-OSIII/os_sem.c **** 
+ 337:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 338:Libraries/uC-OSIII/os_sem.c ****     if (p_sem->Type != OS_OBJ_TYPE_SEM) {                   /* Make sure semaphore was created     
+ 452              		.loc 1 338 0
+ 453 02e2 FB68     		ldr	r3, [r7, #12]
+ 454 02e4 1A68     		ldr	r2, [r3, #0]
+ 455 02e6 44F25353 		movw	r3, #17747
+ 456 02ea C4F24D13 		movt	r3, 16717
+ 457 02ee 9A42     		cmp	r2, r3
+ 458 02f0 06D0     		beq	.L28
+ 339:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 459              		.loc 1 339 0
+ 460 02f2 3B6C     		ldr	r3, [r7, #64]
+ 461 02f4 45F6C452 		movw	r2, #24004
+ 462 02f8 1A80     		strh	r2, [r3, #0]	@ movhi
+ 340:Libraries/uC-OSIII/os_sem.c ****         return ((OS_SEM_CTR)0);
+ 463              		.loc 1 340 0
+ 464 02fa 4FF00003 		mov	r3, #0
+ 465 02fe 00E1     		b	.L23
+ 466              	.L28:
+ 341:Libraries/uC-OSIII/os_sem.c ****     }
+ 342:Libraries/uC-OSIII/os_sem.c **** #endif
+ 343:Libraries/uC-OSIII/os_sem.c **** 
+ 344:Libraries/uC-OSIII/os_sem.c ****     if (p_ts != (CPU_TS *)0) {
+ 467              		.loc 1 344 0
+ 468 0300 3B68     		ldr	r3, [r7, #0]
+ 469 0302 002B     		cmp	r3, #0
+ 470 0304 03D0     		beq	.L29
+ 345:Libraries/uC-OSIII/os_sem.c ****        *p_ts  = (CPU_TS)0;                                  /* Initialize the returned timestamp   
+ 471              		.loc 1 345 0
+ 472 0306 3B68     		ldr	r3, [r7, #0]
+ 473 0308 4FF00002 		mov	r2, #0
+ 474 030c 1A60     		str	r2, [r3, #0]
+ 475              	.L29:
+ 346:Libraries/uC-OSIII/os_sem.c ****     }
+ 347:Libraries/uC-OSIII/os_sem.c ****     CPU_CRITICAL_ENTER();
+ 476              		.loc 1 347 0
+ 477 030e FFF7FEFF 		bl	CPU_SR_Save
+ 478 0312 7863     		str	r0, [r7, #52]
+ 479 0314 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 348:Libraries/uC-OSIII/os_sem.c ****     if (p_sem->Ctr > (OS_SEM_CTR)0) {                       /* Resource available?                 
+ 480              		.loc 1 348 0
+ 481 0318 FB68     		ldr	r3, [r7, #12]
+ 482 031a 1B6A     		ldr	r3, [r3, #32]
+ 483 031c 002B     		cmp	r3, #0
+ 484 031e 1AD0     		beq	.L30
+ 349:Libraries/uC-OSIII/os_sem.c ****         p_sem->Ctr--;                                       /* Yes, caller may proceed             
+ 485              		.loc 1 349 0
+ 486 0320 FB68     		ldr	r3, [r7, #12]
+ 487 0322 1B6A     		ldr	r3, [r3, #32]
+ 488 0324 03F1FF32 		add	r2, r3, #-1
+ 489 0328 FB68     		ldr	r3, [r7, #12]
+ 490 032a 1A62     		str	r2, [r3, #32]
+ 350:Libraries/uC-OSIII/os_sem.c ****         if (p_ts != (CPU_TS *)0) {
+ 491              		.loc 1 350 0
+ 492 032c 3B68     		ldr	r3, [r7, #0]
+ 493 032e 002B     		cmp	r3, #0
+ 494 0330 03D0     		beq	.L31
+ 351:Libraries/uC-OSIII/os_sem.c ****            *p_ts  = p_sem->TS;                              /*      get timestamp of last post     
+ 495              		.loc 1 351 0
+ 496 0332 FB68     		ldr	r3, [r7, #12]
+ 497 0334 5A6A     		ldr	r2, [r3, #36]
+ 498 0336 3B68     		ldr	r3, [r7, #0]
+ 499 0338 1A60     		str	r2, [r3, #0]
+ 500              	.L31:
+ 352:Libraries/uC-OSIII/os_sem.c ****         }
+ 353:Libraries/uC-OSIII/os_sem.c ****         ctr    = p_sem->Ctr;
+ 501              		.loc 1 353 0
+ 502 033a FB68     		ldr	r3, [r7, #12]
+ 503 033c 1B6A     		ldr	r3, [r3, #32]
+ 504 033e 3B63     		str	r3, [r7, #48]
+ 354:Libraries/uC-OSIII/os_sem.c ****         CPU_CRITICAL_EXIT();
+ 505              		.loc 1 354 0
+ 506 0340 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 507 0344 786B     		ldr	r0, [r7, #52]
+ 508 0346 FFF7FEFF 		bl	CPU_SR_Restore
+ 355:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_NONE;
+ 509              		.loc 1 355 0
+ 510 034a 3B6C     		ldr	r3, [r7, #64]
+ 511 034c 4FF00002 		mov	r2, #0
+ 512 0350 1A80     		strh	r2, [r3, #0]	@ movhi
+ 356:Libraries/uC-OSIII/os_sem.c ****         return (ctr);
+ 513              		.loc 1 356 0
+ 514 0352 3B6B     		ldr	r3, [r7, #48]
+ 515 0354 D5E0     		b	.L23
+ 516              	.L30:
+ 357:Libraries/uC-OSIII/os_sem.c ****     }
+ 358:Libraries/uC-OSIII/os_sem.c **** 
+ 359:Libraries/uC-OSIII/os_sem.c ****     if ((opt & OS_OPT_PEND_NON_BLOCKING) != (OS_OPT)0) {    /* Caller wants to block if not availab
+ 517              		.loc 1 359 0
+ 518 0356 FB88     		ldrh	r3, [r7, #6]
+ 519 0358 1BB2     		sxth	r3, r3
+ 520 035a 002B     		cmp	r3, #0
+ 521 035c 0DDA     		bge	.L32
+ 360:Libraries/uC-OSIII/os_sem.c ****         ctr    = p_sem->Ctr;                                /* No                                  
+ 522              		.loc 1 360 0
+ 523 035e FB68     		ldr	r3, [r7, #12]
+ 524 0360 1B6A     		ldr	r3, [r3, #32]
+ 525 0362 3B63     		str	r3, [r7, #48]
+ 361:Libraries/uC-OSIII/os_sem.c ****         CPU_CRITICAL_EXIT();
+ 526              		.loc 1 361 0
+ 527 0364 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 528 0368 786B     		ldr	r0, [r7, #52]
+ 529 036a FFF7FEFF 		bl	CPU_SR_Restore
+ 362:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_PEND_WOULD_BLOCK;
+ 530              		.loc 1 362 0
+ 531 036e 3B6C     		ldr	r3, [r7, #64]
+ 532 0370 46F2B012 		movw	r2, #25008
+ 533 0374 1A80     		strh	r2, [r3, #0]	@ movhi
+ 363:Libraries/uC-OSIII/os_sem.c ****         return (ctr);
+ 534              		.loc 1 363 0
+ 535 0376 3B6B     		ldr	r3, [r7, #48]
+ 536 0378 C3E0     		b	.L23
+ 537              	.L32:
+ 364:Libraries/uC-OSIII/os_sem.c ****     } else {                                                /* Yes                                 
+ 365:Libraries/uC-OSIII/os_sem.c ****         if (OSSchedLockNestingCtr > (OS_NESTING_CTR)0) {    /* Can't pend when the scheduler is loc
+ 538              		.loc 1 365 0
+ 539 037a 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 540 037e C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 541 0382 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 542 0384 002B     		cmp	r3, #0
+ 543 0386 0BD0     		beq	.L33
+ 366:Libraries/uC-OSIII/os_sem.c ****             CPU_CRITICAL_EXIT();
+ 544              		.loc 1 366 0
+ 545 0388 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 546 038c 786B     		ldr	r0, [r7, #52]
+ 547 038e FFF7FEFF 		bl	CPU_SR_Restore
+ 367:Libraries/uC-OSIII/os_sem.c ****             *p_err = OS_ERR_SCHED_LOCKED;
+ 548              		.loc 1 367 0
+ 549 0392 3B6C     		ldr	r3, [r7, #64]
+ 550 0394 46F66252 		movw	r2, #28002
+ 551 0398 1A80     		strh	r2, [r3, #0]	@ movhi
+ 368:Libraries/uC-OSIII/os_sem.c ****             return ((OS_SEM_CTR)0);
+ 552              		.loc 1 368 0
+ 553 039a 4FF00003 		mov	r3, #0
+ 554 039e B0E0     		b	.L23
+ 555              	.L33:
+ 369:Libraries/uC-OSIII/os_sem.c ****         }
+ 370:Libraries/uC-OSIII/os_sem.c ****     }
+ 371:Libraries/uC-OSIII/os_sem.c **** 
+ 372:Libraries/uC-OSIII/os_sem.c ****     OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();                  /* Lock the scheduler/re-enable interru
+ 556              		.loc 1 372 0
+ 557 03a0 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 558 03a4 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 559 03a8 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 560 03aa 03F10103 		add	r3, r3, #1
+ 561 03ae DAB2     		uxtb	r2, r3
+ 562 03b0 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 563 03b4 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 564 03b8 1A70     		strb	r2, [r3, #0]
+ 565 03ba 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 566 03be C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 567 03c2 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 568 03c4 012B     		cmp	r3, #1
+ 569 03c6 01D1     		bne	.L34
+ 570              		.loc 1 372 0 is_stmt 0 discriminator 1
+ 571 03c8 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 572              	.L34:
+ 573              		.loc 1 372 0 discriminator 2
+ 574 03cc FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 575 03d0 786B     		ldr	r0, [r7, #52]
+ 576 03d2 FFF7FEFF 		bl	CPU_SR_Restore
+ 373:Libraries/uC-OSIII/os_sem.c ****     OS_Pend(&pend_data,                                     /* Block task pending on Semaphore     
+ 577              		.loc 1 373 0 is_stmt 1 discriminator 2
+ 578 03d6 07F11003 		add	r3, r7, #16
+ 579 03da 1846     		mov	r0, r3
+ 580 03dc F968     		ldr	r1, [r7, #12]
+ 581 03de 4FF00602 		mov	r2, #6
+ 582 03e2 BB68     		ldr	r3, [r7, #8]
+ 583 03e4 FFF7FEFF 		bl	OS_Pend
+ 374:Libraries/uC-OSIII/os_sem.c ****             (OS_PEND_OBJ *)((void *)p_sem),
+ 375:Libraries/uC-OSIII/os_sem.c ****             OS_TASK_PEND_ON_SEM,
+ 376:Libraries/uC-OSIII/os_sem.c ****             timeout);
+ 377:Libraries/uC-OSIII/os_sem.c **** 
+ 378:Libraries/uC-OSIII/os_sem.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 584              		.loc 1 378 0 discriminator 2
+ 585 03e8 FFF7FEFF 		bl	CPU_SR_Save
+ 586 03ec 7863     		str	r0, [r7, #52]
+ 587 03ee FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 588 03f2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 589 03f6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 590 03fa 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 591 03fc 03F1FF33 		add	r3, r3, #-1
+ 592 0400 DAB2     		uxtb	r2, r3
+ 593 0402 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 594 0406 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 595 040a 1A70     		strb	r2, [r3, #0]
+ 596 040c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 597 0410 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 598 0414 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 599 0416 002B     		cmp	r3, #0
+ 600 0418 01D1     		bne	.L35
+ 601              		.loc 1 378 0 is_stmt 0 discriminator 1
+ 602 041a FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 603              	.L35:
+ 604              		.loc 1 378 0 discriminator 2
+ 605 041e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 606 0422 786B     		ldr	r0, [r7, #52]
+ 607 0424 FFF7FEFF 		bl	CPU_SR_Restore
+ 379:Libraries/uC-OSIII/os_sem.c **** 
+ 380:Libraries/uC-OSIII/os_sem.c ****     OSSched();                                              /* Find the next highest priority task 
+ 608              		.loc 1 380 0 is_stmt 1 discriminator 2
+ 609 0428 FFF7FEFF 		bl	OSSched
+ 381:Libraries/uC-OSIII/os_sem.c **** 
+ 382:Libraries/uC-OSIII/os_sem.c ****     CPU_CRITICAL_ENTER();
+ 610              		.loc 1 382 0 discriminator 2
+ 611 042c FFF7FEFF 		bl	CPU_SR_Save
+ 612 0430 7863     		str	r0, [r7, #52]
+ 613 0432 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 383:Libraries/uC-OSIII/os_sem.c ****     switch (OSTCBCurPtr->PendStatus) {
+ 614              		.loc 1 383 0 discriminator 2
+ 615 0436 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 616 043a C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 617 043e 1B68     		ldr	r3, [r3, #0]
+ 618 0440 93F8C130 		ldrb	r3, [r3, #193]	@ zero_extendqisi2
+ 619 0444 032B     		cmp	r3, #3
+ 620 0446 47D8     		bhi	.L36
+ 621 0448 01A2     		adr	r2, .L41
+ 622 044a 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 623 044e 00BF     		.align	2
+ 624              	.L41:
+ 625 0450 61040000 		.word	.L37+1
+ 626 0454 81040000 		.word	.L38+1
+ 627 0458 B9040000 		.word	.L39+1
+ 628 045c A1040000 		.word	.L40+1
+ 629              	.L37:
+ 384:Libraries/uC-OSIII/os_sem.c ****         case OS_STATUS_PEND_OK:                             /* We got the semaphore                
+ 385:Libraries/uC-OSIII/os_sem.c ****              if (p_ts != (CPU_TS *)0) {
+ 630              		.loc 1 385 0
+ 631 0460 3B68     		ldr	r3, [r7, #0]
+ 632 0462 002B     		cmp	r3, #0
+ 633 0464 07D0     		beq	.L42
+ 386:Libraries/uC-OSIII/os_sem.c ****                 *p_ts  =  OSTCBCurPtr->TS;
+ 634              		.loc 1 386 0
+ 635 0466 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 636 046a C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 637 046e 1B68     		ldr	r3, [r3, #0]
+ 638 0470 9A6B     		ldr	r2, [r3, #56]
+ 639 0472 3B68     		ldr	r3, [r7, #0]
+ 640 0474 1A60     		str	r2, [r3, #0]
+ 641              	.L42:
+ 387:Libraries/uC-OSIII/os_sem.c ****              }
+ 388:Libraries/uC-OSIII/os_sem.c ****              *p_err = OS_ERR_NONE;
+ 642              		.loc 1 388 0
+ 643 0476 3B6C     		ldr	r3, [r7, #64]
+ 644 0478 4FF00002 		mov	r2, #0
+ 645 047c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 389:Libraries/uC-OSIII/os_sem.c ****              break;
+ 646              		.loc 1 389 0
+ 647 047e 37E0     		b	.L43
+ 648              	.L38:
+ 390:Libraries/uC-OSIII/os_sem.c **** 
+ 391:Libraries/uC-OSIII/os_sem.c ****         case OS_STATUS_PEND_ABORT:                          /* Indicate that we aborted            
+ 392:Libraries/uC-OSIII/os_sem.c ****              if (p_ts != (CPU_TS *)0) {
+ 649              		.loc 1 392 0
+ 650 0480 3B68     		ldr	r3, [r7, #0]
+ 651 0482 002B     		cmp	r3, #0
+ 652 0484 07D0     		beq	.L44
+ 393:Libraries/uC-OSIII/os_sem.c ****                 *p_ts  =  OSTCBCurPtr->TS;
+ 653              		.loc 1 393 0
+ 654 0486 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 655 048a C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 656 048e 1B68     		ldr	r3, [r3, #0]
+ 657 0490 9A6B     		ldr	r2, [r3, #56]
+ 658 0492 3B68     		ldr	r3, [r7, #0]
+ 659 0494 1A60     		str	r2, [r3, #0]
+ 660              	.L44:
+ 394:Libraries/uC-OSIII/os_sem.c ****              }
+ 395:Libraries/uC-OSIII/os_sem.c ****              *p_err = OS_ERR_PEND_ABORT;
+ 661              		.loc 1 395 0
+ 662 0496 3B6C     		ldr	r3, [r7, #64]
+ 663 0498 46F2A912 		movw	r2, #25001
+ 664 049c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 396:Libraries/uC-OSIII/os_sem.c ****              break;
+ 665              		.loc 1 396 0
+ 666 049e 27E0     		b	.L43
+ 667              	.L40:
+ 397:Libraries/uC-OSIII/os_sem.c **** 
+ 398:Libraries/uC-OSIII/os_sem.c ****         case OS_STATUS_PEND_TIMEOUT:                        /* Indicate that we didn't get semaphor
+ 399:Libraries/uC-OSIII/os_sem.c ****              if (p_ts != (CPU_TS *)0) {
+ 668              		.loc 1 399 0
+ 669 04a0 3B68     		ldr	r3, [r7, #0]
+ 670 04a2 002B     		cmp	r3, #0
+ 671 04a4 03D0     		beq	.L45
+ 400:Libraries/uC-OSIII/os_sem.c ****                 *p_ts  = (CPU_TS  )0;
+ 672              		.loc 1 400 0
+ 673 04a6 3B68     		ldr	r3, [r7, #0]
+ 674 04a8 4FF00002 		mov	r2, #0
+ 675 04ac 1A60     		str	r2, [r3, #0]
+ 676              	.L45:
+ 401:Libraries/uC-OSIII/os_sem.c ****              }
+ 402:Libraries/uC-OSIII/os_sem.c ****              *p_err = OS_ERR_TIMEOUT;
+ 677              		.loc 1 402 0
+ 678 04ae 3B6C     		ldr	r3, [r7, #64]
+ 679 04b0 47F2D922 		movw	r2, #29401
+ 680 04b4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 403:Libraries/uC-OSIII/os_sem.c ****              break;
+ 681              		.loc 1 403 0
+ 682 04b6 1BE0     		b	.L43
+ 683              	.L39:
+ 404:Libraries/uC-OSIII/os_sem.c **** 
+ 405:Libraries/uC-OSIII/os_sem.c ****         case OS_STATUS_PEND_DEL:                            /* Indicate that object pended on has b
+ 406:Libraries/uC-OSIII/os_sem.c ****              if (p_ts != (CPU_TS *)0) {
+ 684              		.loc 1 406 0
+ 685 04b8 3B68     		ldr	r3, [r7, #0]
+ 686 04ba 002B     		cmp	r3, #0
+ 687 04bc 07D0     		beq	.L46
+ 407:Libraries/uC-OSIII/os_sem.c ****                 *p_ts  =  OSTCBCurPtr->TS;
+ 688              		.loc 1 407 0
+ 689 04be 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 690 04c2 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 691 04c6 1B68     		ldr	r3, [r3, #0]
+ 692 04c8 9A6B     		ldr	r2, [r3, #56]
+ 693 04ca 3B68     		ldr	r3, [r7, #0]
+ 694 04cc 1A60     		str	r2, [r3, #0]
+ 695              	.L46:
+ 408:Libraries/uC-OSIII/os_sem.c ****              }
+ 409:Libraries/uC-OSIII/os_sem.c ****              *p_err = OS_ERR_OBJ_DEL;
+ 696              		.loc 1 409 0
+ 697 04ce 3B6C     		ldr	r3, [r7, #64]
+ 698 04d0 45F6C252 		movw	r2, #24002
+ 699 04d4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 410:Libraries/uC-OSIII/os_sem.c ****              break;
+ 700              		.loc 1 410 0
+ 701 04d6 0BE0     		b	.L43
+ 702              	.L36:
+ 411:Libraries/uC-OSIII/os_sem.c **** 
+ 412:Libraries/uC-OSIII/os_sem.c ****         default:
+ 413:Libraries/uC-OSIII/os_sem.c ****              *p_err = OS_ERR_STATUS_INVALID;
+ 703              		.loc 1 413 0
+ 704 04d8 3B6C     		ldr	r3, [r7, #64]
+ 705 04da 46F62B62 		movw	r2, #28203
+ 706 04de 1A80     		strh	r2, [r3, #0]	@ movhi
+ 414:Libraries/uC-OSIII/os_sem.c ****              CPU_CRITICAL_EXIT();
+ 707              		.loc 1 414 0
+ 708 04e0 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 709 04e4 786B     		ldr	r0, [r7, #52]
+ 710 04e6 FFF7FEFF 		bl	CPU_SR_Restore
+ 415:Libraries/uC-OSIII/os_sem.c ****              return ((OS_SEM_CTR)0);
+ 711              		.loc 1 415 0
+ 712 04ea 4FF00003 		mov	r3, #0
+ 713 04ee 08E0     		b	.L23
+ 714              	.L43:
+ 416:Libraries/uC-OSIII/os_sem.c ****     }
+ 417:Libraries/uC-OSIII/os_sem.c ****     ctr = p_sem->Ctr;
+ 715              		.loc 1 417 0
+ 716 04f0 FB68     		ldr	r3, [r7, #12]
+ 717 04f2 1B6A     		ldr	r3, [r3, #32]
+ 718 04f4 3B63     		str	r3, [r7, #48]
+ 418:Libraries/uC-OSIII/os_sem.c ****     CPU_CRITICAL_EXIT();
+ 719              		.loc 1 418 0
+ 720 04f6 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 721 04fa 786B     		ldr	r0, [r7, #52]
+ 722 04fc FFF7FEFF 		bl	CPU_SR_Restore
+ 419:Libraries/uC-OSIII/os_sem.c ****     return (ctr);
+ 723              		.loc 1 419 0
+ 724 0500 3B6B     		ldr	r3, [r7, #48]
+ 725              	.L23:
+ 420:Libraries/uC-OSIII/os_sem.c **** }
+ 726              		.loc 1 420 0
+ 727 0502 1846     		mov	r0, r3
+ 728 0504 07F13807 		add	r7, r7, #56
+ 729 0508 BD46     		mov	sp, r7
+ 730 050a 80BD     		pop	{r7, pc}
+ 731              		.cfi_endproc
+ 732              	.LFE2:
+ 734              		.align	2
+ 735              		.global	OSSemPendAbort
+ 736              		.thumb
+ 737              		.thumb_func
+ 739              	OSSemPendAbort:
+ 740              	.LFB3:
+ 421:Libraries/uC-OSIII/os_sem.c **** 
+ 422:Libraries/uC-OSIII/os_sem.c **** /*$PAGE*/
+ 423:Libraries/uC-OSIII/os_sem.c **** /*
+ 424:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 425:Libraries/uC-OSIII/os_sem.c **** *                                             ABORT WAITING ON A SEMAPHORE
+ 426:Libraries/uC-OSIII/os_sem.c **** *
+ 427:Libraries/uC-OSIII/os_sem.c **** * Description: This function aborts & readies any tasks currently waiting on a semaphore.  This fun
+ 428:Libraries/uC-OSIII/os_sem.c **** *              to fault-abort the wait on the semaphore, rather than to normally signal the semapho
+ 429:Libraries/uC-OSIII/os_sem.c **** *
+ 430:Libraries/uC-OSIII/os_sem.c **** * Arguments  : p_sem     is a pointer to the semaphore
+ 431:Libraries/uC-OSIII/os_sem.c **** *
+ 432:Libraries/uC-OSIII/os_sem.c **** *              opt       determines the type of ABORT performed:
+ 433:Libraries/uC-OSIII/os_sem.c **** *
+ 434:Libraries/uC-OSIII/os_sem.c **** *                            OS_OPT_PEND_ABORT_1          ABORT wait for a single task (HPT) waitin
+ 435:Libraries/uC-OSIII/os_sem.c **** *                            OS_OPT_PEND_ABORT_ALL        ABORT wait for ALL tasks that are  waitin
+ 436:Libraries/uC-OSIII/os_sem.c **** *                            OS_OPT_POST_NO_SCHED         Do not call the scheduler
+ 437:Libraries/uC-OSIII/os_sem.c **** *
+ 438:Libraries/uC-OSIII/os_sem.c **** *              p_err     is a pointer to a variable that will contain an error code returned by thi
+ 439:Libraries/uC-OSIII/os_sem.c **** *
+ 440:Libraries/uC-OSIII/os_sem.c **** *                            OS_ERR_NONE                  At least one task waiting on the semaphor
+ 441:Libraries/uC-OSIII/os_sem.c **** *                                                         informed of the aborted wait; check retur
+ 442:Libraries/uC-OSIII/os_sem.c **** *                                                         number of tasks whose wait on the semapho
+ 443:Libraries/uC-OSIII/os_sem.c **** *                            OS_ERR_OBJ_PTR_NULL          If 'p_sem' is a NULL pointer.
+ 444:Libraries/uC-OSIII/os_sem.c **** *                            OS_ERR_OBJ_TYPE              If 'p_sem' is not pointing at a semaphore
+ 445:Libraries/uC-OSIII/os_sem.c **** *                            OS_ERR_OPT_INVALID           If you specified an invalid option
+ 446:Libraries/uC-OSIII/os_sem.c **** *                            OS_ERR_PEND_ABORT_ISR        If you called this function from an ISR
+ 447:Libraries/uC-OSIII/os_sem.c **** *                            OS_ERR_PEND_ABORT_NONE       No task were pending
+ 448:Libraries/uC-OSIII/os_sem.c **** *
+ 449:Libraries/uC-OSIII/os_sem.c **** * Returns    : == 0          if no tasks were waiting on the semaphore, or upon error.
+ 450:Libraries/uC-OSIII/os_sem.c **** *              >  0          if one or more tasks waiting on the semaphore are now readied and info
+ 451:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 452:Libraries/uC-OSIII/os_sem.c **** */
+ 453:Libraries/uC-OSIII/os_sem.c **** 
+ 454:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_SEM_PEND_ABORT_EN > 0u
+ 455:Libraries/uC-OSIII/os_sem.c **** OS_OBJ_QTY  OSSemPendAbort (OS_SEM  *p_sem,
+ 456:Libraries/uC-OSIII/os_sem.c ****                             OS_OPT   opt,
+ 457:Libraries/uC-OSIII/os_sem.c ****                             OS_ERR  *p_err)
+ 458:Libraries/uC-OSIII/os_sem.c **** {
+ 741              		.loc 1 458 0
+ 742              		.cfi_startproc
+ 743              		@ args = 0, pretend = 0, frame = 40
+ 744              		@ frame_needed = 1, uses_anonymous_args = 0
+ 745 050c 80B5     		push	{r7, lr}
+ 746              	.LCFI9:
+ 747              		.cfi_def_cfa_offset 8
+ 748              		.cfi_offset 14, -4
+ 749              		.cfi_offset 7, -8
+ 750 050e 8AB0     		sub	sp, sp, #40
+ 751              	.LCFI10:
+ 752              		.cfi_def_cfa_offset 48
+ 753 0510 00AF     		add	r7, sp, #0
+ 754              	.LCFI11:
+ 755              		.cfi_def_cfa_register 7
+ 756 0512 F860     		str	r0, [r7, #12]
+ 757 0514 0B46     		mov	r3, r1
+ 758 0516 7A60     		str	r2, [r7, #4]
+ 759 0518 7B81     		strh	r3, [r7, #10]	@ movhi
+ 459:Libraries/uC-OSIII/os_sem.c ****     OS_PEND_LIST  *p_pend_list;
+ 460:Libraries/uC-OSIII/os_sem.c ****     OS_TCB        *p_tcb;
+ 461:Libraries/uC-OSIII/os_sem.c ****     CPU_TS         ts;
+ 462:Libraries/uC-OSIII/os_sem.c ****     OS_OBJ_QTY     nbr_tasks;
+ 463:Libraries/uC-OSIII/os_sem.c ****     CPU_SR_ALLOC();
+ 760              		.loc 1 463 0
+ 761 051a 4FF00003 		mov	r3, #0
+ 762 051e 3B62     		str	r3, [r7, #32]
+ 464:Libraries/uC-OSIII/os_sem.c **** 
+ 465:Libraries/uC-OSIII/os_sem.c **** 
+ 466:Libraries/uC-OSIII/os_sem.c **** 
+ 467:Libraries/uC-OSIII/os_sem.c **** #ifdef OS_SAFETY_CRITICAL
+ 468:Libraries/uC-OSIII/os_sem.c ****     if (p_err == (OS_ERR *)0) {
+ 469:Libraries/uC-OSIII/os_sem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 470:Libraries/uC-OSIII/os_sem.c ****     }
+ 471:Libraries/uC-OSIII/os_sem.c **** #endif
+ 472:Libraries/uC-OSIII/os_sem.c **** 
+ 473:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 474:Libraries/uC-OSIII/os_sem.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0u) {             /* Not allowed to Pend Abort from an IS
+ 763              		.loc 1 474 0
+ 764 0520 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 765 0524 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 766 0528 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 767 052a 002B     		cmp	r3, #0
+ 768 052c 06D0     		beq	.L49
+ 475:Libraries/uC-OSIII/os_sem.c ****        *p_err =  OS_ERR_PEND_ABORT_ISR;
+ 769              		.loc 1 475 0
+ 770 052e 7B68     		ldr	r3, [r7, #4]
+ 771 0530 46F2AA12 		movw	r2, #25002
+ 772 0534 1A80     		strh	r2, [r3, #0]	@ movhi
+ 476:Libraries/uC-OSIII/os_sem.c ****         return ((OS_OBJ_QTY)0u);
+ 773              		.loc 1 476 0
+ 774 0536 4FF00003 		mov	r3, #0
+ 775 053a A3E0     		b	.L50
+ 776              	.L49:
+ 477:Libraries/uC-OSIII/os_sem.c ****     }
+ 478:Libraries/uC-OSIII/os_sem.c **** #endif
+ 479:Libraries/uC-OSIII/os_sem.c **** 
+ 480:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 481:Libraries/uC-OSIII/os_sem.c ****     if (p_sem == (OS_SEM *)0) {                             /* Validate 'p_sem'                    
+ 777              		.loc 1 481 0
+ 778 053c FB68     		ldr	r3, [r7, #12]
+ 779 053e 002B     		cmp	r3, #0
+ 780 0540 06D1     		bne	.L51
+ 482:Libraries/uC-OSIII/os_sem.c ****        *p_err =  OS_ERR_OBJ_PTR_NULL;
+ 781              		.loc 1 482 0
+ 782 0542 7B68     		ldr	r3, [r7, #4]
+ 783 0544 45F6C352 		movw	r2, #24003
+ 784 0548 1A80     		strh	r2, [r3, #0]	@ movhi
+ 483:Libraries/uC-OSIII/os_sem.c ****         return ((OS_OBJ_QTY)0u);
+ 785              		.loc 1 483 0
+ 786 054a 4FF00003 		mov	r3, #0
+ 787 054e 99E0     		b	.L50
+ 788              	.L51:
+ 484:Libraries/uC-OSIII/os_sem.c ****     }
+ 485:Libraries/uC-OSIII/os_sem.c ****     switch (opt) {                                          /* Validate 'opt'                      
+ 789              		.loc 1 485 0
+ 790 0550 7B89     		ldrh	r3, [r7, #10]
+ 791 0552 002B     		cmp	r3, #0
+ 792 0554 09D0     		beq	.L63
+ 793 0556 B3F5807F 		cmp	r3, #256
+ 794 055a 06D0     		beq	.L63
+ 486:Libraries/uC-OSIII/os_sem.c ****         case OS_OPT_PEND_ABORT_1:
+ 487:Libraries/uC-OSIII/os_sem.c ****         case OS_OPT_PEND_ABORT_ALL:
+ 488:Libraries/uC-OSIII/os_sem.c ****              break;
+ 489:Libraries/uC-OSIII/os_sem.c **** 
+ 490:Libraries/uC-OSIII/os_sem.c ****         default:
+ 491:Libraries/uC-OSIII/os_sem.c ****             *p_err =  OS_ERR_OPT_INVALID;
+ 795              		.loc 1 491 0
+ 796 055c 7B68     		ldr	r3, [r7, #4]
+ 797 055e 45F62562 		movw	r2, #24101
+ 798 0562 1A80     		strh	r2, [r3, #0]	@ movhi
+ 492:Libraries/uC-OSIII/os_sem.c ****              return ((OS_OBJ_QTY)0u);
+ 799              		.loc 1 492 0
+ 800 0564 4FF00003 		mov	r3, #0
+ 801 0568 8CE0     		b	.L50
+ 802              	.L63:
+ 488:Libraries/uC-OSIII/os_sem.c ****              break;
+ 803              		.loc 1 488 0
+ 804 056a 00BF     		nop
+ 805              	.L54:
+ 493:Libraries/uC-OSIII/os_sem.c ****     }
+ 494:Libraries/uC-OSIII/os_sem.c **** #endif
+ 495:Libraries/uC-OSIII/os_sem.c **** 
+ 496:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 497:Libraries/uC-OSIII/os_sem.c ****     if (p_sem->Type != OS_OBJ_TYPE_SEM) {                   /* Make sure semaphore was created     
+ 806              		.loc 1 497 0
+ 807 056c FB68     		ldr	r3, [r7, #12]
+ 808 056e 1A68     		ldr	r2, [r3, #0]
+ 809 0570 44F25353 		movw	r3, #17747
+ 810 0574 C4F24D13 		movt	r3, 16717
+ 811 0578 9A42     		cmp	r2, r3
+ 812 057a 06D0     		beq	.L55
+ 498:Libraries/uC-OSIII/os_sem.c ****        *p_err =  OS_ERR_OBJ_TYPE;
+ 813              		.loc 1 498 0
+ 814 057c 7B68     		ldr	r3, [r7, #4]
+ 815 057e 45F6C452 		movw	r2, #24004
+ 816 0582 1A80     		strh	r2, [r3, #0]	@ movhi
+ 499:Libraries/uC-OSIII/os_sem.c ****         return ((OS_OBJ_QTY)0u);
+ 817              		.loc 1 499 0
+ 818 0584 4FF00003 		mov	r3, #0
+ 819 0588 7CE0     		b	.L50
+ 820              	.L55:
+ 500:Libraries/uC-OSIII/os_sem.c ****     }
+ 501:Libraries/uC-OSIII/os_sem.c **** #endif
+ 502:Libraries/uC-OSIII/os_sem.c **** 
+ 503:Libraries/uC-OSIII/os_sem.c ****     CPU_CRITICAL_ENTER();
+ 821              		.loc 1 503 0
+ 822 058a FFF7FEFF 		bl	CPU_SR_Save
+ 823 058e 3862     		str	r0, [r7, #32]
+ 824 0590 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 504:Libraries/uC-OSIII/os_sem.c ****     p_pend_list = &p_sem->PendList;
+ 825              		.loc 1 504 0
+ 826 0594 FB68     		ldr	r3, [r7, #12]
+ 827 0596 03F10803 		add	r3, r3, #8
+ 828 059a FB61     		str	r3, [r7, #28]
+ 505:Libraries/uC-OSIII/os_sem.c ****     if (p_pend_list->NbrEntries == (OS_OBJ_QTY)0u) {        /* Any task waiting on semaphore?      
+ 829              		.loc 1 505 0
+ 830 059c FB69     		ldr	r3, [r7, #28]
+ 831 059e 1B89     		ldrh	r3, [r3, #8]
+ 832 05a0 002B     		cmp	r3, #0
+ 833 05a2 0BD1     		bne	.L56
+ 506:Libraries/uC-OSIII/os_sem.c ****         CPU_CRITICAL_EXIT();                                /* No                                  
+ 834              		.loc 1 506 0
+ 835 05a4 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 836 05a8 386A     		ldr	r0, [r7, #32]
+ 837 05aa FFF7FEFF 		bl	CPU_SR_Restore
+ 507:Libraries/uC-OSIII/os_sem.c ****        *p_err =  OS_ERR_PEND_ABORT_NONE;
+ 838              		.loc 1 507 0
+ 839 05ae 7B68     		ldr	r3, [r7, #4]
+ 840 05b0 46F2AB12 		movw	r2, #25003
+ 841 05b4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 508:Libraries/uC-OSIII/os_sem.c ****         return ((OS_OBJ_QTY)0u);
+ 842              		.loc 1 508 0
+ 843 05b6 4FF00003 		mov	r3, #0
+ 844 05ba 63E0     		b	.L50
+ 845              	.L56:
+ 509:Libraries/uC-OSIII/os_sem.c ****     }
+ 510:Libraries/uC-OSIII/os_sem.c **** 
+ 511:Libraries/uC-OSIII/os_sem.c ****     OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();
+ 846              		.loc 1 511 0
+ 847 05bc 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 848 05c0 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 849 05c4 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 850 05c6 03F10103 		add	r3, r3, #1
+ 851 05ca DAB2     		uxtb	r2, r3
+ 852 05cc 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 853 05d0 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 854 05d4 1A70     		strb	r2, [r3, #0]
+ 855 05d6 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 856 05da C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 857 05de 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 858 05e0 012B     		cmp	r3, #1
+ 859 05e2 01D1     		bne	.L57
+ 860              		.loc 1 511 0 is_stmt 0 discriminator 1
+ 861 05e4 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 862              	.L57:
+ 863              		.loc 1 511 0 discriminator 2
+ 864 05e8 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 865 05ec 386A     		ldr	r0, [r7, #32]
+ 866 05ee FFF7FEFF 		bl	CPU_SR_Restore
+ 512:Libraries/uC-OSIII/os_sem.c ****     nbr_tasks = 0u;
+ 867              		.loc 1 512 0 is_stmt 1 discriminator 2
+ 868 05f2 4FF00003 		mov	r3, #0
+ 869 05f6 FB84     		strh	r3, [r7, #38]	@ movhi
+ 513:Libraries/uC-OSIII/os_sem.c ****     ts        = OS_TS_GET();                                /* Get local time stamp so all tasks ge
+ 870              		.loc 1 513 0 discriminator 2
+ 871 05f8 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 872 05fc B861     		str	r0, [r7, #24]
+ 514:Libraries/uC-OSIII/os_sem.c ****     while (p_pend_list->NbrEntries > (OS_OBJ_QTY)0u) {
+ 873              		.loc 1 514 0 discriminator 2
+ 874 05fe 10E0     		b	.L58
+ 875              	.L60:
+ 515:Libraries/uC-OSIII/os_sem.c ****         p_tcb = p_pend_list->HeadPtr->TCBPtr;
+ 876              		.loc 1 515 0
+ 877 0600 FB69     		ldr	r3, [r7, #28]
+ 878 0602 1B68     		ldr	r3, [r3, #0]
+ 879 0604 9B68     		ldr	r3, [r3, #8]
+ 880 0606 7B61     		str	r3, [r7, #20]
+ 516:Libraries/uC-OSIII/os_sem.c ****         OS_PendAbort((OS_PEND_OBJ *)((void *)p_sem),
+ 881              		.loc 1 516 0
+ 882 0608 F868     		ldr	r0, [r7, #12]
+ 883 060a 7969     		ldr	r1, [r7, #20]
+ 884 060c BA69     		ldr	r2, [r7, #24]
+ 885 060e FFF7FEFF 		bl	OS_PendAbort
+ 517:Libraries/uC-OSIII/os_sem.c ****                      p_tcb,
+ 518:Libraries/uC-OSIII/os_sem.c ****                      ts);
+ 519:Libraries/uC-OSIII/os_sem.c ****         nbr_tasks++;
+ 886              		.loc 1 519 0
+ 887 0612 FB8C     		ldrh	r3, [r7, #38]	@ movhi
+ 888 0614 03F10103 		add	r3, r3, #1
+ 889 0618 FB84     		strh	r3, [r7, #38]	@ movhi
+ 520:Libraries/uC-OSIII/os_sem.c ****         if (opt != OS_OPT_PEND_ABORT_ALL) {                 /* Pend abort all tasks waiting?       
+ 890              		.loc 1 520 0
+ 891 061a 7B89     		ldrh	r3, [r7, #10]
+ 892 061c B3F5807F 		cmp	r3, #256
+ 893 0620 04D1     		bne	.L64
+ 894              	.L58:
+ 514:Libraries/uC-OSIII/os_sem.c ****     while (p_pend_list->NbrEntries > (OS_OBJ_QTY)0u) {
+ 895              		.loc 1 514 0 discriminator 1
+ 896 0622 FB69     		ldr	r3, [r7, #28]
+ 897 0624 1B89     		ldrh	r3, [r3, #8]
+ 898 0626 002B     		cmp	r3, #0
+ 899 0628 EAD1     		bne	.L60
+ 900 062a 00E0     		b	.L59
+ 901              	.L64:
+ 521:Libraries/uC-OSIII/os_sem.c ****             break;                                          /* No                                  
+ 902              		.loc 1 521 0
+ 903 062c 00BF     		nop
+ 904              	.L59:
+ 522:Libraries/uC-OSIII/os_sem.c ****         }
+ 523:Libraries/uC-OSIII/os_sem.c ****     }
+ 524:Libraries/uC-OSIII/os_sem.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 905              		.loc 1 524 0
+ 906 062e FFF7FEFF 		bl	CPU_SR_Save
+ 907 0632 3862     		str	r0, [r7, #32]
+ 908 0634 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 909 0638 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 910 063c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 911 0640 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 912 0642 03F1FF33 		add	r3, r3, #-1
+ 913 0646 DAB2     		uxtb	r2, r3
+ 914 0648 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 915 064c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 916 0650 1A70     		strb	r2, [r3, #0]
+ 917 0652 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 918 0656 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 919 065a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 920 065c 002B     		cmp	r3, #0
+ 921 065e 01D1     		bne	.L61
+ 922              		.loc 1 524 0 is_stmt 0 discriminator 1
+ 923 0660 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 924              	.L61:
+ 925              		.loc 1 524 0 discriminator 2
+ 926 0664 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 927 0668 386A     		ldr	r0, [r7, #32]
+ 928 066a FFF7FEFF 		bl	CPU_SR_Restore
+ 525:Libraries/uC-OSIII/os_sem.c **** 
+ 526:Libraries/uC-OSIII/os_sem.c ****     if ((opt & OS_OPT_POST_NO_SCHED) == (OS_OPT)0u) {
+ 929              		.loc 1 526 0 is_stmt 1 discriminator 2
+ 930 066e 7B89     		ldrh	r3, [r7, #10]
+ 931 0670 1BB2     		sxth	r3, r3
+ 932 0672 002B     		cmp	r3, #0
+ 933 0674 01DB     		blt	.L62
+ 527:Libraries/uC-OSIII/os_sem.c ****         OSSched();                                          /* Run the scheduler                   
+ 934              		.loc 1 527 0
+ 935 0676 FFF7FEFF 		bl	OSSched
+ 936              	.L62:
+ 528:Libraries/uC-OSIII/os_sem.c ****     }
+ 529:Libraries/uC-OSIII/os_sem.c **** 
+ 530:Libraries/uC-OSIII/os_sem.c ****    *p_err = OS_ERR_NONE;
+ 937              		.loc 1 530 0
+ 938 067a 7B68     		ldr	r3, [r7, #4]
+ 939 067c 4FF00002 		mov	r2, #0
+ 940 0680 1A80     		strh	r2, [r3, #0]	@ movhi
+ 531:Libraries/uC-OSIII/os_sem.c ****     return (nbr_tasks);
+ 941              		.loc 1 531 0
+ 942 0682 FB8C     		ldrh	r3, [r7, #38]
+ 943              	.L50:
+ 532:Libraries/uC-OSIII/os_sem.c **** }
+ 944              		.loc 1 532 0
+ 945 0684 1846     		mov	r0, r3
+ 946 0686 07F12807 		add	r7, r7, #40
+ 947 068a BD46     		mov	sp, r7
+ 948 068c 80BD     		pop	{r7, pc}
+ 949              		.cfi_endproc
+ 950              	.LFE3:
+ 952 068e 00BF     		.align	2
+ 953              		.global	OSSemPost
+ 954              		.thumb
+ 955              		.thumb_func
+ 957              	OSSemPost:
+ 958              	.LFB4:
+ 533:Libraries/uC-OSIII/os_sem.c **** #endif
+ 534:Libraries/uC-OSIII/os_sem.c **** 
+ 535:Libraries/uC-OSIII/os_sem.c **** /*$PAGE*/
+ 536:Libraries/uC-OSIII/os_sem.c **** /*
+ 537:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 538:Libraries/uC-OSIII/os_sem.c **** *                                                 POST TO A SEMAPHORE
+ 539:Libraries/uC-OSIII/os_sem.c **** *
+ 540:Libraries/uC-OSIII/os_sem.c **** * Description: This function signals a semaphore
+ 541:Libraries/uC-OSIII/os_sem.c **** *
+ 542:Libraries/uC-OSIII/os_sem.c **** * Arguments  : p_sem    is a pointer to the semaphore
+ 543:Libraries/uC-OSIII/os_sem.c **** *
+ 544:Libraries/uC-OSIII/os_sem.c **** *              opt      determines the type of POST performed:
+ 545:Libraries/uC-OSIII/os_sem.c **** *
+ 546:Libraries/uC-OSIII/os_sem.c **** *                           OS_OPT_POST_1            POST and ready only the highest priority task 
+ 547:Libraries/uC-OSIII/os_sem.c **** *                                                    (if tasks are waiting).
+ 548:Libraries/uC-OSIII/os_sem.c **** *                           OS_OPT_POST_ALL          POST to ALL tasks that are waiting on the sema
+ 549:Libraries/uC-OSIII/os_sem.c **** *
+ 550:Libraries/uC-OSIII/os_sem.c **** *                           OS_OPT_POST_NO_SCHED     Do not call the scheduler
+ 551:Libraries/uC-OSIII/os_sem.c **** *
+ 552:Libraries/uC-OSIII/os_sem.c **** *                           Note(s): 1) OS_OPT_POST_NO_SCHED can be added with one of the other opt
+ 553:Libraries/uC-OSIII/os_sem.c **** *
+ 554:Libraries/uC-OSIII/os_sem.c **** *              p_err    is a pointer to a variable that will contain an error code returned by this
+ 555:Libraries/uC-OSIII/os_sem.c **** *
+ 556:Libraries/uC-OSIII/os_sem.c **** *                           OS_ERR_NONE          The call was successful and the semaphore was sign
+ 557:Libraries/uC-OSIII/os_sem.c **** *                           OS_ERR_OBJ_PTR_NULL  If 'p_sem' is a NULL pointer.
+ 558:Libraries/uC-OSIII/os_sem.c **** *                           OS_ERR_OBJ_TYPE      If 'p_sem' is not pointing at a semaphore
+ 559:Libraries/uC-OSIII/os_sem.c **** *                           OS_ERR_SEM_OVF       If the post would cause the semaphore count to ove
+ 560:Libraries/uC-OSIII/os_sem.c **** *
+ 561:Libraries/uC-OSIII/os_sem.c **** * Returns    : The current value of the semaphore counter or 0 upon error.
+ 562:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 563:Libraries/uC-OSIII/os_sem.c **** */
+ 564:Libraries/uC-OSIII/os_sem.c **** 
+ 565:Libraries/uC-OSIII/os_sem.c **** OS_SEM_CTR  OSSemPost (OS_SEM  *p_sem,
+ 566:Libraries/uC-OSIII/os_sem.c ****                        OS_OPT   opt,
+ 567:Libraries/uC-OSIII/os_sem.c ****                        OS_ERR  *p_err)
+ 568:Libraries/uC-OSIII/os_sem.c **** {
+ 959              		.loc 1 568 0
+ 960              		.cfi_startproc
+ 961              		@ args = 0, pretend = 0, frame = 24
+ 962              		@ frame_needed = 1, uses_anonymous_args = 0
+ 963 0690 80B5     		push	{r7, lr}
+ 964              	.LCFI12:
+ 965              		.cfi_def_cfa_offset 8
+ 966              		.cfi_offset 14, -4
+ 967              		.cfi_offset 7, -8
+ 968 0692 8AB0     		sub	sp, sp, #40
+ 969              	.LCFI13:
+ 970              		.cfi_def_cfa_offset 48
+ 971 0694 04AF     		add	r7, sp, #16
+ 972              	.LCFI14:
+ 973              		.cfi_def_cfa 7, 32
+ 974 0696 F860     		str	r0, [r7, #12]
+ 975 0698 0B46     		mov	r3, r1
+ 976 069a 7A60     		str	r2, [r7, #4]
+ 977 069c 7B81     		strh	r3, [r7, #10]	@ movhi
+ 569:Libraries/uC-OSIII/os_sem.c ****     OS_SEM_CTR  ctr;
+ 570:Libraries/uC-OSIII/os_sem.c ****     CPU_TS      ts;
+ 571:Libraries/uC-OSIII/os_sem.c **** 
+ 572:Libraries/uC-OSIII/os_sem.c **** 
+ 573:Libraries/uC-OSIII/os_sem.c **** 
+ 574:Libraries/uC-OSIII/os_sem.c **** #ifdef OS_SAFETY_CRITICAL
+ 575:Libraries/uC-OSIII/os_sem.c ****     if (p_err == (OS_ERR *)0) {
+ 576:Libraries/uC-OSIII/os_sem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 577:Libraries/uC-OSIII/os_sem.c ****     }
+ 578:Libraries/uC-OSIII/os_sem.c **** #endif
+ 579:Libraries/uC-OSIII/os_sem.c **** 
+ 580:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 581:Libraries/uC-OSIII/os_sem.c ****     if (p_sem == (OS_SEM *)0) {                             /* Validate 'p_sem'                    
+ 978              		.loc 1 581 0
+ 979 069e FB68     		ldr	r3, [r7, #12]
+ 980 06a0 002B     		cmp	r3, #0
+ 981 06a2 06D1     		bne	.L66
+ 582:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 982              		.loc 1 582 0
+ 983 06a4 7B68     		ldr	r3, [r7, #4]
+ 984 06a6 45F6C352 		movw	r2, #24003
+ 985 06aa 1A80     		strh	r2, [r3, #0]	@ movhi
+ 583:Libraries/uC-OSIII/os_sem.c ****         return ((OS_SEM_CTR)0);
+ 986              		.loc 1 583 0
+ 987 06ac 4FF00003 		mov	r3, #0
+ 988 06b0 38E0     		b	.L67
+ 989              	.L66:
+ 584:Libraries/uC-OSIII/os_sem.c ****     }
+ 585:Libraries/uC-OSIII/os_sem.c **** #endif
+ 586:Libraries/uC-OSIII/os_sem.c **** 
+ 587:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 588:Libraries/uC-OSIII/os_sem.c ****     if (p_sem->Type != OS_OBJ_TYPE_SEM) {                   /* Make sure semaphore was created     
+ 990              		.loc 1 588 0
+ 991 06b2 FB68     		ldr	r3, [r7, #12]
+ 992 06b4 1A68     		ldr	r2, [r3, #0]
+ 993 06b6 44F25353 		movw	r3, #17747
+ 994 06ba C4F24D13 		movt	r3, 16717
+ 995 06be 9A42     		cmp	r2, r3
+ 996 06c0 06D0     		beq	.L68
+ 589:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 997              		.loc 1 589 0
+ 998 06c2 7B68     		ldr	r3, [r7, #4]
+ 999 06c4 45F6C452 		movw	r2, #24004
+ 1000 06c8 1A80     		strh	r2, [r3, #0]	@ movhi
+ 590:Libraries/uC-OSIII/os_sem.c ****         return ((OS_SEM_CTR)0);
+ 1001              		.loc 1 590 0
+ 1002 06ca 4FF00003 		mov	r3, #0
+ 1003 06ce 29E0     		b	.L67
+ 1004              	.L68:
+ 591:Libraries/uC-OSIII/os_sem.c ****     }
+ 592:Libraries/uC-OSIII/os_sem.c **** #endif
+ 593:Libraries/uC-OSIII/os_sem.c **** 
+ 594:Libraries/uC-OSIII/os_sem.c ****     ts = OS_TS_GET();                                       /* Get timestamp                       
+ 1005              		.loc 1 594 0
+ 1006 06d0 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 1007 06d4 7861     		str	r0, [r7, #20]
+ 595:Libraries/uC-OSIII/os_sem.c **** 
+ 596:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_ISR_POST_DEFERRED_EN > 0u
+ 597:Libraries/uC-OSIII/os_sem.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* See if called from an ISR           
+ 1008              		.loc 1 597 0
+ 1009 06d6 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 1010 06da C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 1011 06de 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1012 06e0 002B     		cmp	r3, #0
+ 1013 06e2 16D0     		beq	.L69
+ 598:Libraries/uC-OSIII/os_sem.c ****         OS_IntQPost((OS_OBJ_TYPE)OS_OBJ_TYPE_SEM,           /* Post to ISR queue                   
+ 1014              		.loc 1 598 0
+ 1015 06e4 4FF00003 		mov	r3, #0
+ 1016 06e8 0093     		str	r3, [sp, #0]
+ 1017 06ea 7B89     		ldrh	r3, [r7, #10]
+ 1018 06ec 0193     		str	r3, [sp, #4]
+ 1019 06ee 7B69     		ldr	r3, [r7, #20]
+ 1020 06f0 0293     		str	r3, [sp, #8]
+ 1021 06f2 7B68     		ldr	r3, [r7, #4]
+ 1022 06f4 0393     		str	r3, [sp, #12]
+ 1023 06f6 44F25350 		movw	r0, #17747
+ 1024 06fa C4F24D10 		movt	r0, 16717
+ 1025 06fe F968     		ldr	r1, [r7, #12]
+ 1026 0700 4FF00002 		mov	r2, #0
+ 1027 0704 4FF00003 		mov	r3, #0
+ 1028 0708 FFF7FEFF 		bl	OS_IntQPost
+ 599:Libraries/uC-OSIII/os_sem.c ****                     (void      *)p_sem,
+ 600:Libraries/uC-OSIII/os_sem.c ****                     (void      *)0,
+ 601:Libraries/uC-OSIII/os_sem.c ****                     (OS_MSG_SIZE)0,
+ 602:Libraries/uC-OSIII/os_sem.c ****                     (OS_FLAGS   )0,
+ 603:Libraries/uC-OSIII/os_sem.c ****                     (OS_OPT     )opt,
+ 604:Libraries/uC-OSIII/os_sem.c ****                     (CPU_TS     )ts,
+ 605:Libraries/uC-OSIII/os_sem.c ****                     (OS_ERR    *)p_err);
+ 606:Libraries/uC-OSIII/os_sem.c ****         return ((OS_SEM_CTR)0);
+ 1029              		.loc 1 606 0
+ 1030 070c 4FF00003 		mov	r3, #0
+ 1031 0710 08E0     		b	.L67
+ 1032              	.L69:
+ 607:Libraries/uC-OSIII/os_sem.c ****     }
+ 608:Libraries/uC-OSIII/os_sem.c **** #endif
+ 609:Libraries/uC-OSIII/os_sem.c **** 
+ 610:Libraries/uC-OSIII/os_sem.c ****     ctr = OS_SemPost(p_sem,                                 /* Post to semaphore                   
+ 1033              		.loc 1 610 0
+ 1034 0712 7B89     		ldrh	r3, [r7, #10]
+ 1035 0714 F868     		ldr	r0, [r7, #12]
+ 1036 0716 1946     		mov	r1, r3
+ 1037 0718 7A69     		ldr	r2, [r7, #20]
+ 1038 071a 7B68     		ldr	r3, [r7, #4]
+ 1039 071c FFF7FEFF 		bl	OS_SemPost
+ 1040 0720 3861     		str	r0, [r7, #16]
+ 611:Libraries/uC-OSIII/os_sem.c ****                      opt,
+ 612:Libraries/uC-OSIII/os_sem.c ****                      ts,
+ 613:Libraries/uC-OSIII/os_sem.c ****                      p_err);
+ 614:Libraries/uC-OSIII/os_sem.c **** 
+ 615:Libraries/uC-OSIII/os_sem.c ****     return (ctr);
+ 1041              		.loc 1 615 0
+ 1042 0722 3B69     		ldr	r3, [r7, #16]
+ 1043              	.L67:
+ 616:Libraries/uC-OSIII/os_sem.c **** }
+ 1044              		.loc 1 616 0
+ 1045 0724 1846     		mov	r0, r3
+ 1046 0726 07F11807 		add	r7, r7, #24
+ 1047 072a BD46     		mov	sp, r7
+ 1048 072c 80BD     		pop	{r7, pc}
+ 1049              		.cfi_endproc
+ 1050              	.LFE4:
+ 1052 072e 00BF     		.align	2
+ 1053              		.global	OSSemSet
+ 1054              		.thumb
+ 1055              		.thumb_func
+ 1057              	OSSemSet:
+ 1058              	.LFB5:
+ 617:Libraries/uC-OSIII/os_sem.c **** 
+ 618:Libraries/uC-OSIII/os_sem.c **** /*$PAGE*/
+ 619:Libraries/uC-OSIII/os_sem.c **** /*
+ 620:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 621:Libraries/uC-OSIII/os_sem.c **** *                                                    SET SEMAPHORE
+ 622:Libraries/uC-OSIII/os_sem.c **** *
+ 623:Libraries/uC-OSIII/os_sem.c **** * Description: This function sets the semaphore count to the value specified as an argument.  Typic
+ 624:Libraries/uC-OSIII/os_sem.c **** *              would be 0 but of course, we can set the semaphore to any value.
+ 625:Libraries/uC-OSIII/os_sem.c **** *
+ 626:Libraries/uC-OSIII/os_sem.c **** *              You would typically use this function when a semaphore is used as a signaling mechan
+ 627:Libraries/uC-OSIII/os_sem.c **** *              and, you want to reset the count value.
+ 628:Libraries/uC-OSIII/os_sem.c **** *
+ 629:Libraries/uC-OSIII/os_sem.c **** * Arguments  : p_sem     is a pointer to the semaphore
+ 630:Libraries/uC-OSIII/os_sem.c **** *
+ 631:Libraries/uC-OSIII/os_sem.c **** *              cnt       is the new value for the semaphore count.  You would pass 0 to reset the s
+ 632:Libraries/uC-OSIII/os_sem.c **** *
+ 633:Libraries/uC-OSIII/os_sem.c **** *              p_err     is a pointer to a variable that will contain an error code returned by thi
+ 634:Libraries/uC-OSIII/os_sem.c **** *
+ 635:Libraries/uC-OSIII/os_sem.c **** *                            OS_ERR_NONE           The call was successful and the semaphore value 
+ 636:Libraries/uC-OSIII/os_sem.c **** *                            OS_ERR_OBJ_PTR_NULL   If 'p_sem' is a NULL pointer.
+ 637:Libraries/uC-OSIII/os_sem.c **** *                            OS_ERR_OBJ_TYPE       If 'p_sem' is not pointing to a semaphore.
+ 638:Libraries/uC-OSIII/os_sem.c **** *                            OS_ERR_TASK_WAITING   If tasks are waiting on the semaphore.
+ 639:Libraries/uC-OSIII/os_sem.c **** *
+ 640:Libraries/uC-OSIII/os_sem.c **** * Returns    : None
+ 641:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 642:Libraries/uC-OSIII/os_sem.c **** */
+ 643:Libraries/uC-OSIII/os_sem.c **** 
+ 644:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_SEM_SET_EN > 0u
+ 645:Libraries/uC-OSIII/os_sem.c **** void  OSSemSet (OS_SEM      *p_sem,
+ 646:Libraries/uC-OSIII/os_sem.c ****                 OS_SEM_CTR   cnt,
+ 647:Libraries/uC-OSIII/os_sem.c ****                 OS_ERR      *p_err)
+ 648:Libraries/uC-OSIII/os_sem.c **** {
+ 1059              		.loc 1 648 0
+ 1060              		.cfi_startproc
+ 1061              		@ args = 0, pretend = 0, frame = 24
+ 1062              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1063 0730 80B5     		push	{r7, lr}
+ 1064              	.LCFI15:
+ 1065              		.cfi_def_cfa_offset 8
+ 1066              		.cfi_offset 14, -4
+ 1067              		.cfi_offset 7, -8
+ 1068 0732 86B0     		sub	sp, sp, #24
+ 1069              	.LCFI16:
+ 1070              		.cfi_def_cfa_offset 32
+ 1071 0734 00AF     		add	r7, sp, #0
+ 1072              	.LCFI17:
+ 1073              		.cfi_def_cfa_register 7
+ 1074 0736 F860     		str	r0, [r7, #12]
+ 1075 0738 B960     		str	r1, [r7, #8]
+ 1076 073a 7A60     		str	r2, [r7, #4]
+ 649:Libraries/uC-OSIII/os_sem.c ****     OS_PEND_LIST  *p_pend_list;
+ 650:Libraries/uC-OSIII/os_sem.c ****     CPU_SR_ALLOC();
+ 1077              		.loc 1 650 0
+ 1078 073c 4FF00003 		mov	r3, #0
+ 1079 0740 7B61     		str	r3, [r7, #20]
+ 651:Libraries/uC-OSIII/os_sem.c **** 
+ 652:Libraries/uC-OSIII/os_sem.c **** 
+ 653:Libraries/uC-OSIII/os_sem.c **** 
+ 654:Libraries/uC-OSIII/os_sem.c **** #ifdef OS_SAFETY_CRITICAL
+ 655:Libraries/uC-OSIII/os_sem.c ****     if (p_err == (OS_ERR *)0) {
+ 656:Libraries/uC-OSIII/os_sem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 657:Libraries/uC-OSIII/os_sem.c ****     }
+ 658:Libraries/uC-OSIII/os_sem.c **** #endif
+ 659:Libraries/uC-OSIII/os_sem.c **** 
+ 660:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 661:Libraries/uC-OSIII/os_sem.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Can't call this function from an ISR
+ 1080              		.loc 1 661 0
+ 1081 0742 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 1082 0746 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 1083 074a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1084 074c 002B     		cmp	r3, #0
+ 1085 074e 04D0     		beq	.L71
+ 662:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_SET_ISR;
+ 1086              		.loc 1 662 0
+ 1087 0750 7B68     		ldr	r3, [r7, #4]
+ 1088 0752 46F6C652 		movw	r2, #28102
+ 1089 0756 1A80     		strh	r2, [r3, #0]	@ movhi
+ 663:Libraries/uC-OSIII/os_sem.c ****         return;
+ 1090              		.loc 1 663 0
+ 1091 0758 3AE0     		b	.L70
+ 1092              	.L71:
+ 664:Libraries/uC-OSIII/os_sem.c ****     }
+ 665:Libraries/uC-OSIII/os_sem.c **** #endif
+ 666:Libraries/uC-OSIII/os_sem.c **** 
+ 667:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 668:Libraries/uC-OSIII/os_sem.c ****     if (p_sem == (OS_SEM *)0) {                             /* Validate 'p_sem'                    
+ 1093              		.loc 1 668 0
+ 1094 075a FB68     		ldr	r3, [r7, #12]
+ 1095 075c 002B     		cmp	r3, #0
+ 1096 075e 04D1     		bne	.L73
+ 669:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 1097              		.loc 1 669 0
+ 1098 0760 7B68     		ldr	r3, [r7, #4]
+ 1099 0762 45F6C352 		movw	r2, #24003
+ 1100 0766 1A80     		strh	r2, [r3, #0]	@ movhi
+ 670:Libraries/uC-OSIII/os_sem.c ****         return;
+ 1101              		.loc 1 670 0
+ 1102 0768 32E0     		b	.L70
+ 1103              	.L73:
+ 671:Libraries/uC-OSIII/os_sem.c ****     }
+ 672:Libraries/uC-OSIII/os_sem.c **** #endif
+ 673:Libraries/uC-OSIII/os_sem.c **** 
+ 674:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 675:Libraries/uC-OSIII/os_sem.c ****     if (p_sem->Type != OS_OBJ_TYPE_SEM) {                   /* Make sure semaphore was created     
+ 1104              		.loc 1 675 0
+ 1105 076a FB68     		ldr	r3, [r7, #12]
+ 1106 076c 1A68     		ldr	r2, [r3, #0]
+ 1107 076e 44F25353 		movw	r3, #17747
+ 1108 0772 C4F24D13 		movt	r3, 16717
+ 1109 0776 9A42     		cmp	r2, r3
+ 1110 0778 04D0     		beq	.L74
+ 676:Libraries/uC-OSIII/os_sem.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 1111              		.loc 1 676 0
+ 1112 077a 7B68     		ldr	r3, [r7, #4]
+ 1113 077c 45F6C452 		movw	r2, #24004
+ 1114 0780 1A80     		strh	r2, [r3, #0]	@ movhi
+ 677:Libraries/uC-OSIII/os_sem.c ****         return;
+ 1115              		.loc 1 677 0
+ 1116 0782 25E0     		b	.L70
+ 1117              	.L74:
+ 678:Libraries/uC-OSIII/os_sem.c ****     }
+ 679:Libraries/uC-OSIII/os_sem.c **** #endif
+ 680:Libraries/uC-OSIII/os_sem.c **** 
+ 681:Libraries/uC-OSIII/os_sem.c ****     *p_err = OS_ERR_NONE;
+ 1118              		.loc 1 681 0
+ 1119 0784 7B68     		ldr	r3, [r7, #4]
+ 1120 0786 4FF00002 		mov	r2, #0
+ 1121 078a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 682:Libraries/uC-OSIII/os_sem.c ****     CPU_CRITICAL_ENTER();
+ 1122              		.loc 1 682 0
+ 1123 078c FFF7FEFF 		bl	CPU_SR_Save
+ 1124 0790 7861     		str	r0, [r7, #20]
+ 1125 0792 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 683:Libraries/uC-OSIII/os_sem.c ****     if (p_sem->Ctr > (OS_SEM_CTR)0) {                       /* See if semaphore already has a count
+ 1126              		.loc 1 683 0
+ 1127 0796 FB68     		ldr	r3, [r7, #12]
+ 1128 0798 1B6A     		ldr	r3, [r3, #32]
+ 1129 079a 002B     		cmp	r3, #0
+ 1130 079c 03D0     		beq	.L75
+ 684:Libraries/uC-OSIII/os_sem.c ****         p_sem->Ctr = cnt;                                   /* Yes, set it to the new value specifi
+ 1131              		.loc 1 684 0
+ 1132 079e FB68     		ldr	r3, [r7, #12]
+ 1133 07a0 BA68     		ldr	r2, [r7, #8]
+ 1134 07a2 1A62     		str	r2, [r3, #32]
+ 1135 07a4 0FE0     		b	.L76
+ 1136              	.L75:
+ 685:Libraries/uC-OSIII/os_sem.c ****     } else {
+ 686:Libraries/uC-OSIII/os_sem.c ****         p_pend_list = &p_sem->PendList;                     /* No                                  
+ 1137              		.loc 1 686 0
+ 1138 07a6 FB68     		ldr	r3, [r7, #12]
+ 1139 07a8 03F10803 		add	r3, r3, #8
+ 1140 07ac 3B61     		str	r3, [r7, #16]
+ 687:Libraries/uC-OSIII/os_sem.c ****         if (p_pend_list->NbrEntries == (OS_OBJ_QTY)0) {     /*      See if task(s) waiting?        
+ 1141              		.loc 1 687 0
+ 1142 07ae 3B69     		ldr	r3, [r7, #16]
+ 1143 07b0 1B89     		ldrh	r3, [r3, #8]
+ 1144 07b2 002B     		cmp	r3, #0
+ 1145 07b4 03D1     		bne	.L77
+ 688:Libraries/uC-OSIII/os_sem.c ****             p_sem->Ctr = cnt;                               /*      No, OK to set the value        
+ 1146              		.loc 1 688 0
+ 1147 07b6 FB68     		ldr	r3, [r7, #12]
+ 1148 07b8 BA68     		ldr	r2, [r7, #8]
+ 1149 07ba 1A62     		str	r2, [r3, #32]
+ 1150 07bc 03E0     		b	.L76
+ 1151              	.L77:
+ 689:Libraries/uC-OSIII/os_sem.c ****         } else {
+ 690:Libraries/uC-OSIII/os_sem.c ****             *p_err     = OS_ERR_TASK_WAITING;
+ 1152              		.loc 1 690 0
+ 1153 07be 7B68     		ldr	r3, [r7, #4]
+ 1154 07c0 47F25E12 		movw	r2, #29022
+ 1155 07c4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 1156              	.L76:
+ 691:Libraries/uC-OSIII/os_sem.c ****         }
+ 692:Libraries/uC-OSIII/os_sem.c ****     }
+ 693:Libraries/uC-OSIII/os_sem.c ****     CPU_CRITICAL_EXIT();
+ 1157              		.loc 1 693 0
+ 1158 07c6 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1159 07ca 7869     		ldr	r0, [r7, #20]
+ 1160 07cc FFF7FEFF 		bl	CPU_SR_Restore
+ 1161              	.L70:
+ 694:Libraries/uC-OSIII/os_sem.c **** }
+ 1162              		.loc 1 694 0
+ 1163 07d0 07F11807 		add	r7, r7, #24
+ 1164 07d4 BD46     		mov	sp, r7
+ 1165 07d6 80BD     		pop	{r7, pc}
+ 1166              		.cfi_endproc
+ 1167              	.LFE5:
+ 1169              		.section	.rodata
+ 1170              		.align	2
+ 1171              	.LC0:
+ 1172 0000 3F53454D 		.ascii	"?SEM\000"
+ 1172      00
+ 1173              		.text
+ 1174              		.align	2
+ 1175              		.global	OS_SemClr
+ 1176              		.thumb
+ 1177              		.thumb_func
+ 1179              	OS_SemClr:
+ 1180              	.LFB6:
+ 695:Libraries/uC-OSIII/os_sem.c **** #endif
+ 696:Libraries/uC-OSIII/os_sem.c **** 
+ 697:Libraries/uC-OSIII/os_sem.c **** /*$PAGE*/
+ 698:Libraries/uC-OSIII/os_sem.c **** /*
+ 699:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 700:Libraries/uC-OSIII/os_sem.c **** *                                           CLEAR THE CONTENTS OF A SEMAPHORE
+ 701:Libraries/uC-OSIII/os_sem.c **** *
+ 702:Libraries/uC-OSIII/os_sem.c **** * Description: This function is called by OSSemDel() to clear the contents of a semaphore
+ 703:Libraries/uC-OSIII/os_sem.c **** *
+ 704:Libraries/uC-OSIII/os_sem.c **** 
+ 705:Libraries/uC-OSIII/os_sem.c **** * Argument(s): p_sem      is a pointer to the semaphore to clear
+ 706:Libraries/uC-OSIII/os_sem.c **** *              -----
+ 707:Libraries/uC-OSIII/os_sem.c **** *
+ 708:Libraries/uC-OSIII/os_sem.c **** * Returns    : none
+ 709:Libraries/uC-OSIII/os_sem.c **** *
+ 710:Libraries/uC-OSIII/os_sem.c **** * Note(s)    : 1) This function is INTERNAL to uC/OS-III and your application MUST NOT call it.
+ 711:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 712:Libraries/uC-OSIII/os_sem.c **** */
+ 713:Libraries/uC-OSIII/os_sem.c **** 
+ 714:Libraries/uC-OSIII/os_sem.c **** void  OS_SemClr (OS_SEM  *p_sem)
+ 715:Libraries/uC-OSIII/os_sem.c **** {
+ 1181              		.loc 1 715 0
+ 1182              		.cfi_startproc
+ 1183              		@ args = 0, pretend = 0, frame = 8
+ 1184              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1185 07d8 80B5     		push	{r7, lr}
+ 1186              	.LCFI18:
+ 1187              		.cfi_def_cfa_offset 8
+ 1188              		.cfi_offset 14, -4
+ 1189              		.cfi_offset 7, -8
+ 1190 07da 82B0     		sub	sp, sp, #8
+ 1191              	.LCFI19:
+ 1192              		.cfi_def_cfa_offset 16
+ 1193 07dc 00AF     		add	r7, sp, #0
+ 1194              	.LCFI20:
+ 1195              		.cfi_def_cfa_register 7
+ 1196 07de 7860     		str	r0, [r7, #4]
+ 716:Libraries/uC-OSIII/os_sem.c ****     p_sem->Type    = OS_OBJ_TYPE_NONE;                      /* Mark the data structure as a NONE   
+ 1197              		.loc 1 716 0
+ 1198 07e0 7A68     		ldr	r2, [r7, #4]
+ 1199 07e2 44F64E73 		movw	r3, #20302
+ 1200 07e6 C4F24E53 		movt	r3, 17742
+ 1201 07ea 1360     		str	r3, [r2, #0]
+ 717:Libraries/uC-OSIII/os_sem.c ****     p_sem->Ctr     = (OS_SEM_CTR)0;                         /* Set semaphore value                 
+ 1202              		.loc 1 717 0
+ 1203 07ec 7B68     		ldr	r3, [r7, #4]
+ 1204 07ee 4FF00002 		mov	r2, #0
+ 1205 07f2 1A62     		str	r2, [r3, #32]
+ 718:Libraries/uC-OSIII/os_sem.c ****     p_sem->TS      = (CPU_TS    )0;                         /* Clear the time stamp                
+ 1206              		.loc 1 718 0
+ 1207 07f4 7B68     		ldr	r3, [r7, #4]
+ 1208 07f6 4FF00002 		mov	r2, #0
+ 1209 07fa 5A62     		str	r2, [r3, #36]
+ 719:Libraries/uC-OSIII/os_sem.c ****     p_sem->NamePtr = (CPU_CHAR *)((void *)"?SEM");
+ 1210              		.loc 1 719 0
+ 1211 07fc 7A68     		ldr	r2, [r7, #4]
+ 1212 07fe 40F20003 		movw	r3, #:lower16:.LC0
+ 1213 0802 C0F20003 		movt	r3, #:upper16:.LC0
+ 1214 0806 5360     		str	r3, [r2, #4]
+ 720:Libraries/uC-OSIII/os_sem.c ****     OS_PendListInit(&p_sem->PendList);                      /* Initialize the waiting list         
+ 1215              		.loc 1 720 0
+ 1216 0808 7B68     		ldr	r3, [r7, #4]
+ 1217 080a 03F10803 		add	r3, r3, #8
+ 1218 080e 1846     		mov	r0, r3
+ 1219 0810 FFF7FEFF 		bl	OS_PendListInit
+ 721:Libraries/uC-OSIII/os_sem.c **** }
+ 1220              		.loc 1 721 0
+ 1221 0814 07F10807 		add	r7, r7, #8
+ 1222 0818 BD46     		mov	sp, r7
+ 1223 081a 80BD     		pop	{r7, pc}
+ 1224              		.cfi_endproc
+ 1225              	.LFE6:
+ 1227              		.section	.rodata
+ 1228 0005 000000   		.align	2
+ 1229              	.LC1:
+ 1230 0008 2000     		.ascii	" \000"
+ 1231 000a 0000     		.text
+ 1232              		.align	2
+ 1233              		.global	OS_SemDbgListAdd
+ 1234              		.thumb
+ 1235              		.thumb_func
+ 1237              	OS_SemDbgListAdd:
+ 1238              	.LFB7:
+ 722:Libraries/uC-OSIII/os_sem.c **** 
+ 723:Libraries/uC-OSIII/os_sem.c **** /*$PAGE*/
+ 724:Libraries/uC-OSIII/os_sem.c **** /*
+ 725:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 726:Libraries/uC-OSIII/os_sem.c **** *                                        ADD/REMOVE SEMAPHORE TO/FROM DEBUG LIST
+ 727:Libraries/uC-OSIII/os_sem.c **** *
+ 728:Libraries/uC-OSIII/os_sem.c **** * Description: These functions are called by uC/OS-III to add or remove a semaphore to/from the deb
+ 729:Libraries/uC-OSIII/os_sem.c **** *
+ 730:Libraries/uC-OSIII/os_sem.c **** * Arguments  : p_sem     is a pointer to the semaphore to add/remove
+ 731:Libraries/uC-OSIII/os_sem.c **** *
+ 732:Libraries/uC-OSIII/os_sem.c **** * Returns    : none
+ 733:Libraries/uC-OSIII/os_sem.c **** *
+ 734:Libraries/uC-OSIII/os_sem.c **** * Note(s)    : These functions are INTERNAL to uC/OS-III and your application should not call it.
+ 735:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 736:Libraries/uC-OSIII/os_sem.c **** */
+ 737:Libraries/uC-OSIII/os_sem.c **** 
+ 738:Libraries/uC-OSIII/os_sem.c **** 
+ 739:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_DBG_EN > 0u
+ 740:Libraries/uC-OSIII/os_sem.c **** void  OS_SemDbgListAdd (OS_SEM  *p_sem)
+ 741:Libraries/uC-OSIII/os_sem.c **** {
+ 1239              		.loc 1 741 0
+ 1240              		.cfi_startproc
+ 1241              		@ args = 0, pretend = 0, frame = 8
+ 1242              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1243              		@ link register save eliminated.
+ 1244 081c 80B4     		push	{r7}
+ 1245              	.LCFI21:
+ 1246              		.cfi_def_cfa_offset 4
+ 1247              		.cfi_offset 7, -4
+ 1248 081e 83B0     		sub	sp, sp, #12
+ 1249              	.LCFI22:
+ 1250              		.cfi_def_cfa_offset 16
+ 1251 0820 00AF     		add	r7, sp, #0
+ 1252              	.LCFI23:
+ 1253              		.cfi_def_cfa_register 7
+ 1254 0822 7860     		str	r0, [r7, #4]
+ 742:Libraries/uC-OSIII/os_sem.c ****     p_sem->DbgNamePtr               = (CPU_CHAR *)((void *)" ");
+ 1255              		.loc 1 742 0
+ 1256 0824 7A68     		ldr	r2, [r7, #4]
+ 1257 0826 40F20003 		movw	r3, #:lower16:.LC1
+ 1258 082a C0F20003 		movt	r3, #:upper16:.LC1
+ 1259 082e D361     		str	r3, [r2, #28]
+ 743:Libraries/uC-OSIII/os_sem.c ****     p_sem->DbgPrevPtr               = (OS_SEM   *)0;
+ 1260              		.loc 1 743 0
+ 1261 0830 7B68     		ldr	r3, [r7, #4]
+ 1262 0832 4FF00002 		mov	r2, #0
+ 1263 0836 5A61     		str	r2, [r3, #20]
+ 744:Libraries/uC-OSIII/os_sem.c ****     if (OSSemDbgListPtr == (OS_SEM *)0) {
+ 1264              		.loc 1 744 0
+ 1265 0838 40F20003 		movw	r3, #:lower16:OSSemDbgListPtr
+ 1266 083c C0F20003 		movt	r3, #:upper16:OSSemDbgListPtr
+ 1267 0840 1B68     		ldr	r3, [r3, #0]
+ 1268 0842 002B     		cmp	r3, #0
+ 1269 0844 04D1     		bne	.L80
+ 745:Libraries/uC-OSIII/os_sem.c ****         p_sem->DbgNextPtr           = (OS_SEM   *)0;
+ 1270              		.loc 1 745 0
+ 1271 0846 7B68     		ldr	r3, [r7, #4]
+ 1272 0848 4FF00002 		mov	r2, #0
+ 1273 084c 9A61     		str	r2, [r3, #24]
+ 1274 084e 0DE0     		b	.L81
+ 1275              	.L80:
+ 746:Libraries/uC-OSIII/os_sem.c ****     } else {
+ 747:Libraries/uC-OSIII/os_sem.c ****         p_sem->DbgNextPtr           =  OSSemDbgListPtr;
+ 1276              		.loc 1 747 0
+ 1277 0850 40F20003 		movw	r3, #:lower16:OSSemDbgListPtr
+ 1278 0854 C0F20003 		movt	r3, #:upper16:OSSemDbgListPtr
+ 1279 0858 1A68     		ldr	r2, [r3, #0]
+ 1280 085a 7B68     		ldr	r3, [r7, #4]
+ 1281 085c 9A61     		str	r2, [r3, #24]
+ 748:Libraries/uC-OSIII/os_sem.c ****         OSSemDbgListPtr->DbgPrevPtr =  p_sem;
+ 1282              		.loc 1 748 0
+ 1283 085e 40F20003 		movw	r3, #:lower16:OSSemDbgListPtr
+ 1284 0862 C0F20003 		movt	r3, #:upper16:OSSemDbgListPtr
+ 1285 0866 1B68     		ldr	r3, [r3, #0]
+ 1286 0868 7A68     		ldr	r2, [r7, #4]
+ 1287 086a 5A61     		str	r2, [r3, #20]
+ 1288              	.L81:
+ 749:Libraries/uC-OSIII/os_sem.c ****     }
+ 750:Libraries/uC-OSIII/os_sem.c ****     OSSemDbgListPtr                 =  p_sem;
+ 1289              		.loc 1 750 0
+ 1290 086c 40F20003 		movw	r3, #:lower16:OSSemDbgListPtr
+ 1291 0870 C0F20003 		movt	r3, #:upper16:OSSemDbgListPtr
+ 1292 0874 7A68     		ldr	r2, [r7, #4]
+ 1293 0876 1A60     		str	r2, [r3, #0]
+ 751:Libraries/uC-OSIII/os_sem.c **** }
+ 1294              		.loc 1 751 0
+ 1295 0878 07F10C07 		add	r7, r7, #12
+ 1296 087c BD46     		mov	sp, r7
+ 1297 087e 80BC     		pop	{r7}
+ 1298 0880 7047     		bx	lr
+ 1299              		.cfi_endproc
+ 1300              	.LFE7:
+ 1302 0882 00BF     		.align	2
+ 1303              		.global	OS_SemDbgListRemove
+ 1304              		.thumb
+ 1305              		.thumb_func
+ 1307              	OS_SemDbgListRemove:
+ 1308              	.LFB8:
+ 752:Libraries/uC-OSIII/os_sem.c **** 
+ 753:Libraries/uC-OSIII/os_sem.c **** 
+ 754:Libraries/uC-OSIII/os_sem.c **** 
+ 755:Libraries/uC-OSIII/os_sem.c **** void  OS_SemDbgListRemove (OS_SEM  *p_sem)
+ 756:Libraries/uC-OSIII/os_sem.c **** {
+ 1309              		.loc 1 756 0
+ 1310              		.cfi_startproc
+ 1311              		@ args = 0, pretend = 0, frame = 16
+ 1312              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1313              		@ link register save eliminated.
+ 1314 0884 80B4     		push	{r7}
+ 1315              	.LCFI24:
+ 1316              		.cfi_def_cfa_offset 4
+ 1317              		.cfi_offset 7, -4
+ 1318 0886 85B0     		sub	sp, sp, #20
+ 1319              	.LCFI25:
+ 1320              		.cfi_def_cfa_offset 24
+ 1321 0888 00AF     		add	r7, sp, #0
+ 1322              	.LCFI26:
+ 1323              		.cfi_def_cfa_register 7
+ 1324 088a 7860     		str	r0, [r7, #4]
+ 757:Libraries/uC-OSIII/os_sem.c ****     OS_SEM  *p_sem_next;
+ 758:Libraries/uC-OSIII/os_sem.c ****     OS_SEM  *p_sem_prev;
+ 759:Libraries/uC-OSIII/os_sem.c **** 
+ 760:Libraries/uC-OSIII/os_sem.c **** 
+ 761:Libraries/uC-OSIII/os_sem.c ****     p_sem_prev = p_sem->DbgPrevPtr;
+ 1325              		.loc 1 761 0
+ 1326 088c 7B68     		ldr	r3, [r7, #4]
+ 1327 088e 5B69     		ldr	r3, [r3, #20]
+ 1328 0890 FB60     		str	r3, [r7, #12]
+ 762:Libraries/uC-OSIII/os_sem.c ****     p_sem_next = p_sem->DbgNextPtr;
+ 1329              		.loc 1 762 0
+ 1330 0892 7B68     		ldr	r3, [r7, #4]
+ 1331 0894 9B69     		ldr	r3, [r3, #24]
+ 1332 0896 BB60     		str	r3, [r7, #8]
+ 763:Libraries/uC-OSIII/os_sem.c **** 
+ 764:Libraries/uC-OSIII/os_sem.c ****     if (p_sem_prev == (OS_SEM *)0) {
+ 1333              		.loc 1 764 0
+ 1334 0898 FB68     		ldr	r3, [r7, #12]
+ 1335 089a 002B     		cmp	r3, #0
+ 1336 089c 11D1     		bne	.L83
+ 765:Libraries/uC-OSIII/os_sem.c ****         OSSemDbgListPtr = p_sem_next;
+ 1337              		.loc 1 765 0
+ 1338 089e 40F20003 		movw	r3, #:lower16:OSSemDbgListPtr
+ 1339 08a2 C0F20003 		movt	r3, #:upper16:OSSemDbgListPtr
+ 1340 08a6 BA68     		ldr	r2, [r7, #8]
+ 1341 08a8 1A60     		str	r2, [r3, #0]
+ 766:Libraries/uC-OSIII/os_sem.c ****         if (p_sem_next != (OS_SEM *)0) {
+ 1342              		.loc 1 766 0
+ 1343 08aa BB68     		ldr	r3, [r7, #8]
+ 1344 08ac 002B     		cmp	r3, #0
+ 1345 08ae 03D0     		beq	.L84
+ 767:Libraries/uC-OSIII/os_sem.c ****             p_sem_next->DbgPrevPtr = (OS_SEM *)0;
+ 1346              		.loc 1 767 0
+ 1347 08b0 BB68     		ldr	r3, [r7, #8]
+ 1348 08b2 4FF00002 		mov	r2, #0
+ 1349 08b6 5A61     		str	r2, [r3, #20]
+ 1350              	.L84:
+ 768:Libraries/uC-OSIII/os_sem.c ****         }
+ 769:Libraries/uC-OSIII/os_sem.c ****         p_sem->DbgNextPtr = (OS_SEM *)0;
+ 1351              		.loc 1 769 0
+ 1352 08b8 7B68     		ldr	r3, [r7, #4]
+ 1353 08ba 4FF00002 		mov	r2, #0
+ 1354 08be 9A61     		str	r2, [r3, #24]
+ 1355 08c0 19E0     		b	.L82
+ 1356              	.L83:
+ 770:Libraries/uC-OSIII/os_sem.c **** 
+ 771:Libraries/uC-OSIII/os_sem.c ****     } else if (p_sem_next == (OS_SEM *)0) {
+ 1357              		.loc 1 771 0
+ 1358 08c2 BB68     		ldr	r3, [r7, #8]
+ 1359 08c4 002B     		cmp	r3, #0
+ 1360 08c6 08D1     		bne	.L86
+ 772:Libraries/uC-OSIII/os_sem.c ****         p_sem_prev->DbgNextPtr = (OS_SEM *)0;
+ 1361              		.loc 1 772 0
+ 1362 08c8 FB68     		ldr	r3, [r7, #12]
+ 1363 08ca 4FF00002 		mov	r2, #0
+ 1364 08ce 9A61     		str	r2, [r3, #24]
+ 773:Libraries/uC-OSIII/os_sem.c ****         p_sem->DbgPrevPtr      = (OS_SEM *)0;
+ 1365              		.loc 1 773 0
+ 1366 08d0 7B68     		ldr	r3, [r7, #4]
+ 1367 08d2 4FF00002 		mov	r2, #0
+ 1368 08d6 5A61     		str	r2, [r3, #20]
+ 1369 08d8 0DE0     		b	.L82
+ 1370              	.L86:
+ 774:Libraries/uC-OSIII/os_sem.c **** 
+ 775:Libraries/uC-OSIII/os_sem.c ****     } else {
+ 776:Libraries/uC-OSIII/os_sem.c ****         p_sem_prev->DbgNextPtr =  p_sem_next;
+ 1371              		.loc 1 776 0
+ 1372 08da FB68     		ldr	r3, [r7, #12]
+ 1373 08dc BA68     		ldr	r2, [r7, #8]
+ 1374 08de 9A61     		str	r2, [r3, #24]
+ 777:Libraries/uC-OSIII/os_sem.c ****         p_sem_next->DbgPrevPtr =  p_sem_prev;
+ 1375              		.loc 1 777 0
+ 1376 08e0 BB68     		ldr	r3, [r7, #8]
+ 1377 08e2 FA68     		ldr	r2, [r7, #12]
+ 1378 08e4 5A61     		str	r2, [r3, #20]
+ 778:Libraries/uC-OSIII/os_sem.c ****         p_sem->DbgNextPtr      = (OS_SEM *)0;
+ 1379              		.loc 1 778 0
+ 1380 08e6 7B68     		ldr	r3, [r7, #4]
+ 1381 08e8 4FF00002 		mov	r2, #0
+ 1382 08ec 9A61     		str	r2, [r3, #24]
+ 779:Libraries/uC-OSIII/os_sem.c ****         p_sem->DbgPrevPtr      = (OS_SEM *)0;
+ 1383              		.loc 1 779 0
+ 1384 08ee 7B68     		ldr	r3, [r7, #4]
+ 1385 08f0 4FF00002 		mov	r2, #0
+ 1386 08f4 5A61     		str	r2, [r3, #20]
+ 1387              	.L82:
+ 780:Libraries/uC-OSIII/os_sem.c ****     }
+ 781:Libraries/uC-OSIII/os_sem.c **** }
+ 1388              		.loc 1 781 0
+ 1389 08f6 07F11407 		add	r7, r7, #20
+ 1390 08fa BD46     		mov	sp, r7
+ 1391 08fc 80BC     		pop	{r7}
+ 1392 08fe 7047     		bx	lr
+ 1393              		.cfi_endproc
+ 1394              	.LFE8:
+ 1396              		.align	2
+ 1397              		.global	OS_SemInit
+ 1398              		.thumb
+ 1399              		.thumb_func
+ 1401              	OS_SemInit:
+ 1402              	.LFB9:
+ 782:Libraries/uC-OSIII/os_sem.c **** #endif
+ 783:Libraries/uC-OSIII/os_sem.c **** 
+ 784:Libraries/uC-OSIII/os_sem.c **** /*$PAGE*/
+ 785:Libraries/uC-OSIII/os_sem.c **** /*
+ 786:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 787:Libraries/uC-OSIII/os_sem.c **** *                                                SEMAPHORE INITIALIZATION
+ 788:Libraries/uC-OSIII/os_sem.c **** *
+ 789:Libraries/uC-OSIII/os_sem.c **** * Description: This function is called by OSInit() to initialize the semaphore management.
+ 790:Libraries/uC-OSIII/os_sem.c **** *
+ 791:Libraries/uC-OSIII/os_sem.c **** 
+ 792:Libraries/uC-OSIII/os_sem.c **** * Argument(s): p_err        is a pointer to a variable that will contain an error code returned by 
+ 793:Libraries/uC-OSIII/os_sem.c **** *
+ 794:Libraries/uC-OSIII/os_sem.c **** *                                OS_ERR_NONE     the call was successful
+ 795:Libraries/uC-OSIII/os_sem.c **** *
+ 796:Libraries/uC-OSIII/os_sem.c **** * Returns    : none
+ 797:Libraries/uC-OSIII/os_sem.c **** *
+ 798:Libraries/uC-OSIII/os_sem.c **** * Note(s)    : 1) This function is INTERNAL to uC/OS-III and your application MUST NOT call it.
+ 799:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 800:Libraries/uC-OSIII/os_sem.c **** */
+ 801:Libraries/uC-OSIII/os_sem.c **** 
+ 802:Libraries/uC-OSIII/os_sem.c **** void  OS_SemInit (OS_ERR  *p_err)
+ 803:Libraries/uC-OSIII/os_sem.c **** {
+ 1403              		.loc 1 803 0
+ 1404              		.cfi_startproc
+ 1405              		@ args = 0, pretend = 0, frame = 8
+ 1406              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1407              		@ link register save eliminated.
+ 1408 0900 80B4     		push	{r7}
+ 1409              	.LCFI27:
+ 1410              		.cfi_def_cfa_offset 4
+ 1411              		.cfi_offset 7, -4
+ 1412 0902 83B0     		sub	sp, sp, #12
+ 1413              	.LCFI28:
+ 1414              		.cfi_def_cfa_offset 16
+ 1415 0904 00AF     		add	r7, sp, #0
+ 1416              	.LCFI29:
+ 1417              		.cfi_def_cfa_register 7
+ 1418 0906 7860     		str	r0, [r7, #4]
+ 804:Libraries/uC-OSIII/os_sem.c **** #ifdef OS_SAFETY_CRITICAL
+ 805:Libraries/uC-OSIII/os_sem.c ****     if (p_err == (OS_ERR *)0) {
+ 806:Libraries/uC-OSIII/os_sem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 807:Libraries/uC-OSIII/os_sem.c ****     }
+ 808:Libraries/uC-OSIII/os_sem.c **** #endif
+ 809:Libraries/uC-OSIII/os_sem.c **** 
+ 810:Libraries/uC-OSIII/os_sem.c **** #if OS_CFG_DBG_EN > 0u
+ 811:Libraries/uC-OSIII/os_sem.c ****     OSSemDbgListPtr = (OS_SEM *)0;
+ 1419              		.loc 1 811 0
+ 1420 0908 40F20003 		movw	r3, #:lower16:OSSemDbgListPtr
+ 1421 090c C0F20003 		movt	r3, #:upper16:OSSemDbgListPtr
+ 1422 0910 4FF00002 		mov	r2, #0
+ 1423 0914 1A60     		str	r2, [r3, #0]
+ 812:Libraries/uC-OSIII/os_sem.c **** #endif
+ 813:Libraries/uC-OSIII/os_sem.c **** 
+ 814:Libraries/uC-OSIII/os_sem.c ****     OSSemQty        = (OS_OBJ_QTY)0;
+ 1424              		.loc 1 814 0
+ 1425 0916 40F20003 		movw	r3, #:lower16:OSSemQty
+ 1426 091a C0F20003 		movt	r3, #:upper16:OSSemQty
+ 1427 091e 4FF00002 		mov	r2, #0
+ 1428 0922 1A80     		strh	r2, [r3, #0]	@ movhi
+ 815:Libraries/uC-OSIII/os_sem.c ****     *p_err          = OS_ERR_NONE;
+ 1429              		.loc 1 815 0
+ 1430 0924 7B68     		ldr	r3, [r7, #4]
+ 1431 0926 4FF00002 		mov	r2, #0
+ 1432 092a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 816:Libraries/uC-OSIII/os_sem.c **** }
+ 1433              		.loc 1 816 0
+ 1434 092c 07F10C07 		add	r7, r7, #12
+ 1435 0930 BD46     		mov	sp, r7
+ 1436 0932 80BC     		pop	{r7}
+ 1437 0934 7047     		bx	lr
+ 1438              		.cfi_endproc
+ 1439              	.LFE9:
+ 1441 0936 00BF     		.align	2
+ 1442              		.global	OS_SemPost
+ 1443              		.thumb
+ 1444              		.thumb_func
+ 1446              	OS_SemPost:
+ 1447              	.LFB10:
+ 817:Libraries/uC-OSIII/os_sem.c **** 
+ 818:Libraries/uC-OSIII/os_sem.c **** /*$PAGE*/
+ 819:Libraries/uC-OSIII/os_sem.c **** /*
+ 820:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 821:Libraries/uC-OSIII/os_sem.c **** *                                                 POST TO A SEMAPHORE
+ 822:Libraries/uC-OSIII/os_sem.c **** *
+ 823:Libraries/uC-OSIII/os_sem.c **** * Description: This function signals a semaphore
+ 824:Libraries/uC-OSIII/os_sem.c **** *
+ 825:Libraries/uC-OSIII/os_sem.c **** * Arguments  : p_sem    is a pointer to the semaphore
+ 826:Libraries/uC-OSIII/os_sem.c **** *
+ 827:Libraries/uC-OSIII/os_sem.c **** *              opt      determines the type of POST performed:
+ 828:Libraries/uC-OSIII/os_sem.c **** *
+ 829:Libraries/uC-OSIII/os_sem.c **** *                           OS_OPT_POST_1            POST to a single waiting task
+ 830:Libraries/uC-OSIII/os_sem.c **** *                           OS_OPT_POST_ALL          POST to ALL tasks that are waiting on the sema
+ 831:Libraries/uC-OSIII/os_sem.c **** *
+ 832:Libraries/uC-OSIII/os_sem.c **** *                           OS_OPT_POST_NO_SCHED     Do not call the scheduler
+ 833:Libraries/uC-OSIII/os_sem.c **** *
+ 834:Libraries/uC-OSIII/os_sem.c **** *                           Note(s): 1) OS_OPT_POST_NO_SCHED can be added with one of the other opt
+ 835:Libraries/uC-OSIII/os_sem.c **** *
+ 836:Libraries/uC-OSIII/os_sem.c **** *              ts       is a timestamp indicating when the post occurred.
+ 837:Libraries/uC-OSIII/os_sem.c **** *
+ 838:Libraries/uC-OSIII/os_sem.c **** *              p_err    is a pointer to a variable that will contain an error code returned by this
+ 839:Libraries/uC-OSIII/os_sem.c **** *
+ 840:Libraries/uC-OSIII/os_sem.c **** *                           OS_ERR_NONE          The call was successful and the semaphore was sign
+ 841:Libraries/uC-OSIII/os_sem.c **** *                           OS_ERR_OBJ_PTR_NULL  If 'p_sem' is a NULL pointer.
+ 842:Libraries/uC-OSIII/os_sem.c **** *                           OS_ERR_OBJ_TYPE      If 'p_sem' is not pointing at a semaphore
+ 843:Libraries/uC-OSIII/os_sem.c **** *                           OS_ERR_SEM_OVF       If the post would cause the semaphore count to ove
+ 844:Libraries/uC-OSIII/os_sem.c **** *
+ 845:Libraries/uC-OSIII/os_sem.c **** * Returns    : The current value of the semaphore counter or 0 upon error.
+ 846:Libraries/uC-OSIII/os_sem.c **** *
+ 847:Libraries/uC-OSIII/os_sem.c **** * Note(s)    : This function is INTERNAL to uC/OS-III and your application should not call it.
+ 848:Libraries/uC-OSIII/os_sem.c **** ***************************************************************************************************
+ 849:Libraries/uC-OSIII/os_sem.c **** */
+ 850:Libraries/uC-OSIII/os_sem.c **** 
+ 851:Libraries/uC-OSIII/os_sem.c **** OS_SEM_CTR  OS_SemPost (OS_SEM  *p_sem,
+ 852:Libraries/uC-OSIII/os_sem.c ****                         OS_OPT   opt,
+ 853:Libraries/uC-OSIII/os_sem.c ****                         CPU_TS   ts,
+ 854:Libraries/uC-OSIII/os_sem.c ****                         OS_ERR  *p_err)
+ 855:Libraries/uC-OSIII/os_sem.c **** {
+ 1448              		.loc 1 855 0
+ 1449              		.cfi_startproc
+ 1450              		@ args = 0, pretend = 0, frame = 48
+ 1451              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1452 0938 80B5     		push	{r7, lr}
+ 1453              	.LCFI30:
+ 1454              		.cfi_def_cfa_offset 8
+ 1455              		.cfi_offset 14, -4
+ 1456              		.cfi_offset 7, -8
+ 1457 093a 8EB0     		sub	sp, sp, #56
+ 1458              	.LCFI31:
+ 1459              		.cfi_def_cfa_offset 64
+ 1460 093c 02AF     		add	r7, sp, #8
+ 1461              	.LCFI32:
+ 1462              		.cfi_def_cfa 7, 56
+ 1463 093e F860     		str	r0, [r7, #12]
+ 1464 0940 7A60     		str	r2, [r7, #4]
+ 1465 0942 3B60     		str	r3, [r7, #0]
+ 1466 0944 0B46     		mov	r3, r1	@ movhi
+ 1467 0946 7B81     		strh	r3, [r7, #10]	@ movhi
+ 856:Libraries/uC-OSIII/os_sem.c ****     OS_OBJ_QTY     cnt;
+ 857:Libraries/uC-OSIII/os_sem.c ****     OS_SEM_CTR     ctr;
+ 858:Libraries/uC-OSIII/os_sem.c ****     OS_PEND_LIST  *p_pend_list;
+ 859:Libraries/uC-OSIII/os_sem.c ****     OS_PEND_DATA  *p_pend_data;
+ 860:Libraries/uC-OSIII/os_sem.c ****     OS_PEND_DATA  *p_pend_data_next;
+ 861:Libraries/uC-OSIII/os_sem.c ****     OS_TCB        *p_tcb;
+ 862:Libraries/uC-OSIII/os_sem.c ****     CPU_SR_ALLOC();
+ 1468              		.loc 1 862 0
+ 1469 0948 4FF00003 		mov	r3, #0
+ 1470 094c 7B62     		str	r3, [r7, #36]
+ 863:Libraries/uC-OSIII/os_sem.c **** 
+ 864:Libraries/uC-OSIII/os_sem.c **** 
+ 865:Libraries/uC-OSIII/os_sem.c **** 
+ 866:Libraries/uC-OSIII/os_sem.c ****     CPU_CRITICAL_ENTER();
+ 1471              		.loc 1 866 0
+ 1472 094e FFF7FEFF 		bl	CPU_SR_Save
+ 1473 0952 7862     		str	r0, [r7, #36]
+ 1474 0954 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 867:Libraries/uC-OSIII/os_sem.c ****     p_pend_list = &p_sem->PendList;
+ 1475              		.loc 1 867 0
+ 1476 0958 FB68     		ldr	r3, [r7, #12]
+ 1477 095a 03F10803 		add	r3, r3, #8
+ 1478 095e 3B62     		str	r3, [r7, #32]
+ 868:Libraries/uC-OSIII/os_sem.c ****     if (p_pend_list->NbrEntries == (OS_OBJ_QTY)0) {         /* Any task waiting on semaphore?      
+ 1479              		.loc 1 868 0
+ 1480 0960 3B6A     		ldr	r3, [r7, #32]
+ 1481 0962 1B89     		ldrh	r3, [r3, #8]
+ 1482 0964 002B     		cmp	r3, #0
+ 1483 0966 28D1     		bne	.L89
+ 869:Libraries/uC-OSIII/os_sem.c ****         switch (sizeof(OS_SEM_CTR)) {
+ 870:Libraries/uC-OSIII/os_sem.c ****             case 1u:
+ 871:Libraries/uC-OSIII/os_sem.c ****                  if (p_sem->Ctr == DEF_INT_08U_MAX_VAL) {
+ 872:Libraries/uC-OSIII/os_sem.c ****                      CPU_CRITICAL_EXIT();
+ 873:Libraries/uC-OSIII/os_sem.c ****                      *p_err = OS_ERR_SEM_OVF;
+ 874:Libraries/uC-OSIII/os_sem.c ****                      return ((OS_SEM_CTR)0);
+ 875:Libraries/uC-OSIII/os_sem.c ****                  }
+ 876:Libraries/uC-OSIII/os_sem.c ****                  break;
+ 877:Libraries/uC-OSIII/os_sem.c **** 
+ 878:Libraries/uC-OSIII/os_sem.c ****             case 2u:
+ 879:Libraries/uC-OSIII/os_sem.c ****                  if (p_sem->Ctr == DEF_INT_16U_MAX_VAL) {
+ 880:Libraries/uC-OSIII/os_sem.c ****                      CPU_CRITICAL_EXIT();
+ 881:Libraries/uC-OSIII/os_sem.c ****                      *p_err = OS_ERR_SEM_OVF;
+ 882:Libraries/uC-OSIII/os_sem.c ****                      return ((OS_SEM_CTR)0);
+ 883:Libraries/uC-OSIII/os_sem.c ****                  }
+ 884:Libraries/uC-OSIII/os_sem.c ****                  break;
+ 885:Libraries/uC-OSIII/os_sem.c **** 
+ 886:Libraries/uC-OSIII/os_sem.c ****             case 4u:
+ 887:Libraries/uC-OSIII/os_sem.c ****                  if (p_sem->Ctr == DEF_INT_32U_MAX_VAL) {
+ 1484              		.loc 1 887 0
+ 1485 0968 FB68     		ldr	r3, [r7, #12]
+ 1486 096a 1B6A     		ldr	r3, [r3, #32]
+ 1487 096c B3F1FF3F 		cmp	r3, #-1
+ 1488 0970 0BD1     		bne	.L100
+ 888:Libraries/uC-OSIII/os_sem.c ****                      CPU_CRITICAL_EXIT();
+ 1489              		.loc 1 888 0
+ 1490 0972 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1491 0976 786A     		ldr	r0, [r7, #36]
+ 1492 0978 FFF7FEFF 		bl	CPU_SR_Restore
+ 889:Libraries/uC-OSIII/os_sem.c ****                      *p_err = OS_ERR_SEM_OVF;
+ 1493              		.loc 1 889 0
+ 1494 097c 3B68     		ldr	r3, [r7, #0]
+ 1495 097e 46F6C552 		movw	r2, #28101
+ 1496 0982 1A80     		strh	r2, [r3, #0]	@ movhi
+ 890:Libraries/uC-OSIII/os_sem.c ****                      return ((OS_SEM_CTR)0);
+ 1497              		.loc 1 890 0
+ 1498 0984 4FF00003 		mov	r3, #0
+ 1499 0988 89E0     		b	.L91
+ 1500              	.L100:
+ 891:Libraries/uC-OSIII/os_sem.c ****                  }
+ 892:Libraries/uC-OSIII/os_sem.c ****                  break;
+ 1501              		.loc 1 892 0
+ 1502 098a 00BF     		nop
+ 1503              	.L99:
+ 893:Libraries/uC-OSIII/os_sem.c **** 
+ 894:Libraries/uC-OSIII/os_sem.c ****             default:
+ 895:Libraries/uC-OSIII/os_sem.c ****                  break;
+ 896:Libraries/uC-OSIII/os_sem.c ****         }
+ 897:Libraries/uC-OSIII/os_sem.c ****         p_sem->Ctr++;                                       /* No                                  
+ 1504              		.loc 1 897 0
+ 1505 098c FB68     		ldr	r3, [r7, #12]
+ 1506 098e 1B6A     		ldr	r3, [r3, #32]
+ 1507 0990 03F10102 		add	r2, r3, #1
+ 1508 0994 FB68     		ldr	r3, [r7, #12]
+ 1509 0996 1A62     		str	r2, [r3, #32]
+ 898:Libraries/uC-OSIII/os_sem.c ****         ctr       = p_sem->Ctr;
+ 1510              		.loc 1 898 0
+ 1511 0998 FB68     		ldr	r3, [r7, #12]
+ 1512 099a 1B6A     		ldr	r3, [r3, #32]
+ 1513 099c FB61     		str	r3, [r7, #28]
+ 899:Libraries/uC-OSIII/os_sem.c ****         p_sem->TS = ts;                                     /* Save timestamp in semaphore control 
+ 1514              		.loc 1 899 0
+ 1515 099e FB68     		ldr	r3, [r7, #12]
+ 1516 09a0 7A68     		ldr	r2, [r7, #4]
+ 1517 09a2 5A62     		str	r2, [r3, #36]
+ 900:Libraries/uC-OSIII/os_sem.c ****         CPU_CRITICAL_EXIT();
+ 1518              		.loc 1 900 0
+ 1519 09a4 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1520 09a8 786A     		ldr	r0, [r7, #36]
+ 1521 09aa FFF7FEFF 		bl	CPU_SR_Restore
+ 901:Libraries/uC-OSIII/os_sem.c ****         *p_err    = OS_ERR_NONE;
+ 1522              		.loc 1 901 0
+ 1523 09ae 3B68     		ldr	r3, [r7, #0]
+ 1524 09b0 4FF00002 		mov	r2, #0
+ 1525 09b4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 902:Libraries/uC-OSIII/os_sem.c ****         return (ctr);
+ 1526              		.loc 1 902 0
+ 1527 09b6 FB69     		ldr	r3, [r7, #28]
+ 1528 09b8 71E0     		b	.L91
+ 1529              	.L89:
+ 903:Libraries/uC-OSIII/os_sem.c ****     }
+ 904:Libraries/uC-OSIII/os_sem.c **** 
+ 905:Libraries/uC-OSIII/os_sem.c ****     OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();
+ 1530              		.loc 1 905 0
+ 1531 09ba 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1532 09be C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1533 09c2 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1534 09c4 03F10103 		add	r3, r3, #1
+ 1535 09c8 DAB2     		uxtb	r2, r3
+ 1536 09ca 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1537 09ce C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1538 09d2 1A70     		strb	r2, [r3, #0]
+ 1539 09d4 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1540 09d8 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1541 09dc 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1542 09de 012B     		cmp	r3, #1
+ 1543 09e0 01D1     		bne	.L92
+ 1544              		.loc 1 905 0 is_stmt 0 discriminator 1
+ 1545 09e2 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 1546              	.L92:
+ 1547              		.loc 1 905 0 discriminator 2
+ 1548 09e6 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1549 09ea 786A     		ldr	r0, [r7, #36]
+ 1550 09ec FFF7FEFF 		bl	CPU_SR_Restore
+ 906:Libraries/uC-OSIII/os_sem.c ****     if ((opt & OS_OPT_POST_ALL) != (OS_OPT)0) {             /* Post message to all tasks waiting?  
+ 1551              		.loc 1 906 0 is_stmt 1 discriminator 2
+ 1552 09f0 7B89     		ldrh	r3, [r7, #10]
+ 1553 09f2 03F40073 		and	r3, r3, #512
+ 1554 09f6 002B     		cmp	r3, #0
+ 1555 09f8 03D0     		beq	.L93
+ 907:Libraries/uC-OSIII/os_sem.c ****         cnt = p_pend_list->NbrEntries;                      /* Yes                                 
+ 1556              		.loc 1 907 0
+ 1557 09fa 3B6A     		ldr	r3, [r7, #32]
+ 1558 09fc 1B89     		ldrh	r3, [r3, #8]	@ movhi
+ 1559 09fe FB85     		strh	r3, [r7, #46]	@ movhi
+ 1560 0a00 02E0     		b	.L94
+ 1561              	.L93:
+ 908:Libraries/uC-OSIII/os_sem.c ****     } else {
+ 909:Libraries/uC-OSIII/os_sem.c ****         cnt = (OS_OBJ_QTY)1;                                /* No                                  
+ 1562              		.loc 1 909 0
+ 1563 0a02 4FF00103 		mov	r3, #1
+ 1564 0a06 FB85     		strh	r3, [r7, #46]	@ movhi
+ 1565              	.L94:
+ 910:Libraries/uC-OSIII/os_sem.c ****     }
+ 911:Libraries/uC-OSIII/os_sem.c ****     p_pend_data = p_pend_list->HeadPtr;
+ 1566              		.loc 1 911 0
+ 1567 0a08 3B6A     		ldr	r3, [r7, #32]
+ 1568 0a0a 1B68     		ldr	r3, [r3, #0]
+ 1569 0a0c BB62     		str	r3, [r7, #40]
+ 912:Libraries/uC-OSIII/os_sem.c ****     while (cnt > 0u) {
+ 1570              		.loc 1 912 0
+ 1571 0a0e 15E0     		b	.L95
+ 1572              	.L96:
+ 913:Libraries/uC-OSIII/os_sem.c ****         p_tcb            = p_pend_data->TCBPtr;
+ 1573              		.loc 1 913 0
+ 1574 0a10 BB6A     		ldr	r3, [r7, #40]
+ 1575 0a12 9B68     		ldr	r3, [r3, #8]
+ 1576 0a14 BB61     		str	r3, [r7, #24]
+ 914:Libraries/uC-OSIII/os_sem.c ****         p_pend_data_next = p_pend_data->NextPtr;
+ 1577              		.loc 1 914 0
+ 1578 0a16 BB6A     		ldr	r3, [r7, #40]
+ 1579 0a18 5B68     		ldr	r3, [r3, #4]
+ 1580 0a1a 7B61     		str	r3, [r7, #20]
+ 915:Libraries/uC-OSIII/os_sem.c ****         OS_Post((OS_PEND_OBJ *)((void *)p_sem),
+ 1581              		.loc 1 915 0
+ 1582 0a1c 7B68     		ldr	r3, [r7, #4]
+ 1583 0a1e 0093     		str	r3, [sp, #0]
+ 1584 0a20 F868     		ldr	r0, [r7, #12]
+ 1585 0a22 B969     		ldr	r1, [r7, #24]
+ 1586 0a24 4FF00002 		mov	r2, #0
+ 1587 0a28 4FF00003 		mov	r3, #0
+ 1588 0a2c FFF7FEFF 		bl	OS_Post
+ 916:Libraries/uC-OSIII/os_sem.c ****                 p_tcb,
+ 917:Libraries/uC-OSIII/os_sem.c ****                 (void      *)0,
+ 918:Libraries/uC-OSIII/os_sem.c ****                 (OS_MSG_SIZE)0,
+ 919:Libraries/uC-OSIII/os_sem.c ****                 ts);
+ 920:Libraries/uC-OSIII/os_sem.c ****         p_pend_data = p_pend_data_next;
+ 1589              		.loc 1 920 0
+ 1590 0a30 7B69     		ldr	r3, [r7, #20]
+ 1591 0a32 BB62     		str	r3, [r7, #40]
+ 921:Libraries/uC-OSIII/os_sem.c ****         cnt--;
+ 1592              		.loc 1 921 0
+ 1593 0a34 FB8D     		ldrh	r3, [r7, #46]	@ movhi
+ 1594 0a36 03F1FF33 		add	r3, r3, #-1
+ 1595 0a3a FB85     		strh	r3, [r7, #46]	@ movhi
+ 1596              	.L95:
+ 912:Libraries/uC-OSIII/os_sem.c ****     while (cnt > 0u) {
+ 1597              		.loc 1 912 0 discriminator 1
+ 1598 0a3c FB8D     		ldrh	r3, [r7, #46]
+ 1599 0a3e 002B     		cmp	r3, #0
+ 1600 0a40 E6D1     		bne	.L96
+ 922:Libraries/uC-OSIII/os_sem.c ****     }
+ 923:Libraries/uC-OSIII/os_sem.c ****     ctr = p_sem->Ctr;
+ 1601              		.loc 1 923 0
+ 1602 0a42 FB68     		ldr	r3, [r7, #12]
+ 1603 0a44 1B6A     		ldr	r3, [r3, #32]
+ 1604 0a46 FB61     		str	r3, [r7, #28]
+ 924:Libraries/uC-OSIII/os_sem.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 1605              		.loc 1 924 0
+ 1606 0a48 FFF7FEFF 		bl	CPU_SR_Save
+ 1607 0a4c 7862     		str	r0, [r7, #36]
+ 1608 0a4e FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 1609 0a52 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1610 0a56 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1611 0a5a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1612 0a5c 03F1FF33 		add	r3, r3, #-1
+ 1613 0a60 DAB2     		uxtb	r2, r3
+ 1614 0a62 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1615 0a66 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1616 0a6a 1A70     		strb	r2, [r3, #0]
+ 1617 0a6c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1618 0a70 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1619 0a74 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1620 0a76 002B     		cmp	r3, #0
+ 1621 0a78 01D1     		bne	.L97
+ 1622              		.loc 1 924 0 is_stmt 0 discriminator 1
+ 1623 0a7a FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 1624              	.L97:
+ 1625              		.loc 1 924 0 discriminator 2
+ 1626 0a7e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1627 0a82 786A     		ldr	r0, [r7, #36]
+ 1628 0a84 FFF7FEFF 		bl	CPU_SR_Restore
+ 925:Libraries/uC-OSIII/os_sem.c ****     if ((opt & OS_OPT_POST_NO_SCHED) == (OS_OPT)0) {
+ 1629              		.loc 1 925 0 is_stmt 1 discriminator 2
+ 1630 0a88 7B89     		ldrh	r3, [r7, #10]
+ 1631 0a8a 1BB2     		sxth	r3, r3
+ 1632 0a8c 002B     		cmp	r3, #0
+ 1633 0a8e 01DB     		blt	.L98
+ 926:Libraries/uC-OSIII/os_sem.c ****         OSSched();                                          /* Run the scheduler                   
+ 1634              		.loc 1 926 0
+ 1635 0a90 FFF7FEFF 		bl	OSSched
+ 1636              	.L98:
+ 927:Libraries/uC-OSIII/os_sem.c ****     }
+ 928:Libraries/uC-OSIII/os_sem.c ****     *p_err = OS_ERR_NONE;
+ 1637              		.loc 1 928 0
+ 1638 0a94 3B68     		ldr	r3, [r7, #0]
+ 1639 0a96 4FF00002 		mov	r2, #0
+ 1640 0a9a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 929:Libraries/uC-OSIII/os_sem.c ****     return (ctr);
+ 1641              		.loc 1 929 0
+ 1642 0a9c FB69     		ldr	r3, [r7, #28]
+ 1643              	.L91:
+ 930:Libraries/uC-OSIII/os_sem.c **** }
+ 1644              		.loc 1 930 0
+ 1645 0a9e 1846     		mov	r0, r3
+ 1646 0aa0 07F13007 		add	r7, r7, #48
+ 1647 0aa4 BD46     		mov	sp, r7
+ 1648 0aa6 80BD     		pop	{r7, pc}
+ 1649              		.cfi_endproc
+ 1650              	.LFE10:
+ 1652              	.Letext0:
+ 1653              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 1654              		.file 3 "Libraries/uC-CPU/cpu_core.h"
+ 1655              		.file 4 "Libraries/uC-OSIII/os_type.h"
+ 1656              		.file 5 "Libraries/uC-OSIII/os.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 os_sem.c
+     /tmp/ccybxiig.s:18     .text:00000000 $t
+     /tmp/ccybxiig.s:23     .text:00000000 OSSemCreate
+     /tmp/ccybxiig.s:1237   .text:0000081c OS_SemDbgListAdd
+     /tmp/ccybxiig.s:131    .text:000000ac OSSemDel
+     /tmp/ccybxiig.s:1307   .text:00000884 OS_SemDbgListRemove
+     /tmp/ccybxiig.s:1179   .text:000007d8 OS_SemClr
+     /tmp/ccybxiig.s:384    .text:00000280 OSSemPend
+     /tmp/ccybxiig.s:625    .text:00000450 $d
+     /tmp/ccybxiig.s:631    .text:00000460 $t
+     /tmp/ccybxiig.s:739    .text:0000050c OSSemPendAbort
+     /tmp/ccybxiig.s:957    .text:00000690 OSSemPost
+     /tmp/ccybxiig.s:1446   .text:00000938 OS_SemPost
+     /tmp/ccybxiig.s:1057   .text:00000730 OSSemSet
+     /tmp/ccybxiig.s:1170   .rodata:00000000 $d
+     /tmp/ccybxiig.s:1171   .rodata:00000000 .LC0
+     /tmp/ccybxiig.s:1229   .rodata:00000008 .LC1
+     /tmp/ccybxiig.s:1401   .text:00000900 OS_SemInit
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+OSIntNestingCtr
+CPU_SR_Save
+CPU_IntDisMeasStart
+OS_PendListInit
+OSSemQty
+CPU_IntDisMeasStop
+CPU_SR_Restore
+OSSchedLockNestingCtr
+OS_SchedLockTimeMeasStart
+CPU_TS_TmrRd
+OS_PendObjDel
+OS_SchedLockTimeMeasStop
+OSSched
+OS_Pend
+OSTCBCurPtr
+OS_PendAbort
+OS_IntQPost
+OSSemDbgListPtr
+OS_Post

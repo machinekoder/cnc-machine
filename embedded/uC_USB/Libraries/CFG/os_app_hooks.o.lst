@@ -1,0 +1,655 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"os_app_hooks.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	App_OS_SetAllHooks
+  20              		.thumb
+  21              		.thumb_func
+  23              	App_OS_SetAllHooks:
+  24              	.LFB0:
+  25              		.file 1 "Libraries/CFG/os_app_hooks.c"
+   1:Libraries/CFG/os_app_hooks.c **** /*
+   2:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+   3:Libraries/CFG/os_app_hooks.c **** *                                                     uC/OS-III
+   4:Libraries/CFG/os_app_hooks.c **** *                                                The Real-Time Kernel
+   5:Libraries/CFG/os_app_hooks.c **** *
+   6:Libraries/CFG/os_app_hooks.c **** *                                  (c) Copyright 2009-2010; Micrium, Inc.; Weston, FL
+   7:Libraries/CFG/os_app_hooks.c **** *                          All rights reserved.  Protected by international copyright laws.
+   8:Libraries/CFG/os_app_hooks.c **** *
+   9:Libraries/CFG/os_app_hooks.c **** *                                                  APPLICATION HOOKS
+  10:Libraries/CFG/os_app_hooks.c **** *
+  11:Libraries/CFG/os_app_hooks.c **** * File    : OS_APP_HOOKS.C
+  12:Libraries/CFG/os_app_hooks.c **** * By      : JJL
+  13:Libraries/CFG/os_app_hooks.c **** * Version : V3.01.1
+  14:Libraries/CFG/os_app_hooks.c **** *
+  15:Libraries/CFG/os_app_hooks.c **** * LICENSING TERMS:
+  16:Libraries/CFG/os_app_hooks.c **** * ---------------
+  17:Libraries/CFG/os_app_hooks.c **** *               uC/OS-III is provided in source form to registered licensees ONLY.  It is 
+  18:Libraries/CFG/os_app_hooks.c **** *               illegal to distribute this source code to any third party unless you receive 
+  19:Libraries/CFG/os_app_hooks.c **** *               written permission by an authorized Micrium representative.  Knowledge of 
+  20:Libraries/CFG/os_app_hooks.c **** *               the source code may NOT be used to develop a similar product.
+  21:Libraries/CFG/os_app_hooks.c **** *
+  22:Libraries/CFG/os_app_hooks.c **** *               Please help us continue to provide the Embedded community with the finest
+  23:Libraries/CFG/os_app_hooks.c **** *               software available.  Your honesty is greatly appreciated.
+  24:Libraries/CFG/os_app_hooks.c **** *
+  25:Libraries/CFG/os_app_hooks.c **** *               You can contact us at www.micrium.com.
+  26:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+  27:Libraries/CFG/os_app_hooks.c **** */
+  28:Libraries/CFG/os_app_hooks.c **** 
+  29:Libraries/CFG/os_app_hooks.c **** #include <os.h>
+  30:Libraries/CFG/os_app_hooks.c **** #include <os_app_hooks.h>
+  31:Libraries/CFG/os_app_hooks.c **** 
+  32:Libraries/CFG/os_app_hooks.c **** /*$PAGE*/
+  33:Libraries/CFG/os_app_hooks.c **** /*
+  34:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+  35:Libraries/CFG/os_app_hooks.c **** *                                              SET ALL APPLICATION HOOKS
+  36:Libraries/CFG/os_app_hooks.c **** *
+  37:Libraries/CFG/os_app_hooks.c **** * Description: Set ALL application hooks.
+  38:Libraries/CFG/os_app_hooks.c **** *
+  39:Libraries/CFG/os_app_hooks.c **** * Arguments  : none.
+  40:Libraries/CFG/os_app_hooks.c **** *
+  41:Libraries/CFG/os_app_hooks.c **** * Note(s)    : none
+  42:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+  43:Libraries/CFG/os_app_hooks.c **** */
+  44:Libraries/CFG/os_app_hooks.c **** 
+  45:Libraries/CFG/os_app_hooks.c **** void  App_OS_SetAllHooks (void)
+  46:Libraries/CFG/os_app_hooks.c **** {
+  26              		.loc 1 46 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 8
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 14, -4
+  34              		.cfi_offset 7, -8
+  35 0002 82B0     		sub	sp, sp, #8
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 16
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  47:Libraries/CFG/os_app_hooks.c **** #if OS_CFG_APP_HOOKS_EN > 0u
+  48:Libraries/CFG/os_app_hooks.c ****     CPU_SR_ALLOC();
+  41              		.loc 1 48 0
+  42 0006 4FF00003 		mov	r3, #0
+  43 000a 7B60     		str	r3, [r7, #4]
+  49:Libraries/CFG/os_app_hooks.c **** 
+  50:Libraries/CFG/os_app_hooks.c **** 
+  51:Libraries/CFG/os_app_hooks.c ****     CPU_CRITICAL_ENTER();
+  44              		.loc 1 51 0
+  45 000c FFF7FEFF 		bl	CPU_SR_Save
+  46 0010 7860     		str	r0, [r7, #4]
+  47 0012 FFF7FEFF 		bl	CPU_IntDisMeasStart
+  52:Libraries/CFG/os_app_hooks.c ****     OS_AppTaskCreateHookPtr = App_OS_TaskCreateHook;
+  48              		.loc 1 52 0
+  49 0016 40F20003 		movw	r3, #:lower16:OS_AppTaskCreateHookPtr
+  50 001a C0F20003 		movt	r3, #:upper16:OS_AppTaskCreateHookPtr
+  51 001e 40F20002 		movw	r2, #:lower16:App_OS_TaskCreateHook
+  52 0022 C0F20002 		movt	r2, #:upper16:App_OS_TaskCreateHook
+  53 0026 1A60     		str	r2, [r3, #0]
+  53:Libraries/CFG/os_app_hooks.c ****     OS_AppTaskDelHookPtr    = App_OS_TaskDelHook;
+  54              		.loc 1 53 0
+  55 0028 40F20003 		movw	r3, #:lower16:OS_AppTaskDelHookPtr
+  56 002c C0F20003 		movt	r3, #:upper16:OS_AppTaskDelHookPtr
+  57 0030 40F20002 		movw	r2, #:lower16:App_OS_TaskDelHook
+  58 0034 C0F20002 		movt	r2, #:upper16:App_OS_TaskDelHook
+  59 0038 1A60     		str	r2, [r3, #0]
+  54:Libraries/CFG/os_app_hooks.c ****     OS_AppTaskReturnHookPtr = App_OS_TaskReturnHook;
+  60              		.loc 1 54 0
+  61 003a 40F20003 		movw	r3, #:lower16:OS_AppTaskReturnHookPtr
+  62 003e C0F20003 		movt	r3, #:upper16:OS_AppTaskReturnHookPtr
+  63 0042 40F20002 		movw	r2, #:lower16:App_OS_TaskReturnHook
+  64 0046 C0F20002 		movt	r2, #:upper16:App_OS_TaskReturnHook
+  65 004a 1A60     		str	r2, [r3, #0]
+  55:Libraries/CFG/os_app_hooks.c **** 
+  56:Libraries/CFG/os_app_hooks.c ****     OS_AppIdleTaskHookPtr   = App_OS_IdleTaskHook;
+  66              		.loc 1 56 0
+  67 004c 40F20003 		movw	r3, #:lower16:OS_AppIdleTaskHookPtr
+  68 0050 C0F20003 		movt	r3, #:upper16:OS_AppIdleTaskHookPtr
+  69 0054 40F20002 		movw	r2, #:lower16:App_OS_IdleTaskHook
+  70 0058 C0F20002 		movt	r2, #:upper16:App_OS_IdleTaskHook
+  71 005c 1A60     		str	r2, [r3, #0]
+  57:Libraries/CFG/os_app_hooks.c ****     OS_AppStatTaskHookPtr   = App_OS_StatTaskHook;
+  72              		.loc 1 57 0
+  73 005e 40F20003 		movw	r3, #:lower16:OS_AppStatTaskHookPtr
+  74 0062 C0F20003 		movt	r3, #:upper16:OS_AppStatTaskHookPtr
+  75 0066 40F20002 		movw	r2, #:lower16:App_OS_StatTaskHook
+  76 006a C0F20002 		movt	r2, #:upper16:App_OS_StatTaskHook
+  77 006e 1A60     		str	r2, [r3, #0]
+  58:Libraries/CFG/os_app_hooks.c ****     OS_AppTaskSwHookPtr     = App_OS_TaskSwHook;
+  78              		.loc 1 58 0
+  79 0070 40F20003 		movw	r3, #:lower16:OS_AppTaskSwHookPtr
+  80 0074 C0F20003 		movt	r3, #:upper16:OS_AppTaskSwHookPtr
+  81 0078 40F20002 		movw	r2, #:lower16:App_OS_TaskSwHook
+  82 007c C0F20002 		movt	r2, #:upper16:App_OS_TaskSwHook
+  83 0080 1A60     		str	r2, [r3, #0]
+  59:Libraries/CFG/os_app_hooks.c ****     OS_AppTimeTickHookPtr   = App_OS_TimeTickHook;
+  84              		.loc 1 59 0
+  85 0082 40F20003 		movw	r3, #:lower16:OS_AppTimeTickHookPtr
+  86 0086 C0F20003 		movt	r3, #:upper16:OS_AppTimeTickHookPtr
+  87 008a 40F20002 		movw	r2, #:lower16:App_OS_TimeTickHook
+  88 008e C0F20002 		movt	r2, #:upper16:App_OS_TimeTickHook
+  89 0092 1A60     		str	r2, [r3, #0]
+  60:Libraries/CFG/os_app_hooks.c ****     CPU_CRITICAL_EXIT();
+  90              		.loc 1 60 0
+  91 0094 FFF7FEFF 		bl	CPU_IntDisMeasStop
+  92 0098 7868     		ldr	r0, [r7, #4]
+  93 009a FFF7FEFF 		bl	CPU_SR_Restore
+  61:Libraries/CFG/os_app_hooks.c **** #endif
+  62:Libraries/CFG/os_app_hooks.c **** }
+  94              		.loc 1 62 0
+  95 009e 07F10807 		add	r7, r7, #8
+  96 00a2 BD46     		mov	sp, r7
+  97 00a4 80BD     		pop	{r7, pc}
+  98              		.cfi_endproc
+  99              	.LFE0:
+ 101 00a6 00BF     		.align	2
+ 102              		.global	App_OS_ClrAllHooks
+ 103              		.thumb
+ 104              		.thumb_func
+ 106              	App_OS_ClrAllHooks:
+ 107              	.LFB1:
+  63:Libraries/CFG/os_app_hooks.c **** 
+  64:Libraries/CFG/os_app_hooks.c **** /*$PAGE*/
+  65:Libraries/CFG/os_app_hooks.c **** /*
+  66:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+  67:Libraries/CFG/os_app_hooks.c **** *                                             CLEAR ALL APPLICATION HOOKS
+  68:Libraries/CFG/os_app_hooks.c **** *
+  69:Libraries/CFG/os_app_hooks.c **** * Description: Clear ALL application hooks.
+  70:Libraries/CFG/os_app_hooks.c **** *
+  71:Libraries/CFG/os_app_hooks.c **** * Arguments  : none.
+  72:Libraries/CFG/os_app_hooks.c **** *
+  73:Libraries/CFG/os_app_hooks.c **** * Note(s)    : none
+  74:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+  75:Libraries/CFG/os_app_hooks.c **** */
+  76:Libraries/CFG/os_app_hooks.c **** 
+  77:Libraries/CFG/os_app_hooks.c **** void  App_OS_ClrAllHooks (void)
+  78:Libraries/CFG/os_app_hooks.c **** {
+ 108              		.loc 1 78 0
+ 109              		.cfi_startproc
+ 110              		@ args = 0, pretend = 0, frame = 8
+ 111              		@ frame_needed = 1, uses_anonymous_args = 0
+ 112 00a8 80B5     		push	{r7, lr}
+ 113              	.LCFI3:
+ 114              		.cfi_def_cfa_offset 8
+ 115              		.cfi_offset 14, -4
+ 116              		.cfi_offset 7, -8
+ 117 00aa 82B0     		sub	sp, sp, #8
+ 118              	.LCFI4:
+ 119              		.cfi_def_cfa_offset 16
+ 120 00ac 00AF     		add	r7, sp, #0
+ 121              	.LCFI5:
+ 122              		.cfi_def_cfa_register 7
+  79:Libraries/CFG/os_app_hooks.c **** #if OS_CFG_APP_HOOKS_EN > 0u
+  80:Libraries/CFG/os_app_hooks.c ****     CPU_SR_ALLOC();
+ 123              		.loc 1 80 0
+ 124 00ae 4FF00003 		mov	r3, #0
+ 125 00b2 7B60     		str	r3, [r7, #4]
+  81:Libraries/CFG/os_app_hooks.c **** 
+  82:Libraries/CFG/os_app_hooks.c **** 
+  83:Libraries/CFG/os_app_hooks.c ****     CPU_CRITICAL_ENTER();
+ 126              		.loc 1 83 0
+ 127 00b4 FFF7FEFF 		bl	CPU_SR_Save
+ 128 00b8 7860     		str	r0, [r7, #4]
+ 129 00ba FFF7FEFF 		bl	CPU_IntDisMeasStart
+  84:Libraries/CFG/os_app_hooks.c ****     OS_AppTaskCreateHookPtr = (OS_APP_HOOK_TCB)0;
+ 130              		.loc 1 84 0
+ 131 00be 40F20003 		movw	r3, #:lower16:OS_AppTaskCreateHookPtr
+ 132 00c2 C0F20003 		movt	r3, #:upper16:OS_AppTaskCreateHookPtr
+ 133 00c6 4FF00002 		mov	r2, #0
+ 134 00ca 1A60     		str	r2, [r3, #0]
+  85:Libraries/CFG/os_app_hooks.c ****     OS_AppTaskDelHookPtr    = (OS_APP_HOOK_TCB)0;
+ 135              		.loc 1 85 0
+ 136 00cc 40F20003 		movw	r3, #:lower16:OS_AppTaskDelHookPtr
+ 137 00d0 C0F20003 		movt	r3, #:upper16:OS_AppTaskDelHookPtr
+ 138 00d4 4FF00002 		mov	r2, #0
+ 139 00d8 1A60     		str	r2, [r3, #0]
+  86:Libraries/CFG/os_app_hooks.c ****     OS_AppTaskReturnHookPtr = (OS_APP_HOOK_TCB)0;
+ 140              		.loc 1 86 0
+ 141 00da 40F20003 		movw	r3, #:lower16:OS_AppTaskReturnHookPtr
+ 142 00de C0F20003 		movt	r3, #:upper16:OS_AppTaskReturnHookPtr
+ 143 00e2 4FF00002 		mov	r2, #0
+ 144 00e6 1A60     		str	r2, [r3, #0]
+  87:Libraries/CFG/os_app_hooks.c **** 
+  88:Libraries/CFG/os_app_hooks.c ****     OS_AppIdleTaskHookPtr   = (OS_APP_HOOK_VOID)0;
+ 145              		.loc 1 88 0
+ 146 00e8 40F20003 		movw	r3, #:lower16:OS_AppIdleTaskHookPtr
+ 147 00ec C0F20003 		movt	r3, #:upper16:OS_AppIdleTaskHookPtr
+ 148 00f0 4FF00002 		mov	r2, #0
+ 149 00f4 1A60     		str	r2, [r3, #0]
+  89:Libraries/CFG/os_app_hooks.c ****     OS_AppStatTaskHookPtr   = (OS_APP_HOOK_VOID)0;
+ 150              		.loc 1 89 0
+ 151 00f6 40F20003 		movw	r3, #:lower16:OS_AppStatTaskHookPtr
+ 152 00fa C0F20003 		movt	r3, #:upper16:OS_AppStatTaskHookPtr
+ 153 00fe 4FF00002 		mov	r2, #0
+ 154 0102 1A60     		str	r2, [r3, #0]
+  90:Libraries/CFG/os_app_hooks.c ****     OS_AppTaskSwHookPtr     = (OS_APP_HOOK_VOID)0;
+ 155              		.loc 1 90 0
+ 156 0104 40F20003 		movw	r3, #:lower16:OS_AppTaskSwHookPtr
+ 157 0108 C0F20003 		movt	r3, #:upper16:OS_AppTaskSwHookPtr
+ 158 010c 4FF00002 		mov	r2, #0
+ 159 0110 1A60     		str	r2, [r3, #0]
+  91:Libraries/CFG/os_app_hooks.c ****     OS_AppTimeTickHookPtr   = (OS_APP_HOOK_VOID)0;
+ 160              		.loc 1 91 0
+ 161 0112 40F20003 		movw	r3, #:lower16:OS_AppTimeTickHookPtr
+ 162 0116 C0F20003 		movt	r3, #:upper16:OS_AppTimeTickHookPtr
+ 163 011a 4FF00002 		mov	r2, #0
+ 164 011e 1A60     		str	r2, [r3, #0]
+  92:Libraries/CFG/os_app_hooks.c ****     CPU_CRITICAL_EXIT();
+ 165              		.loc 1 92 0
+ 166 0120 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 167 0124 7868     		ldr	r0, [r7, #4]
+ 168 0126 FFF7FEFF 		bl	CPU_SR_Restore
+  93:Libraries/CFG/os_app_hooks.c **** #endif
+  94:Libraries/CFG/os_app_hooks.c **** }
+ 169              		.loc 1 94 0
+ 170 012a 07F10807 		add	r7, r7, #8
+ 171 012e BD46     		mov	sp, r7
+ 172 0130 80BD     		pop	{r7, pc}
+ 173              		.cfi_endproc
+ 174              	.LFE1:
+ 176 0132 00BF     		.align	2
+ 177              		.global	App_OS_TaskCreateHook
+ 178              		.thumb
+ 179              		.thumb_func
+ 181              	App_OS_TaskCreateHook:
+ 182              	.LFB2:
+  95:Libraries/CFG/os_app_hooks.c **** 
+  96:Libraries/CFG/os_app_hooks.c **** /*$PAGE*/
+  97:Libraries/CFG/os_app_hooks.c **** /*
+  98:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+  99:Libraries/CFG/os_app_hooks.c **** *                                            APPLICATION TASK CREATION HOOK
+ 100:Libraries/CFG/os_app_hooks.c **** *
+ 101:Libraries/CFG/os_app_hooks.c **** * Description: This function is called when a task is created.
+ 102:Libraries/CFG/os_app_hooks.c **** *
+ 103:Libraries/CFG/os_app_hooks.c **** * Arguments  : p_tcb   is a pointer to the task control block of the task being created.
+ 104:Libraries/CFG/os_app_hooks.c **** *
+ 105:Libraries/CFG/os_app_hooks.c **** * Note(s)    : none
+ 106:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 107:Libraries/CFG/os_app_hooks.c **** */
+ 108:Libraries/CFG/os_app_hooks.c **** 
+ 109:Libraries/CFG/os_app_hooks.c **** void  App_OS_TaskCreateHook (OS_TCB  *p_tcb)
+ 110:Libraries/CFG/os_app_hooks.c **** {
+ 183              		.loc 1 110 0
+ 184              		.cfi_startproc
+ 185              		@ args = 0, pretend = 0, frame = 8
+ 186              		@ frame_needed = 1, uses_anonymous_args = 0
+ 187              		@ link register save eliminated.
+ 188 0134 80B4     		push	{r7}
+ 189              	.LCFI6:
+ 190              		.cfi_def_cfa_offset 4
+ 191              		.cfi_offset 7, -4
+ 192 0136 83B0     		sub	sp, sp, #12
+ 193              	.LCFI7:
+ 194              		.cfi_def_cfa_offset 16
+ 195 0138 00AF     		add	r7, sp, #0
+ 196              	.LCFI8:
+ 197              		.cfi_def_cfa_register 7
+ 198 013a 7860     		str	r0, [r7, #4]
+ 111:Libraries/CFG/os_app_hooks.c ****     (void)&p_tcb;
+ 112:Libraries/CFG/os_app_hooks.c **** }
+ 199              		.loc 1 112 0
+ 200 013c 07F10C07 		add	r7, r7, #12
+ 201 0140 BD46     		mov	sp, r7
+ 202 0142 80BC     		pop	{r7}
+ 203 0144 7047     		bx	lr
+ 204              		.cfi_endproc
+ 205              	.LFE2:
+ 207 0146 00BF     		.align	2
+ 208              		.global	App_OS_TaskDelHook
+ 209              		.thumb
+ 210              		.thumb_func
+ 212              	App_OS_TaskDelHook:
+ 213              	.LFB3:
+ 113:Libraries/CFG/os_app_hooks.c **** 
+ 114:Libraries/CFG/os_app_hooks.c **** /*$PAGE*/
+ 115:Libraries/CFG/os_app_hooks.c **** /*
+ 116:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 117:Libraries/CFG/os_app_hooks.c **** *                                            APPLICATION TASK DELETION HOOK
+ 118:Libraries/CFG/os_app_hooks.c **** *
+ 119:Libraries/CFG/os_app_hooks.c **** * Description: This function is called when a task is deleted.
+ 120:Libraries/CFG/os_app_hooks.c **** *
+ 121:Libraries/CFG/os_app_hooks.c **** * Arguments  : p_tcb   is a pointer to the task control block of the task being deleted.
+ 122:Libraries/CFG/os_app_hooks.c **** *
+ 123:Libraries/CFG/os_app_hooks.c **** * Note(s)    : none
+ 124:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 125:Libraries/CFG/os_app_hooks.c **** */
+ 126:Libraries/CFG/os_app_hooks.c **** 
+ 127:Libraries/CFG/os_app_hooks.c **** void  App_OS_TaskDelHook (OS_TCB  *p_tcb)
+ 128:Libraries/CFG/os_app_hooks.c **** {
+ 214              		.loc 1 128 0
+ 215              		.cfi_startproc
+ 216              		@ args = 0, pretend = 0, frame = 8
+ 217              		@ frame_needed = 1, uses_anonymous_args = 0
+ 218              		@ link register save eliminated.
+ 219 0148 80B4     		push	{r7}
+ 220              	.LCFI9:
+ 221              		.cfi_def_cfa_offset 4
+ 222              		.cfi_offset 7, -4
+ 223 014a 83B0     		sub	sp, sp, #12
+ 224              	.LCFI10:
+ 225              		.cfi_def_cfa_offset 16
+ 226 014c 00AF     		add	r7, sp, #0
+ 227              	.LCFI11:
+ 228              		.cfi_def_cfa_register 7
+ 229 014e 7860     		str	r0, [r7, #4]
+ 129:Libraries/CFG/os_app_hooks.c ****     (void)&p_tcb;
+ 130:Libraries/CFG/os_app_hooks.c **** }
+ 230              		.loc 1 130 0
+ 231 0150 07F10C07 		add	r7, r7, #12
+ 232 0154 BD46     		mov	sp, r7
+ 233 0156 80BC     		pop	{r7}
+ 234 0158 7047     		bx	lr
+ 235              		.cfi_endproc
+ 236              	.LFE3:
+ 238 015a 00BF     		.align	2
+ 239              		.global	App_OS_TaskReturnHook
+ 240              		.thumb
+ 241              		.thumb_func
+ 243              	App_OS_TaskReturnHook:
+ 244              	.LFB4:
+ 131:Libraries/CFG/os_app_hooks.c **** 
+ 132:Libraries/CFG/os_app_hooks.c **** /*$PAGE*/
+ 133:Libraries/CFG/os_app_hooks.c **** /*
+ 134:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 135:Libraries/CFG/os_app_hooks.c **** *                                             APPLICATION TASK RETURN HOOK
+ 136:Libraries/CFG/os_app_hooks.c **** *
+ 137:Libraries/CFG/os_app_hooks.c **** * Description: This function is called if a task accidentally returns.  In other words, a task shou
+ 138:Libraries/CFG/os_app_hooks.c **** *              infinite loop or delete itself when done.
+ 139:Libraries/CFG/os_app_hooks.c **** *
+ 140:Libraries/CFG/os_app_hooks.c **** * Arguments  : p_tcb     is a pointer to the OS_TCB of the task that is returning.
+ 141:Libraries/CFG/os_app_hooks.c **** *
+ 142:Libraries/CFG/os_app_hooks.c **** * Note(s)    : none
+ 143:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 144:Libraries/CFG/os_app_hooks.c **** */
+ 145:Libraries/CFG/os_app_hooks.c **** 
+ 146:Libraries/CFG/os_app_hooks.c **** void  App_OS_TaskReturnHook (OS_TCB  *p_tcb)
+ 147:Libraries/CFG/os_app_hooks.c **** {
+ 245              		.loc 1 147 0
+ 246              		.cfi_startproc
+ 247              		@ args = 0, pretend = 0, frame = 8
+ 248              		@ frame_needed = 1, uses_anonymous_args = 0
+ 249              		@ link register save eliminated.
+ 250 015c 80B4     		push	{r7}
+ 251              	.LCFI12:
+ 252              		.cfi_def_cfa_offset 4
+ 253              		.cfi_offset 7, -4
+ 254 015e 83B0     		sub	sp, sp, #12
+ 255              	.LCFI13:
+ 256              		.cfi_def_cfa_offset 16
+ 257 0160 00AF     		add	r7, sp, #0
+ 258              	.LCFI14:
+ 259              		.cfi_def_cfa_register 7
+ 260 0162 7860     		str	r0, [r7, #4]
+ 148:Libraries/CFG/os_app_hooks.c ****     (void)&p_tcb;
+ 149:Libraries/CFG/os_app_hooks.c **** }
+ 261              		.loc 1 149 0
+ 262 0164 07F10C07 		add	r7, r7, #12
+ 263 0168 BD46     		mov	sp, r7
+ 264 016a 80BC     		pop	{r7}
+ 265 016c 7047     		bx	lr
+ 266              		.cfi_endproc
+ 267              	.LFE4:
+ 269 016e 00BF     		.align	2
+ 270              		.global	App_OS_IdleTaskHook
+ 271              		.thumb
+ 272              		.thumb_func
+ 274              	App_OS_IdleTaskHook:
+ 275              	.LFB5:
+ 150:Libraries/CFG/os_app_hooks.c **** 
+ 151:Libraries/CFG/os_app_hooks.c **** /*$PAGE*/
+ 152:Libraries/CFG/os_app_hooks.c **** /*
+ 153:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 154:Libraries/CFG/os_app_hooks.c **** *                                              APPLICATION IDLE TASK HOOK
+ 155:Libraries/CFG/os_app_hooks.c **** *
+ 156:Libraries/CFG/os_app_hooks.c **** * Description: This function is called by the idle task.  This hook has been added to allow you to 
+ 157:Libraries/CFG/os_app_hooks.c **** *              STOP the CPU to conserve power.
+ 158:Libraries/CFG/os_app_hooks.c **** *
+ 159:Libraries/CFG/os_app_hooks.c **** * Arguments  : none
+ 160:Libraries/CFG/os_app_hooks.c **** *
+ 161:Libraries/CFG/os_app_hooks.c **** * Note(s)    : none
+ 162:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 163:Libraries/CFG/os_app_hooks.c **** */
+ 164:Libraries/CFG/os_app_hooks.c **** 
+ 165:Libraries/CFG/os_app_hooks.c **** void  App_OS_IdleTaskHook (void)
+ 166:Libraries/CFG/os_app_hooks.c **** {
+ 276              		.loc 1 166 0
+ 277              		.cfi_startproc
+ 278              		@ args = 0, pretend = 0, frame = 0
+ 279              		@ frame_needed = 1, uses_anonymous_args = 0
+ 280              		@ link register save eliminated.
+ 281 0170 80B4     		push	{r7}
+ 282              	.LCFI15:
+ 283              		.cfi_def_cfa_offset 4
+ 284              		.cfi_offset 7, -4
+ 285 0172 00AF     		add	r7, sp, #0
+ 286              	.LCFI16:
+ 287              		.cfi_def_cfa_register 7
+ 167:Libraries/CFG/os_app_hooks.c **** 
+ 168:Libraries/CFG/os_app_hooks.c **** }
+ 288              		.loc 1 168 0
+ 289 0174 BD46     		mov	sp, r7
+ 290 0176 80BC     		pop	{r7}
+ 291 0178 7047     		bx	lr
+ 292              		.cfi_endproc
+ 293              	.LFE5:
+ 295 017a 00BF     		.align	2
+ 296              		.global	App_OS_InitHook
+ 297              		.thumb
+ 298              		.thumb_func
+ 300              	App_OS_InitHook:
+ 301              	.LFB6:
+ 169:Libraries/CFG/os_app_hooks.c **** 
+ 170:Libraries/CFG/os_app_hooks.c **** /*$PAGE*/
+ 171:Libraries/CFG/os_app_hooks.c **** /*
+ 172:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 173:Libraries/CFG/os_app_hooks.c **** *                                          APPLICATION OS INITIALIZATION HOOK
+ 174:Libraries/CFG/os_app_hooks.c **** *
+ 175:Libraries/CFG/os_app_hooks.c **** * Description: This function is called by OSInit() at the beginning of OSInit().
+ 176:Libraries/CFG/os_app_hooks.c **** *
+ 177:Libraries/CFG/os_app_hooks.c **** * Arguments  : none
+ 178:Libraries/CFG/os_app_hooks.c **** *
+ 179:Libraries/CFG/os_app_hooks.c **** * Note(s)    : none
+ 180:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 181:Libraries/CFG/os_app_hooks.c **** */
+ 182:Libraries/CFG/os_app_hooks.c **** 
+ 183:Libraries/CFG/os_app_hooks.c **** void  App_OS_InitHook (void)
+ 184:Libraries/CFG/os_app_hooks.c **** {
+ 302              		.loc 1 184 0
+ 303              		.cfi_startproc
+ 304              		@ args = 0, pretend = 0, frame = 0
+ 305              		@ frame_needed = 1, uses_anonymous_args = 0
+ 306              		@ link register save eliminated.
+ 307 017c 80B4     		push	{r7}
+ 308              	.LCFI17:
+ 309              		.cfi_def_cfa_offset 4
+ 310              		.cfi_offset 7, -4
+ 311 017e 00AF     		add	r7, sp, #0
+ 312              	.LCFI18:
+ 313              		.cfi_def_cfa_register 7
+ 185:Libraries/CFG/os_app_hooks.c **** 
+ 186:Libraries/CFG/os_app_hooks.c **** }
+ 314              		.loc 1 186 0
+ 315 0180 BD46     		mov	sp, r7
+ 316 0182 80BC     		pop	{r7}
+ 317 0184 7047     		bx	lr
+ 318              		.cfi_endproc
+ 319              	.LFE6:
+ 321 0186 00BF     		.align	2
+ 322              		.global	App_OS_StatTaskHook
+ 323              		.thumb
+ 324              		.thumb_func
+ 326              	App_OS_StatTaskHook:
+ 327              	.LFB7:
+ 187:Libraries/CFG/os_app_hooks.c **** 
+ 188:Libraries/CFG/os_app_hooks.c **** /*$PAGE*/
+ 189:Libraries/CFG/os_app_hooks.c **** /*
+ 190:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 191:Libraries/CFG/os_app_hooks.c **** *                                           APPLICATION STATISTIC TASK HOOK
+ 192:Libraries/CFG/os_app_hooks.c **** *
+ 193:Libraries/CFG/os_app_hooks.c **** * Description: This function is called every second by uC/OS-III's statistics task.  This allows yo
+ 194:Libraries/CFG/os_app_hooks.c **** *              functionality to the statistics task.
+ 195:Libraries/CFG/os_app_hooks.c **** *
+ 196:Libraries/CFG/os_app_hooks.c **** * Arguments  : none
+ 197:Libraries/CFG/os_app_hooks.c **** *
+ 198:Libraries/CFG/os_app_hooks.c **** * Note(s)    : none
+ 199:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 200:Libraries/CFG/os_app_hooks.c **** */
+ 201:Libraries/CFG/os_app_hooks.c **** 
+ 202:Libraries/CFG/os_app_hooks.c **** void  App_OS_StatTaskHook (void)
+ 203:Libraries/CFG/os_app_hooks.c **** {
+ 328              		.loc 1 203 0
+ 329              		.cfi_startproc
+ 330              		@ args = 0, pretend = 0, frame = 0
+ 331              		@ frame_needed = 1, uses_anonymous_args = 0
+ 332              		@ link register save eliminated.
+ 333 0188 80B4     		push	{r7}
+ 334              	.LCFI19:
+ 335              		.cfi_def_cfa_offset 4
+ 336              		.cfi_offset 7, -4
+ 337 018a 00AF     		add	r7, sp, #0
+ 338              	.LCFI20:
+ 339              		.cfi_def_cfa_register 7
+ 204:Libraries/CFG/os_app_hooks.c **** 
+ 205:Libraries/CFG/os_app_hooks.c **** }
+ 340              		.loc 1 205 0
+ 341 018c BD46     		mov	sp, r7
+ 342 018e 80BC     		pop	{r7}
+ 343 0190 7047     		bx	lr
+ 344              		.cfi_endproc
+ 345              	.LFE7:
+ 347 0192 00BF     		.align	2
+ 348              		.global	App_OS_TaskSwHook
+ 349              		.thumb
+ 350              		.thumb_func
+ 352              	App_OS_TaskSwHook:
+ 353              	.LFB8:
+ 206:Libraries/CFG/os_app_hooks.c **** 
+ 207:Libraries/CFG/os_app_hooks.c **** /*$PAGE*/
+ 208:Libraries/CFG/os_app_hooks.c **** /*
+ 209:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 210:Libraries/CFG/os_app_hooks.c **** *                                             APPLICATION TASK SWITCH HOOK
+ 211:Libraries/CFG/os_app_hooks.c **** *
+ 212:Libraries/CFG/os_app_hooks.c **** * Description: This function is called when a task switch is performed.  This allows you to perform
+ 213:Libraries/CFG/os_app_hooks.c **** *              during a context switch.
+ 214:Libraries/CFG/os_app_hooks.c **** *
+ 215:Libraries/CFG/os_app_hooks.c **** * Arguments  : none
+ 216:Libraries/CFG/os_app_hooks.c **** *
+ 217:Libraries/CFG/os_app_hooks.c **** * Note(s)    : 1) Interrupts are disabled during this call.
+ 218:Libraries/CFG/os_app_hooks.c **** *              2) It is assumed that the global pointer 'OSTCBHighRdyPtr' points to the TCB of the 
+ 219:Libraries/CFG/os_app_hooks.c **** *                 'switched in' (i.e. the highest priority task) and, 'OSTCBCurPtr' points to the t
+ 220:Libraries/CFG/os_app_hooks.c **** *                 (i.e. the preempted task).
+ 221:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 222:Libraries/CFG/os_app_hooks.c **** */
+ 223:Libraries/CFG/os_app_hooks.c **** 
+ 224:Libraries/CFG/os_app_hooks.c **** void  App_OS_TaskSwHook (void)
+ 225:Libraries/CFG/os_app_hooks.c **** {
+ 354              		.loc 1 225 0
+ 355              		.cfi_startproc
+ 356              		@ args = 0, pretend = 0, frame = 0
+ 357              		@ frame_needed = 1, uses_anonymous_args = 0
+ 358              		@ link register save eliminated.
+ 359 0194 80B4     		push	{r7}
+ 360              	.LCFI21:
+ 361              		.cfi_def_cfa_offset 4
+ 362              		.cfi_offset 7, -4
+ 363 0196 00AF     		add	r7, sp, #0
+ 364              	.LCFI22:
+ 365              		.cfi_def_cfa_register 7
+ 226:Libraries/CFG/os_app_hooks.c **** 
+ 227:Libraries/CFG/os_app_hooks.c **** }
+ 366              		.loc 1 227 0
+ 367 0198 BD46     		mov	sp, r7
+ 368 019a 80BC     		pop	{r7}
+ 369 019c 7047     		bx	lr
+ 370              		.cfi_endproc
+ 371              	.LFE8:
+ 373 019e 00BF     		.align	2
+ 374              		.global	App_OS_TimeTickHook
+ 375              		.thumb
+ 376              		.thumb_func
+ 378              	App_OS_TimeTickHook:
+ 379              	.LFB9:
+ 228:Libraries/CFG/os_app_hooks.c **** 
+ 229:Libraries/CFG/os_app_hooks.c **** /*$PAGE*/
+ 230:Libraries/CFG/os_app_hooks.c **** /*
+ 231:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 232:Libraries/CFG/os_app_hooks.c **** *                                                APPLICATION TICK HOOK
+ 233:Libraries/CFG/os_app_hooks.c **** *
+ 234:Libraries/CFG/os_app_hooks.c **** * Description: This function is called every tick.
+ 235:Libraries/CFG/os_app_hooks.c **** *
+ 236:Libraries/CFG/os_app_hooks.c **** * Arguments  : none
+ 237:Libraries/CFG/os_app_hooks.c **** *
+ 238:Libraries/CFG/os_app_hooks.c **** * Note(s)    : 1) This function is assumed to be called from the Tick ISR.
+ 239:Libraries/CFG/os_app_hooks.c **** ***************************************************************************************************
+ 240:Libraries/CFG/os_app_hooks.c **** */
+ 241:Libraries/CFG/os_app_hooks.c **** 
+ 242:Libraries/CFG/os_app_hooks.c **** void  App_OS_TimeTickHook (void)
+ 243:Libraries/CFG/os_app_hooks.c **** {
+ 380              		.loc 1 243 0
+ 381              		.cfi_startproc
+ 382              		@ args = 0, pretend = 0, frame = 0
+ 383              		@ frame_needed = 1, uses_anonymous_args = 0
+ 384              		@ link register save eliminated.
+ 385 01a0 80B4     		push	{r7}
+ 386              	.LCFI23:
+ 387              		.cfi_def_cfa_offset 4
+ 388              		.cfi_offset 7, -4
+ 389 01a2 00AF     		add	r7, sp, #0
+ 390              	.LCFI24:
+ 391              		.cfi_def_cfa_register 7
+ 244:Libraries/CFG/os_app_hooks.c **** 
+ 245:Libraries/CFG/os_app_hooks.c **** }
+ 392              		.loc 1 245 0
+ 393 01a4 BD46     		mov	sp, r7
+ 394 01a6 80BC     		pop	{r7}
+ 395 01a8 7047     		bx	lr
+ 396              		.cfi_endproc
+ 397              	.LFE9:
+ 399              	.Letext0:
+ 400              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 401              		.file 3 "Libraries/uC-CPU/cpu_core.h"
+ 402              		.file 4 "Libraries/uC-OSIII/os_type.h"
+ 403              		.file 5 "Libraries/uC-OSIII/os.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 os_app_hooks.c
+     /tmp/cc2JlfOl.s:18     .text:00000000 $t
+     /tmp/cc2JlfOl.s:23     .text:00000000 App_OS_SetAllHooks
+     /tmp/cc2JlfOl.s:181    .text:00000134 App_OS_TaskCreateHook
+     /tmp/cc2JlfOl.s:212    .text:00000148 App_OS_TaskDelHook
+     /tmp/cc2JlfOl.s:243    .text:0000015c App_OS_TaskReturnHook
+     /tmp/cc2JlfOl.s:274    .text:00000170 App_OS_IdleTaskHook
+     /tmp/cc2JlfOl.s:326    .text:00000188 App_OS_StatTaskHook
+     /tmp/cc2JlfOl.s:352    .text:00000194 App_OS_TaskSwHook
+     /tmp/cc2JlfOl.s:378    .text:000001a0 App_OS_TimeTickHook
+     /tmp/cc2JlfOl.s:106    .text:000000a8 App_OS_ClrAllHooks
+     /tmp/cc2JlfOl.s:300    .text:0000017c App_OS_InitHook
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+CPU_SR_Save
+CPU_IntDisMeasStart
+OS_AppTaskCreateHookPtr
+OS_AppTaskDelHookPtr
+OS_AppTaskReturnHookPtr
+OS_AppIdleTaskHookPtr
+OS_AppStatTaskHookPtr
+OS_AppTaskSwHookPtr
+OS_AppTimeTickHookPtr
+CPU_IntDisMeasStop
+CPU_SR_Restore

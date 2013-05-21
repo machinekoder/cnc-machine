@@ -1,0 +1,938 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"os_mem.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	OSMemCreate
+  20              		.thumb
+  21              		.thumb_func
+  23              	OSMemCreate:
+  24              	.LFB0:
+  25              		.file 1 "Libraries/uC-OSIII/os_mem.c"
+   1:Libraries/uC-OSIII/os_mem.c **** /*
+   2:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+   3:Libraries/uC-OSIII/os_mem.c **** *                                                      uC/OS-III
+   4:Libraries/uC-OSIII/os_mem.c **** *                                                 The Real-Time Kernel
+   5:Libraries/uC-OSIII/os_mem.c **** *
+   6:Libraries/uC-OSIII/os_mem.c **** *                                  (c) Copyright 2009-2010; Micrium, Inc.; Weston, FL
+   7:Libraries/uC-OSIII/os_mem.c **** *                          All rights reserved.  Protected by international copyright laws.
+   8:Libraries/uC-OSIII/os_mem.c **** *
+   9:Libraries/uC-OSIII/os_mem.c **** *                                              MEMORY PARTITION MANAGEMENT
+  10:Libraries/uC-OSIII/os_mem.c **** *
+  11:Libraries/uC-OSIII/os_mem.c **** * File    : OS_MEM.C
+  12:Libraries/uC-OSIII/os_mem.c **** * By      : JJL
+  13:Libraries/uC-OSIII/os_mem.c **** * Version : V3.01.2
+  14:Libraries/uC-OSIII/os_mem.c **** *
+  15:Libraries/uC-OSIII/os_mem.c **** * LICENSING TERMS:
+  16:Libraries/uC-OSIII/os_mem.c **** * ---------------
+  17:Libraries/uC-OSIII/os_mem.c **** *               uC/OS-III is provided in source form to registered licensees ONLY.  It is
+  18:Libraries/uC-OSIII/os_mem.c **** *               illegal to distribute this source code to any third party unless you receive
+  19:Libraries/uC-OSIII/os_mem.c **** *               written permission by an authorized Micrium representative.  Knowledge of
+  20:Libraries/uC-OSIII/os_mem.c **** *               the source code may NOT be used to develop a similar product.
+  21:Libraries/uC-OSIII/os_mem.c **** *
+  22:Libraries/uC-OSIII/os_mem.c **** *               Please help us continue to provide the Embedded community with the finest
+  23:Libraries/uC-OSIII/os_mem.c **** *               software available.  Your honesty is greatly appreciated.
+  24:Libraries/uC-OSIII/os_mem.c **** *
+  25:Libraries/uC-OSIII/os_mem.c **** *               You can contact us at www.micrium.com.
+  26:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+  27:Libraries/uC-OSIII/os_mem.c **** */
+  28:Libraries/uC-OSIII/os_mem.c **** 
+  29:Libraries/uC-OSIII/os_mem.c **** #include <os.h>
+  30:Libraries/uC-OSIII/os_mem.c **** 
+  31:Libraries/uC-OSIII/os_mem.c **** #ifdef VSC_INCLUDE_SOURCE_FILE_NAMES
+  32:Libraries/uC-OSIII/os_mem.c **** const  CPU_CHAR  *os_mem__c = "$Id: $";
+  33:Libraries/uC-OSIII/os_mem.c **** #endif
+  34:Libraries/uC-OSIII/os_mem.c **** 
+  35:Libraries/uC-OSIII/os_mem.c **** 
+  36:Libraries/uC-OSIII/os_mem.c **** #if OS_CFG_MEM_EN > 0u
+  37:Libraries/uC-OSIII/os_mem.c **** /*
+  38:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+  39:Libraries/uC-OSIII/os_mem.c **** *                                               CREATE A MEMORY PARTITION
+  40:Libraries/uC-OSIII/os_mem.c **** *
+  41:Libraries/uC-OSIII/os_mem.c **** * Description : Create a fixed-sized memory partition that will be managed by uC/OS-III.
+  42:Libraries/uC-OSIII/os_mem.c **** *
+  43:Libraries/uC-OSIII/os_mem.c **** * Arguments   : p_mem    is a pointer to a memory partition control block which is allocated in use
+  44:Libraries/uC-OSIII/os_mem.c **** *
+  45:Libraries/uC-OSIII/os_mem.c **** *               p_name   is a pointer to an ASCII string to provide a name to the memory partition.
+  46:Libraries/uC-OSIII/os_mem.c **** *
+  47:Libraries/uC-OSIII/os_mem.c **** *               p_addr   is the starting address of the memory partition
+  48:Libraries/uC-OSIII/os_mem.c **** *
+  49:Libraries/uC-OSIII/os_mem.c **** *               n_blks   is the number of memory blocks to create from the partition.
+  50:Libraries/uC-OSIII/os_mem.c **** *
+  51:Libraries/uC-OSIII/os_mem.c **** *               blk_size is the size (in bytes) of each block in the memory partition.
+  52:Libraries/uC-OSIII/os_mem.c **** *
+  53:Libraries/uC-OSIII/os_mem.c **** *               p_err    is a pointer to a variable containing an error message which will be set b
+  54:Libraries/uC-OSIII/os_mem.c **** *                        either:
+  55:Libraries/uC-OSIII/os_mem.c **** *
+  56:Libraries/uC-OSIII/os_mem.c **** *                            OS_ERR_NONE                    if the memory partition has been create
+  57:Libraries/uC-OSIII/os_mem.c **** *                            OS_ERR_ILLEGAL_CREATE_RUN_TIME if you are trying to create the memory 
+  58:Libraries/uC-OSIII/os_mem.c **** *                                                             called OSSafetyCriticalStart().
+  59:Libraries/uC-OSIII/os_mem.c **** *                            OS_ERR_MEM_INVALID_BLKS        user specified an invalid number of blo
+  60:Libraries/uC-OSIII/os_mem.c **** *                            OS_ERR_MEM_INVALID_P_ADDR      if you are specifying an invalid addres
+  61:Libraries/uC-OSIII/os_mem.c **** *                                                           storage of the partition or, the block 
+  62:Libraries/uC-OSIII/os_mem.c **** *                                                           pointer boundary
+  63:Libraries/uC-OSIII/os_mem.c **** *                            OS_ERR_MEM_INVALID_SIZE        user specified an invalid block size
+  64:Libraries/uC-OSIII/os_mem.c **** *                                                             - must be greater than the size of a 
+  65:Libraries/uC-OSIII/os_mem.c **** *                                                             - must be able to hold an integral nu
+  66:Libraries/uC-OSIII/os_mem.c **** * Returns    : none
+  67:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+  68:Libraries/uC-OSIII/os_mem.c **** */
+  69:Libraries/uC-OSIII/os_mem.c **** 
+  70:Libraries/uC-OSIII/os_mem.c **** void  OSMemCreate (OS_MEM      *p_mem,
+  71:Libraries/uC-OSIII/os_mem.c ****                    CPU_CHAR    *p_name,
+  72:Libraries/uC-OSIII/os_mem.c ****                    void        *p_addr,
+  73:Libraries/uC-OSIII/os_mem.c ****                    OS_MEM_QTY   n_blks,
+  74:Libraries/uC-OSIII/os_mem.c ****                    OS_MEM_SIZE  blk_size,
+  75:Libraries/uC-OSIII/os_mem.c ****                    OS_ERR      *p_err)
+  76:Libraries/uC-OSIII/os_mem.c **** {
+  26              		.loc 1 76 0
+  27              		.cfi_startproc
+  28              		@ args = 8, pretend = 0, frame = 40
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 14, -4
+  34              		.cfi_offset 7, -8
+  35 0002 8AB0     		sub	sp, sp, #40
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 48
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  41 0006 F860     		str	r0, [r7, #12]
+  42 0008 B960     		str	r1, [r7, #8]
+  43 000a 7A60     		str	r2, [r7, #4]
+  44 000c 7B80     		strh	r3, [r7, #2]	@ movhi
+  77:Libraries/uC-OSIII/os_mem.c **** #if OS_CFG_ARG_CHK_EN > 0u
+  78:Libraries/uC-OSIII/os_mem.c ****     CPU_DATA       align_msk;
+  79:Libraries/uC-OSIII/os_mem.c **** #endif
+  80:Libraries/uC-OSIII/os_mem.c ****     OS_MEM_QTY     i;
+  81:Libraries/uC-OSIII/os_mem.c ****     OS_MEM_QTY     loops;
+  82:Libraries/uC-OSIII/os_mem.c ****     CPU_INT08U    *p_blk;
+  83:Libraries/uC-OSIII/os_mem.c ****     void         **p_link;
+  84:Libraries/uC-OSIII/os_mem.c ****     CPU_SR_ALLOC();
+  45              		.loc 1 84 0
+  46 000e 4FF00003 		mov	r3, #0
+  47 0012 BB61     		str	r3, [r7, #24]
+  85:Libraries/uC-OSIII/os_mem.c **** 
+  86:Libraries/uC-OSIII/os_mem.c **** 
+  87:Libraries/uC-OSIII/os_mem.c **** 
+  88:Libraries/uC-OSIII/os_mem.c **** #ifdef OS_SAFETY_CRITICAL
+  89:Libraries/uC-OSIII/os_mem.c ****     if (p_err == (OS_ERR *)0) {
+  90:Libraries/uC-OSIII/os_mem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+  91:Libraries/uC-OSIII/os_mem.c ****     }
+  92:Libraries/uC-OSIII/os_mem.c **** #endif
+  93:Libraries/uC-OSIII/os_mem.c **** 
+  94:Libraries/uC-OSIII/os_mem.c **** #ifdef OS_SAFETY_CRITICAL_IEC61508
+  95:Libraries/uC-OSIII/os_mem.c ****     if (OSSafetyCriticalStartFlag == DEF_TRUE) {
+  96:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_ILLEGAL_CREATE_RUN_TIME;
+  97:Libraries/uC-OSIII/os_mem.c ****         return;
+  98:Libraries/uC-OSIII/os_mem.c ****     }
+  99:Libraries/uC-OSIII/os_mem.c **** #endif
+ 100:Libraries/uC-OSIII/os_mem.c **** 
+ 101:Libraries/uC-OSIII/os_mem.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 102:Libraries/uC-OSIII/os_mem.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Not allowed to call from an ISR     
+  48              		.loc 1 102 0
+  49 0014 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+  50 0018 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+  51 001c 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  52 001e 002B     		cmp	r3, #0
+  53 0020 03D0     		beq	.L2
+ 103:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_CREATE_ISR;
+  54              		.loc 1 103 0
+  55 0022 7B6B     		ldr	r3, [r7, #52]
+  56 0024 45F2B962 		movw	r2, #22201
+  57 0028 1A80     		strh	r2, [r3, #0]	@ movhi
+  58              	.L2:
+ 104:Libraries/uC-OSIII/os_mem.c ****     }
+ 105:Libraries/uC-OSIII/os_mem.c **** #endif
+ 106:Libraries/uC-OSIII/os_mem.c **** 
+ 107:Libraries/uC-OSIII/os_mem.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 108:Libraries/uC-OSIII/os_mem.c ****     if (p_addr == (void *)0) {                              /* Must pass a valid address for the me
+  59              		.loc 1 108 0
+  60 002a 7B68     		ldr	r3, [r7, #4]
+  61 002c 002B     		cmp	r3, #0
+  62 002e 04D1     		bne	.L3
+ 109:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_INVALID_P_ADDR;
+  63              		.loc 1 109 0
+  64 0030 7B6B     		ldr	r3, [r7, #52]
+  65 0032 45F2BB62 		movw	r2, #22203
+  66 0036 1A80     		strh	r2, [r3, #0]	@ movhi
+ 110:Libraries/uC-OSIII/os_mem.c ****         return;
+  67              		.loc 1 110 0
+  68 0038 C7E0     		b	.L1
+  69              	.L3:
+ 111:Libraries/uC-OSIII/os_mem.c ****     }
+ 112:Libraries/uC-OSIII/os_mem.c ****     if (((CPU_INT32U)p_addr & (sizeof(void *) - 1u)) != 0u){/* Must be pointer size aligned        
+  70              		.loc 1 112 0
+  71 003a 7B68     		ldr	r3, [r7, #4]
+  72 003c 03F00303 		and	r3, r3, #3
+  73 0040 002B     		cmp	r3, #0
+  74 0042 04D0     		beq	.L5
+ 113:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_INVALID_P_ADDR;
+  75              		.loc 1 113 0
+  76 0044 7B6B     		ldr	r3, [r7, #52]
+  77 0046 45F2BB62 		movw	r2, #22203
+  78 004a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 114:Libraries/uC-OSIII/os_mem.c ****         return;
+  79              		.loc 1 114 0
+  80 004c BDE0     		b	.L1
+  81              	.L5:
+ 115:Libraries/uC-OSIII/os_mem.c ****     }
+ 116:Libraries/uC-OSIII/os_mem.c ****     if (n_blks < (OS_MEM_QTY)2) {                           /* Must have at least 2 blocks per part
+  82              		.loc 1 116 0
+  83 004e 7B88     		ldrh	r3, [r7, #2]
+  84 0050 012B     		cmp	r3, #1
+  85 0052 04D8     		bhi	.L6
+ 117:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_INVALID_BLKS;
+  86              		.loc 1 117 0
+  87 0054 7B6B     		ldr	r3, [r7, #52]
+  88 0056 45F2BC62 		movw	r2, #22204
+  89 005a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 118:Libraries/uC-OSIII/os_mem.c ****         return;
+  90              		.loc 1 118 0
+  91 005c B5E0     		b	.L1
+  92              	.L6:
+ 119:Libraries/uC-OSIII/os_mem.c ****     }
+ 120:Libraries/uC-OSIII/os_mem.c ****     if (blk_size < sizeof(void *)) {                        /* Must contain space for at least a po
+  93              		.loc 1 120 0
+  94 005e 3B8E     		ldrh	r3, [r7, #48]
+  95 0060 032B     		cmp	r3, #3
+  96 0062 04D8     		bhi	.L7
+ 121:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_INVALID_SIZE;
+  97              		.loc 1 121 0
+  98 0064 7B6B     		ldr	r3, [r7, #52]
+  99 0066 45F2C162 		movw	r2, #22209
+ 100 006a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 122:Libraries/uC-OSIII/os_mem.c ****         return;
+ 101              		.loc 1 122 0
+ 102 006c ADE0     		b	.L1
+ 103              	.L7:
+ 123:Libraries/uC-OSIII/os_mem.c ****     }
+ 124:Libraries/uC-OSIII/os_mem.c ****     align_msk = sizeof(void *) - 1u;                        /* Block size must be a multiple addres
+ 104              		.loc 1 124 0
+ 105 006e 4FF00303 		mov	r3, #3
+ 106 0072 7B61     		str	r3, [r7, #20]
+ 125:Libraries/uC-OSIII/os_mem.c ****     if ((blk_size & align_msk) != 0u) {
+ 107              		.loc 1 125 0
+ 108 0074 3A8E     		ldrh	r2, [r7, #48]
+ 109 0076 7B69     		ldr	r3, [r7, #20]
+ 110 0078 1340     		ands	r3, r3, r2
+ 111 007a 002B     		cmp	r3, #0
+ 112 007c 03D0     		beq	.L8
+ 126:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_INVALID_SIZE;
+ 113              		.loc 1 126 0
+ 114 007e 7B6B     		ldr	r3, [r7, #52]
+ 115 0080 45F2C162 		movw	r2, #22209
+ 116 0084 1A80     		strh	r2, [r3, #0]	@ movhi
+ 117              	.L8:
+ 127:Libraries/uC-OSIII/os_mem.c ****     }
+ 128:Libraries/uC-OSIII/os_mem.c **** #endif
+ 129:Libraries/uC-OSIII/os_mem.c **** 
+ 130:Libraries/uC-OSIII/os_mem.c ****     p_link = (void **)p_addr;                               /* Create linked list of free memory bl
+ 118              		.loc 1 130 0
+ 119 0086 7B68     		ldr	r3, [r7, #4]
+ 120 0088 FB61     		str	r3, [r7, #28]
+ 131:Libraries/uC-OSIII/os_mem.c ****     p_blk  = p_addr;
+ 121              		.loc 1 131 0
+ 122 008a 7B68     		ldr	r3, [r7, #4]
+ 123 008c 3B62     		str	r3, [r7, #32]
+ 132:Libraries/uC-OSIII/os_mem.c ****     loops  = n_blks - 1u;
+ 124              		.loc 1 132 0
+ 125 008e 7B88     		ldrh	r3, [r7, #2]	@ movhi
+ 126 0090 03F1FF33 		add	r3, r3, #-1
+ 127 0094 7B82     		strh	r3, [r7, #18]	@ movhi
+ 133:Libraries/uC-OSIII/os_mem.c ****     for (i = 0u; i < loops; i++) {
+ 128              		.loc 1 133 0
+ 129 0096 4FF00003 		mov	r3, #0
+ 130 009a FB84     		strh	r3, [r7, #38]	@ movhi
+ 131 009c 0CE0     		b	.L9
+ 132              	.L10:
+ 134:Libraries/uC-OSIII/os_mem.c ****         p_blk +=  blk_size;
+ 133              		.loc 1 134 0 discriminator 2
+ 134 009e 3B8E     		ldrh	r3, [r7, #48]
+ 135 00a0 3A6A     		ldr	r2, [r7, #32]
+ 136 00a2 D318     		adds	r3, r2, r3
+ 137 00a4 3B62     		str	r3, [r7, #32]
+ 135:Libraries/uC-OSIII/os_mem.c ****        *p_link = (void  *)p_blk;                            /* Save pointer to NEXT block in CURREN
+ 138              		.loc 1 135 0 discriminator 2
+ 139 00a6 FB69     		ldr	r3, [r7, #28]
+ 140 00a8 3A6A     		ldr	r2, [r7, #32]
+ 141 00aa 1A60     		str	r2, [r3, #0]
+ 136:Libraries/uC-OSIII/os_mem.c ****         p_link = (void **)p_blk;                            /* Position     to NEXT block          
+ 142              		.loc 1 136 0 discriminator 2
+ 143 00ac 3B6A     		ldr	r3, [r7, #32]
+ 144 00ae FB61     		str	r3, [r7, #28]
+ 133:Libraries/uC-OSIII/os_mem.c ****     for (i = 0u; i < loops; i++) {
+ 145              		.loc 1 133 0 discriminator 2
+ 146 00b0 FB8C     		ldrh	r3, [r7, #38]	@ movhi
+ 147 00b2 03F10103 		add	r3, r3, #1
+ 148 00b6 FB84     		strh	r3, [r7, #38]	@ movhi
+ 149              	.L9:
+ 133:Libraries/uC-OSIII/os_mem.c ****     for (i = 0u; i < loops; i++) {
+ 150              		.loc 1 133 0 is_stmt 0 discriminator 1
+ 151 00b8 FA8C     		ldrh	r2, [r7, #38]
+ 152 00ba 7B8A     		ldrh	r3, [r7, #18]
+ 153 00bc 9A42     		cmp	r2, r3
+ 154 00be EED3     		bcc	.L10
+ 137:Libraries/uC-OSIII/os_mem.c ****     }
+ 138:Libraries/uC-OSIII/os_mem.c ****     *p_link            = (void *)0;                         /* Last memory block points to NULL    
+ 155              		.loc 1 138 0 is_stmt 1
+ 156 00c0 FB69     		ldr	r3, [r7, #28]
+ 157 00c2 4FF00002 		mov	r2, #0
+ 158 00c6 1A60     		str	r2, [r3, #0]
+ 139:Libraries/uC-OSIII/os_mem.c **** 
+ 140:Libraries/uC-OSIII/os_mem.c ****     OS_CRITICAL_ENTER();
+ 159              		.loc 1 140 0
+ 160 00c8 FFF7FEFF 		bl	CPU_SR_Save
+ 161 00cc B861     		str	r0, [r7, #24]
+ 162 00ce FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 163 00d2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 164 00d6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 165 00da 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 166 00dc 03F10103 		add	r3, r3, #1
+ 167 00e0 DAB2     		uxtb	r2, r3
+ 168 00e2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 169 00e6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 170 00ea 1A70     		strb	r2, [r3, #0]
+ 171 00ec 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 172 00f0 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 173 00f4 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 174 00f6 012B     		cmp	r3, #1
+ 175 00f8 01D1     		bne	.L11
+ 176              		.loc 1 140 0 is_stmt 0 discriminator 1
+ 177 00fa FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 178              	.L11:
+ 179              		.loc 1 140 0 discriminator 2
+ 180 00fe FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 181 0102 B869     		ldr	r0, [r7, #24]
+ 182 0104 FFF7FEFF 		bl	CPU_SR_Restore
+ 141:Libraries/uC-OSIII/os_mem.c ****     p_mem->Type        = OS_OBJ_TYPE_MEM;                   /* Set the type of object              
+ 183              		.loc 1 141 0 is_stmt 1 discriminator 2
+ 184 0108 FA68     		ldr	r2, [r7, #12]
+ 185 010a 44F24D53 		movw	r3, #17741
+ 186 010e C2F24D03 		movt	r3, 8269
+ 187 0112 1360     		str	r3, [r2, #0]
+ 142:Libraries/uC-OSIII/os_mem.c ****     p_mem->NamePtr     = p_name;                            /* Save name of memory partition       
+ 188              		.loc 1 142 0 discriminator 2
+ 189 0114 FB68     		ldr	r3, [r7, #12]
+ 190 0116 BA68     		ldr	r2, [r7, #8]
+ 191 0118 9A60     		str	r2, [r3, #8]
+ 143:Libraries/uC-OSIII/os_mem.c ****     p_mem->AddrPtr     = p_addr;                            /* Store start address of memory partit
+ 192              		.loc 1 143 0 discriminator 2
+ 193 011a FB68     		ldr	r3, [r7, #12]
+ 194 011c 7A68     		ldr	r2, [r7, #4]
+ 195 011e 5A60     		str	r2, [r3, #4]
+ 144:Libraries/uC-OSIII/os_mem.c ****     p_mem->FreeListPtr = p_addr;                            /* Initialize pointer to pool of free b
+ 196              		.loc 1 144 0 discriminator 2
+ 197 0120 FB68     		ldr	r3, [r7, #12]
+ 198 0122 7A68     		ldr	r2, [r7, #4]
+ 199 0124 DA60     		str	r2, [r3, #12]
+ 145:Libraries/uC-OSIII/os_mem.c ****     p_mem->NbrFree     = n_blks;                            /* Store number of free blocks in MCB  
+ 200              		.loc 1 145 0 discriminator 2
+ 201 0126 FB68     		ldr	r3, [r7, #12]
+ 202 0128 7A88     		ldrh	r2, [r7, #2]	@ movhi
+ 203 012a 9A82     		strh	r2, [r3, #20]	@ movhi
+ 146:Libraries/uC-OSIII/os_mem.c ****     p_mem->NbrMax      = n_blks;
+ 204              		.loc 1 146 0 discriminator 2
+ 205 012c FB68     		ldr	r3, [r7, #12]
+ 206 012e 7A88     		ldrh	r2, [r7, #2]	@ movhi
+ 207 0130 5A82     		strh	r2, [r3, #18]	@ movhi
+ 147:Libraries/uC-OSIII/os_mem.c ****     p_mem->BlkSize     = blk_size;                          /* Store block size of each memory bloc
+ 208              		.loc 1 147 0 discriminator 2
+ 209 0132 FB68     		ldr	r3, [r7, #12]
+ 210 0134 3A8E     		ldrh	r2, [r7, #48]	@ movhi
+ 211 0136 1A82     		strh	r2, [r3, #16]	@ movhi
+ 148:Libraries/uC-OSIII/os_mem.c **** 
+ 149:Libraries/uC-OSIII/os_mem.c **** #if OS_CFG_DBG_EN > 0u
+ 150:Libraries/uC-OSIII/os_mem.c ****     OS_MemDbgListAdd(p_mem);
+ 212              		.loc 1 150 0 discriminator 2
+ 213 0138 F868     		ldr	r0, [r7, #12]
+ 214 013a FFF7FEFF 		bl	OS_MemDbgListAdd
+ 151:Libraries/uC-OSIII/os_mem.c **** #endif
+ 152:Libraries/uC-OSIII/os_mem.c **** 
+ 153:Libraries/uC-OSIII/os_mem.c ****     OSMemQty++;
+ 215              		.loc 1 153 0 discriminator 2
+ 216 013e 40F20003 		movw	r3, #:lower16:OSMemQty
+ 217 0142 C0F20003 		movt	r3, #:upper16:OSMemQty
+ 218 0146 1B88     		ldrh	r3, [r3, #0]
+ 219 0148 03F10103 		add	r3, r3, #1
+ 220 014c 9AB2     		uxth	r2, r3
+ 221 014e 40F20003 		movw	r3, #:lower16:OSMemQty
+ 222 0152 C0F20003 		movt	r3, #:upper16:OSMemQty
+ 223 0156 1A80     		strh	r2, [r3, #0]	@ movhi
+ 154:Libraries/uC-OSIII/os_mem.c **** 
+ 155:Libraries/uC-OSIII/os_mem.c ****     OS_CRITICAL_EXIT();
+ 224              		.loc 1 155 0 discriminator 2
+ 225 0158 FFF7FEFF 		bl	CPU_SR_Save
+ 226 015c B861     		str	r0, [r7, #24]
+ 227 015e FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 228 0162 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 229 0166 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 230 016a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 231 016c 03F1FF33 		add	r3, r3, #-1
+ 232 0170 DAB2     		uxtb	r2, r3
+ 233 0172 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 234 0176 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 235 017a 1A70     		strb	r2, [r3, #0]
+ 236 017c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 237 0180 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 238 0184 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 239 0186 002B     		cmp	r3, #0
+ 240 0188 16D1     		bne	.L12
+ 241              		.loc 1 155 0 is_stmt 0 discriminator 1
+ 242 018a FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 243 018e 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 244 0192 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 245 0196 1B88     		ldrh	r3, [r3, #0]
+ 246 0198 002B     		cmp	r3, #0
+ 247 019a 07D0     		beq	.L13
+ 248              		.loc 1 155 0 discriminator 3
+ 249 019c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 250 01a0 B869     		ldr	r0, [r7, #24]
+ 251 01a2 FFF7FEFF 		bl	CPU_SR_Restore
+ 252 01a6 FFF7FEFF 		bl	OS_Sched0
+ 253 01aa 0AE0     		b	.L14
+ 254              	.L13:
+ 255              		.loc 1 155 0 discriminator 4
+ 256 01ac FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 257 01b0 B869     		ldr	r0, [r7, #24]
+ 258 01b2 FFF7FEFF 		bl	CPU_SR_Restore
+ 259 01b6 04E0     		b	.L14
+ 260              	.L12:
+ 261              		.loc 1 155 0 discriminator 2
+ 262 01b8 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 263 01bc B869     		ldr	r0, [r7, #24]
+ 264 01be FFF7FEFF 		bl	CPU_SR_Restore
+ 265              	.L14:
+ 156:Libraries/uC-OSIII/os_mem.c ****     *p_err = OS_ERR_NONE;
+ 266              		.loc 1 156 0 is_stmt 1
+ 267 01c2 7B6B     		ldr	r3, [r7, #52]
+ 268 01c4 4FF00002 		mov	r2, #0
+ 269 01c8 1A80     		strh	r2, [r3, #0]	@ movhi
+ 270              	.L1:
+ 157:Libraries/uC-OSIII/os_mem.c **** }
+ 271              		.loc 1 157 0
+ 272 01ca 07F12807 		add	r7, r7, #40
+ 273 01ce BD46     		mov	sp, r7
+ 274 01d0 80BD     		pop	{r7, pc}
+ 275              		.cfi_endproc
+ 276              	.LFE0:
+ 278 01d2 00BF     		.align	2
+ 279              		.global	OSMemGet
+ 280              		.thumb
+ 281              		.thumb_func
+ 283              	OSMemGet:
+ 284              	.LFB1:
+ 158:Libraries/uC-OSIII/os_mem.c **** 
+ 159:Libraries/uC-OSIII/os_mem.c **** /*$PAGE*/
+ 160:Libraries/uC-OSIII/os_mem.c **** /*
+ 161:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+ 162:Libraries/uC-OSIII/os_mem.c **** *                                                  GET A MEMORY BLOCK
+ 163:Libraries/uC-OSIII/os_mem.c **** *
+ 164:Libraries/uC-OSIII/os_mem.c **** * Description : Get a memory block from a partition
+ 165:Libraries/uC-OSIII/os_mem.c **** *
+ 166:Libraries/uC-OSIII/os_mem.c **** * Arguments   : p_mem   is a pointer to the memory partition control block
+ 167:Libraries/uC-OSIII/os_mem.c **** *
+ 168:Libraries/uC-OSIII/os_mem.c **** *               p_err   is a pointer to a variable containing an error message which will be set by
+ 169:Libraries/uC-OSIII/os_mem.c **** *                       either:
+ 170:Libraries/uC-OSIII/os_mem.c **** *
+ 171:Libraries/uC-OSIII/os_mem.c **** *                       OS_ERR_NONE               if the memory partition has been created correctl
+ 172:Libraries/uC-OSIII/os_mem.c **** *                       OS_ERR_MEM_INVALID_P_MEM  if you passed a NULL pointer for 'p_mem'
+ 173:Libraries/uC-OSIII/os_mem.c **** *                       OS_ERR_MEM_NO_FREE_BLKS   if there are no more free memory blocks to alloca
+ 174:Libraries/uC-OSIII/os_mem.c **** *
+ 175:Libraries/uC-OSIII/os_mem.c **** * Returns     : A pointer to a memory block if no error is detected
+ 176:Libraries/uC-OSIII/os_mem.c **** *               A pointer to NULL if an error is detected
+ 177:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+ 178:Libraries/uC-OSIII/os_mem.c **** */
+ 179:Libraries/uC-OSIII/os_mem.c **** 
+ 180:Libraries/uC-OSIII/os_mem.c **** void  *OSMemGet (OS_MEM  *p_mem,
+ 181:Libraries/uC-OSIII/os_mem.c ****                  OS_ERR  *p_err)
+ 182:Libraries/uC-OSIII/os_mem.c **** {
+ 285              		.loc 1 182 0
+ 286              		.cfi_startproc
+ 287              		@ args = 0, pretend = 0, frame = 16
+ 288              		@ frame_needed = 1, uses_anonymous_args = 0
+ 289 01d4 80B5     		push	{r7, lr}
+ 290              	.LCFI3:
+ 291              		.cfi_def_cfa_offset 8
+ 292              		.cfi_offset 14, -4
+ 293              		.cfi_offset 7, -8
+ 294 01d6 84B0     		sub	sp, sp, #16
+ 295              	.LCFI4:
+ 296              		.cfi_def_cfa_offset 24
+ 297 01d8 00AF     		add	r7, sp, #0
+ 298              	.LCFI5:
+ 299              		.cfi_def_cfa_register 7
+ 300 01da 7860     		str	r0, [r7, #4]
+ 301 01dc 3960     		str	r1, [r7, #0]
+ 183:Libraries/uC-OSIII/os_mem.c ****     void    *p_blk;
+ 184:Libraries/uC-OSIII/os_mem.c ****     CPU_SR_ALLOC();
+ 302              		.loc 1 184 0
+ 303 01de 4FF00003 		mov	r3, #0
+ 304 01e2 FB60     		str	r3, [r7, #12]
+ 185:Libraries/uC-OSIII/os_mem.c **** 
+ 186:Libraries/uC-OSIII/os_mem.c **** 
+ 187:Libraries/uC-OSIII/os_mem.c **** 
+ 188:Libraries/uC-OSIII/os_mem.c **** #ifdef OS_SAFETY_CRITICAL
+ 189:Libraries/uC-OSIII/os_mem.c ****     if (p_err == (OS_ERR *)0) {
+ 190:Libraries/uC-OSIII/os_mem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 191:Libraries/uC-OSIII/os_mem.c ****     }
+ 192:Libraries/uC-OSIII/os_mem.c **** #endif
+ 193:Libraries/uC-OSIII/os_mem.c **** 
+ 194:Libraries/uC-OSIII/os_mem.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 195:Libraries/uC-OSIII/os_mem.c ****     if (p_mem == (OS_MEM *)0) {                             /* Must point to a valid memory partiti
+ 305              		.loc 1 195 0
+ 306 01e4 7B68     		ldr	r3, [r7, #4]
+ 307 01e6 002B     		cmp	r3, #0
+ 308 01e8 06D1     		bne	.L16
+ 196:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_INVALID_P_MEM;
+ 309              		.loc 1 196 0
+ 310 01ea 3B68     		ldr	r3, [r7, #0]
+ 311 01ec 45F2BF62 		movw	r2, #22207
+ 312 01f0 1A80     		strh	r2, [r3, #0]	@ movhi
+ 197:Libraries/uC-OSIII/os_mem.c ****         return ((void *)0);
+ 313              		.loc 1 197 0
+ 314 01f2 4FF00003 		mov	r3, #0
+ 315 01f6 2CE0     		b	.L17
+ 316              	.L16:
+ 198:Libraries/uC-OSIII/os_mem.c ****     }
+ 199:Libraries/uC-OSIII/os_mem.c **** #endif
+ 200:Libraries/uC-OSIII/os_mem.c **** 
+ 201:Libraries/uC-OSIII/os_mem.c ****     CPU_CRITICAL_ENTER();
+ 317              		.loc 1 201 0
+ 318 01f8 FFF7FEFF 		bl	CPU_SR_Save
+ 319 01fc F860     		str	r0, [r7, #12]
+ 320 01fe FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 202:Libraries/uC-OSIII/os_mem.c ****     if (p_mem->NbrFree == (OS_MEM_QTY)0) {                  /* See if there are any free memory blo
+ 321              		.loc 1 202 0
+ 322 0202 7B68     		ldr	r3, [r7, #4]
+ 323 0204 9B8A     		ldrh	r3, [r3, #20]
+ 324 0206 002B     		cmp	r3, #0
+ 325 0208 0BD1     		bne	.L18
+ 203:Libraries/uC-OSIII/os_mem.c ****         CPU_CRITICAL_EXIT();
+ 326              		.loc 1 203 0
+ 327 020a FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 328 020e F868     		ldr	r0, [r7, #12]
+ 329 0210 FFF7FEFF 		bl	CPU_SR_Restore
+ 204:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_NO_FREE_BLKS;                   /* No,  Notify caller of empty memory p
+ 330              		.loc 1 204 0
+ 331 0214 3B68     		ldr	r3, [r7, #0]
+ 332 0216 45F2C262 		movw	r2, #22210
+ 333 021a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 205:Libraries/uC-OSIII/os_mem.c ****         return ((void *)0);                                 /*      Return NULL pointer to caller  
+ 334              		.loc 1 205 0
+ 335 021c 4FF00003 		mov	r3, #0
+ 336 0220 17E0     		b	.L17
+ 337              	.L18:
+ 206:Libraries/uC-OSIII/os_mem.c ****     }
+ 207:Libraries/uC-OSIII/os_mem.c ****     p_blk              = p_mem->FreeListPtr;                /* Yes, point to next free memory block
+ 338              		.loc 1 207 0
+ 339 0222 7B68     		ldr	r3, [r7, #4]
+ 340 0224 DB68     		ldr	r3, [r3, #12]
+ 341 0226 BB60     		str	r3, [r7, #8]
+ 208:Libraries/uC-OSIII/os_mem.c ****     p_mem->FreeListPtr = *(void **)p_blk;                   /*      Adjust pointer to new free list
+ 342              		.loc 1 208 0
+ 343 0228 BB68     		ldr	r3, [r7, #8]
+ 344 022a 1A68     		ldr	r2, [r3, #0]
+ 345 022c 7B68     		ldr	r3, [r7, #4]
+ 346 022e DA60     		str	r2, [r3, #12]
+ 209:Libraries/uC-OSIII/os_mem.c ****     p_mem->NbrFree--;                                       /*      One less memory block in this p
+ 347              		.loc 1 209 0
+ 348 0230 7B68     		ldr	r3, [r7, #4]
+ 349 0232 9B8A     		ldrh	r3, [r3, #20]
+ 350 0234 03F1FF33 		add	r3, r3, #-1
+ 351 0238 9AB2     		uxth	r2, r3
+ 352 023a 7B68     		ldr	r3, [r7, #4]
+ 353 023c 9A82     		strh	r2, [r3, #20]	@ movhi
+ 210:Libraries/uC-OSIII/os_mem.c ****     CPU_CRITICAL_EXIT();
+ 354              		.loc 1 210 0
+ 355 023e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 356 0242 F868     		ldr	r0, [r7, #12]
+ 357 0244 FFF7FEFF 		bl	CPU_SR_Restore
+ 211:Libraries/uC-OSIII/os_mem.c ****     *p_err = OS_ERR_NONE;                                   /*      No error                       
+ 358              		.loc 1 211 0
+ 359 0248 3B68     		ldr	r3, [r7, #0]
+ 360 024a 4FF00002 		mov	r2, #0
+ 361 024e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 212:Libraries/uC-OSIII/os_mem.c ****     return (p_blk);                                         /*      Return memory block to caller  
+ 362              		.loc 1 212 0
+ 363 0250 BB68     		ldr	r3, [r7, #8]
+ 364              	.L17:
+ 213:Libraries/uC-OSIII/os_mem.c **** }
+ 365              		.loc 1 213 0
+ 366 0252 1846     		mov	r0, r3
+ 367 0254 07F11007 		add	r7, r7, #16
+ 368 0258 BD46     		mov	sp, r7
+ 369 025a 80BD     		pop	{r7, pc}
+ 370              		.cfi_endproc
+ 371              	.LFE1:
+ 373              		.align	2
+ 374              		.global	OSMemPut
+ 375              		.thumb
+ 376              		.thumb_func
+ 378              	OSMemPut:
+ 379              	.LFB2:
+ 214:Libraries/uC-OSIII/os_mem.c **** 
+ 215:Libraries/uC-OSIII/os_mem.c **** /*$PAGE*/
+ 216:Libraries/uC-OSIII/os_mem.c **** /*
+ 217:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+ 218:Libraries/uC-OSIII/os_mem.c **** *                                                 RELEASE A MEMORY BLOCK
+ 219:Libraries/uC-OSIII/os_mem.c **** *
+ 220:Libraries/uC-OSIII/os_mem.c **** * Description : Returns a memory block to a partition
+ 221:Libraries/uC-OSIII/os_mem.c **** *
+ 222:Libraries/uC-OSIII/os_mem.c **** * Arguments   : p_mem    is a pointer to the memory partition control block
+ 223:Libraries/uC-OSIII/os_mem.c **** *
+ 224:Libraries/uC-OSIII/os_mem.c **** *               p_blk    is a pointer to the memory block being released.
+ 225:Libraries/uC-OSIII/os_mem.c **** *
+ 226:Libraries/uC-OSIII/os_mem.c **** *               p_err    is a pointer to a variable that will contain an error code returned by thi
+ 227:Libraries/uC-OSIII/os_mem.c **** *
+ 228:Libraries/uC-OSIII/os_mem.c **** *                            OS_ERR_NONE               if the memory block was inserted into the pa
+ 229:Libraries/uC-OSIII/os_mem.c **** *                            OS_ERR_MEM_FULL           if you are returning a memory block to an al
+ 230:Libraries/uC-OSIII/os_mem.c **** *                                                      partition (You freed more blocks than you al
+ 231:Libraries/uC-OSIII/os_mem.c **** *                            OS_ERR_MEM_INVALID_P_BLK  if you passed a NULL pointer for the block t
+ 232:Libraries/uC-OSIII/os_mem.c **** *                            OS_ERR_MEM_INVALID_P_MEM  if you passed a NULL pointer for 'p_mem'
+ 233:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+ 234:Libraries/uC-OSIII/os_mem.c **** */
+ 235:Libraries/uC-OSIII/os_mem.c **** 
+ 236:Libraries/uC-OSIII/os_mem.c **** void  OSMemPut (OS_MEM  *p_mem,
+ 237:Libraries/uC-OSIII/os_mem.c ****                 void    *p_blk,
+ 238:Libraries/uC-OSIII/os_mem.c ****                 OS_ERR  *p_err)
+ 239:Libraries/uC-OSIII/os_mem.c **** {
+ 380              		.loc 1 239 0
+ 381              		.cfi_startproc
+ 382              		@ args = 0, pretend = 0, frame = 24
+ 383              		@ frame_needed = 1, uses_anonymous_args = 0
+ 384 025c 80B5     		push	{r7, lr}
+ 385              	.LCFI6:
+ 386              		.cfi_def_cfa_offset 8
+ 387              		.cfi_offset 14, -4
+ 388              		.cfi_offset 7, -8
+ 389 025e 86B0     		sub	sp, sp, #24
+ 390              	.LCFI7:
+ 391              		.cfi_def_cfa_offset 32
+ 392 0260 00AF     		add	r7, sp, #0
+ 393              	.LCFI8:
+ 394              		.cfi_def_cfa_register 7
+ 395 0262 F860     		str	r0, [r7, #12]
+ 396 0264 B960     		str	r1, [r7, #8]
+ 397 0266 7A60     		str	r2, [r7, #4]
+ 240:Libraries/uC-OSIII/os_mem.c ****     CPU_SR_ALLOC();
+ 398              		.loc 1 240 0
+ 399 0268 4FF00003 		mov	r3, #0
+ 400 026c 7B61     		str	r3, [r7, #20]
+ 241:Libraries/uC-OSIII/os_mem.c **** 
+ 242:Libraries/uC-OSIII/os_mem.c **** 
+ 243:Libraries/uC-OSIII/os_mem.c **** 
+ 244:Libraries/uC-OSIII/os_mem.c **** #ifdef OS_SAFETY_CRITICAL
+ 245:Libraries/uC-OSIII/os_mem.c ****     if (p_err == (OS_ERR *)0) {
+ 246:Libraries/uC-OSIII/os_mem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 247:Libraries/uC-OSIII/os_mem.c ****     }
+ 248:Libraries/uC-OSIII/os_mem.c **** #endif
+ 249:Libraries/uC-OSIII/os_mem.c **** 
+ 250:Libraries/uC-OSIII/os_mem.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 251:Libraries/uC-OSIII/os_mem.c ****     if (p_mem == (OS_MEM *)0) {                             /* Must point to a valid memory partiti
+ 401              		.loc 1 251 0
+ 402 026e FB68     		ldr	r3, [r7, #12]
+ 403 0270 002B     		cmp	r3, #0
+ 404 0272 04D1     		bne	.L20
+ 252:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_INVALID_P_MEM;
+ 405              		.loc 1 252 0
+ 406 0274 7B68     		ldr	r3, [r7, #4]
+ 407 0276 45F2BF62 		movw	r2, #22207
+ 408 027a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 253:Libraries/uC-OSIII/os_mem.c ****         return;
+ 409              		.loc 1 253 0
+ 410 027c 33E0     		b	.L19
+ 411              	.L20:
+ 254:Libraries/uC-OSIII/os_mem.c ****     }
+ 255:Libraries/uC-OSIII/os_mem.c ****     if (p_blk == (void *)0) {                               /* Must release a valid block          
+ 412              		.loc 1 255 0
+ 413 027e BB68     		ldr	r3, [r7, #8]
+ 414 0280 002B     		cmp	r3, #0
+ 415 0282 04D1     		bne	.L22
+ 256:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_INVALID_P_BLK;
+ 416              		.loc 1 256 0
+ 417 0284 7B68     		ldr	r3, [r7, #4]
+ 418 0286 45F2BE62 		movw	r2, #22206
+ 419 028a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 257:Libraries/uC-OSIII/os_mem.c ****         return;
+ 420              		.loc 1 257 0
+ 421 028c 2BE0     		b	.L19
+ 422              	.L22:
+ 258:Libraries/uC-OSIII/os_mem.c ****     }
+ 259:Libraries/uC-OSIII/os_mem.c **** #endif
+ 260:Libraries/uC-OSIII/os_mem.c **** 
+ 261:Libraries/uC-OSIII/os_mem.c ****     CPU_CRITICAL_ENTER();
+ 423              		.loc 1 261 0
+ 424 028e FFF7FEFF 		bl	CPU_SR_Save
+ 425 0292 7861     		str	r0, [r7, #20]
+ 426 0294 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 262:Libraries/uC-OSIII/os_mem.c ****     if (p_mem->NbrFree >= p_mem->NbrMax) {                  /* Make sure all blocks not already ret
+ 427              		.loc 1 262 0
+ 428 0298 FB68     		ldr	r3, [r7, #12]
+ 429 029a 9A8A     		ldrh	r2, [r3, #20]
+ 430 029c FB68     		ldr	r3, [r7, #12]
+ 431 029e 5B8A     		ldrh	r3, [r3, #18]
+ 432 02a0 9A42     		cmp	r2, r3
+ 433 02a2 09D3     		bcc	.L23
+ 263:Libraries/uC-OSIII/os_mem.c ****         CPU_CRITICAL_EXIT();
+ 434              		.loc 1 263 0
+ 435 02a4 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 436 02a8 7869     		ldr	r0, [r7, #20]
+ 437 02aa FFF7FEFF 		bl	CPU_SR_Restore
+ 264:Libraries/uC-OSIII/os_mem.c ****         *p_err = OS_ERR_MEM_FULL;
+ 438              		.loc 1 264 0
+ 439 02ae 7B68     		ldr	r3, [r7, #4]
+ 440 02b0 45F2BA62 		movw	r2, #22202
+ 441 02b4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 265:Libraries/uC-OSIII/os_mem.c ****         return;
+ 442              		.loc 1 265 0
+ 443 02b6 16E0     		b	.L19
+ 444              	.L23:
+ 266:Libraries/uC-OSIII/os_mem.c ****     }
+ 267:Libraries/uC-OSIII/os_mem.c ****     *(void **)p_blk    = p_mem->FreeListPtr;                /* Insert released block into free bloc
+ 445              		.loc 1 267 0
+ 446 02b8 FB68     		ldr	r3, [r7, #12]
+ 447 02ba DA68     		ldr	r2, [r3, #12]
+ 448 02bc BB68     		ldr	r3, [r7, #8]
+ 449 02be 1A60     		str	r2, [r3, #0]
+ 268:Libraries/uC-OSIII/os_mem.c ****     p_mem->FreeListPtr = p_blk;
+ 450              		.loc 1 268 0
+ 451 02c0 FB68     		ldr	r3, [r7, #12]
+ 452 02c2 BA68     		ldr	r2, [r7, #8]
+ 453 02c4 DA60     		str	r2, [r3, #12]
+ 269:Libraries/uC-OSIII/os_mem.c ****     p_mem->NbrFree++;                                       /* One more memory block in this partit
+ 454              		.loc 1 269 0
+ 455 02c6 FB68     		ldr	r3, [r7, #12]
+ 456 02c8 9B8A     		ldrh	r3, [r3, #20]
+ 457 02ca 03F10103 		add	r3, r3, #1
+ 458 02ce 9AB2     		uxth	r2, r3
+ 459 02d0 FB68     		ldr	r3, [r7, #12]
+ 460 02d2 9A82     		strh	r2, [r3, #20]	@ movhi
+ 270:Libraries/uC-OSIII/os_mem.c ****     CPU_CRITICAL_EXIT();
+ 461              		.loc 1 270 0
+ 462 02d4 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 463 02d8 7869     		ldr	r0, [r7, #20]
+ 464 02da FFF7FEFF 		bl	CPU_SR_Restore
+ 271:Libraries/uC-OSIII/os_mem.c ****     *p_err             = OS_ERR_NONE;                       /* Notify caller that memory block was 
+ 465              		.loc 1 271 0
+ 466 02de 7B68     		ldr	r3, [r7, #4]
+ 467 02e0 4FF00002 		mov	r2, #0
+ 468 02e4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 469              	.L19:
+ 272:Libraries/uC-OSIII/os_mem.c **** }
+ 470              		.loc 1 272 0
+ 471 02e6 07F11807 		add	r7, r7, #24
+ 472 02ea BD46     		mov	sp, r7
+ 473 02ec 80BD     		pop	{r7, pc}
+ 474              		.cfi_endproc
+ 475              	.LFE2:
+ 477 02ee 00BF     		.align	2
+ 478              		.global	OS_MemDbgListAdd
+ 479              		.thumb
+ 480              		.thumb_func
+ 482              	OS_MemDbgListAdd:
+ 483              	.LFB3:
+ 273:Libraries/uC-OSIII/os_mem.c **** 
+ 274:Libraries/uC-OSIII/os_mem.c **** /*$PAGE*/
+ 275:Libraries/uC-OSIII/os_mem.c **** /*
+ 276:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+ 277:Libraries/uC-OSIII/os_mem.c **** *                                           ADD MEMORY PARTITION TO DEBUG LIST
+ 278:Libraries/uC-OSIII/os_mem.c **** *
+ 279:Libraries/uC-OSIII/os_mem.c **** * Description : This function is called by OSMemCreate() to add the memory partition to the debug t
+ 280:Libraries/uC-OSIII/os_mem.c **** *
+ 281:Libraries/uC-OSIII/os_mem.c **** * Arguments   : p_mem    Is a pointer to the memory partition
+ 282:Libraries/uC-OSIII/os_mem.c **** *
+ 283:Libraries/uC-OSIII/os_mem.c **** * Returns     : none
+ 284:Libraries/uC-OSIII/os_mem.c **** *
+ 285:Libraries/uC-OSIII/os_mem.c **** * Note(s)    : This function is INTERNAL to uC/OS-III and your application should not call it.
+ 286:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+ 287:Libraries/uC-OSIII/os_mem.c **** */
+ 288:Libraries/uC-OSIII/os_mem.c **** 
+ 289:Libraries/uC-OSIII/os_mem.c **** #if OS_CFG_DBG_EN > 0u
+ 290:Libraries/uC-OSIII/os_mem.c **** void  OS_MemDbgListAdd (OS_MEM *p_mem)
+ 291:Libraries/uC-OSIII/os_mem.c **** {
+ 484              		.loc 1 291 0
+ 485              		.cfi_startproc
+ 486              		@ args = 0, pretend = 0, frame = 8
+ 487              		@ frame_needed = 1, uses_anonymous_args = 0
+ 488              		@ link register save eliminated.
+ 489 02f0 80B4     		push	{r7}
+ 490              	.LCFI9:
+ 491              		.cfi_def_cfa_offset 4
+ 492              		.cfi_offset 7, -4
+ 493 02f2 83B0     		sub	sp, sp, #12
+ 494              	.LCFI10:
+ 495              		.cfi_def_cfa_offset 16
+ 496 02f4 00AF     		add	r7, sp, #0
+ 497              	.LCFI11:
+ 498              		.cfi_def_cfa_register 7
+ 499 02f6 7860     		str	r0, [r7, #4]
+ 292:Libraries/uC-OSIII/os_mem.c ****     p_mem->DbgPrevPtr               = (OS_MEM *)0;
+ 500              		.loc 1 292 0
+ 501 02f8 7B68     		ldr	r3, [r7, #4]
+ 502 02fa 4FF00002 		mov	r2, #0
+ 503 02fe 9A61     		str	r2, [r3, #24]
+ 293:Libraries/uC-OSIII/os_mem.c ****     if (OSMemDbgListPtr == (OS_MEM *)0) {
+ 504              		.loc 1 293 0
+ 505 0300 40F20003 		movw	r3, #:lower16:OSMemDbgListPtr
+ 506 0304 C0F20003 		movt	r3, #:upper16:OSMemDbgListPtr
+ 507 0308 1B68     		ldr	r3, [r3, #0]
+ 508 030a 002B     		cmp	r3, #0
+ 509 030c 04D1     		bne	.L25
+ 294:Libraries/uC-OSIII/os_mem.c ****         p_mem->DbgNextPtr           = (OS_MEM *)0;
+ 510              		.loc 1 294 0
+ 511 030e 7B68     		ldr	r3, [r7, #4]
+ 512 0310 4FF00002 		mov	r2, #0
+ 513 0314 DA61     		str	r2, [r3, #28]
+ 514 0316 0DE0     		b	.L26
+ 515              	.L25:
+ 295:Libraries/uC-OSIII/os_mem.c ****     } else {
+ 296:Libraries/uC-OSIII/os_mem.c ****         p_mem->DbgNextPtr           =  OSMemDbgListPtr;
+ 516              		.loc 1 296 0
+ 517 0318 40F20003 		movw	r3, #:lower16:OSMemDbgListPtr
+ 518 031c C0F20003 		movt	r3, #:upper16:OSMemDbgListPtr
+ 519 0320 1A68     		ldr	r2, [r3, #0]
+ 520 0322 7B68     		ldr	r3, [r7, #4]
+ 521 0324 DA61     		str	r2, [r3, #28]
+ 297:Libraries/uC-OSIII/os_mem.c ****         OSMemDbgListPtr->DbgPrevPtr =  p_mem;
+ 522              		.loc 1 297 0
+ 523 0326 40F20003 		movw	r3, #:lower16:OSMemDbgListPtr
+ 524 032a C0F20003 		movt	r3, #:upper16:OSMemDbgListPtr
+ 525 032e 1B68     		ldr	r3, [r3, #0]
+ 526 0330 7A68     		ldr	r2, [r7, #4]
+ 527 0332 9A61     		str	r2, [r3, #24]
+ 528              	.L26:
+ 298:Libraries/uC-OSIII/os_mem.c ****     }
+ 299:Libraries/uC-OSIII/os_mem.c ****     OSMemDbgListPtr                 =  p_mem;
+ 529              		.loc 1 299 0
+ 530 0334 40F20003 		movw	r3, #:lower16:OSMemDbgListPtr
+ 531 0338 C0F20003 		movt	r3, #:upper16:OSMemDbgListPtr
+ 532 033c 7A68     		ldr	r2, [r7, #4]
+ 533 033e 1A60     		str	r2, [r3, #0]
+ 300:Libraries/uC-OSIII/os_mem.c **** }
+ 534              		.loc 1 300 0
+ 535 0340 07F10C07 		add	r7, r7, #12
+ 536 0344 BD46     		mov	sp, r7
+ 537 0346 80BC     		pop	{r7}
+ 538 0348 7047     		bx	lr
+ 539              		.cfi_endproc
+ 540              	.LFE3:
+ 542 034a 00BF     		.align	2
+ 543              		.global	OS_MemInit
+ 544              		.thumb
+ 545              		.thumb_func
+ 547              	OS_MemInit:
+ 548              	.LFB4:
+ 301:Libraries/uC-OSIII/os_mem.c **** #endif
+ 302:Libraries/uC-OSIII/os_mem.c **** 
+ 303:Libraries/uC-OSIII/os_mem.c **** /*$PAGE*/
+ 304:Libraries/uC-OSIII/os_mem.c **** /*
+ 305:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+ 306:Libraries/uC-OSIII/os_mem.c **** *                                           INITIALIZE MEMORY PARTITION MANAGER
+ 307:Libraries/uC-OSIII/os_mem.c **** *
+ 308:Libraries/uC-OSIII/os_mem.c **** * Description : This function is called by uC/OS-III to initialize the memory partition manager.  Y
+ 309:Libraries/uC-OSIII/os_mem.c **** *               application MUST NOT call this function.
+ 310:Libraries/uC-OSIII/os_mem.c **** *
+ 311:Libraries/uC-OSIII/os_mem.c **** * Arguments   : none
+ 312:Libraries/uC-OSIII/os_mem.c **** *
+ 313:Libraries/uC-OSIII/os_mem.c **** * Returns     : none
+ 314:Libraries/uC-OSIII/os_mem.c **** *
+ 315:Libraries/uC-OSIII/os_mem.c **** * Note(s)    : This function is INTERNAL to uC/OS-III and your application should not call it.
+ 316:Libraries/uC-OSIII/os_mem.c **** ***************************************************************************************************
+ 317:Libraries/uC-OSIII/os_mem.c **** */
+ 318:Libraries/uC-OSIII/os_mem.c **** 
+ 319:Libraries/uC-OSIII/os_mem.c **** void  OS_MemInit (OS_ERR  *p_err)
+ 320:Libraries/uC-OSIII/os_mem.c **** {
+ 549              		.loc 1 320 0
+ 550              		.cfi_startproc
+ 551              		@ args = 0, pretend = 0, frame = 8
+ 552              		@ frame_needed = 1, uses_anonymous_args = 0
+ 553              		@ link register save eliminated.
+ 554 034c 80B4     		push	{r7}
+ 555              	.LCFI12:
+ 556              		.cfi_def_cfa_offset 4
+ 557              		.cfi_offset 7, -4
+ 558 034e 83B0     		sub	sp, sp, #12
+ 559              	.LCFI13:
+ 560              		.cfi_def_cfa_offset 16
+ 561 0350 00AF     		add	r7, sp, #0
+ 562              	.LCFI14:
+ 563              		.cfi_def_cfa_register 7
+ 564 0352 7860     		str	r0, [r7, #4]
+ 321:Libraries/uC-OSIII/os_mem.c **** #ifdef OS_SAFETY_CRITICAL
+ 322:Libraries/uC-OSIII/os_mem.c ****     if (p_err == (OS_ERR *)0) {
+ 323:Libraries/uC-OSIII/os_mem.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 324:Libraries/uC-OSIII/os_mem.c ****     }
+ 325:Libraries/uC-OSIII/os_mem.c **** #endif
+ 326:Libraries/uC-OSIII/os_mem.c **** 
+ 327:Libraries/uC-OSIII/os_mem.c **** #if OS_CFG_DBG_EN > 0u
+ 328:Libraries/uC-OSIII/os_mem.c ****     OSMemDbgListPtr = (OS_MEM   *)0;
+ 565              		.loc 1 328 0
+ 566 0354 40F20003 		movw	r3, #:lower16:OSMemDbgListPtr
+ 567 0358 C0F20003 		movt	r3, #:upper16:OSMemDbgListPtr
+ 568 035c 4FF00002 		mov	r2, #0
+ 569 0360 1A60     		str	r2, [r3, #0]
+ 329:Libraries/uC-OSIII/os_mem.c **** #endif
+ 330:Libraries/uC-OSIII/os_mem.c **** 
+ 331:Libraries/uC-OSIII/os_mem.c ****     OSMemQty        = (OS_OBJ_QTY)0;
+ 570              		.loc 1 331 0
+ 571 0362 40F20003 		movw	r3, #:lower16:OSMemQty
+ 572 0366 C0F20003 		movt	r3, #:upper16:OSMemQty
+ 573 036a 4FF00002 		mov	r2, #0
+ 574 036e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 332:Libraries/uC-OSIII/os_mem.c ****     *p_err          = OS_ERR_NONE;
+ 575              		.loc 1 332 0
+ 576 0370 7B68     		ldr	r3, [r7, #4]
+ 577 0372 4FF00002 		mov	r2, #0
+ 578 0376 1A80     		strh	r2, [r3, #0]	@ movhi
+ 333:Libraries/uC-OSIII/os_mem.c **** }
+ 579              		.loc 1 333 0
+ 580 0378 07F10C07 		add	r7, r7, #12
+ 581 037c BD46     		mov	sp, r7
+ 582 037e 80BC     		pop	{r7}
+ 583 0380 7047     		bx	lr
+ 584              		.cfi_endproc
+ 585              	.LFE4:
+ 587              	.Letext0:
+ 588              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 589              		.file 3 "Libraries/uC-OSIII/os_type.h"
+ 590              		.file 4 "Libraries/uC-OSIII/os.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 os_mem.c
+     /tmp/ccHUAddk.s:18     .text:00000000 $t
+     /tmp/ccHUAddk.s:23     .text:00000000 OSMemCreate
+     /tmp/ccHUAddk.s:482    .text:000002f0 OS_MemDbgListAdd
+     /tmp/ccHUAddk.s:283    .text:000001d4 OSMemGet
+     /tmp/ccHUAddk.s:378    .text:0000025c OSMemPut
+     /tmp/ccHUAddk.s:547    .text:0000034c OS_MemInit
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+OSIntNestingCtr
+CPU_SR_Save
+CPU_IntDisMeasStart
+OSSchedLockNestingCtr
+OS_SchedLockTimeMeasStart
+CPU_IntDisMeasStop
+CPU_SR_Restore
+OSMemQty
+OS_SchedLockTimeMeasStop
+OSIntQNbrEntries
+OS_Sched0
+OSMemDbgListPtr

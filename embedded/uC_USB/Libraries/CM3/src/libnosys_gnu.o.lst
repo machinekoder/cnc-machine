@@ -1,0 +1,902 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"libnosys_gnu.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.global	__env
+  19              		.bss
+  20              		.align	2
+  23              	__env:
+  24 0000 00000000 		.space	4
+  25              		.global	environ
+  26              		.data
+  27              		.align	2
+  30              	environ:
+  31 0000 00000000 		.word	__env
+  32              		.text
+  33              		.align	2
+  34              		.global	_close
+  35              		.thumb
+  36              		.thumb_func
+  38              	_close:
+  39              	.LFB0:
+  40              		.file 1 "Libraries/CM3/src/libnosys_gnu.c"
+   1:Libraries/CM3/src/libnosys_gnu.c **** /**********************************************************************
+   2:Libraries/CM3/src/libnosys_gnu.c **** * $Id$		libnosys_gnu.c  				2008-12-01
+   3:Libraries/CM3/src/libnosys_gnu.c **** *//**
+   4:Libraries/CM3/src/libnosys_gnu.c **** * @file		libnosys_gnu.c
+   5:Libraries/CM3/src/libnosys_gnu.c **** * @brief	Definitions for OS interface, stub function required by newlibc
+   6:Libraries/CM3/src/libnosys_gnu.c **** * 			used by Codesourcery GNU compiler.
+   7:Libraries/CM3/src/libnosys_gnu.c **** * @version
+   8:Libraries/CM3/src/libnosys_gnu.c **** * @date		01. December. 2008
+   9:Libraries/CM3/src/libnosys_gnu.c **** * @author	NXP MCU SW Application Team
+  10:Libraries/CM3/src/libnosys_gnu.c **** *
+  11:Libraries/CM3/src/libnosys_gnu.c **** * Copyright(C) 2010, NXP Semiconductor
+  12:Libraries/CM3/src/libnosys_gnu.c **** * All rights reserved.
+  13:Libraries/CM3/src/libnosys_gnu.c **** *
+  14:Libraries/CM3/src/libnosys_gnu.c **** ***********************************************************************
+  15:Libraries/CM3/src/libnosys_gnu.c **** * Software that is described herein is for illustrative purposes only
+  16:Libraries/CM3/src/libnosys_gnu.c **** * which provides customers with programming information regarding the
+  17:Libraries/CM3/src/libnosys_gnu.c **** * products. This software is supplied "AS IS" without any warranties.
+  18:Libraries/CM3/src/libnosys_gnu.c **** * NXP Semiconductors assumes no responsibility or liability for the
+  19:Libraries/CM3/src/libnosys_gnu.c **** * use of the software, conveys no license or title under any patent,
+  20:Libraries/CM3/src/libnosys_gnu.c **** * copyright, or mask work right to the product. NXP Semiconductors
+  21:Libraries/CM3/src/libnosys_gnu.c **** * reserves the right to make changes in the software without
+  22:Libraries/CM3/src/libnosys_gnu.c **** * notification. NXP Semiconductors also make no representation or
+  23:Libraries/CM3/src/libnosys_gnu.c **** * warranty that such application will be suitable for the specified
+  24:Libraries/CM3/src/libnosys_gnu.c **** * use without further testing or modification.
+  25:Libraries/CM3/src/libnosys_gnu.c **** **********************************************************************/
+  26:Libraries/CM3/src/libnosys_gnu.c **** #if defined(__GNUC__)
+  27:Libraries/CM3/src/libnosys_gnu.c **** 
+  28:Libraries/CM3/src/libnosys_gnu.c **** #include "lpc_types.h"
+  29:Libraries/CM3/src/libnosys_gnu.c **** #include <errno.h>
+  30:Libraries/CM3/src/libnosys_gnu.c **** #include <sys/times.h>
+  31:Libraries/CM3/src/libnosys_gnu.c **** #include <sys/stat.h>
+  32:Libraries/CM3/src/libnosys_gnu.c **** 
+  33:Libraries/CM3/src/libnosys_gnu.c **** /* errno definition */
+  34:Libraries/CM3/src/libnosys_gnu.c **** #undef errno
+  35:Libraries/CM3/src/libnosys_gnu.c **** extern int errno;
+  36:Libraries/CM3/src/libnosys_gnu.c **** 
+  37:Libraries/CM3/src/libnosys_gnu.c **** char *__env[1] = { 0 };
+  38:Libraries/CM3/src/libnosys_gnu.c **** char **environ = __env;
+  39:Libraries/CM3/src/libnosys_gnu.c **** 
+  40:Libraries/CM3/src/libnosys_gnu.c **** int _close(int file)
+  41:Libraries/CM3/src/libnosys_gnu.c **** {
+  41              		.loc 1 41 0
+  42              		.cfi_startproc
+  43              		@ args = 0, pretend = 0, frame = 8
+  44              		@ frame_needed = 1, uses_anonymous_args = 0
+  45              		@ link register save eliminated.
+  46 0000 80B4     		push	{r7}
+  47              	.LCFI0:
+  48              		.cfi_def_cfa_offset 4
+  49              		.cfi_offset 7, -4
+  50 0002 83B0     		sub	sp, sp, #12
+  51              	.LCFI1:
+  52              		.cfi_def_cfa_offset 16
+  53 0004 00AF     		add	r7, sp, #0
+  54              	.LCFI2:
+  55              		.cfi_def_cfa_register 7
+  56 0006 7860     		str	r0, [r7, #4]
+  42:Libraries/CM3/src/libnosys_gnu.c ****   return -1;
+  57              		.loc 1 42 0
+  58 0008 4FF0FF33 		mov	r3, #-1
+  43:Libraries/CM3/src/libnosys_gnu.c **** }
+  59              		.loc 1 43 0
+  60 000c 1846     		mov	r0, r3
+  61 000e 07F10C07 		add	r7, r7, #12
+  62 0012 BD46     		mov	sp, r7
+  63 0014 80BC     		pop	{r7}
+  64 0016 7047     		bx	lr
+  65              		.cfi_endproc
+  66              	.LFE0:
+  68              		.align	2
+  69              		.global	_execve
+  70              		.thumb
+  71              		.thumb_func
+  73              	_execve:
+  74              	.LFB1:
+  44:Libraries/CM3/src/libnosys_gnu.c **** 
+  45:Libraries/CM3/src/libnosys_gnu.c **** int _execve(char *name, char **argv, char **env)
+  46:Libraries/CM3/src/libnosys_gnu.c **** {
+  75              		.loc 1 46 0
+  76              		.cfi_startproc
+  77              		@ args = 0, pretend = 0, frame = 16
+  78              		@ frame_needed = 1, uses_anonymous_args = 0
+  79              		@ link register save eliminated.
+  80 0018 80B4     		push	{r7}
+  81              	.LCFI3:
+  82              		.cfi_def_cfa_offset 4
+  83              		.cfi_offset 7, -4
+  84 001a 85B0     		sub	sp, sp, #20
+  85              	.LCFI4:
+  86              		.cfi_def_cfa_offset 24
+  87 001c 00AF     		add	r7, sp, #0
+  88              	.LCFI5:
+  89              		.cfi_def_cfa_register 7
+  90 001e F860     		str	r0, [r7, #12]
+  91 0020 B960     		str	r1, [r7, #8]
+  92 0022 7A60     		str	r2, [r7, #4]
+  47:Libraries/CM3/src/libnosys_gnu.c ****   errno = ENOMEM;
+  93              		.loc 1 47 0
+  94 0024 40F20003 		movw	r3, #:lower16:errno
+  95 0028 C0F20003 		movt	r3, #:upper16:errno
+  96 002c 4FF00C02 		mov	r2, #12
+  97 0030 1A60     		str	r2, [r3, #0]
+  48:Libraries/CM3/src/libnosys_gnu.c ****   return -1;
+  98              		.loc 1 48 0
+  99 0032 4FF0FF33 		mov	r3, #-1
+  49:Libraries/CM3/src/libnosys_gnu.c **** }
+ 100              		.loc 1 49 0
+ 101 0036 1846     		mov	r0, r3
+ 102 0038 07F11407 		add	r7, r7, #20
+ 103 003c BD46     		mov	sp, r7
+ 104 003e 80BC     		pop	{r7}
+ 105 0040 7047     		bx	lr
+ 106              		.cfi_endproc
+ 107              	.LFE1:
+ 109 0042 00BF     		.align	2
+ 110              		.global	_exit
+ 111              		.thumb
+ 112              		.thumb_func
+ 114              	_exit:
+ 115              	.LFB2:
+  50:Libraries/CM3/src/libnosys_gnu.c **** int _exit()
+  51:Libraries/CM3/src/libnosys_gnu.c **** {
+ 116              		.loc 1 51 0
+ 117              		.cfi_startproc
+ 118              		@ args = 0, pretend = 0, frame = 0
+ 119              		@ frame_needed = 1, uses_anonymous_args = 0
+ 120              		@ link register save eliminated.
+ 121 0044 80B4     		push	{r7}
+ 122              	.LCFI6:
+ 123              		.cfi_def_cfa_offset 4
+ 124              		.cfi_offset 7, -4
+ 125 0046 00AF     		add	r7, sp, #0
+ 126              	.LCFI7:
+ 127              		.cfi_def_cfa_register 7
+  52:Libraries/CM3/src/libnosys_gnu.c ****   return 0;
+ 128              		.loc 1 52 0
+ 129 0048 4FF00003 		mov	r3, #0
+  53:Libraries/CM3/src/libnosys_gnu.c **** }
+ 130              		.loc 1 53 0
+ 131 004c 1846     		mov	r0, r3
+ 132 004e BD46     		mov	sp, r7
+ 133 0050 80BC     		pop	{r7}
+ 134 0052 7047     		bx	lr
+ 135              		.cfi_endproc
+ 136              	.LFE2:
+ 138              		.align	2
+ 139              		.global	_fork
+ 140              		.thumb
+ 141              		.thumb_func
+ 143              	_fork:
+ 144              	.LFB3:
+  54:Libraries/CM3/src/libnosys_gnu.c **** 
+  55:Libraries/CM3/src/libnosys_gnu.c **** int _fork()
+  56:Libraries/CM3/src/libnosys_gnu.c **** {
+ 145              		.loc 1 56 0
+ 146              		.cfi_startproc
+ 147              		@ args = 0, pretend = 0, frame = 0
+ 148              		@ frame_needed = 1, uses_anonymous_args = 0
+ 149              		@ link register save eliminated.
+ 150 0054 80B4     		push	{r7}
+ 151              	.LCFI8:
+ 152              		.cfi_def_cfa_offset 4
+ 153              		.cfi_offset 7, -4
+ 154 0056 00AF     		add	r7, sp, #0
+ 155              	.LCFI9:
+ 156              		.cfi_def_cfa_register 7
+  57:Libraries/CM3/src/libnosys_gnu.c ****   errno = EAGAIN;
+ 157              		.loc 1 57 0
+ 158 0058 40F20003 		movw	r3, #:lower16:errno
+ 159 005c C0F20003 		movt	r3, #:upper16:errno
+ 160 0060 4FF00B02 		mov	r2, #11
+ 161 0064 1A60     		str	r2, [r3, #0]
+  58:Libraries/CM3/src/libnosys_gnu.c ****   return -1;
+ 162              		.loc 1 58 0
+ 163 0066 4FF0FF33 		mov	r3, #-1
+  59:Libraries/CM3/src/libnosys_gnu.c **** }
+ 164              		.loc 1 59 0
+ 165 006a 1846     		mov	r0, r3
+ 166 006c BD46     		mov	sp, r7
+ 167 006e 80BC     		pop	{r7}
+ 168 0070 7047     		bx	lr
+ 169              		.cfi_endproc
+ 170              	.LFE3:
+ 172 0072 00BF     		.align	2
+ 173              		.global	_fstat
+ 174              		.thumb
+ 175              		.thumb_func
+ 177              	_fstat:
+ 178              	.LFB4:
+  60:Libraries/CM3/src/libnosys_gnu.c **** 
+  61:Libraries/CM3/src/libnosys_gnu.c **** int _fstat(int file, struct stat *st)
+  62:Libraries/CM3/src/libnosys_gnu.c **** {
+ 179              		.loc 1 62 0
+ 180              		.cfi_startproc
+ 181              		@ args = 0, pretend = 0, frame = 8
+ 182              		@ frame_needed = 1, uses_anonymous_args = 0
+ 183              		@ link register save eliminated.
+ 184 0074 80B4     		push	{r7}
+ 185              	.LCFI10:
+ 186              		.cfi_def_cfa_offset 4
+ 187              		.cfi_offset 7, -4
+ 188 0076 83B0     		sub	sp, sp, #12
+ 189              	.LCFI11:
+ 190              		.cfi_def_cfa_offset 16
+ 191 0078 00AF     		add	r7, sp, #0
+ 192              	.LCFI12:
+ 193              		.cfi_def_cfa_register 7
+ 194 007a 7860     		str	r0, [r7, #4]
+ 195 007c 3960     		str	r1, [r7, #0]
+  63:Libraries/CM3/src/libnosys_gnu.c ****   st->st_mode = S_IFCHR;
+ 196              		.loc 1 63 0
+ 197 007e 3B68     		ldr	r3, [r7, #0]
+ 198 0080 4FF40052 		mov	r2, #8192
+ 199 0084 5A60     		str	r2, [r3, #4]
+  64:Libraries/CM3/src/libnosys_gnu.c ****   return 0;
+ 200              		.loc 1 64 0
+ 201 0086 4FF00003 		mov	r3, #0
+  65:Libraries/CM3/src/libnosys_gnu.c **** }
+ 202              		.loc 1 65 0
+ 203 008a 1846     		mov	r0, r3
+ 204 008c 07F10C07 		add	r7, r7, #12
+ 205 0090 BD46     		mov	sp, r7
+ 206 0092 80BC     		pop	{r7}
+ 207 0094 7047     		bx	lr
+ 208              		.cfi_endproc
+ 209              	.LFE4:
+ 211 0096 00BF     		.align	2
+ 212              		.global	_getpid
+ 213              		.thumb
+ 214              		.thumb_func
+ 216              	_getpid:
+ 217              	.LFB5:
+  66:Libraries/CM3/src/libnosys_gnu.c **** 
+  67:Libraries/CM3/src/libnosys_gnu.c **** int _getpid()
+  68:Libraries/CM3/src/libnosys_gnu.c **** {
+ 218              		.loc 1 68 0
+ 219              		.cfi_startproc
+ 220              		@ args = 0, pretend = 0, frame = 0
+ 221              		@ frame_needed = 1, uses_anonymous_args = 0
+ 222              		@ link register save eliminated.
+ 223 0098 80B4     		push	{r7}
+ 224              	.LCFI13:
+ 225              		.cfi_def_cfa_offset 4
+ 226              		.cfi_offset 7, -4
+ 227 009a 00AF     		add	r7, sp, #0
+ 228              	.LCFI14:
+ 229              		.cfi_def_cfa_register 7
+  69:Libraries/CM3/src/libnosys_gnu.c ****   return 1;
+ 230              		.loc 1 69 0
+ 231 009c 4FF00103 		mov	r3, #1
+  70:Libraries/CM3/src/libnosys_gnu.c **** }
+ 232              		.loc 1 70 0
+ 233 00a0 1846     		mov	r0, r3
+ 234 00a2 BD46     		mov	sp, r7
+ 235 00a4 80BC     		pop	{r7}
+ 236 00a6 7047     		bx	lr
+ 237              		.cfi_endproc
+ 238              	.LFE5:
+ 240              		.align	2
+ 241              		.global	_kill
+ 242              		.thumb
+ 243              		.thumb_func
+ 245              	_kill:
+ 246              	.LFB6:
+  71:Libraries/CM3/src/libnosys_gnu.c **** 
+  72:Libraries/CM3/src/libnosys_gnu.c **** int _kill(int pid, int sig)
+  73:Libraries/CM3/src/libnosys_gnu.c **** {
+ 247              		.loc 1 73 0
+ 248              		.cfi_startproc
+ 249              		@ args = 0, pretend = 0, frame = 8
+ 250              		@ frame_needed = 1, uses_anonymous_args = 0
+ 251              		@ link register save eliminated.
+ 252 00a8 80B4     		push	{r7}
+ 253              	.LCFI15:
+ 254              		.cfi_def_cfa_offset 4
+ 255              		.cfi_offset 7, -4
+ 256 00aa 83B0     		sub	sp, sp, #12
+ 257              	.LCFI16:
+ 258              		.cfi_def_cfa_offset 16
+ 259 00ac 00AF     		add	r7, sp, #0
+ 260              	.LCFI17:
+ 261              		.cfi_def_cfa_register 7
+ 262 00ae 7860     		str	r0, [r7, #4]
+ 263 00b0 3960     		str	r1, [r7, #0]
+  74:Libraries/CM3/src/libnosys_gnu.c ****   errno = EINVAL;
+ 264              		.loc 1 74 0
+ 265 00b2 40F20003 		movw	r3, #:lower16:errno
+ 266 00b6 C0F20003 		movt	r3, #:upper16:errno
+ 267 00ba 4FF01602 		mov	r2, #22
+ 268 00be 1A60     		str	r2, [r3, #0]
+  75:Libraries/CM3/src/libnosys_gnu.c ****   return(-1);
+ 269              		.loc 1 75 0
+ 270 00c0 4FF0FF33 		mov	r3, #-1
+  76:Libraries/CM3/src/libnosys_gnu.c **** }
+ 271              		.loc 1 76 0
+ 272 00c4 1846     		mov	r0, r3
+ 273 00c6 07F10C07 		add	r7, r7, #12
+ 274 00ca BD46     		mov	sp, r7
+ 275 00cc 80BC     		pop	{r7}
+ 276 00ce 7047     		bx	lr
+ 277              		.cfi_endproc
+ 278              	.LFE6:
+ 280              		.align	2
+ 281              		.global	isatty
+ 282              		.thumb
+ 283              		.thumb_func
+ 285              	isatty:
+ 286              	.LFB7:
+  77:Libraries/CM3/src/libnosys_gnu.c **** 
+  78:Libraries/CM3/src/libnosys_gnu.c **** int isatty(int fildes)
+  79:Libraries/CM3/src/libnosys_gnu.c **** {
+ 287              		.loc 1 79 0
+ 288              		.cfi_startproc
+ 289              		@ args = 0, pretend = 0, frame = 8
+ 290              		@ frame_needed = 1, uses_anonymous_args = 0
+ 291              		@ link register save eliminated.
+ 292 00d0 80B4     		push	{r7}
+ 293              	.LCFI18:
+ 294              		.cfi_def_cfa_offset 4
+ 295              		.cfi_offset 7, -4
+ 296 00d2 83B0     		sub	sp, sp, #12
+ 297              	.LCFI19:
+ 298              		.cfi_def_cfa_offset 16
+ 299 00d4 00AF     		add	r7, sp, #0
+ 300              	.LCFI20:
+ 301              		.cfi_def_cfa_register 7
+ 302 00d6 7860     		str	r0, [r7, #4]
+  80:Libraries/CM3/src/libnosys_gnu.c ****   return 1;
+ 303              		.loc 1 80 0
+ 304 00d8 4FF00103 		mov	r3, #1
+  81:Libraries/CM3/src/libnosys_gnu.c **** }
+ 305              		.loc 1 81 0
+ 306 00dc 1846     		mov	r0, r3
+ 307 00de 07F10C07 		add	r7, r7, #12
+ 308 00e2 BD46     		mov	sp, r7
+ 309 00e4 80BC     		pop	{r7}
+ 310 00e6 7047     		bx	lr
+ 311              		.cfi_endproc
+ 312              	.LFE7:
+ 314              		.align	2
+ 315              		.global	_isatty
+ 316              		.thumb
+ 317              		.thumb_func
+ 319              	_isatty:
+ 320              	.LFB8:
+  82:Libraries/CM3/src/libnosys_gnu.c **** int _isatty(int fildes)
+  83:Libraries/CM3/src/libnosys_gnu.c **** {
+ 321              		.loc 1 83 0
+ 322              		.cfi_startproc
+ 323              		@ args = 0, pretend = 0, frame = 8
+ 324              		@ frame_needed = 1, uses_anonymous_args = 0
+ 325              		@ link register save eliminated.
+ 326 00e8 80B4     		push	{r7}
+ 327              	.LCFI21:
+ 328              		.cfi_def_cfa_offset 4
+ 329              		.cfi_offset 7, -4
+ 330 00ea 83B0     		sub	sp, sp, #12
+ 331              	.LCFI22:
+ 332              		.cfi_def_cfa_offset 16
+ 333 00ec 00AF     		add	r7, sp, #0
+ 334              	.LCFI23:
+ 335              		.cfi_def_cfa_register 7
+ 336 00ee 7860     		str	r0, [r7, #4]
+  84:Libraries/CM3/src/libnosys_gnu.c ****   return 1;
+ 337              		.loc 1 84 0
+ 338 00f0 4FF00103 		mov	r3, #1
+  85:Libraries/CM3/src/libnosys_gnu.c **** }
+ 339              		.loc 1 85 0
+ 340 00f4 1846     		mov	r0, r3
+ 341 00f6 07F10C07 		add	r7, r7, #12
+ 342 00fa BD46     		mov	sp, r7
+ 343 00fc 80BC     		pop	{r7}
+ 344 00fe 7047     		bx	lr
+ 345              		.cfi_endproc
+ 346              	.LFE8:
+ 348              		.align	2
+ 349              		.global	_link
+ 350              		.thumb
+ 351              		.thumb_func
+ 353              	_link:
+ 354              	.LFB9:
+  86:Libraries/CM3/src/libnosys_gnu.c **** 
+  87:Libraries/CM3/src/libnosys_gnu.c **** int _link(char *old, char *new)
+  88:Libraries/CM3/src/libnosys_gnu.c **** {
+ 355              		.loc 1 88 0
+ 356              		.cfi_startproc
+ 357              		@ args = 0, pretend = 0, frame = 8
+ 358              		@ frame_needed = 1, uses_anonymous_args = 0
+ 359              		@ link register save eliminated.
+ 360 0100 80B4     		push	{r7}
+ 361              	.LCFI24:
+ 362              		.cfi_def_cfa_offset 4
+ 363              		.cfi_offset 7, -4
+ 364 0102 83B0     		sub	sp, sp, #12
+ 365              	.LCFI25:
+ 366              		.cfi_def_cfa_offset 16
+ 367 0104 00AF     		add	r7, sp, #0
+ 368              	.LCFI26:
+ 369              		.cfi_def_cfa_register 7
+ 370 0106 7860     		str	r0, [r7, #4]
+ 371 0108 3960     		str	r1, [r7, #0]
+  89:Libraries/CM3/src/libnosys_gnu.c ****   errno = EMLINK;
+ 372              		.loc 1 89 0
+ 373 010a 40F20003 		movw	r3, #:lower16:errno
+ 374 010e C0F20003 		movt	r3, #:upper16:errno
+ 375 0112 4FF01F02 		mov	r2, #31
+ 376 0116 1A60     		str	r2, [r3, #0]
+  90:Libraries/CM3/src/libnosys_gnu.c ****   return -1;
+ 377              		.loc 1 90 0
+ 378 0118 4FF0FF33 		mov	r3, #-1
+  91:Libraries/CM3/src/libnosys_gnu.c **** }
+ 379              		.loc 1 91 0
+ 380 011c 1846     		mov	r0, r3
+ 381 011e 07F10C07 		add	r7, r7, #12
+ 382 0122 BD46     		mov	sp, r7
+ 383 0124 80BC     		pop	{r7}
+ 384 0126 7047     		bx	lr
+ 385              		.cfi_endproc
+ 386              	.LFE9:
+ 388              		.align	2
+ 389              		.global	_lseek
+ 390              		.thumb
+ 391              		.thumb_func
+ 393              	_lseek:
+ 394              	.LFB10:
+  92:Libraries/CM3/src/libnosys_gnu.c **** 
+  93:Libraries/CM3/src/libnosys_gnu.c **** int _lseek(int file, int ptr, int dir)
+  94:Libraries/CM3/src/libnosys_gnu.c **** {
+ 395              		.loc 1 94 0
+ 396              		.cfi_startproc
+ 397              		@ args = 0, pretend = 0, frame = 16
+ 398              		@ frame_needed = 1, uses_anonymous_args = 0
+ 399              		@ link register save eliminated.
+ 400 0128 80B4     		push	{r7}
+ 401              	.LCFI27:
+ 402              		.cfi_def_cfa_offset 4
+ 403              		.cfi_offset 7, -4
+ 404 012a 85B0     		sub	sp, sp, #20
+ 405              	.LCFI28:
+ 406              		.cfi_def_cfa_offset 24
+ 407 012c 00AF     		add	r7, sp, #0
+ 408              	.LCFI29:
+ 409              		.cfi_def_cfa_register 7
+ 410 012e F860     		str	r0, [r7, #12]
+ 411 0130 B960     		str	r1, [r7, #8]
+ 412 0132 7A60     		str	r2, [r7, #4]
+  95:Libraries/CM3/src/libnosys_gnu.c ****   return 0;
+ 413              		.loc 1 95 0
+ 414 0134 4FF00003 		mov	r3, #0
+  96:Libraries/CM3/src/libnosys_gnu.c **** }
+ 415              		.loc 1 96 0
+ 416 0138 1846     		mov	r0, r3
+ 417 013a 07F11407 		add	r7, r7, #20
+ 418 013e BD46     		mov	sp, r7
+ 419 0140 80BC     		pop	{r7}
+ 420 0142 7047     		bx	lr
+ 421              		.cfi_endproc
+ 422              	.LFE10:
+ 424              		.align	2
+ 425              		.global	_open
+ 426              		.thumb
+ 427              		.thumb_func
+ 429              	_open:
+ 430              	.LFB11:
+  97:Libraries/CM3/src/libnosys_gnu.c **** 
+  98:Libraries/CM3/src/libnosys_gnu.c **** int _open(const char *name, int flags, int mode)
+  99:Libraries/CM3/src/libnosys_gnu.c **** {
+ 431              		.loc 1 99 0
+ 432              		.cfi_startproc
+ 433              		@ args = 0, pretend = 0, frame = 16
+ 434              		@ frame_needed = 1, uses_anonymous_args = 0
+ 435              		@ link register save eliminated.
+ 436 0144 80B4     		push	{r7}
+ 437              	.LCFI30:
+ 438              		.cfi_def_cfa_offset 4
+ 439              		.cfi_offset 7, -4
+ 440 0146 85B0     		sub	sp, sp, #20
+ 441              	.LCFI31:
+ 442              		.cfi_def_cfa_offset 24
+ 443 0148 00AF     		add	r7, sp, #0
+ 444              	.LCFI32:
+ 445              		.cfi_def_cfa_register 7
+ 446 014a F860     		str	r0, [r7, #12]
+ 447 014c B960     		str	r1, [r7, #8]
+ 448 014e 7A60     		str	r2, [r7, #4]
+ 100:Libraries/CM3/src/libnosys_gnu.c ****   return -1;
+ 449              		.loc 1 100 0
+ 450 0150 4FF0FF33 		mov	r3, #-1
+ 101:Libraries/CM3/src/libnosys_gnu.c **** }
+ 451              		.loc 1 101 0
+ 452 0154 1846     		mov	r0, r3
+ 453 0156 07F11407 		add	r7, r7, #20
+ 454 015a BD46     		mov	sp, r7
+ 455 015c 80BC     		pop	{r7}
+ 456 015e 7047     		bx	lr
+ 457              		.cfi_endproc
+ 458              	.LFE11:
+ 460              		.align	2
+ 461              		.global	_read
+ 462              		.thumb
+ 463              		.thumb_func
+ 465              	_read:
+ 466              	.LFB12:
+ 102:Libraries/CM3/src/libnosys_gnu.c **** 
+ 103:Libraries/CM3/src/libnosys_gnu.c **** int _read(int file, char *ptr, int len)
+ 104:Libraries/CM3/src/libnosys_gnu.c **** {
+ 467              		.loc 1 104 0
+ 468              		.cfi_startproc
+ 469              		@ args = 0, pretend = 0, frame = 16
+ 470              		@ frame_needed = 1, uses_anonymous_args = 0
+ 471              		@ link register save eliminated.
+ 472 0160 80B4     		push	{r7}
+ 473              	.LCFI33:
+ 474              		.cfi_def_cfa_offset 4
+ 475              		.cfi_offset 7, -4
+ 476 0162 85B0     		sub	sp, sp, #20
+ 477              	.LCFI34:
+ 478              		.cfi_def_cfa_offset 24
+ 479 0164 00AF     		add	r7, sp, #0
+ 480              	.LCFI35:
+ 481              		.cfi_def_cfa_register 7
+ 482 0166 F860     		str	r0, [r7, #12]
+ 483 0168 B960     		str	r1, [r7, #8]
+ 484 016a 7A60     		str	r2, [r7, #4]
+ 105:Libraries/CM3/src/libnosys_gnu.c ****   return 0;
+ 485              		.loc 1 105 0
+ 486 016c 4FF00003 		mov	r3, #0
+ 106:Libraries/CM3/src/libnosys_gnu.c **** }
+ 487              		.loc 1 106 0
+ 488 0170 1846     		mov	r0, r3
+ 489 0172 07F11407 		add	r7, r7, #20
+ 490 0176 BD46     		mov	sp, r7
+ 491 0178 80BC     		pop	{r7}
+ 492 017a 7047     		bx	lr
+ 493              		.cfi_endproc
+ 494              	.LFE12:
+ 496              		.align	2
+ 497              		.global	_sbrk
+ 498              		.thumb
+ 499              		.thumb_func
+ 501              	_sbrk:
+ 502              	.LFB13:
+ 107:Libraries/CM3/src/libnosys_gnu.c **** 
+ 108:Libraries/CM3/src/libnosys_gnu.c **** caddr_t _sbrk(int incr)
+ 109:Libraries/CM3/src/libnosys_gnu.c **** {
+ 503              		.loc 1 109 0
+ 504              		.cfi_startproc
+ 505              		@ args = 0, pretend = 0, frame = 16
+ 506              		@ frame_needed = 1, uses_anonymous_args = 0
+ 507              		@ link register save eliminated.
+ 508 017c 80B4     		push	{r7}
+ 509              	.LCFI36:
+ 510              		.cfi_def_cfa_offset 4
+ 511              		.cfi_offset 7, -4
+ 512 017e 85B0     		sub	sp, sp, #20
+ 513              	.LCFI37:
+ 514              		.cfi_def_cfa_offset 24
+ 515 0180 00AF     		add	r7, sp, #0
+ 516              	.LCFI38:
+ 517              		.cfi_def_cfa_register 7
+ 518 0182 7860     		str	r0, [r7, #4]
+ 110:Libraries/CM3/src/libnosys_gnu.c ****   extern char __cs3_heap_end;		/* Defined by the linker */
+ 111:Libraries/CM3/src/libnosys_gnu.c ****   static char *heap_end;
+ 112:Libraries/CM3/src/libnosys_gnu.c ****   char *prev_heap_end;
+ 113:Libraries/CM3/src/libnosys_gnu.c **** 
+ 114:Libraries/CM3/src/libnosys_gnu.c ****   if (heap_end == 0)
+ 519              		.loc 1 114 0
+ 520 0184 40F20003 		movw	r3, #:lower16:heap_end.4387
+ 521 0188 C0F20003 		movt	r3, #:upper16:heap_end.4387
+ 522 018c 1B68     		ldr	r3, [r3, #0]
+ 523 018e 002B     		cmp	r3, #0
+ 524 0190 14D1     		bne	.L15
+ 115:Libraries/CM3/src/libnosys_gnu.c ****   {
+ 116:Libraries/CM3/src/libnosys_gnu.c ****     heap_end = &__cs3_heap_end;
+ 525              		.loc 1 116 0
+ 526 0192 40F20003 		movw	r3, #:lower16:heap_end.4387
+ 527 0196 C0F20003 		movt	r3, #:upper16:heap_end.4387
+ 528 019a 40F20002 		movw	r2, #:lower16:__cs3_heap_end
+ 529 019e C0F20002 		movt	r2, #:upper16:__cs3_heap_end
+ 530 01a2 1A60     		str	r2, [r3, #0]
+ 117:Libraries/CM3/src/libnosys_gnu.c ****     /* give 16KB area for stacks and use the rest of memory for heap*/
+ 118:Libraries/CM3/src/libnosys_gnu.c ****     heap_end += 0x4000;
+ 531              		.loc 1 118 0
+ 532 01a4 40F20003 		movw	r3, #:lower16:heap_end.4387
+ 533 01a8 C0F20003 		movt	r3, #:upper16:heap_end.4387
+ 534 01ac 1B68     		ldr	r3, [r3, #0]
+ 535 01ae 03F58042 		add	r2, r3, #16384
+ 536 01b2 40F20003 		movw	r3, #:lower16:heap_end.4387
+ 537 01b6 C0F20003 		movt	r3, #:upper16:heap_end.4387
+ 538 01ba 1A60     		str	r2, [r3, #0]
+ 539              	.L15:
+ 119:Libraries/CM3/src/libnosys_gnu.c ****   }
+ 120:Libraries/CM3/src/libnosys_gnu.c ****   prev_heap_end = heap_end;
+ 540              		.loc 1 120 0
+ 541 01bc 40F20003 		movw	r3, #:lower16:heap_end.4387
+ 542 01c0 C0F20003 		movt	r3, #:upper16:heap_end.4387
+ 543 01c4 1B68     		ldr	r3, [r3, #0]
+ 544 01c6 FB60     		str	r3, [r7, #12]
+ 121:Libraries/CM3/src/libnosys_gnu.c **** 
+ 122:Libraries/CM3/src/libnosys_gnu.c ****   heap_end += incr;
+ 545              		.loc 1 122 0
+ 546 01c8 40F20003 		movw	r3, #:lower16:heap_end.4387
+ 547 01cc C0F20003 		movt	r3, #:upper16:heap_end.4387
+ 548 01d0 1A68     		ldr	r2, [r3, #0]
+ 549 01d2 7B68     		ldr	r3, [r7, #4]
+ 550 01d4 D218     		adds	r2, r2, r3
+ 551 01d6 40F20003 		movw	r3, #:lower16:heap_end.4387
+ 552 01da C0F20003 		movt	r3, #:upper16:heap_end.4387
+ 553 01de 1A60     		str	r2, [r3, #0]
+ 123:Libraries/CM3/src/libnosys_gnu.c ****   return (caddr_t) prev_heap_end;
+ 554              		.loc 1 123 0
+ 555 01e0 FB68     		ldr	r3, [r7, #12]
+ 124:Libraries/CM3/src/libnosys_gnu.c **** }
+ 556              		.loc 1 124 0
+ 557 01e2 1846     		mov	r0, r3
+ 558 01e4 07F11407 		add	r7, r7, #20
+ 559 01e8 BD46     		mov	sp, r7
+ 560 01ea 80BC     		pop	{r7}
+ 561 01ec 7047     		bx	lr
+ 562              		.cfi_endproc
+ 563              	.LFE13:
+ 565 01ee 00BF     		.align	2
+ 566              		.global	_stat
+ 567              		.thumb
+ 568              		.thumb_func
+ 570              	_stat:
+ 571              	.LFB14:
+ 125:Libraries/CM3/src/libnosys_gnu.c **** 
+ 126:Libraries/CM3/src/libnosys_gnu.c **** int _stat(char *file, struct stat *st)
+ 127:Libraries/CM3/src/libnosys_gnu.c **** {
+ 572              		.loc 1 127 0
+ 573              		.cfi_startproc
+ 574              		@ args = 0, pretend = 0, frame = 8
+ 575              		@ frame_needed = 1, uses_anonymous_args = 0
+ 576              		@ link register save eliminated.
+ 577 01f0 80B4     		push	{r7}
+ 578              	.LCFI39:
+ 579              		.cfi_def_cfa_offset 4
+ 580              		.cfi_offset 7, -4
+ 581 01f2 83B0     		sub	sp, sp, #12
+ 582              	.LCFI40:
+ 583              		.cfi_def_cfa_offset 16
+ 584 01f4 00AF     		add	r7, sp, #0
+ 585              	.LCFI41:
+ 586              		.cfi_def_cfa_register 7
+ 587 01f6 7860     		str	r0, [r7, #4]
+ 588 01f8 3960     		str	r1, [r7, #0]
+ 128:Libraries/CM3/src/libnosys_gnu.c ****   st->st_mode = S_IFCHR;
+ 589              		.loc 1 128 0
+ 590 01fa 3B68     		ldr	r3, [r7, #0]
+ 591 01fc 4FF40052 		mov	r2, #8192
+ 592 0200 5A60     		str	r2, [r3, #4]
+ 129:Libraries/CM3/src/libnosys_gnu.c ****   return 0;
+ 593              		.loc 1 129 0
+ 594 0202 4FF00003 		mov	r3, #0
+ 130:Libraries/CM3/src/libnosys_gnu.c **** }
+ 595              		.loc 1 130 0
+ 596 0206 1846     		mov	r0, r3
+ 597 0208 07F10C07 		add	r7, r7, #12
+ 598 020c BD46     		mov	sp, r7
+ 599 020e 80BC     		pop	{r7}
+ 600 0210 7047     		bx	lr
+ 601              		.cfi_endproc
+ 602              	.LFE14:
+ 604 0212 00BF     		.align	2
+ 605              		.global	_times
+ 606              		.thumb
+ 607              		.thumb_func
+ 609              	_times:
+ 610              	.LFB15:
+ 131:Libraries/CM3/src/libnosys_gnu.c **** int _times(struct tms *buf)
+ 132:Libraries/CM3/src/libnosys_gnu.c **** {
+ 611              		.loc 1 132 0
+ 612              		.cfi_startproc
+ 613              		@ args = 0, pretend = 0, frame = 8
+ 614              		@ frame_needed = 1, uses_anonymous_args = 0
+ 615              		@ link register save eliminated.
+ 616 0214 80B4     		push	{r7}
+ 617              	.LCFI42:
+ 618              		.cfi_def_cfa_offset 4
+ 619              		.cfi_offset 7, -4
+ 620 0216 83B0     		sub	sp, sp, #12
+ 621              	.LCFI43:
+ 622              		.cfi_def_cfa_offset 16
+ 623 0218 00AF     		add	r7, sp, #0
+ 624              	.LCFI44:
+ 625              		.cfi_def_cfa_register 7
+ 626 021a 7860     		str	r0, [r7, #4]
+ 133:Libraries/CM3/src/libnosys_gnu.c ****   return -1;
+ 627              		.loc 1 133 0
+ 628 021c 4FF0FF33 		mov	r3, #-1
+ 134:Libraries/CM3/src/libnosys_gnu.c **** }
+ 629              		.loc 1 134 0
+ 630 0220 1846     		mov	r0, r3
+ 631 0222 07F10C07 		add	r7, r7, #12
+ 632 0226 BD46     		mov	sp, r7
+ 633 0228 80BC     		pop	{r7}
+ 634 022a 7047     		bx	lr
+ 635              		.cfi_endproc
+ 636              	.LFE15:
+ 638              		.align	2
+ 639              		.global	_unlink
+ 640              		.thumb
+ 641              		.thumb_func
+ 643              	_unlink:
+ 644              	.LFB16:
+ 135:Libraries/CM3/src/libnosys_gnu.c **** 
+ 136:Libraries/CM3/src/libnosys_gnu.c **** int _unlink(char *name)
+ 137:Libraries/CM3/src/libnosys_gnu.c **** {
+ 645              		.loc 1 137 0
+ 646              		.cfi_startproc
+ 647              		@ args = 0, pretend = 0, frame = 8
+ 648              		@ frame_needed = 1, uses_anonymous_args = 0
+ 649              		@ link register save eliminated.
+ 650 022c 80B4     		push	{r7}
+ 651              	.LCFI45:
+ 652              		.cfi_def_cfa_offset 4
+ 653              		.cfi_offset 7, -4
+ 654 022e 83B0     		sub	sp, sp, #12
+ 655              	.LCFI46:
+ 656              		.cfi_def_cfa_offset 16
+ 657 0230 00AF     		add	r7, sp, #0
+ 658              	.LCFI47:
+ 659              		.cfi_def_cfa_register 7
+ 660 0232 7860     		str	r0, [r7, #4]
+ 138:Libraries/CM3/src/libnosys_gnu.c ****   errno = ENOENT;
+ 661              		.loc 1 138 0
+ 662 0234 40F20003 		movw	r3, #:lower16:errno
+ 663 0238 C0F20003 		movt	r3, #:upper16:errno
+ 664 023c 4FF00202 		mov	r2, #2
+ 665 0240 1A60     		str	r2, [r3, #0]
+ 139:Libraries/CM3/src/libnosys_gnu.c ****   return -1;
+ 666              		.loc 1 139 0
+ 667 0242 4FF0FF33 		mov	r3, #-1
+ 140:Libraries/CM3/src/libnosys_gnu.c **** }
+ 668              		.loc 1 140 0
+ 669 0246 1846     		mov	r0, r3
+ 670 0248 07F10C07 		add	r7, r7, #12
+ 671 024c BD46     		mov	sp, r7
+ 672 024e 80BC     		pop	{r7}
+ 673 0250 7047     		bx	lr
+ 674              		.cfi_endproc
+ 675              	.LFE16:
+ 677 0252 00BF     		.align	2
+ 678              		.global	_wait
+ 679              		.thumb
+ 680              		.thumb_func
+ 682              	_wait:
+ 683              	.LFB17:
+ 141:Libraries/CM3/src/libnosys_gnu.c **** 
+ 142:Libraries/CM3/src/libnosys_gnu.c **** int _wait(int *status)
+ 143:Libraries/CM3/src/libnosys_gnu.c **** {
+ 684              		.loc 1 143 0
+ 685              		.cfi_startproc
+ 686              		@ args = 0, pretend = 0, frame = 8
+ 687              		@ frame_needed = 1, uses_anonymous_args = 0
+ 688              		@ link register save eliminated.
+ 689 0254 80B4     		push	{r7}
+ 690              	.LCFI48:
+ 691              		.cfi_def_cfa_offset 4
+ 692              		.cfi_offset 7, -4
+ 693 0256 83B0     		sub	sp, sp, #12
+ 694              	.LCFI49:
+ 695              		.cfi_def_cfa_offset 16
+ 696 0258 00AF     		add	r7, sp, #0
+ 697              	.LCFI50:
+ 698              		.cfi_def_cfa_register 7
+ 699 025a 7860     		str	r0, [r7, #4]
+ 144:Libraries/CM3/src/libnosys_gnu.c ****   errno = ECHILD;
+ 700              		.loc 1 144 0
+ 701 025c 40F20003 		movw	r3, #:lower16:errno
+ 702 0260 C0F20003 		movt	r3, #:upper16:errno
+ 703 0264 4FF00A02 		mov	r2, #10
+ 704 0268 1A60     		str	r2, [r3, #0]
+ 145:Libraries/CM3/src/libnosys_gnu.c ****   return -1;
+ 705              		.loc 1 145 0
+ 706 026a 4FF0FF33 		mov	r3, #-1
+ 146:Libraries/CM3/src/libnosys_gnu.c **** }
+ 707              		.loc 1 146 0
+ 708 026e 1846     		mov	r0, r3
+ 709 0270 07F10C07 		add	r7, r7, #12
+ 710 0274 BD46     		mov	sp, r7
+ 711 0276 80BC     		pop	{r7}
+ 712 0278 7047     		bx	lr
+ 713              		.cfi_endproc
+ 714              	.LFE17:
+ 716 027a 00BF     		.align	2
+ 717              		.global	_write
+ 718              		.thumb
+ 719              		.thumb_func
+ 721              	_write:
+ 722              	.LFB18:
+ 147:Libraries/CM3/src/libnosys_gnu.c **** 
+ 148:Libraries/CM3/src/libnosys_gnu.c **** int _write(int file, char *ptr, int len)
+ 149:Libraries/CM3/src/libnosys_gnu.c **** {
+ 723              		.loc 1 149 0
+ 724              		.cfi_startproc
+ 725              		@ args = 0, pretend = 0, frame = 16
+ 726              		@ frame_needed = 1, uses_anonymous_args = 0
+ 727              		@ link register save eliminated.
+ 728 027c 80B4     		push	{r7}
+ 729              	.LCFI51:
+ 730              		.cfi_def_cfa_offset 4
+ 731              		.cfi_offset 7, -4
+ 732 027e 85B0     		sub	sp, sp, #20
+ 733              	.LCFI52:
+ 734              		.cfi_def_cfa_offset 24
+ 735 0280 00AF     		add	r7, sp, #0
+ 736              	.LCFI53:
+ 737              		.cfi_def_cfa_register 7
+ 738 0282 F860     		str	r0, [r7, #12]
+ 739 0284 B960     		str	r1, [r7, #8]
+ 740 0286 7A60     		str	r2, [r7, #4]
+ 150:Libraries/CM3/src/libnosys_gnu.c ****   return 0;
+ 741              		.loc 1 150 0
+ 742 0288 4FF00003 		mov	r3, #0
+ 151:Libraries/CM3/src/libnosys_gnu.c **** }
+ 743              		.loc 1 151 0
+ 744 028c 1846     		mov	r0, r3
+ 745 028e 07F11407 		add	r7, r7, #20
+ 746 0292 BD46     		mov	sp, r7
+ 747 0294 80BC     		pop	{r7}
+ 748 0296 7047     		bx	lr
+ 749              		.cfi_endproc
+ 750              	.LFE18:
+ 752              		.bss
+ 753              		.align	2
+ 754              	heap_end.4387:
+ 755 0004 00000000 		.space	4
+ 756              		.text
+ 757              	.Letext0:
+ 758              		.file 2 "/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none
+ 759              		.file 3 "/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none
+ 760              		.file 4 "/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none
+ 761              		.file 5 "/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none
+DEFINED SYMBOLS
+                            *ABS*:00000000 libnosys_gnu.c
+     /tmp/cchWZKc7.s:23     .bss:00000000 __env
+     /tmp/cchWZKc7.s:20     .bss:00000000 $d
+     /tmp/cchWZKc7.s:30     .data:00000000 environ
+     /tmp/cchWZKc7.s:27     .data:00000000 $d
+     /tmp/cchWZKc7.s:33     .text:00000000 $t
+     /tmp/cchWZKc7.s:38     .text:00000000 _close
+     /tmp/cchWZKc7.s:73     .text:00000018 _execve
+     /tmp/cchWZKc7.s:114    .text:00000044 _exit
+     /tmp/cchWZKc7.s:143    .text:00000054 _fork
+     /tmp/cchWZKc7.s:177    .text:00000074 _fstat
+     /tmp/cchWZKc7.s:216    .text:00000098 _getpid
+     /tmp/cchWZKc7.s:245    .text:000000a8 _kill
+     /tmp/cchWZKc7.s:285    .text:000000d0 isatty
+     /tmp/cchWZKc7.s:319    .text:000000e8 _isatty
+     /tmp/cchWZKc7.s:353    .text:00000100 _link
+     /tmp/cchWZKc7.s:393    .text:00000128 _lseek
+     /tmp/cchWZKc7.s:429    .text:00000144 _open
+     /tmp/cchWZKc7.s:465    .text:00000160 _read
+     /tmp/cchWZKc7.s:501    .text:0000017c _sbrk
+     /tmp/cchWZKc7.s:754    .bss:00000004 heap_end.4387
+     /tmp/cchWZKc7.s:570    .text:000001f0 _stat
+     /tmp/cchWZKc7.s:609    .text:00000214 _times
+     /tmp/cchWZKc7.s:643    .text:0000022c _unlink
+     /tmp/cchWZKc7.s:682    .text:00000254 _wait
+     /tmp/cchWZKc7.s:721    .text:0000027c _write
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+errno
+__cs3_heap_end
