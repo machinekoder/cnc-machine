@@ -33,7 +33,7 @@
 #ifndef _USBSTRUCT_H_
 #define _USBSTRUCT_H_
 
-#include <lpc_types.h>
+#include <type.h>
 
 /** setup packet definitions */
 typedef struct {

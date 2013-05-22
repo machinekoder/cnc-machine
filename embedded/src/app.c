@@ -3,8 +3,9 @@
  *
  **/
 #include "app.h"
-#include "Libraries/uC-CSP/csp.h"
-#include "
+#include <csp.h>
+#include <usbapi.h>
+#include <usbdesc.h>
 
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
@@ -119,6 +120,7 @@ main (void)
 
     cnc_initialize();
     buttonInit();
+    Led_initialize(1,29,Led_LowActive_Yes); // onboard LED Led1
     // DAC_Init(LPC_DAC);
     //  Led_initialize(1,29, Led>_LowActive_Yes);
     CSP_TmrInit();
@@ -245,13 +247,11 @@ static  void App_TaskStart (void *p_arg)
                  (void       *)0,
                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                  (OS_ERR     *)&err);
-
-    GPIO_SetDir(1,(1<<29),1);
-    GPIO_ClearValue(1,(1<<29));
+    
     while (DEF_TRUE) {
-        GPIO_SetValue(1,(1<<29));
+        Led_set(Led1);
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
-        GPIO_ClearValue(1,(1<<29));
+        Led_clear(Led1);
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
         
     }
@@ -396,20 +396,20 @@ static void App_Button (void *p_arg)
 static void App_MotorSteuerung (void *p_arg)
 {
     OS_ERR       err;
-   (void)p_arg;                                                    /* Prevent Compiler Warning */
+   (void)p_arg;                                             /* Prevent Compiler Warning */
 
-  uint8_t str[] = "I'm a LPC1758\n";                                            /* Setup string for transmitting */
+  uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
 
   (void)p_arg;                                              /* Prevent Compiler Warning */
   while(DEF_TRUE) 
   {
    if(BulkOutSize > 0)
-   {                                                                  /* if a Message was received */
-        BulkInSize = strlen((char *)str);                                     /* calculate string length of outgoing data */
-        abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);            /* Highbyte */
-        abBulkInBuf[1]=0x00ff&(BulkInSize+1);                     /* Lowbyte  */
-        BulkInSize += 3;                                                                      /* HB + LB + \0 */
-        BulkOutSize = 0;                                                                      /* reset the Message length of the incoming buffer */
+   {                                                        /* if a Message was received */
+        BulkInSize = strlen((char *)str);                   /* calculate string length of outgoing data */
+        abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);          /* Highbyte */
+        abBulkInBuf[1]=0x00ff&(BulkInSize+1);               /* Lowbyte  */
+        BulkInSize += 3;                                    /* HB + LB + \0 */
+        BulkOutSize = 0;                                    /* reset the Message length of the incoming buffer */
    }
       OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &err);
  

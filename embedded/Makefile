@@ -103,6 +103,10 @@ SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/csp_int.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/csp_pm.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/csp_dma.c
 
+SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/intenable.c
+SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.c
+SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c
+SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usblibs.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usbinit.c
 
