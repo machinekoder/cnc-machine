@@ -1,0 +1,2860 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"os_mutex.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	OSMutexCreate
+  20              		.thumb
+  21              		.thumb_func
+  23              	OSMutexCreate:
+  24              	.LFB0:
+  25              		.file 1 "Libraries/uC-OSIII/os_mutex.c"
+   1:Libraries/uC-OSIII/os_mutex.c **** /*
+   2:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+   3:Libraries/uC-OSIII/os_mutex.c **** *                                                      uC/OS-III
+   4:Libraries/uC-OSIII/os_mutex.c **** *                                                 The Real-Time Kernel
+   5:Libraries/uC-OSIII/os_mutex.c **** *
+   6:Libraries/uC-OSIII/os_mutex.c **** *                                  (c) Copyright 2009-2010; Micrium, Inc.; Weston, FL
+   7:Libraries/uC-OSIII/os_mutex.c **** *                          All rights reserved.  Protected by international copyright laws.
+   8:Libraries/uC-OSIII/os_mutex.c **** *
+   9:Libraries/uC-OSIII/os_mutex.c **** *                                                    MUTEX MANAGEMENT
+  10:Libraries/uC-OSIII/os_mutex.c **** *
+  11:Libraries/uC-OSIII/os_mutex.c **** * File    : OS_MUTEX.C
+  12:Libraries/uC-OSIII/os_mutex.c **** * By      : JJL
+  13:Libraries/uC-OSIII/os_mutex.c **** * Version : V3.01.2
+  14:Libraries/uC-OSIII/os_mutex.c **** *
+  15:Libraries/uC-OSIII/os_mutex.c **** * LICENSING TERMS:
+  16:Libraries/uC-OSIII/os_mutex.c **** * ---------------
+  17:Libraries/uC-OSIII/os_mutex.c **** *               uC/OS-III is provided in source form to registered licensees ONLY.  It is
+  18:Libraries/uC-OSIII/os_mutex.c **** *               illegal to distribute this source code to any third party unless you receive
+  19:Libraries/uC-OSIII/os_mutex.c **** *               written permission by an authorized Micrium representative.  Knowledge of
+  20:Libraries/uC-OSIII/os_mutex.c **** *               the source code may NOT be used to develop a similar product.
+  21:Libraries/uC-OSIII/os_mutex.c **** *
+  22:Libraries/uC-OSIII/os_mutex.c **** *               Please help us continue to provide the Embedded community with the finest
+  23:Libraries/uC-OSIII/os_mutex.c **** *               software available.  Your honesty is greatly appreciated.
+  24:Libraries/uC-OSIII/os_mutex.c **** *
+  25:Libraries/uC-OSIII/os_mutex.c **** *               You can contact us at www.micrium.com.
+  26:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+  27:Libraries/uC-OSIII/os_mutex.c **** */
+  28:Libraries/uC-OSIII/os_mutex.c **** 
+  29:Libraries/uC-OSIII/os_mutex.c **** #include <os.h>
+  30:Libraries/uC-OSIII/os_mutex.c **** 
+  31:Libraries/uC-OSIII/os_mutex.c **** #ifdef VSC_INCLUDE_SOURCE_FILE_NAMES
+  32:Libraries/uC-OSIII/os_mutex.c **** const  CPU_CHAR  *os_mutex__c = "$Id: $";
+  33:Libraries/uC-OSIII/os_mutex.c **** #endif
+  34:Libraries/uC-OSIII/os_mutex.c **** 
+  35:Libraries/uC-OSIII/os_mutex.c **** 
+  36:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_MUTEX_EN > 0u
+  37:Libraries/uC-OSIII/os_mutex.c **** /*
+  38:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+  39:Libraries/uC-OSIII/os_mutex.c **** *                                                   CREATE A MUTEX
+  40:Libraries/uC-OSIII/os_mutex.c **** *
+  41:Libraries/uC-OSIII/os_mutex.c **** * Description: This function creates a mutex.
+  42:Libraries/uC-OSIII/os_mutex.c **** *
+  43:Libraries/uC-OSIII/os_mutex.c **** * Arguments  : p_mutex       is a pointer to the mutex to initialize.  Your application is responsi
+  44:Libraries/uC-OSIII/os_mutex.c **** *                            storage for the mutex.
+  45:Libraries/uC-OSIII/os_mutex.c **** *
+  46:Libraries/uC-OSIII/os_mutex.c **** *              p_name        is a pointer to the name you would like to give the mutex.
+  47:Libraries/uC-OSIII/os_mutex.c **** *
+  48:Libraries/uC-OSIII/os_mutex.c **** *              p_err         is a pointer to a variable that will contain an error code returned by
+  49:Libraries/uC-OSIII/os_mutex.c **** *
+  50:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_NONE                    if the call was successful
+  51:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_CREATE_ISR              if you called this function from an
+  52:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_ILLEGAL_CREATE_RUN_TIME if you are trying to create the Mut
+  53:Libraries/uC-OSIII/os_mutex.c **** *                                                                 OSSafetyCriticalStart().
+  54:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_NAME                    if 'p_name'  is a NULL pointer
+  55:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_OBJ_CREATED             if the mutex has already been creat
+  56:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_OBJ_PTR_NULL            if 'p_mutex' is a NULL pointer
+  57:Libraries/uC-OSIII/os_mutex.c **** *
+  58:Libraries/uC-OSIII/os_mutex.c **** * Returns    : none
+  59:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+  60:Libraries/uC-OSIII/os_mutex.c **** */
+  61:Libraries/uC-OSIII/os_mutex.c **** 
+  62:Libraries/uC-OSIII/os_mutex.c **** void  OSMutexCreate (OS_MUTEX    *p_mutex,
+  63:Libraries/uC-OSIII/os_mutex.c ****                      CPU_CHAR    *p_name,
+  64:Libraries/uC-OSIII/os_mutex.c ****                      OS_ERR      *p_err)
+  65:Libraries/uC-OSIII/os_mutex.c **** {
+  26              		.loc 1 65 0
+  27              		.cfi_startproc
+  28              		@ args = 0, pretend = 0, frame = 24
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 14, -4
+  34              		.cfi_offset 7, -8
+  35 0002 86B0     		sub	sp, sp, #24
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 32
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  41 0006 F860     		str	r0, [r7, #12]
+  42 0008 B960     		str	r1, [r7, #8]
+  43 000a 7A60     		str	r2, [r7, #4]
+  66:Libraries/uC-OSIII/os_mutex.c ****     CPU_SR_ALLOC();
+  44              		.loc 1 66 0
+  45 000c 4FF00003 		mov	r3, #0
+  46 0010 7B61     		str	r3, [r7, #20]
+  67:Libraries/uC-OSIII/os_mutex.c **** 
+  68:Libraries/uC-OSIII/os_mutex.c **** 
+  69:Libraries/uC-OSIII/os_mutex.c **** 
+  70:Libraries/uC-OSIII/os_mutex.c **** #ifdef OS_SAFETY_CRITICAL
+  71:Libraries/uC-OSIII/os_mutex.c ****     if (p_err == (OS_ERR *)0) {
+  72:Libraries/uC-OSIII/os_mutex.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+  73:Libraries/uC-OSIII/os_mutex.c ****     }
+  74:Libraries/uC-OSIII/os_mutex.c **** #endif
+  75:Libraries/uC-OSIII/os_mutex.c **** 
+  76:Libraries/uC-OSIII/os_mutex.c **** #ifdef OS_SAFETY_CRITICAL_IEC61508
+  77:Libraries/uC-OSIII/os_mutex.c ****     if (OSSafetyCriticalStartFlag == DEF_TRUE) {
+  78:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_ILLEGAL_CREATE_RUN_TIME;
+  79:Libraries/uC-OSIII/os_mutex.c ****         return;
+  80:Libraries/uC-OSIII/os_mutex.c ****     }
+  81:Libraries/uC-OSIII/os_mutex.c **** #endif
+  82:Libraries/uC-OSIII/os_mutex.c **** 
+  83:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+  84:Libraries/uC-OSIII/os_mutex.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Not allowed to be called from an ISR
+  47              		.loc 1 84 0
+  48 0012 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+  49 0016 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+  50 001a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  51 001c 002B     		cmp	r3, #0
+  52 001e 04D0     		beq	.L2
+  85:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_CREATE_ISR;
+  53              		.loc 1 85 0
+  54 0020 7B68     		ldr	r3, [r7, #4]
+  55 0022 42F6E162 		movw	r2, #12001
+  56 0026 1A80     		strh	r2, [r3, #0]	@ movhi
+  86:Libraries/uC-OSIII/os_mutex.c ****         return;
+  57              		.loc 1 86 0
+  58 0028 46E0     		b	.L1
+  59              	.L2:
+  87:Libraries/uC-OSIII/os_mutex.c ****     }
+  88:Libraries/uC-OSIII/os_mutex.c **** #endif
+  89:Libraries/uC-OSIII/os_mutex.c **** 
+  90:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_ARG_CHK_EN > 0u
+  91:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex == (OS_MUTEX *)0) {                         /* Validate 'p_mutex'                  
+  60              		.loc 1 91 0
+  61 002a FB68     		ldr	r3, [r7, #12]
+  62 002c 002B     		cmp	r3, #0
+  63 002e 04D1     		bne	.L4
+  92:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+  64              		.loc 1 92 0
+  65 0030 7B68     		ldr	r3, [r7, #4]
+  66 0032 45F6C352 		movw	r2, #24003
+  67 0036 1A80     		strh	r2, [r3, #0]	@ movhi
+  93:Libraries/uC-OSIII/os_mutex.c ****         return;
+  68              		.loc 1 93 0
+  69 0038 3EE0     		b	.L1
+  70              	.L4:
+  94:Libraries/uC-OSIII/os_mutex.c ****     }
+  95:Libraries/uC-OSIII/os_mutex.c **** #endif
+  96:Libraries/uC-OSIII/os_mutex.c **** 
+  97:Libraries/uC-OSIII/os_mutex.c ****     CPU_CRITICAL_ENTER();
+  71              		.loc 1 97 0
+  72 003a FFF7FEFF 		bl	CPU_SR_Save
+  73 003e 7861     		str	r0, [r7, #20]
+  74 0040 FFF7FEFF 		bl	CPU_IntDisMeasStart
+  98:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->Type              =  OS_OBJ_TYPE_MUTEX;        /* Mark the data structure as a mutex  
+  75              		.loc 1 98 0
+  76 0044 FA68     		ldr	r2, [r7, #12]
+  77 0046 45F24D53 		movw	r3, #21837
+  78 004a C5F65403 		movt	r3, 22612
+  79 004e 1360     		str	r3, [r2, #0]
+  99:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->NamePtr           =  p_name;
+  80              		.loc 1 99 0
+  81 0050 FB68     		ldr	r3, [r7, #12]
+  82 0052 BA68     		ldr	r2, [r7, #8]
+  83 0054 5A60     		str	r2, [r3, #4]
+ 100:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->OwnerTCBPtr       = (OS_TCB       *)0;
+  84              		.loc 1 100 0
+  85 0056 FB68     		ldr	r3, [r7, #12]
+  86 0058 4FF00002 		mov	r2, #0
+  87 005c 1A62     		str	r2, [r3, #32]
+ 101:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->OwnerNestingCtr   = (OS_NESTING_CTR)0;         /* Mutex is available                  
+  88              		.loc 1 101 0
+  89 005e FB68     		ldr	r3, [r7, #12]
+  90 0060 4FF00002 		mov	r2, #0
+  91 0064 83F82520 		strb	r2, [r3, #37]
+ 102:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->TS                = (CPU_TS        )0;
+  92              		.loc 1 102 0
+  93 0068 FB68     		ldr	r3, [r7, #12]
+  94 006a 4FF00002 		mov	r2, #0
+  95 006e 9A62     		str	r2, [r3, #40]
+ 103:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->OwnerOriginalPrio =  OS_CFG_PRIO_MAX;
+  96              		.loc 1 103 0
+  97 0070 FB68     		ldr	r3, [r7, #12]
+  98 0072 4FF04002 		mov	r2, #64
+  99 0076 83F82420 		strb	r2, [r3, #36]
+ 104:Libraries/uC-OSIII/os_mutex.c ****     OS_PendListInit(&p_mutex->PendList);                    /* Initialize the waiting list         
+ 100              		.loc 1 104 0
+ 101 007a FB68     		ldr	r3, [r7, #12]
+ 102 007c 03F10803 		add	r3, r3, #8
+ 103 0080 1846     		mov	r0, r3
+ 104 0082 FFF7FEFF 		bl	OS_PendListInit
+ 105:Libraries/uC-OSIII/os_mutex.c **** 
+ 106:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_DBG_EN > 0u
+ 107:Libraries/uC-OSIII/os_mutex.c ****     OS_MutexDbgListAdd(p_mutex);
+ 105              		.loc 1 107 0
+ 106 0086 F868     		ldr	r0, [r7, #12]
+ 107 0088 FFF7FEFF 		bl	OS_MutexDbgListAdd
+ 108:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 109:Libraries/uC-OSIII/os_mutex.c ****     OSMutexQty++;
+ 108              		.loc 1 109 0
+ 109 008c 40F20003 		movw	r3, #:lower16:OSMutexQty
+ 110 0090 C0F20003 		movt	r3, #:upper16:OSMutexQty
+ 111 0094 1B88     		ldrh	r3, [r3, #0]
+ 112 0096 03F10103 		add	r3, r3, #1
+ 113 009a 9AB2     		uxth	r2, r3
+ 114 009c 40F20003 		movw	r3, #:lower16:OSMutexQty
+ 115 00a0 C0F20003 		movt	r3, #:upper16:OSMutexQty
+ 116 00a4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 110:Libraries/uC-OSIII/os_mutex.c **** 
+ 111:Libraries/uC-OSIII/os_mutex.c ****     CPU_CRITICAL_EXIT();
+ 117              		.loc 1 111 0
+ 118 00a6 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 119 00aa 7869     		ldr	r0, [r7, #20]
+ 120 00ac FFF7FEFF 		bl	CPU_SR_Restore
+ 112:Libraries/uC-OSIII/os_mutex.c ****     *p_err = OS_ERR_NONE;
+ 121              		.loc 1 112 0
+ 122 00b0 7B68     		ldr	r3, [r7, #4]
+ 123 00b2 4FF00002 		mov	r2, #0
+ 124 00b6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 125              	.L1:
+ 113:Libraries/uC-OSIII/os_mutex.c **** }
+ 126              		.loc 1 113 0
+ 127 00b8 07F11807 		add	r7, r7, #24
+ 128 00bc BD46     		mov	sp, r7
+ 129 00be 80BD     		pop	{r7, pc}
+ 130              		.cfi_endproc
+ 131              	.LFE0:
+ 133              		.align	2
+ 134              		.global	OSMutexDel
+ 135              		.thumb
+ 136              		.thumb_func
+ 138              	OSMutexDel:
+ 139              	.LFB1:
+ 114:Libraries/uC-OSIII/os_mutex.c **** 
+ 115:Libraries/uC-OSIII/os_mutex.c **** /*$PAGE*/
+ 116:Libraries/uC-OSIII/os_mutex.c **** /*
+ 117:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 118:Libraries/uC-OSIII/os_mutex.c **** *                                                   DELETE A MUTEX
+ 119:Libraries/uC-OSIII/os_mutex.c **** *
+ 120:Libraries/uC-OSIII/os_mutex.c **** * Description: This function deletes a mutex and readies all tasks pending on the mutex.
+ 121:Libraries/uC-OSIII/os_mutex.c **** *
+ 122:Libraries/uC-OSIII/os_mutex.c **** * Arguments  : p_mutex       is a pointer to the mutex to delete
+ 123:Libraries/uC-OSIII/os_mutex.c **** *
+ 124:Libraries/uC-OSIII/os_mutex.c **** *              opt           determines delete options as follows:
+ 125:Libraries/uC-OSIII/os_mutex.c **** *
+ 126:Libraries/uC-OSIII/os_mutex.c **** *                                OS_OPT_DEL_NO_PEND          Delete mutex ONLY if no task pending
+ 127:Libraries/uC-OSIII/os_mutex.c **** *                                OS_OPT_DEL_ALWAYS           Deletes the mutex even if tasks are wa
+ 128:Libraries/uC-OSIII/os_mutex.c **** *                                                            In this case, all the tasks pending wi
+ 129:Libraries/uC-OSIII/os_mutex.c **** *
+ 130:Libraries/uC-OSIII/os_mutex.c **** *              p_err         is a pointer to a variable that will contain an error code returned by
+ 131:Libraries/uC-OSIII/os_mutex.c **** *
+ 132:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_NONE                 The call was successful and the mutex 
+ 133:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_DEL_ISR              If you attempted to delete the mutex f
+ 134:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_OBJ_PTR_NULL         If 'p_mutex' is a NULL pointer.
+ 135:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_OBJ_TYPE             If 'p_mutex' is not pointing to a mute
+ 136:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_OPT_INVALID          An invalid option was specified
+ 137:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_STATE_INVALID        Task is in an invalid state
+ 138:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_TASK_WAITING         One or more tasks were waiting on the 
+ 139:Libraries/uC-OSIII/os_mutex.c **** *
+ 140:Libraries/uC-OSIII/os_mutex.c **** * Returns    : == 0          if no tasks were waiting on the mutex, or upon error.
+ 141:Libraries/uC-OSIII/os_mutex.c **** *              >  0          if one or more tasks waiting on the mutex are now readied and informed
+ 142:Libraries/uC-OSIII/os_mutex.c **** *
+ 143:Libraries/uC-OSIII/os_mutex.c **** * Note(s)    : 1) This function must be used with care.  Tasks that would normally expect the prese
+ 144:Libraries/uC-OSIII/os_mutex.c **** *                 check the return code of OSMutexPend().
+ 145:Libraries/uC-OSIII/os_mutex.c **** *
+ 146:Libraries/uC-OSIII/os_mutex.c **** *              2) OSMutexAccept() callers will not know that the intended mutex has been deleted.
+ 147:Libraries/uC-OSIII/os_mutex.c **** *
+ 148:Libraries/uC-OSIII/os_mutex.c **** *              3) Because ALL tasks pending on the mutex will be readied, you MUST be careful in ap
+ 149:Libraries/uC-OSIII/os_mutex.c **** *                 mutex is used for mutual exclusion because the resource(s) will no longer be guar
+ 150:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 151:Libraries/uC-OSIII/os_mutex.c **** */
+ 152:Libraries/uC-OSIII/os_mutex.c **** 
+ 153:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_MUTEX_DEL_EN > 0u
+ 154:Libraries/uC-OSIII/os_mutex.c **** OS_OBJ_QTY  OSMutexDel (OS_MUTEX  *p_mutex,
+ 155:Libraries/uC-OSIII/os_mutex.c ****                         OS_OPT     opt,
+ 156:Libraries/uC-OSIII/os_mutex.c ****                         OS_ERR    *p_err)
+ 157:Libraries/uC-OSIII/os_mutex.c **** {
+ 140              		.loc 1 157 0
+ 141              		.cfi_startproc
+ 142              		@ args = 0, pretend = 0, frame = 48
+ 143              		@ frame_needed = 1, uses_anonymous_args = 0
+ 144 00c0 80B5     		push	{r7, lr}
+ 145              	.LCFI3:
+ 146              		.cfi_def_cfa_offset 8
+ 147              		.cfi_offset 14, -4
+ 148              		.cfi_offset 7, -8
+ 149 00c2 8CB0     		sub	sp, sp, #48
+ 150              	.LCFI4:
+ 151              		.cfi_def_cfa_offset 56
+ 152 00c4 00AF     		add	r7, sp, #0
+ 153              	.LCFI5:
+ 154              		.cfi_def_cfa_register 7
+ 155 00c6 F860     		str	r0, [r7, #12]
+ 156 00c8 0B46     		mov	r3, r1
+ 157 00ca 7A60     		str	r2, [r7, #4]
+ 158 00cc 7B81     		strh	r3, [r7, #10]	@ movhi
+ 158:Libraries/uC-OSIII/os_mutex.c ****     OS_OBJ_QTY     cnt;
+ 159:Libraries/uC-OSIII/os_mutex.c ****     OS_OBJ_QTY     nbr_tasks;
+ 160:Libraries/uC-OSIII/os_mutex.c ****     OS_PEND_DATA  *p_pend_data;
+ 161:Libraries/uC-OSIII/os_mutex.c ****     OS_PEND_LIST  *p_pend_list;
+ 162:Libraries/uC-OSIII/os_mutex.c ****     OS_TCB        *p_tcb;
+ 163:Libraries/uC-OSIII/os_mutex.c ****     OS_TCB        *p_tcb_owner;
+ 164:Libraries/uC-OSIII/os_mutex.c ****     CPU_TS         ts;
+ 165:Libraries/uC-OSIII/os_mutex.c ****     CPU_SR_ALLOC();
+ 159              		.loc 1 165 0
+ 160 00ce 4FF00003 		mov	r3, #0
+ 161 00d2 BB62     		str	r3, [r7, #40]
+ 166:Libraries/uC-OSIII/os_mutex.c **** 
+ 167:Libraries/uC-OSIII/os_mutex.c **** 
+ 168:Libraries/uC-OSIII/os_mutex.c **** 
+ 169:Libraries/uC-OSIII/os_mutex.c **** #ifdef OS_SAFETY_CRITICAL
+ 170:Libraries/uC-OSIII/os_mutex.c ****     if (p_err == (OS_ERR *)0) {
+ 171:Libraries/uC-OSIII/os_mutex.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 172:Libraries/uC-OSIII/os_mutex.c ****     }
+ 173:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 174:Libraries/uC-OSIII/os_mutex.c **** 
+ 175:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 176:Libraries/uC-OSIII/os_mutex.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {                   /* Not allowed to delete a mutex f
+ 162              		.loc 1 176 0
+ 163 00d4 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 164 00d8 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 165 00dc 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 166 00de 002B     		cmp	r3, #0
+ 167 00e0 06D0     		beq	.L6
+ 177:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_DEL_ISR;
+ 168              		.loc 1 177 0
+ 169 00e2 7B68     		ldr	r3, [r7, #4]
+ 170 00e4 43F2C922 		movw	r2, #13001
+ 171 00e8 1A80     		strh	r2, [r3, #0]	@ movhi
+ 178:Libraries/uC-OSIII/os_mutex.c ****         return ((OS_OBJ_QTY)0);
+ 172              		.loc 1 178 0
+ 173 00ea 4FF00003 		mov	r3, #0
+ 174 00ee E0E1     		b	.L7
+ 175              	.L6:
+ 179:Libraries/uC-OSIII/os_mutex.c ****     }
+ 180:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 181:Libraries/uC-OSIII/os_mutex.c **** 
+ 182:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 183:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex == (OS_MUTEX *)0) {                              /* Validate pointer to mutex      
+ 176              		.loc 1 183 0
+ 177 00f0 FB68     		ldr	r3, [r7, #12]
+ 178 00f2 002B     		cmp	r3, #0
+ 179 00f4 06D1     		bne	.L8
+ 184:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 180              		.loc 1 184 0
+ 181 00f6 7B68     		ldr	r3, [r7, #4]
+ 182 00f8 45F6C352 		movw	r2, #24003
+ 183 00fc 1A80     		strh	r2, [r3, #0]	@ movhi
+ 185:Libraries/uC-OSIII/os_mutex.c ****         return ((OS_OBJ_QTY)0);
+ 184              		.loc 1 185 0
+ 185 00fe 4FF00003 		mov	r3, #0
+ 186 0102 D6E1     		b	.L7
+ 187              	.L8:
+ 186:Libraries/uC-OSIII/os_mutex.c ****     }
+ 187:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 188:Libraries/uC-OSIII/os_mutex.c **** 
+ 189:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 190:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex->Type != OS_OBJ_TYPE_MUTEX) {                    /* Make sure mutex was created    
+ 188              		.loc 1 190 0
+ 189 0104 FB68     		ldr	r3, [r7, #12]
+ 190 0106 1A68     		ldr	r2, [r3, #0]
+ 191 0108 45F24D53 		movw	r3, #21837
+ 192 010c C5F65403 		movt	r3, 22612
+ 193 0110 9A42     		cmp	r2, r3
+ 194 0112 06D0     		beq	.L9
+ 191:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 195              		.loc 1 191 0
+ 196 0114 7B68     		ldr	r3, [r7, #4]
+ 197 0116 45F6C452 		movw	r2, #24004
+ 198 011a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 192:Libraries/uC-OSIII/os_mutex.c ****         return ((OS_OBJ_QTY)0);
+ 199              		.loc 1 192 0
+ 200 011c 4FF00003 		mov	r3, #0
+ 201 0120 C7E1     		b	.L7
+ 202              	.L9:
+ 193:Libraries/uC-OSIII/os_mutex.c ****     }
+ 194:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 195:Libraries/uC-OSIII/os_mutex.c **** 
+ 196:Libraries/uC-OSIII/os_mutex.c ****     OS_CRITICAL_ENTER();
+ 203              		.loc 1 196 0
+ 204 0122 FFF7FEFF 		bl	CPU_SR_Save
+ 205 0126 B862     		str	r0, [r7, #40]
+ 206 0128 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 207 012c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 208 0130 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 209 0134 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 210 0136 03F10103 		add	r3, r3, #1
+ 211 013a DAB2     		uxtb	r2, r3
+ 212 013c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 213 0140 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 214 0144 1A70     		strb	r2, [r3, #0]
+ 215 0146 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 216 014a C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 217 014e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 218 0150 012B     		cmp	r3, #1
+ 219 0152 01D1     		bne	.L10
+ 220              		.loc 1 196 0 is_stmt 0 discriminator 1
+ 221 0154 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 222              	.L10:
+ 223              		.loc 1 196 0 discriminator 2
+ 224 0158 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 225 015c B86A     		ldr	r0, [r7, #40]
+ 226 015e FFF7FEFF 		bl	CPU_SR_Restore
+ 197:Libraries/uC-OSIII/os_mutex.c ****     p_pend_list = &p_mutex->PendList;
+ 227              		.loc 1 197 0 is_stmt 1 discriminator 2
+ 228 0162 FB68     		ldr	r3, [r7, #12]
+ 229 0164 03F10803 		add	r3, r3, #8
+ 230 0168 7B62     		str	r3, [r7, #36]
+ 198:Libraries/uC-OSIII/os_mutex.c ****     cnt         = p_pend_list->NbrEntries;
+ 231              		.loc 1 198 0 discriminator 2
+ 232 016a 7B6A     		ldr	r3, [r7, #36]
+ 233 016c 1B89     		ldrh	r3, [r3, #8]	@ movhi
+ 234 016e FB85     		strh	r3, [r7, #46]	@ movhi
+ 199:Libraries/uC-OSIII/os_mutex.c ****     nbr_tasks   = cnt;
+ 235              		.loc 1 199 0 discriminator 2
+ 236 0170 FB8D     		ldrh	r3, [r7, #46]	@ movhi
+ 237 0172 7B84     		strh	r3, [r7, #34]	@ movhi
+ 200:Libraries/uC-OSIII/os_mutex.c ****     switch (opt) {
+ 238              		.loc 1 200 0 discriminator 2
+ 239 0174 7B89     		ldrh	r3, [r7, #10]
+ 240 0176 002B     		cmp	r3, #0
+ 241 0178 03D0     		beq	.L12
+ 242 017a 012B     		cmp	r3, #1
+ 243 017c 00F08B80 		beq	.L13
+ 244              		.loc 1 200 0 is_stmt 0
+ 245 0180 5CE1     		b	.L37
+ 246              	.L12:
+ 201:Libraries/uC-OSIII/os_mutex.c ****         case OS_OPT_DEL_NO_PEND:                                 /* Delete mutex only if no task wa
+ 202:Libraries/uC-OSIII/os_mutex.c ****              if (nbr_tasks == (OS_OBJ_QTY)0) {
+ 247              		.loc 1 202 0 is_stmt 1
+ 248 0182 7B8C     		ldrh	r3, [r7, #34]
+ 249 0184 002B     		cmp	r3, #0
+ 250 0186 4CD1     		bne	.L14
+ 203:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_DBG_EN > 0u
+ 204:Libraries/uC-OSIII/os_mutex.c ****                  OS_MutexDbgListRemove(p_mutex);
+ 251              		.loc 1 204 0
+ 252 0188 F868     		ldr	r0, [r7, #12]
+ 253 018a FFF7FEFF 		bl	OS_MutexDbgListRemove
+ 205:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 206:Libraries/uC-OSIII/os_mutex.c ****                  OSMutexQty--;
+ 254              		.loc 1 206 0
+ 255 018e 40F20003 		movw	r3, #:lower16:OSMutexQty
+ 256 0192 C0F20003 		movt	r3, #:upper16:OSMutexQty
+ 257 0196 1B88     		ldrh	r3, [r3, #0]
+ 258 0198 03F1FF33 		add	r3, r3, #-1
+ 259 019c 9AB2     		uxth	r2, r3
+ 260 019e 40F20003 		movw	r3, #:lower16:OSMutexQty
+ 261 01a2 C0F20003 		movt	r3, #:upper16:OSMutexQty
+ 262 01a6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 207:Libraries/uC-OSIII/os_mutex.c ****                  OS_MutexClr(p_mutex);
+ 263              		.loc 1 207 0
+ 264 01a8 F868     		ldr	r0, [r7, #12]
+ 265 01aa FFF7FEFF 		bl	OS_MutexClr
+ 208:Libraries/uC-OSIII/os_mutex.c ****                  OS_CRITICAL_EXIT();
+ 266              		.loc 1 208 0
+ 267 01ae FFF7FEFF 		bl	CPU_SR_Save
+ 268 01b2 B862     		str	r0, [r7, #40]
+ 269 01b4 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 270 01b8 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 271 01bc C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 272 01c0 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 273 01c2 03F1FF33 		add	r3, r3, #-1
+ 274 01c6 DAB2     		uxtb	r2, r3
+ 275 01c8 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 276 01cc C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 277 01d0 1A70     		strb	r2, [r3, #0]
+ 278 01d2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 279 01d6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 280 01da 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 281 01dc 002B     		cmp	r3, #0
+ 282 01de 16D1     		bne	.L15
+ 283              		.loc 1 208 0 is_stmt 0 discriminator 1
+ 284 01e0 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 285 01e4 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 286 01e8 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 287 01ec 1B88     		ldrh	r3, [r3, #0]
+ 288 01ee 002B     		cmp	r3, #0
+ 289 01f0 07D0     		beq	.L16
+ 290              		.loc 1 208 0 discriminator 3
+ 291 01f2 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 292 01f6 B86A     		ldr	r0, [r7, #40]
+ 293 01f8 FFF7FEFF 		bl	CPU_SR_Restore
+ 294 01fc FFF7FEFF 		bl	OS_Sched0
+ 295 0200 0AE0     		b	.L17
+ 296              	.L16:
+ 297              		.loc 1 208 0 discriminator 4
+ 298 0202 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 299 0206 B86A     		ldr	r0, [r7, #40]
+ 300 0208 FFF7FEFF 		bl	CPU_SR_Restore
+ 301 020c 04E0     		b	.L17
+ 302              	.L15:
+ 303              		.loc 1 208 0 discriminator 2
+ 304 020e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 305 0212 B86A     		ldr	r0, [r7, #40]
+ 306 0214 FFF7FEFF 		bl	CPU_SR_Restore
+ 307              	.L17:
+ 209:Libraries/uC-OSIII/os_mutex.c ****                  *p_err = OS_ERR_NONE;
+ 308              		.loc 1 209 0 is_stmt 1
+ 309 0218 7B68     		ldr	r3, [r7, #4]
+ 310 021a 4FF00002 		mov	r2, #0
+ 311 021e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 210:Libraries/uC-OSIII/os_mutex.c ****              } else {
+ 211:Libraries/uC-OSIII/os_mutex.c ****                  OS_CRITICAL_EXIT();
+ 212:Libraries/uC-OSIII/os_mutex.c ****                  *p_err = OS_ERR_TASK_WAITING;
+ 213:Libraries/uC-OSIII/os_mutex.c ****              }
+ 214:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 312              		.loc 1 214 0
+ 313 0220 46E1     		b	.L22
+ 314              	.L14:
+ 211:Libraries/uC-OSIII/os_mutex.c ****                  OS_CRITICAL_EXIT();
+ 315              		.loc 1 211 0
+ 316 0222 FFF7FEFF 		bl	CPU_SR_Save
+ 317 0226 B862     		str	r0, [r7, #40]
+ 318 0228 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 319 022c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 320 0230 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 321 0234 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 322 0236 03F1FF33 		add	r3, r3, #-1
+ 323 023a DAB2     		uxtb	r2, r3
+ 324 023c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 325 0240 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 326 0244 1A70     		strb	r2, [r3, #0]
+ 327 0246 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 328 024a C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 329 024e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 330 0250 002B     		cmp	r3, #0
+ 331 0252 16D1     		bne	.L19
+ 211:Libraries/uC-OSIII/os_mutex.c ****                  OS_CRITICAL_EXIT();
+ 332              		.loc 1 211 0 is_stmt 0 discriminator 1
+ 333 0254 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 334 0258 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 335 025c C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 336 0260 1B88     		ldrh	r3, [r3, #0]
+ 337 0262 002B     		cmp	r3, #0
+ 338 0264 07D0     		beq	.L20
+ 211:Libraries/uC-OSIII/os_mutex.c ****                  OS_CRITICAL_EXIT();
+ 339              		.loc 1 211 0 discriminator 3
+ 340 0266 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 341 026a B86A     		ldr	r0, [r7, #40]
+ 342 026c FFF7FEFF 		bl	CPU_SR_Restore
+ 343 0270 FFF7FEFF 		bl	OS_Sched0
+ 344 0274 0AE0     		b	.L21
+ 345              	.L20:
+ 211:Libraries/uC-OSIII/os_mutex.c ****                  OS_CRITICAL_EXIT();
+ 346              		.loc 1 211 0 discriminator 4
+ 347 0276 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 348 027a B86A     		ldr	r0, [r7, #40]
+ 349 027c FFF7FEFF 		bl	CPU_SR_Restore
+ 350 0280 04E0     		b	.L21
+ 351              	.L19:
+ 211:Libraries/uC-OSIII/os_mutex.c ****                  OS_CRITICAL_EXIT();
+ 352              		.loc 1 211 0 discriminator 2
+ 353 0282 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 354 0286 B86A     		ldr	r0, [r7, #40]
+ 355 0288 FFF7FEFF 		bl	CPU_SR_Restore
+ 356              	.L21:
+ 212:Libraries/uC-OSIII/os_mutex.c ****                  *p_err = OS_ERR_TASK_WAITING;
+ 357              		.loc 1 212 0 is_stmt 1
+ 358 028c 7B68     		ldr	r3, [r7, #4]
+ 359 028e 47F25E12 		movw	r2, #29022
+ 360 0292 1A80     		strh	r2, [r3, #0]	@ movhi
+ 361              		.loc 1 214 0
+ 362 0294 0CE1     		b	.L22
+ 363              	.L13:
+ 215:Libraries/uC-OSIII/os_mutex.c **** 
+ 216:Libraries/uC-OSIII/os_mutex.c ****         case OS_OPT_DEL_ALWAYS:                                            /* Always delete the mut
+ 217:Libraries/uC-OSIII/os_mutex.c ****              p_tcb_owner = p_mutex->OwnerTCBPtr;                           /* Did we had to change 
+ 364              		.loc 1 217 0
+ 365 0296 FB68     		ldr	r3, [r7, #12]
+ 366 0298 1B6A     		ldr	r3, [r3, #32]
+ 367 029a FB61     		str	r3, [r7, #28]
+ 218:Libraries/uC-OSIII/os_mutex.c ****              if ((p_tcb_owner       != (OS_TCB *)0) &&
+ 368              		.loc 1 218 0
+ 369 029c FB69     		ldr	r3, [r7, #28]
+ 370 029e 002B     		cmp	r3, #0
+ 371 02a0 7CD0     		beq	.L23
+ 219:Libraries/uC-OSIII/os_mutex.c ****                  (p_tcb_owner->Prio !=  p_mutex->OwnerOriginalPrio)) {
+ 372              		.loc 1 219 0 discriminator 1
+ 373 02a2 FB69     		ldr	r3, [r7, #28]
+ 374 02a4 93F8C320 		ldrb	r2, [r3, #195]	@ zero_extendqisi2
+ 375 02a8 FB68     		ldr	r3, [r7, #12]
+ 376 02aa 93F82430 		ldrb	r3, [r3, #36]	@ zero_extendqisi2
+ 218:Libraries/uC-OSIII/os_mutex.c ****              if ((p_tcb_owner       != (OS_TCB *)0) &&
+ 377              		.loc 1 218 0 discriminator 1
+ 378 02ae 9A42     		cmp	r2, r3
+ 379 02b0 74D0     		beq	.L23
+ 220:Libraries/uC-OSIII/os_mutex.c ****                  switch (p_tcb_owner->TaskState) {                         /* yes                  
+ 380              		.loc 1 220 0
+ 381 02b2 FB69     		ldr	r3, [r7, #28]
+ 382 02b4 93F8C230 		ldrb	r3, [r3, #194]	@ zero_extendqisi2
+ 383 02b8 072B     		cmp	r3, #7
+ 384 02ba 33D8     		bhi	.L24
+ 385 02bc 4FF04C52 		mov	r2, #855638016
+ 386 02c0 02FA03F2 		lsl	r2, r2, r3
+ 387 02c4 002A     		cmp	r2, #0
+ 388 02c6 25DB     		blt	.L27
+ 389 02c8 4FF09842 		mov	r2, #1275068416
+ 390 02cc 02FA03F2 		lsl	r2, r2, r3
+ 391 02d0 002A     		cmp	r2, #0
+ 392 02d2 18DB     		blt	.L26
+ 393 02d4 4FF00042 		mov	r2, #-2147483648
+ 394 02d8 02FA03F3 		lsl	r3, r2, r3
+ 395 02dc 002B     		cmp	r3, #0
+ 396 02de 21DA     		bge	.L24
+ 397              	.L25:
+ 221:Libraries/uC-OSIII/os_mutex.c ****                      case OS_TASK_STATE_RDY:
+ 222:Libraries/uC-OSIII/os_mutex.c ****                           OS_RdyListRemove(p_tcb_owner);
+ 398              		.loc 1 222 0
+ 399 02e0 F869     		ldr	r0, [r7, #28]
+ 400 02e2 FFF7FEFF 		bl	OS_RdyListRemove
+ 223:Libraries/uC-OSIII/os_mutex.c ****                           p_tcb_owner->Prio = p_mutex->OwnerOriginalPrio;  /* Lower owner's prio ba
+ 401              		.loc 1 223 0
+ 402 02e6 FB68     		ldr	r3, [r7, #12]
+ 403 02e8 93F82420 		ldrb	r2, [r3, #36]	@ zero_extendqisi2
+ 404 02ec FB69     		ldr	r3, [r7, #28]
+ 405 02ee 83F8C320 		strb	r2, [r3, #195]
+ 224:Libraries/uC-OSIII/os_mutex.c ****                           OS_PrioInsert(p_tcb_owner->Prio);
+ 406              		.loc 1 224 0
+ 407 02f2 FB69     		ldr	r3, [r7, #28]
+ 408 02f4 93F8C330 		ldrb	r3, [r3, #195]	@ zero_extendqisi2
+ 409 02f8 1846     		mov	r0, r3
+ 410 02fa FFF7FEFF 		bl	OS_PrioInsert
+ 225:Libraries/uC-OSIII/os_mutex.c ****                           OS_RdyListInsertTail(p_tcb_owner);               /* Insert owner in ready
+ 411              		.loc 1 225 0
+ 412 02fe F869     		ldr	r0, [r7, #28]
+ 413 0300 FFF7FEFF 		bl	OS_RdyListInsertTail
+ 226:Libraries/uC-OSIII/os_mutex.c ****                           break;
+ 414              		.loc 1 226 0
+ 415 0304 4AE0     		b	.L23
+ 416              	.L26:
+ 227:Libraries/uC-OSIII/os_mutex.c **** 
+ 228:Libraries/uC-OSIII/os_mutex.c ****                      case OS_TASK_STATE_DLY:
+ 229:Libraries/uC-OSIII/os_mutex.c ****                      case OS_TASK_STATE_SUSPENDED:
+ 230:Libraries/uC-OSIII/os_mutex.c ****                      case OS_TASK_STATE_DLY_SUSPENDED:
+ 231:Libraries/uC-OSIII/os_mutex.c ****                           p_tcb_owner->Prio = p_mutex->OwnerOriginalPrio;  /* Not in any pend list,
+ 417              		.loc 1 231 0
+ 418 0306 FB68     		ldr	r3, [r7, #12]
+ 419 0308 93F82420 		ldrb	r2, [r3, #36]	@ zero_extendqisi2
+ 420 030c FB69     		ldr	r3, [r7, #28]
+ 421 030e 83F8C320 		strb	r2, [r3, #195]
+ 232:Libraries/uC-OSIII/os_mutex.c ****                           break;
+ 422              		.loc 1 232 0
+ 423 0312 43E0     		b	.L23
+ 424              	.L27:
+ 233:Libraries/uC-OSIII/os_mutex.c **** 
+ 234:Libraries/uC-OSIII/os_mutex.c ****                      case OS_TASK_STATE_PEND:
+ 235:Libraries/uC-OSIII/os_mutex.c ****                      case OS_TASK_STATE_PEND_TIMEOUT:
+ 236:Libraries/uC-OSIII/os_mutex.c ****                      case OS_TASK_STATE_PEND_SUSPENDED:
+ 237:Libraries/uC-OSIII/os_mutex.c ****                      case OS_TASK_STATE_PEND_TIMEOUT_SUSPENDED:
+ 238:Libraries/uC-OSIII/os_mutex.c ****                           OS_PendListChangePrio(p_tcb_owner,               /* Owner is pending on a
+ 239:Libraries/uC-OSIII/os_mutex.c ****                                                 p_mutex->OwnerOriginalPrio);
+ 425              		.loc 1 239 0
+ 426 0314 FB68     		ldr	r3, [r7, #12]
+ 238:Libraries/uC-OSIII/os_mutex.c ****                           OS_PendListChangePrio(p_tcb_owner,               /* Owner is pending on a
+ 427              		.loc 1 238 0
+ 428 0316 93F82430 		ldrb	r3, [r3, #36]	@ zero_extendqisi2
+ 429 031a F869     		ldr	r0, [r7, #28]
+ 430 031c 1946     		mov	r1, r3
+ 431 031e FFF7FEFF 		bl	OS_PendListChangePrio
+ 240:Libraries/uC-OSIII/os_mutex.c ****                           break;
+ 432              		.loc 1 240 0
+ 433 0322 3BE0     		b	.L23
+ 434              	.L24:
+ 241:Libraries/uC-OSIII/os_mutex.c **** 
+ 242:Libraries/uC-OSIII/os_mutex.c ****                      default:
+ 243:Libraries/uC-OSIII/os_mutex.c ****                           OS_CRITICAL_EXIT();
+ 435              		.loc 1 243 0
+ 436 0324 FFF7FEFF 		bl	CPU_SR_Save
+ 437 0328 B862     		str	r0, [r7, #40]
+ 438 032a FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 439 032e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 440 0332 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 441 0336 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 442 0338 03F1FF33 		add	r3, r3, #-1
+ 443 033c DAB2     		uxtb	r2, r3
+ 444 033e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 445 0342 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 446 0346 1A70     		strb	r2, [r3, #0]
+ 447 0348 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 448 034c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 449 0350 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 450 0352 002B     		cmp	r3, #0
+ 451 0354 16D1     		bne	.L28
+ 452              		.loc 1 243 0 is_stmt 0 discriminator 1
+ 453 0356 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 454 035a 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 455 035e C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 456 0362 1B88     		ldrh	r3, [r3, #0]
+ 457 0364 002B     		cmp	r3, #0
+ 458 0366 07D0     		beq	.L29
+ 459              		.loc 1 243 0 discriminator 3
+ 460 0368 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 461 036c B86A     		ldr	r0, [r7, #40]
+ 462 036e FFF7FEFF 		bl	CPU_SR_Restore
+ 463 0372 FFF7FEFF 		bl	OS_Sched0
+ 464 0376 0AE0     		b	.L30
+ 465              	.L29:
+ 466              		.loc 1 243 0 discriminator 4
+ 467 0378 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 468 037c B86A     		ldr	r0, [r7, #40]
+ 469 037e FFF7FEFF 		bl	CPU_SR_Restore
+ 470 0382 04E0     		b	.L30
+ 471              	.L28:
+ 472              		.loc 1 243 0 discriminator 2
+ 473 0384 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 474 0388 B86A     		ldr	r0, [r7, #40]
+ 475 038a FFF7FEFF 		bl	CPU_SR_Restore
+ 476              	.L30:
+ 244:Libraries/uC-OSIII/os_mutex.c ****                           *p_err = OS_ERR_STATE_INVALID;
+ 477              		.loc 1 244 0 is_stmt 1
+ 478 038e 7B68     		ldr	r3, [r7, #4]
+ 479 0390 46F62A62 		movw	r2, #28202
+ 480 0394 1A80     		strh	r2, [r3, #0]	@ movhi
+ 245:Libraries/uC-OSIII/os_mutex.c ****                           return ((OS_OBJ_QTY)0);
+ 481              		.loc 1 245 0
+ 482 0396 4FF00003 		mov	r3, #0
+ 483 039a 8AE0     		b	.L7
+ 484              	.L23:
+ 246:Libraries/uC-OSIII/os_mutex.c ****                  }
+ 247:Libraries/uC-OSIII/os_mutex.c ****              }
+ 248:Libraries/uC-OSIII/os_mutex.c **** 
+ 249:Libraries/uC-OSIII/os_mutex.c ****              ts = OS_TS_GET();                                             /* Get timestamp        
+ 485              		.loc 1 249 0
+ 486 039c FFF7FEFF 		bl	CPU_TS_TmrRd
+ 487 03a0 B861     		str	r0, [r7, #24]
+ 250:Libraries/uC-OSIII/os_mutex.c ****              while (cnt > 0u) {                                            /* Remove all tasks from
+ 488              		.loc 1 250 0
+ 489 03a2 0EE0     		b	.L31
+ 490              	.L32:
+ 251:Libraries/uC-OSIII/os_mutex.c ****                  p_pend_data = p_pend_list->HeadPtr;
+ 491              		.loc 1 251 0
+ 492 03a4 7B6A     		ldr	r3, [r7, #36]
+ 493 03a6 1B68     		ldr	r3, [r3, #0]
+ 494 03a8 7B61     		str	r3, [r7, #20]
+ 252:Libraries/uC-OSIII/os_mutex.c ****                  p_tcb       = p_pend_data->TCBPtr;
+ 495              		.loc 1 252 0
+ 496 03aa 7B69     		ldr	r3, [r7, #20]
+ 497 03ac 9B68     		ldr	r3, [r3, #8]
+ 498 03ae 3B61     		str	r3, [r7, #16]
+ 253:Libraries/uC-OSIII/os_mutex.c ****                  OS_PendObjDel((OS_PEND_OBJ *)((void *)p_mutex),
+ 499              		.loc 1 253 0
+ 500 03b0 F868     		ldr	r0, [r7, #12]
+ 501 03b2 3969     		ldr	r1, [r7, #16]
+ 502 03b4 BA69     		ldr	r2, [r7, #24]
+ 503 03b6 FFF7FEFF 		bl	OS_PendObjDel
+ 254:Libraries/uC-OSIII/os_mutex.c ****                                p_tcb,
+ 255:Libraries/uC-OSIII/os_mutex.c ****                                ts);
+ 256:Libraries/uC-OSIII/os_mutex.c ****                  cnt--;
+ 504              		.loc 1 256 0
+ 505 03ba FB8D     		ldrh	r3, [r7, #46]	@ movhi
+ 506 03bc 03F1FF33 		add	r3, r3, #-1
+ 507 03c0 FB85     		strh	r3, [r7, #46]	@ movhi
+ 508              	.L31:
+ 250:Libraries/uC-OSIII/os_mutex.c ****              while (cnt > 0u) {                                            /* Remove all tasks from
+ 509              		.loc 1 250 0 discriminator 1
+ 510 03c2 FB8D     		ldrh	r3, [r7, #46]
+ 511 03c4 002B     		cmp	r3, #0
+ 512 03c6 EDD1     		bne	.L32
+ 257:Libraries/uC-OSIII/os_mutex.c ****              }
+ 258:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_DBG_EN > 0u
+ 259:Libraries/uC-OSIII/os_mutex.c ****              OS_MutexDbgListRemove(p_mutex);
+ 513              		.loc 1 259 0
+ 514 03c8 F868     		ldr	r0, [r7, #12]
+ 515 03ca FFF7FEFF 		bl	OS_MutexDbgListRemove
+ 260:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 261:Libraries/uC-OSIII/os_mutex.c ****              OSMutexQty--;
+ 516              		.loc 1 261 0
+ 517 03ce 40F20003 		movw	r3, #:lower16:OSMutexQty
+ 518 03d2 C0F20003 		movt	r3, #:upper16:OSMutexQty
+ 519 03d6 1B88     		ldrh	r3, [r3, #0]
+ 520 03d8 03F1FF33 		add	r3, r3, #-1
+ 521 03dc 9AB2     		uxth	r2, r3
+ 522 03de 40F20003 		movw	r3, #:lower16:OSMutexQty
+ 523 03e2 C0F20003 		movt	r3, #:upper16:OSMutexQty
+ 524 03e6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 262:Libraries/uC-OSIII/os_mutex.c ****              OS_MutexClr(p_mutex);
+ 525              		.loc 1 262 0
+ 526 03e8 F868     		ldr	r0, [r7, #12]
+ 527 03ea FFF7FEFF 		bl	OS_MutexClr
+ 263:Libraries/uC-OSIII/os_mutex.c ****              OS_CRITICAL_EXIT_NO_SCHED();
+ 528              		.loc 1 263 0
+ 529 03ee FFF7FEFF 		bl	CPU_SR_Save
+ 530 03f2 B862     		str	r0, [r7, #40]
+ 531 03f4 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 532 03f8 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 533 03fc C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 534 0400 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 535 0402 03F1FF33 		add	r3, r3, #-1
+ 536 0406 DAB2     		uxtb	r2, r3
+ 537 0408 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 538 040c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 539 0410 1A70     		strb	r2, [r3, #0]
+ 540 0412 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 541 0416 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 542 041a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 543 041c 002B     		cmp	r3, #0
+ 544 041e 01D1     		bne	.L33
+ 545              		.loc 1 263 0 is_stmt 0 discriminator 1
+ 546 0420 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 547              	.L33:
+ 548              		.loc 1 263 0 discriminator 2
+ 549 0424 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 550 0428 B86A     		ldr	r0, [r7, #40]
+ 551 042a FFF7FEFF 		bl	CPU_SR_Restore
+ 264:Libraries/uC-OSIII/os_mutex.c ****              OSSched();                                                    /* Find highest priority
+ 552              		.loc 1 264 0 is_stmt 1 discriminator 2
+ 553 042e FFF7FEFF 		bl	OSSched
+ 265:Libraries/uC-OSIII/os_mutex.c ****              *p_err = OS_ERR_NONE;
+ 554              		.loc 1 265 0 discriminator 2
+ 555 0432 7B68     		ldr	r3, [r7, #4]
+ 556 0434 4FF00002 		mov	r2, #0
+ 557 0438 1A80     		strh	r2, [r3, #0]	@ movhi
+ 266:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 558              		.loc 1 266 0 discriminator 2
+ 559 043a 39E0     		b	.L22
+ 560              	.L37:
+ 267:Libraries/uC-OSIII/os_mutex.c **** 
+ 268:Libraries/uC-OSIII/os_mutex.c ****         default:
+ 269:Libraries/uC-OSIII/os_mutex.c ****              OS_CRITICAL_EXIT();
+ 561              		.loc 1 269 0
+ 562 043c FFF7FEFF 		bl	CPU_SR_Save
+ 563 0440 B862     		str	r0, [r7, #40]
+ 564 0442 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 565 0446 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 566 044a C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 567 044e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 568 0450 03F1FF33 		add	r3, r3, #-1
+ 569 0454 DAB2     		uxtb	r2, r3
+ 570 0456 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 571 045a C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 572 045e 1A70     		strb	r2, [r3, #0]
+ 573 0460 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 574 0464 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 575 0468 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 576 046a 002B     		cmp	r3, #0
+ 577 046c 16D1     		bne	.L34
+ 578              		.loc 1 269 0 is_stmt 0 discriminator 1
+ 579 046e FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 580 0472 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 581 0476 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 582 047a 1B88     		ldrh	r3, [r3, #0]
+ 583 047c 002B     		cmp	r3, #0
+ 584 047e 07D0     		beq	.L35
+ 585              		.loc 1 269 0 discriminator 3
+ 586 0480 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 587 0484 B86A     		ldr	r0, [r7, #40]
+ 588 0486 FFF7FEFF 		bl	CPU_SR_Restore
+ 589 048a FFF7FEFF 		bl	OS_Sched0
+ 590 048e 0AE0     		b	.L36
+ 591              	.L35:
+ 592              		.loc 1 269 0 discriminator 4
+ 593 0490 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 594 0494 B86A     		ldr	r0, [r7, #40]
+ 595 0496 FFF7FEFF 		bl	CPU_SR_Restore
+ 596 049a 04E0     		b	.L36
+ 597              	.L34:
+ 598              		.loc 1 269 0 discriminator 2
+ 599 049c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 600 04a0 B86A     		ldr	r0, [r7, #40]
+ 601 04a2 FFF7FEFF 		bl	CPU_SR_Restore
+ 602              	.L36:
+ 270:Libraries/uC-OSIII/os_mutex.c ****              *p_err = OS_ERR_OPT_INVALID;
+ 603              		.loc 1 270 0 is_stmt 1
+ 604 04a6 7B68     		ldr	r3, [r7, #4]
+ 605 04a8 45F62562 		movw	r2, #24101
+ 606 04ac 1A80     		strh	r2, [r3, #0]	@ movhi
+ 271:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 607              		.loc 1 271 0
+ 608 04ae 00BF     		nop
+ 609              	.L22:
+ 272:Libraries/uC-OSIII/os_mutex.c ****     }
+ 273:Libraries/uC-OSIII/os_mutex.c ****     return (nbr_tasks);
+ 610              		.loc 1 273 0
+ 611 04b0 7B8C     		ldrh	r3, [r7, #34]
+ 612              	.L7:
+ 274:Libraries/uC-OSIII/os_mutex.c **** }
+ 613              		.loc 1 274 0
+ 614 04b2 1846     		mov	r0, r3
+ 615 04b4 07F13007 		add	r7, r7, #48
+ 616 04b8 BD46     		mov	sp, r7
+ 617 04ba 80BD     		pop	{r7, pc}
+ 618              		.cfi_endproc
+ 619              	.LFE1:
+ 621              		.align	2
+ 622              		.global	OSMutexPend
+ 623              		.thumb
+ 624              		.thumb_func
+ 626              	OSMutexPend:
+ 627              	.LFB2:
+ 275:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 276:Libraries/uC-OSIII/os_mutex.c **** 
+ 277:Libraries/uC-OSIII/os_mutex.c **** /*$PAGE*/
+ 278:Libraries/uC-OSIII/os_mutex.c **** /*
+ 279:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 280:Libraries/uC-OSIII/os_mutex.c **** *                                                    PEND ON MUTEX
+ 281:Libraries/uC-OSIII/os_mutex.c **** *
+ 282:Libraries/uC-OSIII/os_mutex.c **** * Description: This function waits for a mutex.
+ 283:Libraries/uC-OSIII/os_mutex.c **** *
+ 284:Libraries/uC-OSIII/os_mutex.c **** * Arguments  : p_mutex       is a pointer to the mutex
+ 285:Libraries/uC-OSIII/os_mutex.c **** *
+ 286:Libraries/uC-OSIII/os_mutex.c **** *              timeout       is an optional timeout period (in clock ticks).  If non-zero, your tas
+ 287:Libraries/uC-OSIII/os_mutex.c **** *                            resource up to the amount of time (in 'ticks') specified by this argum
+ 288:Libraries/uC-OSIII/os_mutex.c **** *                            0, however, your task will wait forever at the specified mutex or, unt
+ 289:Libraries/uC-OSIII/os_mutex.c **** *                            becomes available.
+ 290:Libraries/uC-OSIII/os_mutex.c **** *
+ 291:Libraries/uC-OSIII/os_mutex.c **** *              opt           determines whether the user wants to block if the mutex is not availab
+ 292:Libraries/uC-OSIII/os_mutex.c **** *
+ 293:Libraries/uC-OSIII/os_mutex.c **** *                                OS_OPT_PEND_BLOCKING
+ 294:Libraries/uC-OSIII/os_mutex.c **** *                                OS_OPT_PEND_NON_BLOCKING
+ 295:Libraries/uC-OSIII/os_mutex.c **** *
+ 296:Libraries/uC-OSIII/os_mutex.c **** *              p_ts          is a pointer to a variable that will receive the timestamp of when the
+ 297:Libraries/uC-OSIII/os_mutex.c **** *                            pend aborted or the mutex deleted.  If you pass a NULL pointer (i.e. (
+ 298:Libraries/uC-OSIII/os_mutex.c **** *                            will not get the timestamp.  In other words, passing a NULL pointer is
+ 299:Libraries/uC-OSIII/os_mutex.c **** *                            that you don't need the timestamp.
+ 300:Libraries/uC-OSIII/os_mutex.c **** *
+ 301:Libraries/uC-OSIII/os_mutex.c **** *              p_err         is a pointer to a variable that will contain an error code returned by
+ 302:Libraries/uC-OSIII/os_mutex.c **** *
+ 303:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_NONE               The call was successful and your task ow
+ 304:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_MUTEX_OWNER        If calling task already owns the mutex
+ 305:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_OBJ_PTR_NULL       If 'p_mutex' is a NULL pointer.
+ 306:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_OPT_INVALID        If you didn't specify a valid option
+ 307:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_PEND_ISR           If you called this function from an ISR 
+ 308:Libraries/uC-OSIII/os_mutex.c **** *                                                          would lead to a suspension.
+ 309:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_PEND_WOULD_BLOCK   If you specified non-blocking but the mu
+ 310:Libraries/uC-OSIII/os_mutex.c **** *                                                          available.
+ 311:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_SCHED_LOCKED       If you called this function when the sch
+ 312:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_STATE_INVALID      If the task is in an invalid state
+ 313:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_STATUS_INVALID     If the pend status has an invalid value
+ 314:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_TIMEOUT            The mutex was not received within the sp
+ 315:Libraries/uC-OSIII/os_mutex.c **** *
+ 316:Libraries/uC-OSIII/os_mutex.c **** * Returns    : none
+ 317:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 318:Libraries/uC-OSIII/os_mutex.c **** */
+ 319:Libraries/uC-OSIII/os_mutex.c **** 
+ 320:Libraries/uC-OSIII/os_mutex.c **** void  OSMutexPend (OS_MUTEX   *p_mutex,
+ 321:Libraries/uC-OSIII/os_mutex.c ****                    OS_TICK     timeout,
+ 322:Libraries/uC-OSIII/os_mutex.c ****                    OS_OPT      opt,
+ 323:Libraries/uC-OSIII/os_mutex.c ****                    CPU_TS     *p_ts,
+ 324:Libraries/uC-OSIII/os_mutex.c ****                    OS_ERR     *p_err)
+ 325:Libraries/uC-OSIII/os_mutex.c **** {
+ 628              		.loc 1 325 0
+ 629              		.cfi_startproc
+ 630              		@ args = 4, pretend = 0, frame = 56
+ 631              		@ frame_needed = 1, uses_anonymous_args = 0
+ 632 04bc 80B5     		push	{r7, lr}
+ 633              	.LCFI6:
+ 634              		.cfi_def_cfa_offset 8
+ 635              		.cfi_offset 14, -4
+ 636              		.cfi_offset 7, -8
+ 637 04be 8EB0     		sub	sp, sp, #56
+ 638              	.LCFI7:
+ 639              		.cfi_def_cfa_offset 64
+ 640 04c0 00AF     		add	r7, sp, #0
+ 641              	.LCFI8:
+ 642              		.cfi_def_cfa_register 7
+ 643 04c2 F860     		str	r0, [r7, #12]
+ 644 04c4 B960     		str	r1, [r7, #8]
+ 645 04c6 3B60     		str	r3, [r7, #0]
+ 646 04c8 1346     		mov	r3, r2	@ movhi
+ 647 04ca FB80     		strh	r3, [r7, #6]	@ movhi
+ 326:Libraries/uC-OSIII/os_mutex.c ****     OS_PEND_DATA  pend_data;
+ 327:Libraries/uC-OSIII/os_mutex.c ****     OS_TCB       *p_tcb;
+ 328:Libraries/uC-OSIII/os_mutex.c ****     CPU_SR_ALLOC();
+ 648              		.loc 1 328 0
+ 649 04cc 4FF00003 		mov	r3, #0
+ 650 04d0 7B63     		str	r3, [r7, #52]
+ 329:Libraries/uC-OSIII/os_mutex.c **** 
+ 330:Libraries/uC-OSIII/os_mutex.c **** 
+ 331:Libraries/uC-OSIII/os_mutex.c **** 
+ 332:Libraries/uC-OSIII/os_mutex.c **** #ifdef OS_SAFETY_CRITICAL
+ 333:Libraries/uC-OSIII/os_mutex.c ****     if (p_err == (OS_ERR *)0) {
+ 334:Libraries/uC-OSIII/os_mutex.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 335:Libraries/uC-OSIII/os_mutex.c ****     }
+ 336:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 337:Libraries/uC-OSIII/os_mutex.c **** 
+ 338:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 339:Libraries/uC-OSIII/os_mutex.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Not allowed to call from an ISR     
+ 651              		.loc 1 339 0
+ 652 04d2 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 653 04d6 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 654 04da 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 655 04dc 002B     		cmp	r3, #0
+ 656 04de 04D0     		beq	.L39
+ 340:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_PEND_ISR;
+ 657              		.loc 1 340 0
+ 658 04e0 3B6C     		ldr	r3, [r7, #64]
+ 659 04e2 46F2AE12 		movw	r2, #25006
+ 660 04e6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 341:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 661              		.loc 1 341 0
+ 662 04e8 CEE1     		b	.L38
+ 663              	.L39:
+ 342:Libraries/uC-OSIII/os_mutex.c ****     }
+ 343:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 344:Libraries/uC-OSIII/os_mutex.c **** 
+ 345:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 346:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex == (OS_MUTEX *)0) {                         /* Validate arguments                  
+ 664              		.loc 1 346 0
+ 665 04ea FB68     		ldr	r3, [r7, #12]
+ 666 04ec 002B     		cmp	r3, #0
+ 667 04ee 04D1     		bne	.L41
+ 347:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 668              		.loc 1 347 0
+ 669 04f0 3B6C     		ldr	r3, [r7, #64]
+ 670 04f2 45F6C352 		movw	r2, #24003
+ 671 04f6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 348:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 672              		.loc 1 348 0
+ 673 04f8 C6E1     		b	.L38
+ 674              	.L41:
+ 349:Libraries/uC-OSIII/os_mutex.c ****     }
+ 350:Libraries/uC-OSIII/os_mutex.c ****     switch (opt) {
+ 675              		.loc 1 350 0
+ 676 04fa FB88     		ldrh	r3, [r7, #6]
+ 677 04fc 002B     		cmp	r3, #0
+ 678 04fe 07D0     		beq	.L74
+ 679 0500 B3F5004F 		cmp	r3, #32768
+ 680 0504 04D0     		beq	.L74
+ 351:Libraries/uC-OSIII/os_mutex.c ****         case OS_OPT_PEND_BLOCKING:
+ 352:Libraries/uC-OSIII/os_mutex.c ****         case OS_OPT_PEND_NON_BLOCKING:
+ 353:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 354:Libraries/uC-OSIII/os_mutex.c **** 
+ 355:Libraries/uC-OSIII/os_mutex.c ****         default:
+ 356:Libraries/uC-OSIII/os_mutex.c ****              *p_err = OS_ERR_OPT_INVALID;
+ 681              		.loc 1 356 0
+ 682 0506 3B6C     		ldr	r3, [r7, #64]
+ 683 0508 45F62562 		movw	r2, #24101
+ 684 050c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 357:Libraries/uC-OSIII/os_mutex.c ****              return;
+ 685              		.loc 1 357 0
+ 686 050e BBE1     		b	.L38
+ 687              	.L74:
+ 353:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 688              		.loc 1 353 0
+ 689 0510 00BF     		nop
+ 690              	.L44:
+ 358:Libraries/uC-OSIII/os_mutex.c ****     }
+ 359:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 360:Libraries/uC-OSIII/os_mutex.c **** 
+ 361:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 362:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex->Type != OS_OBJ_TYPE_MUTEX) {               /* Make sure mutex was created         
+ 691              		.loc 1 362 0
+ 692 0512 FB68     		ldr	r3, [r7, #12]
+ 693 0514 1A68     		ldr	r2, [r3, #0]
+ 694 0516 45F24D53 		movw	r3, #21837
+ 695 051a C5F65403 		movt	r3, 22612
+ 696 051e 9A42     		cmp	r2, r3
+ 697 0520 04D0     		beq	.L45
+ 363:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 698              		.loc 1 363 0
+ 699 0522 3B6C     		ldr	r3, [r7, #64]
+ 700 0524 45F6C452 		movw	r2, #24004
+ 701 0528 1A80     		strh	r2, [r3, #0]	@ movhi
+ 364:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 702              		.loc 1 364 0
+ 703 052a ADE1     		b	.L38
+ 704              	.L45:
+ 365:Libraries/uC-OSIII/os_mutex.c ****     }
+ 366:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 367:Libraries/uC-OSIII/os_mutex.c **** 
+ 368:Libraries/uC-OSIII/os_mutex.c ****     if (p_ts != (CPU_TS *)0) {
+ 705              		.loc 1 368 0
+ 706 052c 3B68     		ldr	r3, [r7, #0]
+ 707 052e 002B     		cmp	r3, #0
+ 708 0530 03D0     		beq	.L46
+ 369:Libraries/uC-OSIII/os_mutex.c ****        *p_ts  = (CPU_TS  )0;                                /* Initialize the returned timestamp   
+ 709              		.loc 1 369 0
+ 710 0532 3B68     		ldr	r3, [r7, #0]
+ 711 0534 4FF00002 		mov	r2, #0
+ 712 0538 1A60     		str	r2, [r3, #0]
+ 713              	.L46:
+ 370:Libraries/uC-OSIII/os_mutex.c ****     }
+ 371:Libraries/uC-OSIII/os_mutex.c **** 
+ 372:Libraries/uC-OSIII/os_mutex.c ****     CPU_CRITICAL_ENTER();
+ 714              		.loc 1 372 0
+ 715 053a FFF7FEFF 		bl	CPU_SR_Save
+ 716 053e 7863     		str	r0, [r7, #52]
+ 717 0540 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 373:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex->OwnerNestingCtr == (OS_NESTING_CTR)0) {    /* Resource available?                 
+ 718              		.loc 1 373 0
+ 719 0544 FB68     		ldr	r3, [r7, #12]
+ 720 0546 93F82530 		ldrb	r3, [r3, #37]	@ zero_extendqisi2
+ 721 054a 002B     		cmp	r3, #0
+ 722 054c 26D1     		bne	.L47
+ 374:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->OwnerTCBPtr       =  OSTCBCurPtr;          /* Yes, caller may proceed             
+ 723              		.loc 1 374 0
+ 724 054e 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 725 0552 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 726 0556 1A68     		ldr	r2, [r3, #0]
+ 727 0558 FB68     		ldr	r3, [r7, #12]
+ 728 055a 1A62     		str	r2, [r3, #32]
+ 375:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->OwnerOriginalPrio =  OSTCBCurPtr->Prio;
+ 729              		.loc 1 375 0
+ 730 055c 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 731 0560 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 732 0564 1B68     		ldr	r3, [r3, #0]
+ 733 0566 93F8C320 		ldrb	r2, [r3, #195]	@ zero_extendqisi2
+ 734 056a FB68     		ldr	r3, [r7, #12]
+ 735 056c 83F82420 		strb	r2, [r3, #36]
+ 376:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->OwnerNestingCtr   = (OS_NESTING_CTR)1;
+ 736              		.loc 1 376 0
+ 737 0570 FB68     		ldr	r3, [r7, #12]
+ 738 0572 4FF00102 		mov	r2, #1
+ 739 0576 83F82520 		strb	r2, [r3, #37]
+ 377:Libraries/uC-OSIII/os_mutex.c ****         if (p_ts != (CPU_TS *)0) {
+ 740              		.loc 1 377 0
+ 741 057a 3B68     		ldr	r3, [r7, #0]
+ 742 057c 002B     		cmp	r3, #0
+ 743 057e 03D0     		beq	.L48
+ 378:Libraries/uC-OSIII/os_mutex.c ****            *p_ts                   = p_mutex->TS;
+ 744              		.loc 1 378 0
+ 745 0580 FB68     		ldr	r3, [r7, #12]
+ 746 0582 9A6A     		ldr	r2, [r3, #40]
+ 747 0584 3B68     		ldr	r3, [r7, #0]
+ 748 0586 1A60     		str	r2, [r3, #0]
+ 749              	.L48:
+ 379:Libraries/uC-OSIII/os_mutex.c ****         }
+ 380:Libraries/uC-OSIII/os_mutex.c ****         CPU_CRITICAL_EXIT();
+ 750              		.loc 1 380 0
+ 751 0588 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 752 058c 786B     		ldr	r0, [r7, #52]
+ 753 058e FFF7FEFF 		bl	CPU_SR_Restore
+ 381:Libraries/uC-OSIII/os_mutex.c ****         *p_err                     =  OS_ERR_NONE;
+ 754              		.loc 1 381 0
+ 755 0592 3B6C     		ldr	r3, [r7, #64]
+ 756 0594 4FF00002 		mov	r2, #0
+ 757 0598 1A80     		strh	r2, [r3, #0]	@ movhi
+ 382:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 758              		.loc 1 382 0
+ 759 059a 75E1     		b	.L38
+ 760              	.L47:
+ 383:Libraries/uC-OSIII/os_mutex.c ****     }
+ 384:Libraries/uC-OSIII/os_mutex.c **** 
+ 385:Libraries/uC-OSIII/os_mutex.c ****     if (OSTCBCurPtr == p_mutex->OwnerTCBPtr) {              /* See if current task is already the o
+ 761              		.loc 1 385 0
+ 762 059c FB68     		ldr	r3, [r7, #12]
+ 763 059e 1A6A     		ldr	r2, [r3, #32]
+ 764 05a0 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 765 05a4 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 766 05a8 1B68     		ldr	r3, [r3, #0]
+ 767 05aa 9A42     		cmp	r2, r3
+ 768 05ac 19D1     		bne	.L49
+ 386:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->OwnerNestingCtr++;
+ 769              		.loc 1 386 0
+ 770 05ae FB68     		ldr	r3, [r7, #12]
+ 771 05b0 93F82530 		ldrb	r3, [r3, #37]	@ zero_extendqisi2
+ 772 05b4 03F10103 		add	r3, r3, #1
+ 773 05b8 DAB2     		uxtb	r2, r3
+ 774 05ba FB68     		ldr	r3, [r7, #12]
+ 775 05bc 83F82520 		strb	r2, [r3, #37]
+ 387:Libraries/uC-OSIII/os_mutex.c ****         if (p_ts != (CPU_TS *)0) {
+ 776              		.loc 1 387 0
+ 777 05c0 3B68     		ldr	r3, [r7, #0]
+ 778 05c2 002B     		cmp	r3, #0
+ 779 05c4 03D0     		beq	.L50
+ 388:Libraries/uC-OSIII/os_mutex.c ****            *p_ts  = p_mutex->TS;
+ 780              		.loc 1 388 0
+ 781 05c6 FB68     		ldr	r3, [r7, #12]
+ 782 05c8 9A6A     		ldr	r2, [r3, #40]
+ 783 05ca 3B68     		ldr	r3, [r7, #0]
+ 784 05cc 1A60     		str	r2, [r3, #0]
+ 785              	.L50:
+ 389:Libraries/uC-OSIII/os_mutex.c ****         }
+ 390:Libraries/uC-OSIII/os_mutex.c ****         CPU_CRITICAL_EXIT();
+ 786              		.loc 1 390 0
+ 787 05ce FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 788 05d2 786B     		ldr	r0, [r7, #52]
+ 789 05d4 FFF7FEFF 		bl	CPU_SR_Restore
+ 391:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_MUTEX_OWNER;                        /* Indicate that current task already o
+ 790              		.loc 1 391 0
+ 791 05d8 3B6C     		ldr	r3, [r7, #64]
+ 792 05da 45F28272 		movw	r2, #22402
+ 793 05de 1A80     		strh	r2, [r3, #0]	@ movhi
+ 392:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 794              		.loc 1 392 0
+ 795 05e0 52E1     		b	.L38
+ 796              	.L49:
+ 393:Libraries/uC-OSIII/os_mutex.c ****     }
+ 394:Libraries/uC-OSIII/os_mutex.c **** 
+ 395:Libraries/uC-OSIII/os_mutex.c ****     if ((opt & OS_OPT_PEND_NON_BLOCKING) != (OS_OPT)0) {    /* Caller wants to block if not availab
+ 797              		.loc 1 395 0
+ 798 05e2 FB88     		ldrh	r3, [r7, #6]
+ 799 05e4 1BB2     		sxth	r3, r3
+ 800 05e6 002B     		cmp	r3, #0
+ 801 05e8 09DA     		bge	.L51
+ 396:Libraries/uC-OSIII/os_mutex.c ****         CPU_CRITICAL_EXIT();
+ 802              		.loc 1 396 0
+ 803 05ea FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 804 05ee 786B     		ldr	r0, [r7, #52]
+ 805 05f0 FFF7FEFF 		bl	CPU_SR_Restore
+ 397:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_PEND_WOULD_BLOCK;                   /* No                                  
+ 806              		.loc 1 397 0
+ 807 05f4 3B6C     		ldr	r3, [r7, #64]
+ 808 05f6 46F2B012 		movw	r2, #25008
+ 809 05fa 1A80     		strh	r2, [r3, #0]	@ movhi
+ 398:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 810              		.loc 1 398 0
+ 811 05fc 44E1     		b	.L38
+ 812              	.L51:
+ 399:Libraries/uC-OSIII/os_mutex.c ****     } else {
+ 400:Libraries/uC-OSIII/os_mutex.c ****         if (OSSchedLockNestingCtr > (OS_NESTING_CTR)0) {    /* Can't pend when the scheduler is loc
+ 813              		.loc 1 400 0
+ 814 05fe 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 815 0602 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 816 0606 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 817 0608 002B     		cmp	r3, #0
+ 818 060a 09D0     		beq	.L52
+ 401:Libraries/uC-OSIII/os_mutex.c ****             CPU_CRITICAL_EXIT();
+ 819              		.loc 1 401 0
+ 820 060c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 821 0610 786B     		ldr	r0, [r7, #52]
+ 822 0612 FFF7FEFF 		bl	CPU_SR_Restore
+ 402:Libraries/uC-OSIII/os_mutex.c ****             *p_err = OS_ERR_SCHED_LOCKED;
+ 823              		.loc 1 402 0
+ 824 0616 3B6C     		ldr	r3, [r7, #64]
+ 825 0618 46F66252 		movw	r2, #28002
+ 826 061c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 403:Libraries/uC-OSIII/os_mutex.c ****             return;
+ 827              		.loc 1 403 0
+ 828 061e 33E1     		b	.L38
+ 829              	.L52:
+ 404:Libraries/uC-OSIII/os_mutex.c ****         }
+ 405:Libraries/uC-OSIII/os_mutex.c ****     }
+ 406:Libraries/uC-OSIII/os_mutex.c **** 
+ 407:Libraries/uC-OSIII/os_mutex.c ****     OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();                  /* Lock the scheduler/re-enable interru
+ 830              		.loc 1 407 0
+ 831 0620 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 832 0624 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 833 0628 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 834 062a 03F10103 		add	r3, r3, #1
+ 835 062e DAB2     		uxtb	r2, r3
+ 836 0630 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 837 0634 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 838 0638 1A70     		strb	r2, [r3, #0]
+ 839 063a 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 840 063e C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 841 0642 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 842 0644 012B     		cmp	r3, #1
+ 843 0646 01D1     		bne	.L53
+ 844              		.loc 1 407 0 is_stmt 0 discriminator 1
+ 845 0648 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 846              	.L53:
+ 847              		.loc 1 407 0 discriminator 2
+ 848 064c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 849 0650 786B     		ldr	r0, [r7, #52]
+ 850 0652 FFF7FEFF 		bl	CPU_SR_Restore
+ 408:Libraries/uC-OSIII/os_mutex.c ****     p_tcb = p_mutex->OwnerTCBPtr;                           /* Point to the TCB of the Mutex owner 
+ 851              		.loc 1 408 0 is_stmt 1 discriminator 2
+ 852 0656 FB68     		ldr	r3, [r7, #12]
+ 853 0658 1B6A     		ldr	r3, [r3, #32]
+ 854 065a 3B63     		str	r3, [r7, #48]
+ 409:Libraries/uC-OSIII/os_mutex.c ****     if (p_tcb->Prio > OSTCBCurPtr->Prio) {                  /* See if mutex owner has a lower prior
+ 855              		.loc 1 409 0 discriminator 2
+ 856 065c 3B6B     		ldr	r3, [r7, #48]
+ 857 065e 93F8C320 		ldrb	r2, [r3, #195]	@ zero_extendqisi2
+ 858 0662 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 859 0666 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 860 066a 1B68     		ldr	r3, [r3, #0]
+ 861 066c 93F8C330 		ldrb	r3, [r3, #195]	@ zero_extendqisi2
+ 862 0670 9A42     		cmp	r2, r3
+ 863 0672 7ED9     		bls	.L54
+ 410:Libraries/uC-OSIII/os_mutex.c ****         switch (p_tcb->TaskState) {
+ 864              		.loc 1 410 0
+ 865 0674 3B6B     		ldr	r3, [r7, #48]
+ 866 0676 93F8C230 		ldrb	r3, [r3, #194]	@ zero_extendqisi2
+ 867 067a 072B     		cmp	r3, #7
+ 868 067c 3FD8     		bhi	.L55
+ 869 067e 4FF04C52 		mov	r2, #855638016
+ 870 0682 02FA03F2 		lsl	r2, r2, r3
+ 871 0686 002A     		cmp	r2, #0
+ 872 0688 2DDB     		blt	.L58
+ 873 068a 4FF09842 		mov	r2, #1275068416
+ 874 068e 02FA03F2 		lsl	r2, r2, r3
+ 875 0692 002A     		cmp	r2, #0
+ 876 0694 1CDB     		blt	.L57
+ 877 0696 4FF00042 		mov	r2, #-2147483648
+ 878 069a 02FA03F3 		lsl	r3, r2, r3
+ 879 069e 002B     		cmp	r3, #0
+ 880 06a0 2DDA     		bge	.L55
+ 881              	.L56:
+ 411:Libraries/uC-OSIII/os_mutex.c ****             case OS_TASK_STATE_RDY:
+ 412:Libraries/uC-OSIII/os_mutex.c ****                  OS_RdyListRemove(p_tcb);                   /* Remove from ready list at current pr
+ 882              		.loc 1 412 0
+ 883 06a2 386B     		ldr	r0, [r7, #48]
+ 884 06a4 FFF7FEFF 		bl	OS_RdyListRemove
+ 413:Libraries/uC-OSIII/os_mutex.c ****                  p_tcb->Prio = OSTCBCurPtr->Prio;           /* Raise owner's priority              
+ 885              		.loc 1 413 0
+ 886 06a8 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 887 06ac C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 888 06b0 1B68     		ldr	r3, [r3, #0]
+ 889 06b2 93F8C320 		ldrb	r2, [r3, #195]	@ zero_extendqisi2
+ 890 06b6 3B6B     		ldr	r3, [r7, #48]
+ 891 06b8 83F8C320 		strb	r2, [r3, #195]
+ 414:Libraries/uC-OSIII/os_mutex.c ****                  OS_PrioInsert(p_tcb->Prio);
+ 892              		.loc 1 414 0
+ 893 06bc 3B6B     		ldr	r3, [r7, #48]
+ 894 06be 93F8C330 		ldrb	r3, [r3, #195]	@ zero_extendqisi2
+ 895 06c2 1846     		mov	r0, r3
+ 896 06c4 FFF7FEFF 		bl	OS_PrioInsert
+ 415:Libraries/uC-OSIII/os_mutex.c ****                  OS_RdyListInsertHead(p_tcb);               /* Insert in ready list at new priority
+ 897              		.loc 1 415 0
+ 898 06c8 386B     		ldr	r0, [r7, #48]
+ 899 06ca FFF7FEFF 		bl	OS_RdyListInsertHead
+ 416:Libraries/uC-OSIII/os_mutex.c ****                  break;
+ 900              		.loc 1 416 0
+ 901 06ce 50E0     		b	.L54
+ 902              	.L57:
+ 417:Libraries/uC-OSIII/os_mutex.c **** 
+ 418:Libraries/uC-OSIII/os_mutex.c ****             case OS_TASK_STATE_DLY:
+ 419:Libraries/uC-OSIII/os_mutex.c ****             case OS_TASK_STATE_DLY_SUSPENDED:
+ 420:Libraries/uC-OSIII/os_mutex.c ****             case OS_TASK_STATE_SUSPENDED:
+ 421:Libraries/uC-OSIII/os_mutex.c ****                  p_tcb->Prio = OSTCBCurPtr->Prio;           /* Only need to raise the owner's prior
+ 903              		.loc 1 421 0
+ 904 06d0 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 905 06d4 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 906 06d8 1B68     		ldr	r3, [r3, #0]
+ 907 06da 93F8C320 		ldrb	r2, [r3, #195]	@ zero_extendqisi2
+ 908 06de 3B6B     		ldr	r3, [r7, #48]
+ 909 06e0 83F8C320 		strb	r2, [r3, #195]
+ 422:Libraries/uC-OSIII/os_mutex.c ****                  break;
+ 910              		.loc 1 422 0
+ 911 06e4 45E0     		b	.L54
+ 912              	.L58:
+ 423:Libraries/uC-OSIII/os_mutex.c **** 
+ 424:Libraries/uC-OSIII/os_mutex.c ****             case OS_TASK_STATE_PEND:                        /* Change the position of the task in t
+ 425:Libraries/uC-OSIII/os_mutex.c ****             case OS_TASK_STATE_PEND_TIMEOUT:
+ 426:Libraries/uC-OSIII/os_mutex.c ****             case OS_TASK_STATE_PEND_SUSPENDED:
+ 427:Libraries/uC-OSIII/os_mutex.c ****             case OS_TASK_STATE_PEND_TIMEOUT_SUSPENDED:
+ 428:Libraries/uC-OSIII/os_mutex.c ****                  OS_PendListChangePrio(p_tcb,
+ 429:Libraries/uC-OSIII/os_mutex.c ****                                        OSTCBCurPtr->Prio);
+ 913              		.loc 1 429 0
+ 914 06e6 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 915 06ea C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 916 06ee 1B68     		ldr	r3, [r3, #0]
+ 428:Libraries/uC-OSIII/os_mutex.c ****                  OS_PendListChangePrio(p_tcb,
+ 917              		.loc 1 428 0
+ 918 06f0 93F8C330 		ldrb	r3, [r3, #195]	@ zero_extendqisi2
+ 919 06f4 386B     		ldr	r0, [r7, #48]
+ 920 06f6 1946     		mov	r1, r3
+ 921 06f8 FFF7FEFF 		bl	OS_PendListChangePrio
+ 430:Libraries/uC-OSIII/os_mutex.c ****                  break;
+ 922              		.loc 1 430 0
+ 923 06fc 39E0     		b	.L54
+ 924              	.L55:
+ 431:Libraries/uC-OSIII/os_mutex.c **** 
+ 432:Libraries/uC-OSIII/os_mutex.c ****             default:
+ 433:Libraries/uC-OSIII/os_mutex.c ****                  OS_CRITICAL_EXIT();
+ 925              		.loc 1 433 0
+ 926 06fe FFF7FEFF 		bl	CPU_SR_Save
+ 927 0702 7863     		str	r0, [r7, #52]
+ 928 0704 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 929 0708 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 930 070c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 931 0710 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 932 0712 03F1FF33 		add	r3, r3, #-1
+ 933 0716 DAB2     		uxtb	r2, r3
+ 934 0718 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 935 071c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 936 0720 1A70     		strb	r2, [r3, #0]
+ 937 0722 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 938 0726 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 939 072a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 940 072c 002B     		cmp	r3, #0
+ 941 072e 16D1     		bne	.L59
+ 942              		.loc 1 433 0 is_stmt 0 discriminator 1
+ 943 0730 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 944 0734 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 945 0738 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 946 073c 1B88     		ldrh	r3, [r3, #0]
+ 947 073e 002B     		cmp	r3, #0
+ 948 0740 07D0     		beq	.L60
+ 949              		.loc 1 433 0 discriminator 3
+ 950 0742 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 951 0746 786B     		ldr	r0, [r7, #52]
+ 952 0748 FFF7FEFF 		bl	CPU_SR_Restore
+ 953 074c FFF7FEFF 		bl	OS_Sched0
+ 954 0750 0AE0     		b	.L61
+ 955              	.L60:
+ 956              		.loc 1 433 0 discriminator 4
+ 957 0752 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 958 0756 786B     		ldr	r0, [r7, #52]
+ 959 0758 FFF7FEFF 		bl	CPU_SR_Restore
+ 960 075c 04E0     		b	.L61
+ 961              	.L59:
+ 962              		.loc 1 433 0 discriminator 2
+ 963 075e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 964 0762 786B     		ldr	r0, [r7, #52]
+ 965 0764 FFF7FEFF 		bl	CPU_SR_Restore
+ 966              	.L61:
+ 434:Libraries/uC-OSIII/os_mutex.c ****                  *p_err = OS_ERR_STATE_INVALID;
+ 967              		.loc 1 434 0 is_stmt 1
+ 968 0768 3B6C     		ldr	r3, [r7, #64]
+ 969 076a 46F62A62 		movw	r2, #28202
+ 970 076e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 435:Libraries/uC-OSIII/os_mutex.c ****                  return;
+ 971              		.loc 1 435 0
+ 972 0770 8AE0     		b	.L38
+ 973              	.L54:
+ 436:Libraries/uC-OSIII/os_mutex.c ****         }
+ 437:Libraries/uC-OSIII/os_mutex.c ****     }
+ 438:Libraries/uC-OSIII/os_mutex.c **** 
+ 439:Libraries/uC-OSIII/os_mutex.c ****     OS_Pend(&pend_data,                                     /* Block task pending on Mutex         
+ 974              		.loc 1 439 0
+ 975 0772 07F11003 		add	r3, r7, #16
+ 976 0776 1846     		mov	r0, r3
+ 977 0778 F968     		ldr	r1, [r7, #12]
+ 978 077a 4FF00402 		mov	r2, #4
+ 979 077e BB68     		ldr	r3, [r7, #8]
+ 980 0780 FFF7FEFF 		bl	OS_Pend
+ 440:Libraries/uC-OSIII/os_mutex.c ****             (OS_PEND_OBJ *)((void *)p_mutex),
+ 441:Libraries/uC-OSIII/os_mutex.c ****             OS_TASK_PEND_ON_MUTEX,
+ 442:Libraries/uC-OSIII/os_mutex.c ****             timeout);
+ 443:Libraries/uC-OSIII/os_mutex.c **** 
+ 444:Libraries/uC-OSIII/os_mutex.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 981              		.loc 1 444 0
+ 982 0784 FFF7FEFF 		bl	CPU_SR_Save
+ 983 0788 7863     		str	r0, [r7, #52]
+ 984 078a FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 985 078e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 986 0792 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 987 0796 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 988 0798 03F1FF33 		add	r3, r3, #-1
+ 989 079c DAB2     		uxtb	r2, r3
+ 990 079e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 991 07a2 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 992 07a6 1A70     		strb	r2, [r3, #0]
+ 993 07a8 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 994 07ac C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 995 07b0 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 996 07b2 002B     		cmp	r3, #0
+ 997 07b4 01D1     		bne	.L62
+ 998              		.loc 1 444 0 is_stmt 0 discriminator 1
+ 999 07b6 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 1000              	.L62:
+ 1001              		.loc 1 444 0 discriminator 2
+ 1002 07ba FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1003 07be 786B     		ldr	r0, [r7, #52]
+ 1004 07c0 FFF7FEFF 		bl	CPU_SR_Restore
+ 445:Libraries/uC-OSIII/os_mutex.c **** 
+ 446:Libraries/uC-OSIII/os_mutex.c ****     OSSched();                                              /* Find the next highest priority task 
+ 1005              		.loc 1 446 0 is_stmt 1 discriminator 2
+ 1006 07c4 FFF7FEFF 		bl	OSSched
+ 447:Libraries/uC-OSIII/os_mutex.c **** 
+ 448:Libraries/uC-OSIII/os_mutex.c ****     CPU_CRITICAL_ENTER();
+ 1007              		.loc 1 448 0 discriminator 2
+ 1008 07c8 FFF7FEFF 		bl	CPU_SR_Save
+ 1009 07cc 7863     		str	r0, [r7, #52]
+ 1010 07ce FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 449:Libraries/uC-OSIII/os_mutex.c ****     switch (OSTCBCurPtr->PendStatus) {
+ 1011              		.loc 1 449 0 discriminator 2
+ 1012 07d2 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1013 07d6 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1014 07da 1B68     		ldr	r3, [r3, #0]
+ 1015 07dc 93F8C130 		ldrb	r3, [r3, #193]	@ zero_extendqisi2
+ 1016 07e0 032B     		cmp	r3, #3
+ 1017 07e2 47D8     		bhi	.L63
+ 1018 07e4 01A2     		adr	r2, .L68
+ 1019 07e6 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 1020 07ea 00BF     		.align	2
+ 1021              	.L68:
+ 1022 07ec FD070000 		.word	.L64+1
+ 1023 07f0 1D080000 		.word	.L65+1
+ 1024 07f4 55080000 		.word	.L66+1
+ 1025 07f8 3D080000 		.word	.L67+1
+ 1026              	.L64:
+ 450:Libraries/uC-OSIII/os_mutex.c ****         case OS_STATUS_PEND_OK:                             /* We got the mutex                    
+ 451:Libraries/uC-OSIII/os_mutex.c ****              if (p_ts != (CPU_TS *)0) {
+ 1027              		.loc 1 451 0
+ 1028 07fc 3B68     		ldr	r3, [r7, #0]
+ 1029 07fe 002B     		cmp	r3, #0
+ 1030 0800 07D0     		beq	.L69
+ 452:Libraries/uC-OSIII/os_mutex.c ****                 *p_ts  = OSTCBCurPtr->TS;
+ 1031              		.loc 1 452 0
+ 1032 0802 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1033 0806 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1034 080a 1B68     		ldr	r3, [r3, #0]
+ 1035 080c 9A6B     		ldr	r2, [r3, #56]
+ 1036 080e 3B68     		ldr	r3, [r7, #0]
+ 1037 0810 1A60     		str	r2, [r3, #0]
+ 1038              	.L69:
+ 453:Libraries/uC-OSIII/os_mutex.c ****              }
+ 454:Libraries/uC-OSIII/os_mutex.c ****              *p_err = OS_ERR_NONE;
+ 1039              		.loc 1 454 0
+ 1040 0812 3B6C     		ldr	r3, [r7, #64]
+ 1041 0814 4FF00002 		mov	r2, #0
+ 1042 0818 1A80     		strh	r2, [r3, #0]	@ movhi
+ 455:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 1043              		.loc 1 455 0
+ 1044 081a 30E0     		b	.L70
+ 1045              	.L65:
+ 456:Libraries/uC-OSIII/os_mutex.c **** 
+ 457:Libraries/uC-OSIII/os_mutex.c ****         case OS_STATUS_PEND_ABORT:                          /* Indicate that we aborted            
+ 458:Libraries/uC-OSIII/os_mutex.c ****              if (p_ts != (CPU_TS *)0) {
+ 1046              		.loc 1 458 0
+ 1047 081c 3B68     		ldr	r3, [r7, #0]
+ 1048 081e 002B     		cmp	r3, #0
+ 1049 0820 07D0     		beq	.L71
+ 459:Libraries/uC-OSIII/os_mutex.c ****                 *p_ts  = OSTCBCurPtr->TS;
+ 1050              		.loc 1 459 0
+ 1051 0822 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1052 0826 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1053 082a 1B68     		ldr	r3, [r3, #0]
+ 1054 082c 9A6B     		ldr	r2, [r3, #56]
+ 1055 082e 3B68     		ldr	r3, [r7, #0]
+ 1056 0830 1A60     		str	r2, [r3, #0]
+ 1057              	.L71:
+ 460:Libraries/uC-OSIII/os_mutex.c ****              }
+ 461:Libraries/uC-OSIII/os_mutex.c ****              *p_err = OS_ERR_PEND_ABORT;
+ 1058              		.loc 1 461 0
+ 1059 0832 3B6C     		ldr	r3, [r7, #64]
+ 1060 0834 46F2A912 		movw	r2, #25001
+ 1061 0838 1A80     		strh	r2, [r3, #0]	@ movhi
+ 462:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 1062              		.loc 1 462 0
+ 1063 083a 20E0     		b	.L70
+ 1064              	.L67:
+ 463:Libraries/uC-OSIII/os_mutex.c **** 
+ 464:Libraries/uC-OSIII/os_mutex.c ****         case OS_STATUS_PEND_TIMEOUT:                        /* Indicate that we didn't get mutex wi
+ 465:Libraries/uC-OSIII/os_mutex.c ****              if (p_ts != (CPU_TS *)0) {
+ 1065              		.loc 1 465 0
+ 1066 083c 3B68     		ldr	r3, [r7, #0]
+ 1067 083e 002B     		cmp	r3, #0
+ 1068 0840 03D0     		beq	.L72
+ 466:Libraries/uC-OSIII/os_mutex.c ****                 *p_ts  = (CPU_TS  )0;
+ 1069              		.loc 1 466 0
+ 1070 0842 3B68     		ldr	r3, [r7, #0]
+ 1071 0844 4FF00002 		mov	r2, #0
+ 1072 0848 1A60     		str	r2, [r3, #0]
+ 1073              	.L72:
+ 467:Libraries/uC-OSIII/os_mutex.c ****              }
+ 468:Libraries/uC-OSIII/os_mutex.c ****              *p_err = OS_ERR_TIMEOUT;
+ 1074              		.loc 1 468 0
+ 1075 084a 3B6C     		ldr	r3, [r7, #64]
+ 1076 084c 47F2D922 		movw	r2, #29401
+ 1077 0850 1A80     		strh	r2, [r3, #0]	@ movhi
+ 469:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 1078              		.loc 1 469 0
+ 1079 0852 14E0     		b	.L70
+ 1080              	.L66:
+ 470:Libraries/uC-OSIII/os_mutex.c **** 
+ 471:Libraries/uC-OSIII/os_mutex.c ****         case OS_STATUS_PEND_DEL:                            /* Indicate that object pended on has b
+ 472:Libraries/uC-OSIII/os_mutex.c ****              if (p_ts != (CPU_TS *)0) {
+ 1081              		.loc 1 472 0
+ 1082 0854 3B68     		ldr	r3, [r7, #0]
+ 1083 0856 002B     		cmp	r3, #0
+ 1084 0858 07D0     		beq	.L73
+ 473:Libraries/uC-OSIII/os_mutex.c ****                 *p_ts  = OSTCBCurPtr->TS;
+ 1085              		.loc 1 473 0
+ 1086 085a 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1087 085e C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1088 0862 1B68     		ldr	r3, [r3, #0]
+ 1089 0864 9A6B     		ldr	r2, [r3, #56]
+ 1090 0866 3B68     		ldr	r3, [r7, #0]
+ 1091 0868 1A60     		str	r2, [r3, #0]
+ 1092              	.L73:
+ 474:Libraries/uC-OSIII/os_mutex.c ****              }
+ 475:Libraries/uC-OSIII/os_mutex.c ****              *p_err = OS_ERR_OBJ_DEL;
+ 1093              		.loc 1 475 0
+ 1094 086a 3B6C     		ldr	r3, [r7, #64]
+ 1095 086c 45F6C252 		movw	r2, #24002
+ 1096 0870 1A80     		strh	r2, [r3, #0]	@ movhi
+ 476:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 1097              		.loc 1 476 0
+ 1098 0872 04E0     		b	.L70
+ 1099              	.L63:
+ 477:Libraries/uC-OSIII/os_mutex.c **** 
+ 478:Libraries/uC-OSIII/os_mutex.c ****         default:
+ 479:Libraries/uC-OSIII/os_mutex.c ****              *p_err = OS_ERR_STATUS_INVALID;
+ 1100              		.loc 1 479 0
+ 1101 0874 3B6C     		ldr	r3, [r7, #64]
+ 1102 0876 46F62B62 		movw	r2, #28203
+ 1103 087a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 480:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 1104              		.loc 1 480 0
+ 1105 087c 00BF     		nop
+ 1106              	.L70:
+ 481:Libraries/uC-OSIII/os_mutex.c ****     }
+ 482:Libraries/uC-OSIII/os_mutex.c ****     CPU_CRITICAL_EXIT();
+ 1107              		.loc 1 482 0
+ 1108 087e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1109 0882 786B     		ldr	r0, [r7, #52]
+ 1110 0884 FFF7FEFF 		bl	CPU_SR_Restore
+ 1111              	.L38:
+ 483:Libraries/uC-OSIII/os_mutex.c **** }
+ 1112              		.loc 1 483 0
+ 1113 0888 07F13807 		add	r7, r7, #56
+ 1114 088c BD46     		mov	sp, r7
+ 1115 088e 80BD     		pop	{r7, pc}
+ 1116              		.cfi_endproc
+ 1117              	.LFE2:
+ 1119              		.align	2
+ 1120              		.global	OSMutexPendAbort
+ 1121              		.thumb
+ 1122              		.thumb_func
+ 1124              	OSMutexPendAbort:
+ 1125              	.LFB3:
+ 484:Libraries/uC-OSIII/os_mutex.c **** 
+ 485:Libraries/uC-OSIII/os_mutex.c **** /*$PAGE*/
+ 486:Libraries/uC-OSIII/os_mutex.c **** /*
+ 487:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 488:Libraries/uC-OSIII/os_mutex.c **** *                                               ABORT WAITING ON A MUTEX
+ 489:Libraries/uC-OSIII/os_mutex.c **** *
+ 490:Libraries/uC-OSIII/os_mutex.c **** * Description: This function aborts & readies any tasks currently waiting on a mutex.  This functio
+ 491:Libraries/uC-OSIII/os_mutex.c **** *              to fault-abort the wait on the mutex, rather than to normally signal the mutex via O
+ 492:Libraries/uC-OSIII/os_mutex.c **** *
+ 493:Libraries/uC-OSIII/os_mutex.c **** * Arguments  : p_mutex   is a pointer to the mutex
+ 494:Libraries/uC-OSIII/os_mutex.c **** *
+ 495:Libraries/uC-OSIII/os_mutex.c **** *              opt       determines the type of ABORT performed:
+ 496:Libraries/uC-OSIII/os_mutex.c **** *
+ 497:Libraries/uC-OSIII/os_mutex.c **** *                            OS_OPT_PEND_ABORT_1          ABORT wait for a single task (HPT) waitin
+ 498:Libraries/uC-OSIII/os_mutex.c **** *                            OS_OPT_PEND_ABORT_ALL        ABORT wait for ALL tasks that are  waitin
+ 499:Libraries/uC-OSIII/os_mutex.c **** *                            OS_OPT_POST_NO_SCHED         Do not call the scheduler
+ 500:Libraries/uC-OSIII/os_mutex.c **** *
+ 501:Libraries/uC-OSIII/os_mutex.c **** *              p_err     is a pointer to a variable that will contain an error code returned by thi
+ 502:Libraries/uC-OSIII/os_mutex.c **** *
+ 503:Libraries/uC-OSIII/os_mutex.c **** *                            OS_ERR_NONE                  At least one task waiting on the mutex wa
+ 504:Libraries/uC-OSIII/os_mutex.c **** *                                                         informed of the aborted wait; check retur
+ 505:Libraries/uC-OSIII/os_mutex.c **** *                                                         number of tasks whose wait on the mutex w
+ 506:Libraries/uC-OSIII/os_mutex.c **** *                            OS_ERR_OBJ_PTR_NULL          If 'p_mutex' is a NULL pointer.
+ 507:Libraries/uC-OSIII/os_mutex.c **** *                            OS_ERR_OBJ_TYPE              If 'p_mutex' is not pointing at a mutex
+ 508:Libraries/uC-OSIII/os_mutex.c **** *                            OS_ERR_OPT_INVALID           If you specified an invalid option
+ 509:Libraries/uC-OSIII/os_mutex.c **** *                            OS_ERR_PEND_ABORT_ISR        If you attempted to call this function fr
+ 510:Libraries/uC-OSIII/os_mutex.c **** *                            OS_ERR_PEND_ABORT_NONE       No task were pending
+ 511:Libraries/uC-OSIII/os_mutex.c **** *
+ 512:Libraries/uC-OSIII/os_mutex.c **** * Returns    : == 0          if no tasks were waiting on the mutex, or upon error.
+ 513:Libraries/uC-OSIII/os_mutex.c **** *              >  0          if one or more tasks waiting on the mutex are now readied and informed
+ 514:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 515:Libraries/uC-OSIII/os_mutex.c **** */
+ 516:Libraries/uC-OSIII/os_mutex.c **** 
+ 517:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_MUTEX_PEND_ABORT_EN > 0u
+ 518:Libraries/uC-OSIII/os_mutex.c **** OS_OBJ_QTY  OSMutexPendAbort (OS_MUTEX  *p_mutex,
+ 519:Libraries/uC-OSIII/os_mutex.c ****                               OS_OPT     opt,
+ 520:Libraries/uC-OSIII/os_mutex.c ****                               OS_ERR    *p_err)
+ 521:Libraries/uC-OSIII/os_mutex.c **** {
+ 1126              		.loc 1 521 0
+ 1127              		.cfi_startproc
+ 1128              		@ args = 0, pretend = 0, frame = 40
+ 1129              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1130 0890 80B5     		push	{r7, lr}
+ 1131              	.LCFI9:
+ 1132              		.cfi_def_cfa_offset 8
+ 1133              		.cfi_offset 14, -4
+ 1134              		.cfi_offset 7, -8
+ 1135 0892 8AB0     		sub	sp, sp, #40
+ 1136              	.LCFI10:
+ 1137              		.cfi_def_cfa_offset 48
+ 1138 0894 00AF     		add	r7, sp, #0
+ 1139              	.LCFI11:
+ 1140              		.cfi_def_cfa_register 7
+ 1141 0896 F860     		str	r0, [r7, #12]
+ 1142 0898 0B46     		mov	r3, r1
+ 1143 089a 7A60     		str	r2, [r7, #4]
+ 1144 089c 7B81     		strh	r3, [r7, #10]	@ movhi
+ 522:Libraries/uC-OSIII/os_mutex.c ****     OS_PEND_LIST  *p_pend_list;
+ 523:Libraries/uC-OSIII/os_mutex.c ****     OS_TCB        *p_tcb;
+ 524:Libraries/uC-OSIII/os_mutex.c ****     CPU_TS         ts;
+ 525:Libraries/uC-OSIII/os_mutex.c ****     OS_OBJ_QTY     nbr_tasks;
+ 526:Libraries/uC-OSIII/os_mutex.c ****     CPU_SR_ALLOC();
+ 1145              		.loc 1 526 0
+ 1146 089e 4FF00003 		mov	r3, #0
+ 1147 08a2 3B62     		str	r3, [r7, #32]
+ 527:Libraries/uC-OSIII/os_mutex.c **** 
+ 528:Libraries/uC-OSIII/os_mutex.c **** 
+ 529:Libraries/uC-OSIII/os_mutex.c **** 
+ 530:Libraries/uC-OSIII/os_mutex.c **** #ifdef OS_SAFETY_CRITICAL
+ 531:Libraries/uC-OSIII/os_mutex.c ****     if (p_err == (OS_ERR *)0) {
+ 532:Libraries/uC-OSIII/os_mutex.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 533:Libraries/uC-OSIII/os_mutex.c ****     }
+ 534:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 535:Libraries/uC-OSIII/os_mutex.c **** 
+ 536:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 537:Libraries/uC-OSIII/os_mutex.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0u) {             /* Not allowed to Pend Abort from an IS
+ 1148              		.loc 1 537 0
+ 1149 08a4 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 1150 08a8 C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 1151 08ac 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1152 08ae 002B     		cmp	r3, #0
+ 1153 08b0 06D0     		beq	.L76
+ 538:Libraries/uC-OSIII/os_mutex.c ****        *p_err =  OS_ERR_PEND_ABORT_ISR;
+ 1154              		.loc 1 538 0
+ 1155 08b2 7B68     		ldr	r3, [r7, #4]
+ 1156 08b4 46F2AA12 		movw	r2, #25002
+ 1157 08b8 1A80     		strh	r2, [r3, #0]	@ movhi
+ 539:Libraries/uC-OSIII/os_mutex.c ****         return ((OS_OBJ_QTY)0u);
+ 1158              		.loc 1 539 0
+ 1159 08ba 4FF00003 		mov	r3, #0
+ 1160 08be A3E0     		b	.L77
+ 1161              	.L76:
+ 540:Libraries/uC-OSIII/os_mutex.c ****     }
+ 541:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 542:Libraries/uC-OSIII/os_mutex.c **** 
+ 543:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 544:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex == (OS_MUTEX *)0) {                         /* Validate 'p_mutex'                  
+ 1162              		.loc 1 544 0
+ 1163 08c0 FB68     		ldr	r3, [r7, #12]
+ 1164 08c2 002B     		cmp	r3, #0
+ 1165 08c4 06D1     		bne	.L78
+ 545:Libraries/uC-OSIII/os_mutex.c ****        *p_err =  OS_ERR_OBJ_PTR_NULL;
+ 1166              		.loc 1 545 0
+ 1167 08c6 7B68     		ldr	r3, [r7, #4]
+ 1168 08c8 45F6C352 		movw	r2, #24003
+ 1169 08cc 1A80     		strh	r2, [r3, #0]	@ movhi
+ 546:Libraries/uC-OSIII/os_mutex.c ****         return ((OS_OBJ_QTY)0u);
+ 1170              		.loc 1 546 0
+ 1171 08ce 4FF00003 		mov	r3, #0
+ 1172 08d2 99E0     		b	.L77
+ 1173              	.L78:
+ 547:Libraries/uC-OSIII/os_mutex.c ****     }
+ 548:Libraries/uC-OSIII/os_mutex.c ****     switch (opt) {                                          /* Validate 'opt'                      
+ 1174              		.loc 1 548 0
+ 1175 08d4 7B89     		ldrh	r3, [r7, #10]
+ 1176 08d6 002B     		cmp	r3, #0
+ 1177 08d8 09D0     		beq	.L90
+ 1178 08da B3F5807F 		cmp	r3, #256
+ 1179 08de 06D0     		beq	.L90
+ 549:Libraries/uC-OSIII/os_mutex.c ****         case OS_OPT_PEND_ABORT_1:
+ 550:Libraries/uC-OSIII/os_mutex.c ****         case OS_OPT_PEND_ABORT_ALL:
+ 551:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 552:Libraries/uC-OSIII/os_mutex.c **** 
+ 553:Libraries/uC-OSIII/os_mutex.c ****         default:
+ 554:Libraries/uC-OSIII/os_mutex.c ****             *p_err =  OS_ERR_OPT_INVALID;
+ 1180              		.loc 1 554 0
+ 1181 08e0 7B68     		ldr	r3, [r7, #4]
+ 1182 08e2 45F62562 		movw	r2, #24101
+ 1183 08e6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 555:Libraries/uC-OSIII/os_mutex.c ****              return ((OS_OBJ_QTY)0u);
+ 1184              		.loc 1 555 0
+ 1185 08e8 4FF00003 		mov	r3, #0
+ 1186 08ec 8CE0     		b	.L77
+ 1187              	.L90:
+ 551:Libraries/uC-OSIII/os_mutex.c ****              break;
+ 1188              		.loc 1 551 0
+ 1189 08ee 00BF     		nop
+ 1190              	.L81:
+ 556:Libraries/uC-OSIII/os_mutex.c ****     }
+ 557:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 558:Libraries/uC-OSIII/os_mutex.c **** 
+ 559:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 560:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex->Type != OS_OBJ_TYPE_MUTEX) {               /* Make sure mutex was created         
+ 1191              		.loc 1 560 0
+ 1192 08f0 FB68     		ldr	r3, [r7, #12]
+ 1193 08f2 1A68     		ldr	r2, [r3, #0]
+ 1194 08f4 45F24D53 		movw	r3, #21837
+ 1195 08f8 C5F65403 		movt	r3, 22612
+ 1196 08fc 9A42     		cmp	r2, r3
+ 1197 08fe 06D0     		beq	.L82
+ 561:Libraries/uC-OSIII/os_mutex.c ****        *p_err =  OS_ERR_OBJ_TYPE;
+ 1198              		.loc 1 561 0
+ 1199 0900 7B68     		ldr	r3, [r7, #4]
+ 1200 0902 45F6C452 		movw	r2, #24004
+ 1201 0906 1A80     		strh	r2, [r3, #0]	@ movhi
+ 562:Libraries/uC-OSIII/os_mutex.c ****         return ((OS_OBJ_QTY)0u);
+ 1202              		.loc 1 562 0
+ 1203 0908 4FF00003 		mov	r3, #0
+ 1204 090c 7CE0     		b	.L77
+ 1205              	.L82:
+ 563:Libraries/uC-OSIII/os_mutex.c ****     }
+ 564:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 565:Libraries/uC-OSIII/os_mutex.c **** 
+ 566:Libraries/uC-OSIII/os_mutex.c ****     CPU_CRITICAL_ENTER();
+ 1206              		.loc 1 566 0
+ 1207 090e FFF7FEFF 		bl	CPU_SR_Save
+ 1208 0912 3862     		str	r0, [r7, #32]
+ 1209 0914 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 567:Libraries/uC-OSIII/os_mutex.c ****     p_pend_list = &p_mutex->PendList;
+ 1210              		.loc 1 567 0
+ 1211 0918 FB68     		ldr	r3, [r7, #12]
+ 1212 091a 03F10803 		add	r3, r3, #8
+ 1213 091e FB61     		str	r3, [r7, #28]
+ 568:Libraries/uC-OSIII/os_mutex.c ****     if (p_pend_list->NbrEntries == (OS_OBJ_QTY)0u) {        /* Any task waiting on mutex?          
+ 1214              		.loc 1 568 0
+ 1215 0920 FB69     		ldr	r3, [r7, #28]
+ 1216 0922 1B89     		ldrh	r3, [r3, #8]
+ 1217 0924 002B     		cmp	r3, #0
+ 1218 0926 0BD1     		bne	.L83
+ 569:Libraries/uC-OSIII/os_mutex.c ****         CPU_CRITICAL_EXIT();                                /* No                                  
+ 1219              		.loc 1 569 0
+ 1220 0928 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1221 092c 386A     		ldr	r0, [r7, #32]
+ 1222 092e FFF7FEFF 		bl	CPU_SR_Restore
+ 570:Libraries/uC-OSIII/os_mutex.c ****        *p_err =  OS_ERR_PEND_ABORT_NONE;
+ 1223              		.loc 1 570 0
+ 1224 0932 7B68     		ldr	r3, [r7, #4]
+ 1225 0934 46F2AB12 		movw	r2, #25003
+ 1226 0938 1A80     		strh	r2, [r3, #0]	@ movhi
+ 571:Libraries/uC-OSIII/os_mutex.c ****         return ((OS_OBJ_QTY)0u);
+ 1227              		.loc 1 571 0
+ 1228 093a 4FF00003 		mov	r3, #0
+ 1229 093e 63E0     		b	.L77
+ 1230              	.L83:
+ 572:Libraries/uC-OSIII/os_mutex.c ****     }
+ 573:Libraries/uC-OSIII/os_mutex.c **** 
+ 574:Libraries/uC-OSIII/os_mutex.c ****     OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();
+ 1231              		.loc 1 574 0
+ 1232 0940 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1233 0944 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1234 0948 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1235 094a 03F10103 		add	r3, r3, #1
+ 1236 094e DAB2     		uxtb	r2, r3
+ 1237 0950 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1238 0954 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1239 0958 1A70     		strb	r2, [r3, #0]
+ 1240 095a 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1241 095e C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1242 0962 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1243 0964 012B     		cmp	r3, #1
+ 1244 0966 01D1     		bne	.L84
+ 1245              		.loc 1 574 0 is_stmt 0 discriminator 1
+ 1246 0968 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 1247              	.L84:
+ 1248              		.loc 1 574 0 discriminator 2
+ 1249 096c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1250 0970 386A     		ldr	r0, [r7, #32]
+ 1251 0972 FFF7FEFF 		bl	CPU_SR_Restore
+ 575:Libraries/uC-OSIII/os_mutex.c ****     nbr_tasks = 0u;
+ 1252              		.loc 1 575 0 is_stmt 1 discriminator 2
+ 1253 0976 4FF00003 		mov	r3, #0
+ 1254 097a FB84     		strh	r3, [r7, #38]	@ movhi
+ 576:Libraries/uC-OSIII/os_mutex.c ****     ts        = OS_TS_GET();                                /* Get local time stamp so all tasks ge
+ 1255              		.loc 1 576 0 discriminator 2
+ 1256 097c FFF7FEFF 		bl	CPU_TS_TmrRd
+ 1257 0980 B861     		str	r0, [r7, #24]
+ 577:Libraries/uC-OSIII/os_mutex.c ****     while (p_pend_list->NbrEntries > (OS_OBJ_QTY)0u) {
+ 1258              		.loc 1 577 0 discriminator 2
+ 1259 0982 10E0     		b	.L85
+ 1260              	.L87:
+ 578:Libraries/uC-OSIII/os_mutex.c ****         p_tcb = p_pend_list->HeadPtr->TCBPtr;
+ 1261              		.loc 1 578 0
+ 1262 0984 FB69     		ldr	r3, [r7, #28]
+ 1263 0986 1B68     		ldr	r3, [r3, #0]
+ 1264 0988 9B68     		ldr	r3, [r3, #8]
+ 1265 098a 7B61     		str	r3, [r7, #20]
+ 579:Libraries/uC-OSIII/os_mutex.c ****         OS_PendAbort((OS_PEND_OBJ *)((void *)p_mutex),
+ 1266              		.loc 1 579 0
+ 1267 098c F868     		ldr	r0, [r7, #12]
+ 1268 098e 7969     		ldr	r1, [r7, #20]
+ 1269 0990 BA69     		ldr	r2, [r7, #24]
+ 1270 0992 FFF7FEFF 		bl	OS_PendAbort
+ 580:Libraries/uC-OSIII/os_mutex.c ****                      p_tcb,
+ 581:Libraries/uC-OSIII/os_mutex.c ****                      ts);
+ 582:Libraries/uC-OSIII/os_mutex.c ****         nbr_tasks++;
+ 1271              		.loc 1 582 0
+ 1272 0996 FB8C     		ldrh	r3, [r7, #38]	@ movhi
+ 1273 0998 03F10103 		add	r3, r3, #1
+ 1274 099c FB84     		strh	r3, [r7, #38]	@ movhi
+ 583:Libraries/uC-OSIII/os_mutex.c ****         if (opt != OS_OPT_PEND_ABORT_ALL) {                 /* Pend abort all tasks waiting?       
+ 1275              		.loc 1 583 0
+ 1276 099e 7B89     		ldrh	r3, [r7, #10]
+ 1277 09a0 B3F5807F 		cmp	r3, #256
+ 1278 09a4 04D1     		bne	.L91
+ 1279              	.L85:
+ 577:Libraries/uC-OSIII/os_mutex.c ****     while (p_pend_list->NbrEntries > (OS_OBJ_QTY)0u) {
+ 1280              		.loc 1 577 0 discriminator 1
+ 1281 09a6 FB69     		ldr	r3, [r7, #28]
+ 1282 09a8 1B89     		ldrh	r3, [r3, #8]
+ 1283 09aa 002B     		cmp	r3, #0
+ 1284 09ac EAD1     		bne	.L87
+ 1285 09ae 00E0     		b	.L86
+ 1286              	.L91:
+ 584:Libraries/uC-OSIII/os_mutex.c ****             break;                                          /* No                                  
+ 1287              		.loc 1 584 0
+ 1288 09b0 00BF     		nop
+ 1289              	.L86:
+ 585:Libraries/uC-OSIII/os_mutex.c ****         }
+ 586:Libraries/uC-OSIII/os_mutex.c ****     }
+ 587:Libraries/uC-OSIII/os_mutex.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 1290              		.loc 1 587 0
+ 1291 09b2 FFF7FEFF 		bl	CPU_SR_Save
+ 1292 09b6 3862     		str	r0, [r7, #32]
+ 1293 09b8 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 1294 09bc 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1295 09c0 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1296 09c4 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1297 09c6 03F1FF33 		add	r3, r3, #-1
+ 1298 09ca DAB2     		uxtb	r2, r3
+ 1299 09cc 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1300 09d0 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1301 09d4 1A70     		strb	r2, [r3, #0]
+ 1302 09d6 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1303 09da C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1304 09de 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1305 09e0 002B     		cmp	r3, #0
+ 1306 09e2 01D1     		bne	.L88
+ 1307              		.loc 1 587 0 is_stmt 0 discriminator 1
+ 1308 09e4 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 1309              	.L88:
+ 1310              		.loc 1 587 0 discriminator 2
+ 1311 09e8 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1312 09ec 386A     		ldr	r0, [r7, #32]
+ 1313 09ee FFF7FEFF 		bl	CPU_SR_Restore
+ 588:Libraries/uC-OSIII/os_mutex.c **** 
+ 589:Libraries/uC-OSIII/os_mutex.c ****     if ((opt & OS_OPT_POST_NO_SCHED) == (OS_OPT)0u) {
+ 1314              		.loc 1 589 0 is_stmt 1 discriminator 2
+ 1315 09f2 7B89     		ldrh	r3, [r7, #10]
+ 1316 09f4 1BB2     		sxth	r3, r3
+ 1317 09f6 002B     		cmp	r3, #0
+ 1318 09f8 01DB     		blt	.L89
+ 590:Libraries/uC-OSIII/os_mutex.c ****         OSSched();                                          /* Run the scheduler                   
+ 1319              		.loc 1 590 0
+ 1320 09fa FFF7FEFF 		bl	OSSched
+ 1321              	.L89:
+ 591:Libraries/uC-OSIII/os_mutex.c ****     }
+ 592:Libraries/uC-OSIII/os_mutex.c **** 
+ 593:Libraries/uC-OSIII/os_mutex.c ****    *p_err = OS_ERR_NONE;
+ 1322              		.loc 1 593 0
+ 1323 09fe 7B68     		ldr	r3, [r7, #4]
+ 1324 0a00 4FF00002 		mov	r2, #0
+ 1325 0a04 1A80     		strh	r2, [r3, #0]	@ movhi
+ 594:Libraries/uC-OSIII/os_mutex.c ****     return (nbr_tasks);
+ 1326              		.loc 1 594 0
+ 1327 0a06 FB8C     		ldrh	r3, [r7, #38]
+ 1328              	.L77:
+ 595:Libraries/uC-OSIII/os_mutex.c **** }
+ 1329              		.loc 1 595 0
+ 1330 0a08 1846     		mov	r0, r3
+ 1331 0a0a 07F12807 		add	r7, r7, #40
+ 1332 0a0e BD46     		mov	sp, r7
+ 1333 0a10 80BD     		pop	{r7, pc}
+ 1334              		.cfi_endproc
+ 1335              	.LFE3:
+ 1337 0a12 00BF     		.align	2
+ 1338              		.global	OSMutexPost
+ 1339              		.thumb
+ 1340              		.thumb_func
+ 1342              	OSMutexPost:
+ 1343              	.LFB4:
+ 596:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 597:Libraries/uC-OSIII/os_mutex.c **** 
+ 598:Libraries/uC-OSIII/os_mutex.c **** /*$PAGE*/
+ 599:Libraries/uC-OSIII/os_mutex.c **** /*
+ 600:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 601:Libraries/uC-OSIII/os_mutex.c **** *                                                   POST TO A MUTEX
+ 602:Libraries/uC-OSIII/os_mutex.c **** *
+ 603:Libraries/uC-OSIII/os_mutex.c **** * Description: This function signals a mutex
+ 604:Libraries/uC-OSIII/os_mutex.c **** *
+ 605:Libraries/uC-OSIII/os_mutex.c **** * Arguments  : p_mutex  is a pointer to the mutex
+ 606:Libraries/uC-OSIII/os_mutex.c **** *
+ 607:Libraries/uC-OSIII/os_mutex.c **** *              opt      is an option you can specify to alter the behavior of the post.  The choice
+ 608:Libraries/uC-OSIII/os_mutex.c **** *
+ 609:Libraries/uC-OSIII/os_mutex.c **** *                           OS_OPT_POST_NONE        No special option selected
+ 610:Libraries/uC-OSIII/os_mutex.c **** *                           OS_OPT_POST_NO_SCHED    If you don't want the scheduler to be called af
+ 611:Libraries/uC-OSIII/os_mutex.c **** *
+ 612:Libraries/uC-OSIII/os_mutex.c **** *              p_err    is a pointer to a variable that will contain an error code returned by this
+ 613:Libraries/uC-OSIII/os_mutex.c **** *
+ 614:Libraries/uC-OSIII/os_mutex.c **** *                           OS_ERR_NONE             The call was successful and the mutex was signa
+ 615:Libraries/uC-OSIII/os_mutex.c **** *                           OS_ERR_MUTEX_NESTING    Mutex owner nested its use of the mutex
+ 616:Libraries/uC-OSIII/os_mutex.c **** *                           OS_ERR_MUTEX_NOT_OWNER  If the task posting is not the Mutex owner
+ 617:Libraries/uC-OSIII/os_mutex.c **** *                           OS_ERR_OBJ_PTR_NULL     If 'p_mutex' is a NULL pointer.
+ 618:Libraries/uC-OSIII/os_mutex.c **** *                           OS_ERR_OBJ_TYPE         If 'p_mutex' is not pointing at a mutex
+ 619:Libraries/uC-OSIII/os_mutex.c **** *                           OS_ERR_POST_ISR         If you attempted to post from an ISR
+ 620:Libraries/uC-OSIII/os_mutex.c **** *
+ 621:Libraries/uC-OSIII/os_mutex.c **** * Returns    : none
+ 622:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 623:Libraries/uC-OSIII/os_mutex.c **** */
+ 624:Libraries/uC-OSIII/os_mutex.c **** 
+ 625:Libraries/uC-OSIII/os_mutex.c **** void  OSMutexPost (OS_MUTEX  *p_mutex,
+ 626:Libraries/uC-OSIII/os_mutex.c ****                    OS_OPT     opt,
+ 627:Libraries/uC-OSIII/os_mutex.c ****                    OS_ERR    *p_err)
+ 628:Libraries/uC-OSIII/os_mutex.c **** {
+ 1344              		.loc 1 628 0
+ 1345              		.cfi_startproc
+ 1346              		@ args = 0, pretend = 0, frame = 32
+ 1347              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1348 0a14 80B5     		push	{r7, lr}
+ 1349              	.LCFI12:
+ 1350              		.cfi_def_cfa_offset 8
+ 1351              		.cfi_offset 14, -4
+ 1352              		.cfi_offset 7, -8
+ 1353 0a16 8AB0     		sub	sp, sp, #40
+ 1354              	.LCFI13:
+ 1355              		.cfi_def_cfa_offset 48
+ 1356 0a18 02AF     		add	r7, sp, #8
+ 1357              	.LCFI14:
+ 1358              		.cfi_def_cfa 7, 40
+ 1359 0a1a F860     		str	r0, [r7, #12]
+ 1360 0a1c 0B46     		mov	r3, r1
+ 1361 0a1e 7A60     		str	r2, [r7, #4]
+ 1362 0a20 7B81     		strh	r3, [r7, #10]	@ movhi
+ 629:Libraries/uC-OSIII/os_mutex.c ****     OS_PEND_LIST  *p_pend_list;
+ 630:Libraries/uC-OSIII/os_mutex.c ****     OS_TCB        *p_tcb;
+ 631:Libraries/uC-OSIII/os_mutex.c ****     CPU_TS         ts;
+ 632:Libraries/uC-OSIII/os_mutex.c ****     CPU_SR_ALLOC();
+ 1363              		.loc 1 632 0
+ 1364 0a22 4FF00003 		mov	r3, #0
+ 1365 0a26 FB61     		str	r3, [r7, #28]
+ 633:Libraries/uC-OSIII/os_mutex.c **** 
+ 634:Libraries/uC-OSIII/os_mutex.c **** 
+ 635:Libraries/uC-OSIII/os_mutex.c **** 
+ 636:Libraries/uC-OSIII/os_mutex.c **** #ifdef OS_SAFETY_CRITICAL
+ 637:Libraries/uC-OSIII/os_mutex.c ****     if (p_err == (OS_ERR *)0) {
+ 638:Libraries/uC-OSIII/os_mutex.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 639:Libraries/uC-OSIII/os_mutex.c ****     }
+ 640:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 641:Libraries/uC-OSIII/os_mutex.c **** 
+ 642:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 643:Libraries/uC-OSIII/os_mutex.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Not allowed to call from an ISR     
+ 1366              		.loc 1 643 0
+ 1367 0a28 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+ 1368 0a2c C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+ 1369 0a30 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1370 0a32 002B     		cmp	r3, #0
+ 1371 0a34 04D0     		beq	.L93
+ 644:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_POST_ISR;
+ 1372              		.loc 1 644 0
+ 1373 0a36 7B68     		ldr	r3, [r7, #4]
+ 1374 0a38 46F20E22 		movw	r2, #25102
+ 1375 0a3c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 645:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 1376              		.loc 1 645 0
+ 1377 0a3e 62E1     		b	.L92
+ 1378              	.L93:
+ 646:Libraries/uC-OSIII/os_mutex.c ****     }
+ 647:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 648:Libraries/uC-OSIII/os_mutex.c **** 
+ 649:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 650:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex == (OS_MUTEX *)0) {                         /* Validate 'p_mutex'                  
+ 1379              		.loc 1 650 0
+ 1380 0a40 FB68     		ldr	r3, [r7, #12]
+ 1381 0a42 002B     		cmp	r3, #0
+ 1382 0a44 04D1     		bne	.L95
+ 651:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_OBJ_PTR_NULL;
+ 1383              		.loc 1 651 0
+ 1384 0a46 7B68     		ldr	r3, [r7, #4]
+ 1385 0a48 45F6C352 		movw	r2, #24003
+ 1386 0a4c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 652:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 1387              		.loc 1 652 0
+ 1388 0a4e 5AE1     		b	.L92
+ 1389              	.L95:
+ 653:Libraries/uC-OSIII/os_mutex.c ****     }
+ 654:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 655:Libraries/uC-OSIII/os_mutex.c **** 
+ 656:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_OBJ_TYPE_CHK_EN > 0u
+ 657:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex->Type != OS_OBJ_TYPE_MUTEX) {               /* Make sure mutex was created         
+ 1390              		.loc 1 657 0
+ 1391 0a50 FB68     		ldr	r3, [r7, #12]
+ 1392 0a52 1A68     		ldr	r2, [r3, #0]
+ 1393 0a54 45F24D53 		movw	r3, #21837
+ 1394 0a58 C5F65403 		movt	r3, 22612
+ 1395 0a5c 9A42     		cmp	r2, r3
+ 1396 0a5e 04D0     		beq	.L96
+ 658:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_OBJ_TYPE;
+ 1397              		.loc 1 658 0
+ 1398 0a60 7B68     		ldr	r3, [r7, #4]
+ 1399 0a62 45F6C452 		movw	r2, #24004
+ 1400 0a66 1A80     		strh	r2, [r3, #0]	@ movhi
+ 659:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 1401              		.loc 1 659 0
+ 1402 0a68 4DE1     		b	.L92
+ 1403              	.L96:
+ 660:Libraries/uC-OSIII/os_mutex.c ****     }
+ 661:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 662:Libraries/uC-OSIII/os_mutex.c **** 
+ 663:Libraries/uC-OSIII/os_mutex.c ****     CPU_CRITICAL_ENTER();
+ 1404              		.loc 1 663 0
+ 1405 0a6a FFF7FEFF 		bl	CPU_SR_Save
+ 1406 0a6e F861     		str	r0, [r7, #28]
+ 1407 0a70 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 664:Libraries/uC-OSIII/os_mutex.c ****     if (OSTCBCurPtr != p_mutex->OwnerTCBPtr) {              /* Make sure the mutex owner is releasi
+ 1408              		.loc 1 664 0
+ 1409 0a74 FB68     		ldr	r3, [r7, #12]
+ 1410 0a76 1A6A     		ldr	r2, [r3, #32]
+ 1411 0a78 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1412 0a7c C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1413 0a80 1B68     		ldr	r3, [r3, #0]
+ 1414 0a82 9A42     		cmp	r2, r3
+ 1415 0a84 09D0     		beq	.L97
+ 665:Libraries/uC-OSIII/os_mutex.c ****         CPU_CRITICAL_EXIT();
+ 1416              		.loc 1 665 0
+ 1417 0a86 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1418 0a8a F869     		ldr	r0, [r7, #28]
+ 1419 0a8c FFF7FEFF 		bl	CPU_SR_Restore
+ 666:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_MUTEX_NOT_OWNER;
+ 1420              		.loc 1 666 0
+ 1421 0a90 7B68     		ldr	r3, [r7, #4]
+ 1422 0a92 45F28172 		movw	r2, #22401
+ 1423 0a96 1A80     		strh	r2, [r3, #0]	@ movhi
+ 667:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 1424              		.loc 1 667 0
+ 1425 0a98 35E1     		b	.L92
+ 1426              	.L97:
+ 668:Libraries/uC-OSIII/os_mutex.c ****     }
+ 669:Libraries/uC-OSIII/os_mutex.c **** 
+ 670:Libraries/uC-OSIII/os_mutex.c ****     OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();
+ 1427              		.loc 1 670 0
+ 1428 0a9a 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1429 0a9e C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1430 0aa2 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1431 0aa4 03F10103 		add	r3, r3, #1
+ 1432 0aa8 DAB2     		uxtb	r2, r3
+ 1433 0aaa 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1434 0aae C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1435 0ab2 1A70     		strb	r2, [r3, #0]
+ 1436 0ab4 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1437 0ab8 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1438 0abc 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1439 0abe 012B     		cmp	r3, #1
+ 1440 0ac0 01D1     		bne	.L98
+ 1441              		.loc 1 670 0 is_stmt 0 discriminator 1
+ 1442 0ac2 FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 1443              	.L98:
+ 1444              		.loc 1 670 0 discriminator 2
+ 1445 0ac6 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1446 0aca F869     		ldr	r0, [r7, #28]
+ 1447 0acc FFF7FEFF 		bl	CPU_SR_Restore
+ 671:Libraries/uC-OSIII/os_mutex.c ****     ts          = OS_TS_GET();                              /* Get timestamp                       
+ 1448              		.loc 1 671 0 is_stmt 1 discriminator 2
+ 1449 0ad0 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 1450 0ad4 B861     		str	r0, [r7, #24]
+ 672:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->TS = ts;
+ 1451              		.loc 1 672 0 discriminator 2
+ 1452 0ad6 FB68     		ldr	r3, [r7, #12]
+ 1453 0ad8 BA69     		ldr	r2, [r7, #24]
+ 1454 0ada 9A62     		str	r2, [r3, #40]
+ 673:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->OwnerNestingCtr--;                             /* Decrement owner's nesting counter   
+ 1455              		.loc 1 673 0 discriminator 2
+ 1456 0adc FB68     		ldr	r3, [r7, #12]
+ 1457 0ade 93F82530 		ldrb	r3, [r3, #37]	@ zero_extendqisi2
+ 1458 0ae2 03F1FF33 		add	r3, r3, #-1
+ 1459 0ae6 DAB2     		uxtb	r2, r3
+ 1460 0ae8 FB68     		ldr	r3, [r7, #12]
+ 1461 0aea 83F82520 		strb	r2, [r3, #37]
+ 674:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex->OwnerNestingCtr > (OS_NESTING_CTR)0) {     /* Are we done with all nestings?      
+ 1462              		.loc 1 674 0 discriminator 2
+ 1463 0aee FB68     		ldr	r3, [r7, #12]
+ 1464 0af0 93F82530 		ldrb	r3, [r3, #37]	@ zero_extendqisi2
+ 1465 0af4 002B     		cmp	r3, #0
+ 1466 0af6 39D0     		beq	.L99
+ 675:Libraries/uC-OSIII/os_mutex.c ****         OS_CRITICAL_EXIT();                                 /* No                                  
+ 1467              		.loc 1 675 0
+ 1468 0af8 FFF7FEFF 		bl	CPU_SR_Save
+ 1469 0afc F861     		str	r0, [r7, #28]
+ 1470 0afe FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 1471 0b02 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1472 0b06 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1473 0b0a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1474 0b0c 03F1FF33 		add	r3, r3, #-1
+ 1475 0b10 DAB2     		uxtb	r2, r3
+ 1476 0b12 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1477 0b16 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1478 0b1a 1A70     		strb	r2, [r3, #0]
+ 1479 0b1c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1480 0b20 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1481 0b24 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1482 0b26 002B     		cmp	r3, #0
+ 1483 0b28 16D1     		bne	.L100
+ 1484              		.loc 1 675 0 is_stmt 0 discriminator 1
+ 1485 0b2a FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 1486 0b2e 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 1487 0b32 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 1488 0b36 1B88     		ldrh	r3, [r3, #0]
+ 1489 0b38 002B     		cmp	r3, #0
+ 1490 0b3a 07D0     		beq	.L101
+ 1491              		.loc 1 675 0 discriminator 3
+ 1492 0b3c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1493 0b40 F869     		ldr	r0, [r7, #28]
+ 1494 0b42 FFF7FEFF 		bl	CPU_SR_Restore
+ 1495 0b46 FFF7FEFF 		bl	OS_Sched0
+ 1496 0b4a 0AE0     		b	.L102
+ 1497              	.L101:
+ 1498              		.loc 1 675 0 discriminator 4
+ 1499 0b4c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1500 0b50 F869     		ldr	r0, [r7, #28]
+ 1501 0b52 FFF7FEFF 		bl	CPU_SR_Restore
+ 1502 0b56 04E0     		b	.L102
+ 1503              	.L100:
+ 1504              		.loc 1 675 0 discriminator 2
+ 1505 0b58 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1506 0b5c F869     		ldr	r0, [r7, #28]
+ 1507 0b5e FFF7FEFF 		bl	CPU_SR_Restore
+ 1508              	.L102:
+ 676:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_MUTEX_NESTING;
+ 1509              		.loc 1 676 0 is_stmt 1
+ 1510 0b62 7B68     		ldr	r3, [r7, #4]
+ 1511 0b64 45F28372 		movw	r2, #22403
+ 1512 0b68 1A80     		strh	r2, [r3, #0]	@ movhi
+ 677:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 1513              		.loc 1 677 0
+ 1514 0b6a CCE0     		b	.L92
+ 1515              	.L99:
+ 678:Libraries/uC-OSIII/os_mutex.c ****     }
+ 679:Libraries/uC-OSIII/os_mutex.c **** 
+ 680:Libraries/uC-OSIII/os_mutex.c ****     p_pend_list = &p_mutex->PendList;
+ 1516              		.loc 1 680 0
+ 1517 0b6c FB68     		ldr	r3, [r7, #12]
+ 1518 0b6e 03F10803 		add	r3, r3, #8
+ 1519 0b72 7B61     		str	r3, [r7, #20]
+ 681:Libraries/uC-OSIII/os_mutex.c ****     if (p_pend_list->NbrEntries == (OS_OBJ_QTY)0) {         /* Any task waiting on mutex?          
+ 1520              		.loc 1 681 0
+ 1521 0b74 7B69     		ldr	r3, [r7, #20]
+ 1522 0b76 1B89     		ldrh	r3, [r3, #8]
+ 1523 0b78 002B     		cmp	r3, #0
+ 1524 0b7a 42D1     		bne	.L103
+ 682:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->OwnerTCBPtr     = (OS_TCB       *)0;       /* No                                  
+ 1525              		.loc 1 682 0
+ 1526 0b7c FB68     		ldr	r3, [r7, #12]
+ 1527 0b7e 4FF00002 		mov	r2, #0
+ 1528 0b82 1A62     		str	r2, [r3, #32]
+ 683:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->OwnerNestingCtr = (OS_NESTING_CTR)0;
+ 1529              		.loc 1 683 0
+ 1530 0b84 FB68     		ldr	r3, [r7, #12]
+ 1531 0b86 4FF00002 		mov	r2, #0
+ 1532 0b8a 83F82520 		strb	r2, [r3, #37]
+ 684:Libraries/uC-OSIII/os_mutex.c ****         OS_CRITICAL_EXIT();
+ 1533              		.loc 1 684 0
+ 1534 0b8e FFF7FEFF 		bl	CPU_SR_Save
+ 1535 0b92 F861     		str	r0, [r7, #28]
+ 1536 0b94 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 1537 0b98 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1538 0b9c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1539 0ba0 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1540 0ba2 03F1FF33 		add	r3, r3, #-1
+ 1541 0ba6 DAB2     		uxtb	r2, r3
+ 1542 0ba8 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1543 0bac C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1544 0bb0 1A70     		strb	r2, [r3, #0]
+ 1545 0bb2 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1546 0bb6 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1547 0bba 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1548 0bbc 002B     		cmp	r3, #0
+ 1549 0bbe 16D1     		bne	.L104
+ 1550              		.loc 1 684 0 is_stmt 0 discriminator 1
+ 1551 0bc0 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 1552 0bc4 40F20003 		movw	r3, #:lower16:OSIntQNbrEntries
+ 1553 0bc8 C0F20003 		movt	r3, #:upper16:OSIntQNbrEntries
+ 1554 0bcc 1B88     		ldrh	r3, [r3, #0]
+ 1555 0bce 002B     		cmp	r3, #0
+ 1556 0bd0 07D0     		beq	.L105
+ 1557              		.loc 1 684 0 discriminator 3
+ 1558 0bd2 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1559 0bd6 F869     		ldr	r0, [r7, #28]
+ 1560 0bd8 FFF7FEFF 		bl	CPU_SR_Restore
+ 1561 0bdc FFF7FEFF 		bl	OS_Sched0
+ 1562 0be0 0AE0     		b	.L106
+ 1563              	.L105:
+ 1564              		.loc 1 684 0 discriminator 4
+ 1565 0be2 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1566 0be6 F869     		ldr	r0, [r7, #28]
+ 1567 0be8 FFF7FEFF 		bl	CPU_SR_Restore
+ 1568 0bec 04E0     		b	.L106
+ 1569              	.L104:
+ 1570              		.loc 1 684 0 discriminator 2
+ 1571 0bee FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1572 0bf2 F869     		ldr	r0, [r7, #28]
+ 1573 0bf4 FFF7FEFF 		bl	CPU_SR_Restore
+ 1574              	.L106:
+ 685:Libraries/uC-OSIII/os_mutex.c ****         *p_err = OS_ERR_NONE;
+ 1575              		.loc 1 685 0 is_stmt 1
+ 1576 0bf8 7B68     		ldr	r3, [r7, #4]
+ 1577 0bfa 4FF00002 		mov	r2, #0
+ 1578 0bfe 1A80     		strh	r2, [r3, #0]	@ movhi
+ 686:Libraries/uC-OSIII/os_mutex.c ****         return;
+ 1579              		.loc 1 686 0
+ 1580 0c00 81E0     		b	.L92
+ 1581              	.L103:
+ 687:Libraries/uC-OSIII/os_mutex.c ****     }
+ 688:Libraries/uC-OSIII/os_mutex.c ****                                                             /* Yes                                 
+ 689:Libraries/uC-OSIII/os_mutex.c ****     if (OSTCBCurPtr->Prio != p_mutex->OwnerOriginalPrio) {
+ 1582              		.loc 1 689 0
+ 1583 0c02 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1584 0c06 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1585 0c0a 1B68     		ldr	r3, [r3, #0]
+ 1586 0c0c 93F8C320 		ldrb	r2, [r3, #195]	@ zero_extendqisi2
+ 1587 0c10 FB68     		ldr	r3, [r7, #12]
+ 1588 0c12 93F82430 		ldrb	r3, [r3, #36]	@ zero_extendqisi2
+ 1589 0c16 9A42     		cmp	r2, r3
+ 1590 0c18 2FD0     		beq	.L107
+ 690:Libraries/uC-OSIII/os_mutex.c ****         OS_RdyListRemove(OSTCBCurPtr);
+ 1591              		.loc 1 690 0
+ 1592 0c1a 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1593 0c1e C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1594 0c22 1B68     		ldr	r3, [r3, #0]
+ 1595 0c24 1846     		mov	r0, r3
+ 1596 0c26 FFF7FEFF 		bl	OS_RdyListRemove
+ 691:Libraries/uC-OSIII/os_mutex.c ****         OSTCBCurPtr->Prio = p_mutex->OwnerOriginalPrio;     /* Lower owner's priority back to its o
+ 1597              		.loc 1 691 0
+ 1598 0c2a 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1599 0c2e C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1600 0c32 1B68     		ldr	r3, [r3, #0]
+ 1601 0c34 FA68     		ldr	r2, [r7, #12]
+ 1602 0c36 92F82420 		ldrb	r2, [r2, #36]	@ zero_extendqisi2
+ 1603 0c3a 83F8C320 		strb	r2, [r3, #195]
+ 692:Libraries/uC-OSIII/os_mutex.c ****         OS_PrioInsert(OSTCBCurPtr->Prio);
+ 1604              		.loc 1 692 0
+ 1605 0c3e 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1606 0c42 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1607 0c46 1B68     		ldr	r3, [r3, #0]
+ 1608 0c48 93F8C330 		ldrb	r3, [r3, #195]	@ zero_extendqisi2
+ 1609 0c4c 1846     		mov	r0, r3
+ 1610 0c4e FFF7FEFF 		bl	OS_PrioInsert
+ 693:Libraries/uC-OSIII/os_mutex.c ****         OS_RdyListInsertTail(OSTCBCurPtr);                  /* Insert owner in ready list at new pr
+ 1611              		.loc 1 693 0
+ 1612 0c52 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1613 0c56 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1614 0c5a 1B68     		ldr	r3, [r3, #0]
+ 1615 0c5c 1846     		mov	r0, r3
+ 1616 0c5e FFF7FEFF 		bl	OS_RdyListInsertTail
+ 694:Libraries/uC-OSIII/os_mutex.c ****         OSPrioCur         = OSTCBCurPtr->Prio;
+ 1617              		.loc 1 694 0
+ 1618 0c62 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 1619 0c66 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 1620 0c6a 1B68     		ldr	r3, [r3, #0]
+ 1621 0c6c 93F8C320 		ldrb	r2, [r3, #195]	@ zero_extendqisi2
+ 1622 0c70 40F20003 		movw	r3, #:lower16:OSPrioCur
+ 1623 0c74 C0F20003 		movt	r3, #:upper16:OSPrioCur
+ 1624 0c78 1A70     		strb	r2, [r3, #0]
+ 1625              	.L107:
+ 695:Libraries/uC-OSIII/os_mutex.c ****     }
+ 696:Libraries/uC-OSIII/os_mutex.c ****                                                             /* Get TCB from head of pend list      
+ 697:Libraries/uC-OSIII/os_mutex.c ****     p_tcb                      = p_pend_list->HeadPtr->TCBPtr;
+ 1626              		.loc 1 697 0
+ 1627 0c7a 7B69     		ldr	r3, [r7, #20]
+ 1628 0c7c 1B68     		ldr	r3, [r3, #0]
+ 1629 0c7e 9B68     		ldr	r3, [r3, #8]
+ 1630 0c80 3B61     		str	r3, [r7, #16]
+ 698:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->OwnerTCBPtr       = p_tcb;                     /* Give mutex to new owner             
+ 1631              		.loc 1 698 0
+ 1632 0c82 FB68     		ldr	r3, [r7, #12]
+ 1633 0c84 3A69     		ldr	r2, [r7, #16]
+ 1634 0c86 1A62     		str	r2, [r3, #32]
+ 699:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->OwnerOriginalPrio = p_tcb->Prio;
+ 1635              		.loc 1 699 0
+ 1636 0c88 3B69     		ldr	r3, [r7, #16]
+ 1637 0c8a 93F8C320 		ldrb	r2, [r3, #195]	@ zero_extendqisi2
+ 1638 0c8e FB68     		ldr	r3, [r7, #12]
+ 1639 0c90 83F82420 		strb	r2, [r3, #36]
+ 700:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->OwnerNestingCtr   = (OS_NESTING_CTR)1;
+ 1640              		.loc 1 700 0
+ 1641 0c94 FB68     		ldr	r3, [r7, #12]
+ 1642 0c96 4FF00102 		mov	r2, #1
+ 1643 0c9a 83F82520 		strb	r2, [r3, #37]
+ 701:Libraries/uC-OSIII/os_mutex.c ****                                                             /* Post to mutex                       
+ 702:Libraries/uC-OSIII/os_mutex.c ****     OS_Post((OS_PEND_OBJ *)((void *)p_mutex),
+ 1644              		.loc 1 702 0
+ 1645 0c9e BB69     		ldr	r3, [r7, #24]
+ 1646 0ca0 0093     		str	r3, [sp, #0]
+ 1647 0ca2 F868     		ldr	r0, [r7, #12]
+ 1648 0ca4 3969     		ldr	r1, [r7, #16]
+ 1649 0ca6 4FF00002 		mov	r2, #0
+ 1650 0caa 4FF00003 		mov	r3, #0
+ 1651 0cae FFF7FEFF 		bl	OS_Post
+ 703:Libraries/uC-OSIII/os_mutex.c ****             (OS_TCB      *)p_tcb,
+ 704:Libraries/uC-OSIII/os_mutex.c ****             (void        *)0,
+ 705:Libraries/uC-OSIII/os_mutex.c ****             (OS_MSG_SIZE  )0,
+ 706:Libraries/uC-OSIII/os_mutex.c ****             (CPU_TS       )ts);
+ 707:Libraries/uC-OSIII/os_mutex.c **** 
+ 708:Libraries/uC-OSIII/os_mutex.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 1652              		.loc 1 708 0
+ 1653 0cb2 FFF7FEFF 		bl	CPU_SR_Save
+ 1654 0cb6 F861     		str	r0, [r7, #28]
+ 1655 0cb8 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 1656 0cbc 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1657 0cc0 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1658 0cc4 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1659 0cc6 03F1FF33 		add	r3, r3, #-1
+ 1660 0cca DAB2     		uxtb	r2, r3
+ 1661 0ccc 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1662 0cd0 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1663 0cd4 1A70     		strb	r2, [r3, #0]
+ 1664 0cd6 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 1665 0cda C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 1666 0cde 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 1667 0ce0 002B     		cmp	r3, #0
+ 1668 0ce2 01D1     		bne	.L108
+ 1669              		.loc 1 708 0 is_stmt 0 discriminator 1
+ 1670 0ce4 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 1671              	.L108:
+ 1672              		.loc 1 708 0 discriminator 2
+ 1673 0ce8 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 1674 0cec F869     		ldr	r0, [r7, #28]
+ 1675 0cee FFF7FEFF 		bl	CPU_SR_Restore
+ 709:Libraries/uC-OSIII/os_mutex.c **** 
+ 710:Libraries/uC-OSIII/os_mutex.c ****     if ((opt & OS_OPT_POST_NO_SCHED) == (OS_OPT)0) {
+ 1676              		.loc 1 710 0 is_stmt 1 discriminator 2
+ 1677 0cf2 7B89     		ldrh	r3, [r7, #10]
+ 1678 0cf4 1BB2     		sxth	r3, r3
+ 1679 0cf6 002B     		cmp	r3, #0
+ 1680 0cf8 01DB     		blt	.L109
+ 711:Libraries/uC-OSIII/os_mutex.c ****         OSSched();                                          /* Run the scheduler                   
+ 1681              		.loc 1 711 0
+ 1682 0cfa FFF7FEFF 		bl	OSSched
+ 1683              	.L109:
+ 712:Libraries/uC-OSIII/os_mutex.c ****     }
+ 713:Libraries/uC-OSIII/os_mutex.c **** 
+ 714:Libraries/uC-OSIII/os_mutex.c ****     *p_err = OS_ERR_NONE;
+ 1684              		.loc 1 714 0
+ 1685 0cfe 7B68     		ldr	r3, [r7, #4]
+ 1686 0d00 4FF00002 		mov	r2, #0
+ 1687 0d04 1A80     		strh	r2, [r3, #0]	@ movhi
+ 1688              	.L92:
+ 715:Libraries/uC-OSIII/os_mutex.c **** }
+ 1689              		.loc 1 715 0
+ 1690 0d06 07F12007 		add	r7, r7, #32
+ 1691 0d0a BD46     		mov	sp, r7
+ 1692 0d0c 80BD     		pop	{r7, pc}
+ 1693              		.cfi_endproc
+ 1694              	.LFE4:
+ 1696              		.section	.rodata
+ 1697              		.align	2
+ 1698              	.LC0:
+ 1699 0000 3F4D5554 		.ascii	"?MUTEX\000"
+ 1699      455800
+ 1700              		.text
+ 1701 0d0e 00BF     		.align	2
+ 1702              		.global	OS_MutexClr
+ 1703              		.thumb
+ 1704              		.thumb_func
+ 1706              	OS_MutexClr:
+ 1707              	.LFB5:
+ 716:Libraries/uC-OSIII/os_mutex.c **** 
+ 717:Libraries/uC-OSIII/os_mutex.c **** /*$PAGE*/
+ 718:Libraries/uC-OSIII/os_mutex.c **** /*
+ 719:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 720:Libraries/uC-OSIII/os_mutex.c **** *                                            CLEAR THE CONTENTS OF A MUTEX
+ 721:Libraries/uC-OSIII/os_mutex.c **** *
+ 722:Libraries/uC-OSIII/os_mutex.c **** * Description: This function is called by OSMutexDel() to clear the contents of a mutex
+ 723:Libraries/uC-OSIII/os_mutex.c **** *
+ 724:Libraries/uC-OSIII/os_mutex.c **** 
+ 725:Libraries/uC-OSIII/os_mutex.c **** * Argument(s): p_mutex      is a pointer to the mutex to clear
+ 726:Libraries/uC-OSIII/os_mutex.c **** *              -------
+ 727:Libraries/uC-OSIII/os_mutex.c **** *
+ 728:Libraries/uC-OSIII/os_mutex.c **** * Returns    : none
+ 729:Libraries/uC-OSIII/os_mutex.c **** *
+ 730:Libraries/uC-OSIII/os_mutex.c **** * Note(s)    : This function is INTERNAL to uC/OS-III and your application should not call it.
+ 731:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 732:Libraries/uC-OSIII/os_mutex.c **** */
+ 733:Libraries/uC-OSIII/os_mutex.c **** 
+ 734:Libraries/uC-OSIII/os_mutex.c **** void  OS_MutexClr (OS_MUTEX  *p_mutex)
+ 735:Libraries/uC-OSIII/os_mutex.c **** {
+ 1708              		.loc 1 735 0
+ 1709              		.cfi_startproc
+ 1710              		@ args = 0, pretend = 0, frame = 8
+ 1711              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1712 0d10 80B5     		push	{r7, lr}
+ 1713              	.LCFI15:
+ 1714              		.cfi_def_cfa_offset 8
+ 1715              		.cfi_offset 14, -4
+ 1716              		.cfi_offset 7, -8
+ 1717 0d12 82B0     		sub	sp, sp, #8
+ 1718              	.LCFI16:
+ 1719              		.cfi_def_cfa_offset 16
+ 1720 0d14 00AF     		add	r7, sp, #0
+ 1721              	.LCFI17:
+ 1722              		.cfi_def_cfa_register 7
+ 1723 0d16 7860     		str	r0, [r7, #4]
+ 736:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->Type              =  OS_OBJ_TYPE_NONE;         /* Mark the data structure as a NONE   
+ 1724              		.loc 1 736 0
+ 1725 0d18 7A68     		ldr	r2, [r7, #4]
+ 1726 0d1a 44F64E73 		movw	r3, #20302
+ 1727 0d1e C4F24E53 		movt	r3, 17742
+ 1728 0d22 1360     		str	r3, [r2, #0]
+ 737:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->NamePtr           = (CPU_CHAR     *)((void *)"?MUTEX");
+ 1729              		.loc 1 737 0
+ 1730 0d24 7A68     		ldr	r2, [r7, #4]
+ 1731 0d26 40F20003 		movw	r3, #:lower16:.LC0
+ 1732 0d2a C0F20003 		movt	r3, #:upper16:.LC0
+ 1733 0d2e 5360     		str	r3, [r2, #4]
+ 738:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->OwnerTCBPtr       = (OS_TCB       *)0;
+ 1734              		.loc 1 738 0
+ 1735 0d30 7B68     		ldr	r3, [r7, #4]
+ 1736 0d32 4FF00002 		mov	r2, #0
+ 1737 0d36 1A62     		str	r2, [r3, #32]
+ 739:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->OwnerNestingCtr   = (OS_NESTING_CTR)0;
+ 1738              		.loc 1 739 0
+ 1739 0d38 7B68     		ldr	r3, [r7, #4]
+ 1740 0d3a 4FF00002 		mov	r2, #0
+ 1741 0d3e 83F82520 		strb	r2, [r3, #37]
+ 740:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->TS                = (CPU_TS        )0;
+ 1742              		.loc 1 740 0
+ 1743 0d42 7B68     		ldr	r3, [r7, #4]
+ 1744 0d44 4FF00002 		mov	r2, #0
+ 1745 0d48 9A62     		str	r2, [r3, #40]
+ 741:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->OwnerOriginalPrio =  OS_CFG_PRIO_MAX;
+ 1746              		.loc 1 741 0
+ 1747 0d4a 7B68     		ldr	r3, [r7, #4]
+ 1748 0d4c 4FF04002 		mov	r2, #64
+ 1749 0d50 83F82420 		strb	r2, [r3, #36]
+ 742:Libraries/uC-OSIII/os_mutex.c ****     OS_PendListInit(&p_mutex->PendList);                    /* Initialize the waiting list         
+ 1750              		.loc 1 742 0
+ 1751 0d54 7B68     		ldr	r3, [r7, #4]
+ 1752 0d56 03F10803 		add	r3, r3, #8
+ 1753 0d5a 1846     		mov	r0, r3
+ 1754 0d5c FFF7FEFF 		bl	OS_PendListInit
+ 743:Libraries/uC-OSIII/os_mutex.c **** }
+ 1755              		.loc 1 743 0
+ 1756 0d60 07F10807 		add	r7, r7, #8
+ 1757 0d64 BD46     		mov	sp, r7
+ 1758 0d66 80BD     		pop	{r7, pc}
+ 1759              		.cfi_endproc
+ 1760              	.LFE5:
+ 1762              		.section	.rodata
+ 1763 0007 00       		.align	2
+ 1764              	.LC1:
+ 1765 0008 2000     		.ascii	" \000"
+ 1766 000a 0000     		.text
+ 1767              		.align	2
+ 1768              		.global	OS_MutexDbgListAdd
+ 1769              		.thumb
+ 1770              		.thumb_func
+ 1772              	OS_MutexDbgListAdd:
+ 1773              	.LFB6:
+ 744:Libraries/uC-OSIII/os_mutex.c **** 
+ 745:Libraries/uC-OSIII/os_mutex.c **** /*$PAGE*/
+ 746:Libraries/uC-OSIII/os_mutex.c **** /*
+ 747:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 748:Libraries/uC-OSIII/os_mutex.c **** *                                          ADD/REMOVE MUTEX TO/FROM DEBUG LIST
+ 749:Libraries/uC-OSIII/os_mutex.c **** *
+ 750:Libraries/uC-OSIII/os_mutex.c **** * Description: These functions are called by uC/OS-III to add or remove a mutex to/from the debug l
+ 751:Libraries/uC-OSIII/os_mutex.c **** *
+ 752:Libraries/uC-OSIII/os_mutex.c **** * Arguments  : p_mutex     is a pointer to the mutex to add/remove
+ 753:Libraries/uC-OSIII/os_mutex.c **** *
+ 754:Libraries/uC-OSIII/os_mutex.c **** * Returns    : none
+ 755:Libraries/uC-OSIII/os_mutex.c **** *
+ 756:Libraries/uC-OSIII/os_mutex.c **** * Note(s)    : These functions are INTERNAL to uC/OS-III and your application should not call it.
+ 757:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 758:Libraries/uC-OSIII/os_mutex.c **** */
+ 759:Libraries/uC-OSIII/os_mutex.c **** 
+ 760:Libraries/uC-OSIII/os_mutex.c **** 
+ 761:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_DBG_EN > 0u
+ 762:Libraries/uC-OSIII/os_mutex.c **** void  OS_MutexDbgListAdd (OS_MUTEX  *p_mutex)
+ 763:Libraries/uC-OSIII/os_mutex.c **** {
+ 1774              		.loc 1 763 0
+ 1775              		.cfi_startproc
+ 1776              		@ args = 0, pretend = 0, frame = 8
+ 1777              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1778              		@ link register save eliminated.
+ 1779 0d68 80B4     		push	{r7}
+ 1780              	.LCFI18:
+ 1781              		.cfi_def_cfa_offset 4
+ 1782              		.cfi_offset 7, -4
+ 1783 0d6a 83B0     		sub	sp, sp, #12
+ 1784              	.LCFI19:
+ 1785              		.cfi_def_cfa_offset 16
+ 1786 0d6c 00AF     		add	r7, sp, #0
+ 1787              	.LCFI20:
+ 1788              		.cfi_def_cfa_register 7
+ 1789 0d6e 7860     		str	r0, [r7, #4]
+ 764:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->DbgNamePtr               = (CPU_CHAR *)((void *)" ");
+ 1790              		.loc 1 764 0
+ 1791 0d70 7A68     		ldr	r2, [r7, #4]
+ 1792 0d72 40F20003 		movw	r3, #:lower16:.LC1
+ 1793 0d76 C0F20003 		movt	r3, #:upper16:.LC1
+ 1794 0d7a D361     		str	r3, [r2, #28]
+ 765:Libraries/uC-OSIII/os_mutex.c ****     p_mutex->DbgPrevPtr               = (OS_MUTEX *)0;
+ 1795              		.loc 1 765 0
+ 1796 0d7c 7B68     		ldr	r3, [r7, #4]
+ 1797 0d7e 4FF00002 		mov	r2, #0
+ 1798 0d82 5A61     		str	r2, [r3, #20]
+ 766:Libraries/uC-OSIII/os_mutex.c ****     if (OSMutexDbgListPtr == (OS_MUTEX *)0) {
+ 1799              		.loc 1 766 0
+ 1800 0d84 40F20003 		movw	r3, #:lower16:OSMutexDbgListPtr
+ 1801 0d88 C0F20003 		movt	r3, #:upper16:OSMutexDbgListPtr
+ 1802 0d8c 1B68     		ldr	r3, [r3, #0]
+ 1803 0d8e 002B     		cmp	r3, #0
+ 1804 0d90 04D1     		bne	.L112
+ 767:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->DbgNextPtr           = (OS_MUTEX *)0;
+ 1805              		.loc 1 767 0
+ 1806 0d92 7B68     		ldr	r3, [r7, #4]
+ 1807 0d94 4FF00002 		mov	r2, #0
+ 1808 0d98 9A61     		str	r2, [r3, #24]
+ 1809 0d9a 0DE0     		b	.L113
+ 1810              	.L112:
+ 768:Libraries/uC-OSIII/os_mutex.c ****     } else {
+ 769:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->DbgNextPtr           =  OSMutexDbgListPtr;
+ 1811              		.loc 1 769 0
+ 1812 0d9c 40F20003 		movw	r3, #:lower16:OSMutexDbgListPtr
+ 1813 0da0 C0F20003 		movt	r3, #:upper16:OSMutexDbgListPtr
+ 1814 0da4 1A68     		ldr	r2, [r3, #0]
+ 1815 0da6 7B68     		ldr	r3, [r7, #4]
+ 1816 0da8 9A61     		str	r2, [r3, #24]
+ 770:Libraries/uC-OSIII/os_mutex.c ****         OSMutexDbgListPtr->DbgPrevPtr =  p_mutex;
+ 1817              		.loc 1 770 0
+ 1818 0daa 40F20003 		movw	r3, #:lower16:OSMutexDbgListPtr
+ 1819 0dae C0F20003 		movt	r3, #:upper16:OSMutexDbgListPtr
+ 1820 0db2 1B68     		ldr	r3, [r3, #0]
+ 1821 0db4 7A68     		ldr	r2, [r7, #4]
+ 1822 0db6 5A61     		str	r2, [r3, #20]
+ 1823              	.L113:
+ 771:Libraries/uC-OSIII/os_mutex.c ****     }
+ 772:Libraries/uC-OSIII/os_mutex.c ****     OSMutexDbgListPtr                 =  p_mutex;
+ 1824              		.loc 1 772 0
+ 1825 0db8 40F20003 		movw	r3, #:lower16:OSMutexDbgListPtr
+ 1826 0dbc C0F20003 		movt	r3, #:upper16:OSMutexDbgListPtr
+ 1827 0dc0 7A68     		ldr	r2, [r7, #4]
+ 1828 0dc2 1A60     		str	r2, [r3, #0]
+ 773:Libraries/uC-OSIII/os_mutex.c **** }
+ 1829              		.loc 1 773 0
+ 1830 0dc4 07F10C07 		add	r7, r7, #12
+ 1831 0dc8 BD46     		mov	sp, r7
+ 1832 0dca 80BC     		pop	{r7}
+ 1833 0dcc 7047     		bx	lr
+ 1834              		.cfi_endproc
+ 1835              	.LFE6:
+ 1837 0dce 00BF     		.align	2
+ 1838              		.global	OS_MutexDbgListRemove
+ 1839              		.thumb
+ 1840              		.thumb_func
+ 1842              	OS_MutexDbgListRemove:
+ 1843              	.LFB7:
+ 774:Libraries/uC-OSIII/os_mutex.c **** 
+ 775:Libraries/uC-OSIII/os_mutex.c **** 
+ 776:Libraries/uC-OSIII/os_mutex.c **** 
+ 777:Libraries/uC-OSIII/os_mutex.c **** void  OS_MutexDbgListRemove (OS_MUTEX  *p_mutex)
+ 778:Libraries/uC-OSIII/os_mutex.c **** {
+ 1844              		.loc 1 778 0
+ 1845              		.cfi_startproc
+ 1846              		@ args = 0, pretend = 0, frame = 16
+ 1847              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1848              		@ link register save eliminated.
+ 1849 0dd0 80B4     		push	{r7}
+ 1850              	.LCFI21:
+ 1851              		.cfi_def_cfa_offset 4
+ 1852              		.cfi_offset 7, -4
+ 1853 0dd2 85B0     		sub	sp, sp, #20
+ 1854              	.LCFI22:
+ 1855              		.cfi_def_cfa_offset 24
+ 1856 0dd4 00AF     		add	r7, sp, #0
+ 1857              	.LCFI23:
+ 1858              		.cfi_def_cfa_register 7
+ 1859 0dd6 7860     		str	r0, [r7, #4]
+ 779:Libraries/uC-OSIII/os_mutex.c ****     OS_MUTEX  *p_mutex_next;
+ 780:Libraries/uC-OSIII/os_mutex.c ****     OS_MUTEX  *p_mutex_prev;
+ 781:Libraries/uC-OSIII/os_mutex.c **** 
+ 782:Libraries/uC-OSIII/os_mutex.c **** 
+ 783:Libraries/uC-OSIII/os_mutex.c ****     p_mutex_prev = p_mutex->DbgPrevPtr;
+ 1860              		.loc 1 783 0
+ 1861 0dd8 7B68     		ldr	r3, [r7, #4]
+ 1862 0dda 5B69     		ldr	r3, [r3, #20]
+ 1863 0ddc FB60     		str	r3, [r7, #12]
+ 784:Libraries/uC-OSIII/os_mutex.c ****     p_mutex_next = p_mutex->DbgNextPtr;
+ 1864              		.loc 1 784 0
+ 1865 0dde 7B68     		ldr	r3, [r7, #4]
+ 1866 0de0 9B69     		ldr	r3, [r3, #24]
+ 1867 0de2 BB60     		str	r3, [r7, #8]
+ 785:Libraries/uC-OSIII/os_mutex.c **** 
+ 786:Libraries/uC-OSIII/os_mutex.c ****     if (p_mutex_prev == (OS_MUTEX *)0) {
+ 1868              		.loc 1 786 0
+ 1869 0de4 FB68     		ldr	r3, [r7, #12]
+ 1870 0de6 002B     		cmp	r3, #0
+ 1871 0de8 11D1     		bne	.L115
+ 787:Libraries/uC-OSIII/os_mutex.c ****         OSMutexDbgListPtr = p_mutex_next;
+ 1872              		.loc 1 787 0
+ 1873 0dea 40F20003 		movw	r3, #:lower16:OSMutexDbgListPtr
+ 1874 0dee C0F20003 		movt	r3, #:upper16:OSMutexDbgListPtr
+ 1875 0df2 BA68     		ldr	r2, [r7, #8]
+ 1876 0df4 1A60     		str	r2, [r3, #0]
+ 788:Libraries/uC-OSIII/os_mutex.c ****         if (p_mutex_next != (OS_MUTEX *)0) {
+ 1877              		.loc 1 788 0
+ 1878 0df6 BB68     		ldr	r3, [r7, #8]
+ 1879 0df8 002B     		cmp	r3, #0
+ 1880 0dfa 03D0     		beq	.L116
+ 789:Libraries/uC-OSIII/os_mutex.c ****             p_mutex_next->DbgPrevPtr = (OS_MUTEX *)0;
+ 1881              		.loc 1 789 0
+ 1882 0dfc BB68     		ldr	r3, [r7, #8]
+ 1883 0dfe 4FF00002 		mov	r2, #0
+ 1884 0e02 5A61     		str	r2, [r3, #20]
+ 1885              	.L116:
+ 790:Libraries/uC-OSIII/os_mutex.c ****         }
+ 791:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->DbgNextPtr = (OS_MUTEX *)0;
+ 1886              		.loc 1 791 0
+ 1887 0e04 7B68     		ldr	r3, [r7, #4]
+ 1888 0e06 4FF00002 		mov	r2, #0
+ 1889 0e0a 9A61     		str	r2, [r3, #24]
+ 1890 0e0c 19E0     		b	.L114
+ 1891              	.L115:
+ 792:Libraries/uC-OSIII/os_mutex.c **** 
+ 793:Libraries/uC-OSIII/os_mutex.c ****     } else if (p_mutex_next == (OS_MUTEX *)0) {
+ 1892              		.loc 1 793 0
+ 1893 0e0e BB68     		ldr	r3, [r7, #8]
+ 1894 0e10 002B     		cmp	r3, #0
+ 1895 0e12 08D1     		bne	.L118
+ 794:Libraries/uC-OSIII/os_mutex.c ****         p_mutex_prev->DbgNextPtr = (OS_MUTEX *)0;
+ 1896              		.loc 1 794 0
+ 1897 0e14 FB68     		ldr	r3, [r7, #12]
+ 1898 0e16 4FF00002 		mov	r2, #0
+ 1899 0e1a 9A61     		str	r2, [r3, #24]
+ 795:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->DbgPrevPtr      = (OS_MUTEX *)0;
+ 1900              		.loc 1 795 0
+ 1901 0e1c 7B68     		ldr	r3, [r7, #4]
+ 1902 0e1e 4FF00002 		mov	r2, #0
+ 1903 0e22 5A61     		str	r2, [r3, #20]
+ 1904 0e24 0DE0     		b	.L114
+ 1905              	.L118:
+ 796:Libraries/uC-OSIII/os_mutex.c **** 
+ 797:Libraries/uC-OSIII/os_mutex.c ****     } else {
+ 798:Libraries/uC-OSIII/os_mutex.c ****         p_mutex_prev->DbgNextPtr =  p_mutex_next;
+ 1906              		.loc 1 798 0
+ 1907 0e26 FB68     		ldr	r3, [r7, #12]
+ 1908 0e28 BA68     		ldr	r2, [r7, #8]
+ 1909 0e2a 9A61     		str	r2, [r3, #24]
+ 799:Libraries/uC-OSIII/os_mutex.c ****         p_mutex_next->DbgPrevPtr =  p_mutex_prev;
+ 1910              		.loc 1 799 0
+ 1911 0e2c BB68     		ldr	r3, [r7, #8]
+ 1912 0e2e FA68     		ldr	r2, [r7, #12]
+ 1913 0e30 5A61     		str	r2, [r3, #20]
+ 800:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->DbgNextPtr      = (OS_MUTEX *)0;
+ 1914              		.loc 1 800 0
+ 1915 0e32 7B68     		ldr	r3, [r7, #4]
+ 1916 0e34 4FF00002 		mov	r2, #0
+ 1917 0e38 9A61     		str	r2, [r3, #24]
+ 801:Libraries/uC-OSIII/os_mutex.c ****         p_mutex->DbgPrevPtr      = (OS_MUTEX *)0;
+ 1918              		.loc 1 801 0
+ 1919 0e3a 7B68     		ldr	r3, [r7, #4]
+ 1920 0e3c 4FF00002 		mov	r2, #0
+ 1921 0e40 5A61     		str	r2, [r3, #20]
+ 1922              	.L114:
+ 802:Libraries/uC-OSIII/os_mutex.c ****     }
+ 803:Libraries/uC-OSIII/os_mutex.c **** }
+ 1923              		.loc 1 803 0
+ 1924 0e42 07F11407 		add	r7, r7, #20
+ 1925 0e46 BD46     		mov	sp, r7
+ 1926 0e48 80BC     		pop	{r7}
+ 1927 0e4a 7047     		bx	lr
+ 1928              		.cfi_endproc
+ 1929              	.LFE7:
+ 1931              		.align	2
+ 1932              		.global	OS_MutexInit
+ 1933              		.thumb
+ 1934              		.thumb_func
+ 1936              	OS_MutexInit:
+ 1937              	.LFB8:
+ 804:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 805:Libraries/uC-OSIII/os_mutex.c **** 
+ 806:Libraries/uC-OSIII/os_mutex.c **** /*$PAGE*/
+ 807:Libraries/uC-OSIII/os_mutex.c **** /*
+ 808:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 809:Libraries/uC-OSIII/os_mutex.c **** *                                                MUTEX INITIALIZATION
+ 810:Libraries/uC-OSIII/os_mutex.c **** *
+ 811:Libraries/uC-OSIII/os_mutex.c **** * Description: This function is called by OSInit() to initialize the mutex management.
+ 812:Libraries/uC-OSIII/os_mutex.c **** *
+ 813:Libraries/uC-OSIII/os_mutex.c **** 
+ 814:Libraries/uC-OSIII/os_mutex.c **** * Argument(s): p_err        is a pointer to a variable that will contain an error code returned by 
+ 815:Libraries/uC-OSIII/os_mutex.c **** *
+ 816:Libraries/uC-OSIII/os_mutex.c **** *                                OS_ERR_NONE     the call was successful
+ 817:Libraries/uC-OSIII/os_mutex.c **** *
+ 818:Libraries/uC-OSIII/os_mutex.c **** * Returns    : none
+ 819:Libraries/uC-OSIII/os_mutex.c **** *
+ 820:Libraries/uC-OSIII/os_mutex.c **** * Note(s)    : 1) This function is INTERNAL to uC/OS-III and your application MUST NOT call it.
+ 821:Libraries/uC-OSIII/os_mutex.c **** ***************************************************************************************************
+ 822:Libraries/uC-OSIII/os_mutex.c **** */
+ 823:Libraries/uC-OSIII/os_mutex.c **** 
+ 824:Libraries/uC-OSIII/os_mutex.c **** void  OS_MutexInit (OS_ERR  *p_err)
+ 825:Libraries/uC-OSIII/os_mutex.c **** {
+ 1938              		.loc 1 825 0
+ 1939              		.cfi_startproc
+ 1940              		@ args = 0, pretend = 0, frame = 8
+ 1941              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1942              		@ link register save eliminated.
+ 1943 0e4c 80B4     		push	{r7}
+ 1944              	.LCFI24:
+ 1945              		.cfi_def_cfa_offset 4
+ 1946              		.cfi_offset 7, -4
+ 1947 0e4e 83B0     		sub	sp, sp, #12
+ 1948              	.LCFI25:
+ 1949              		.cfi_def_cfa_offset 16
+ 1950 0e50 00AF     		add	r7, sp, #0
+ 1951              	.LCFI26:
+ 1952              		.cfi_def_cfa_register 7
+ 1953 0e52 7860     		str	r0, [r7, #4]
+ 826:Libraries/uC-OSIII/os_mutex.c **** #ifdef OS_SAFETY_CRITICAL
+ 827:Libraries/uC-OSIII/os_mutex.c ****     if (p_err == (OS_ERR *)0) {
+ 828:Libraries/uC-OSIII/os_mutex.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 829:Libraries/uC-OSIII/os_mutex.c ****     }
+ 830:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 831:Libraries/uC-OSIII/os_mutex.c **** 
+ 832:Libraries/uC-OSIII/os_mutex.c **** #if OS_CFG_DBG_EN > 0u
+ 833:Libraries/uC-OSIII/os_mutex.c ****     OSMutexDbgListPtr = (OS_MUTEX *)0;
+ 1954              		.loc 1 833 0
+ 1955 0e54 40F20003 		movw	r3, #:lower16:OSMutexDbgListPtr
+ 1956 0e58 C0F20003 		movt	r3, #:upper16:OSMutexDbgListPtr
+ 1957 0e5c 4FF00002 		mov	r2, #0
+ 1958 0e60 1A60     		str	r2, [r3, #0]
+ 834:Libraries/uC-OSIII/os_mutex.c **** #endif
+ 835:Libraries/uC-OSIII/os_mutex.c **** 
+ 836:Libraries/uC-OSIII/os_mutex.c ****     OSMutexQty        = (OS_OBJ_QTY)0;
+ 1959              		.loc 1 836 0
+ 1960 0e62 40F20003 		movw	r3, #:lower16:OSMutexQty
+ 1961 0e66 C0F20003 		movt	r3, #:upper16:OSMutexQty
+ 1962 0e6a 4FF00002 		mov	r2, #0
+ 1963 0e6e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 837:Libraries/uC-OSIII/os_mutex.c ****     *p_err            =  OS_ERR_NONE;
+ 1964              		.loc 1 837 0
+ 1965 0e70 7B68     		ldr	r3, [r7, #4]
+ 1966 0e72 4FF00002 		mov	r2, #0
+ 1967 0e76 1A80     		strh	r2, [r3, #0]	@ movhi
+ 838:Libraries/uC-OSIII/os_mutex.c **** }
+ 1968              		.loc 1 838 0
+ 1969 0e78 07F10C07 		add	r7, r7, #12
+ 1970 0e7c BD46     		mov	sp, r7
+ 1971 0e7e 80BC     		pop	{r7}
+ 1972 0e80 7047     		bx	lr
+ 1973              		.cfi_endproc
+ 1974              	.LFE8:
+ 1976              	.Letext0:
+ 1977              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 1978              		.file 3 "Libraries/uC-CPU/cpu_core.h"
+ 1979              		.file 4 "Libraries/uC-OSIII/os_type.h"
+ 1980              		.file 5 "Libraries/uC-OSIII/os.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 os_mutex.c
+     /tmp/ccDKEXbA.s:18     .text:00000000 $t
+     /tmp/ccDKEXbA.s:23     .text:00000000 OSMutexCreate
+     /tmp/ccDKEXbA.s:1772   .text:00000d68 OS_MutexDbgListAdd
+     /tmp/ccDKEXbA.s:138    .text:000000c0 OSMutexDel
+     /tmp/ccDKEXbA.s:1842   .text:00000dd0 OS_MutexDbgListRemove
+     /tmp/ccDKEXbA.s:1706   .text:00000d10 OS_MutexClr
+     /tmp/ccDKEXbA.s:626    .text:000004bc OSMutexPend
+     /tmp/ccDKEXbA.s:1022   .text:000007ec $d
+     /tmp/ccDKEXbA.s:1028   .text:000007fc $t
+     /tmp/ccDKEXbA.s:1124   .text:00000890 OSMutexPendAbort
+     /tmp/ccDKEXbA.s:1342   .text:00000a14 OSMutexPost
+     /tmp/ccDKEXbA.s:1697   .rodata:00000000 $d
+     /tmp/ccDKEXbA.s:1698   .rodata:00000000 .LC0
+     /tmp/ccDKEXbA.s:1764   .rodata:00000008 .LC1
+     /tmp/ccDKEXbA.s:1936   .text:00000e4c OS_MutexInit
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+OSIntNestingCtr
+CPU_SR_Save
+CPU_IntDisMeasStart
+OS_PendListInit
+OSMutexQty
+CPU_IntDisMeasStop
+CPU_SR_Restore
+OSSchedLockNestingCtr
+OS_SchedLockTimeMeasStart
+OS_SchedLockTimeMeasStop
+OSIntQNbrEntries
+OS_Sched0
+OS_RdyListRemove
+OS_PrioInsert
+OS_RdyListInsertTail
+OS_PendListChangePrio
+CPU_TS_TmrRd
+OS_PendObjDel
+OSSched
+OSTCBCurPtr
+OS_RdyListInsertHead
+OS_Pend
+OS_PendAbort
+OSPrioCur
+OS_Post
+OSMutexDbgListPtr

@@ -1,0 +1,755 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"usbcontrol.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.bss
+  19              		.align	2
+  20              	Setup:
+  21 0000 00000000 		.space	8
+  21      00000000 
+  22              		.align	2
+  23              	pbData:
+  24 0008 00000000 		.space	4
+  25              		.align	2
+  26              	iResidue:
+  27 000c 00000000 		.space	4
+  28              		.align	2
+  29              	iLen:
+  30 0010 00000000 		.space	4
+  31              		.align	2
+  32              	apfnReqHandlers:
+  33 0014 00000000 		.space	16
+  33      00000000 
+  33      00000000 
+  33      00000000 
+  34              		.align	2
+  35              	apbDataStore:
+  36 0024 00000000 		.space	16
+  36      00000000 
+  36      00000000 
+  36      00000000 
+  37              		.text
+  38              		.align	2
+  39              		.thumb
+  40              		.thumb_func
+  42              	_HandleRequest:
+  43              	.LFB0:
+  44              		.file 1 "Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c"
+   1:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** /*
+   2:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	LPCUSB, an USB device driver for LPC microcontrollers
+   3:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	Copyright (C) 2006 Bertrik Sikken (bertrik@sikken.nl)
+   4:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+   5:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	Redistribution and use in source and binary forms, with or without
+   6:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	modification, are permitted provided that the following conditions are met:
+   7:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+   8:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	1. Redistributions of source code must retain the above copyright
+   9:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	   notice, this list of conditions and the following disclaimer.
+  10:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	2. Redistributions in binary form must reproduce the above copyright
+  11:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	   notice, this list of conditions and the following disclaimer in the
+  12:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	   documentation and/or other materials provided with the distribution.
+  13:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	3. The name of the author may not be used to endorse or promote products
+  14:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	   derived from this software without specific prior written permission.
+  15:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  16:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+  17:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+  18:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+  19:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+  20:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  21:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  22:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  23:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  24:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  25:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  26:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** */
+  27:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  28:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  29:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** /** @file
+  30:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	Control transfer handler.
+  31:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  32:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	This module handles control transfers and is normally installed on the
+  33:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	endpoint 0 callback.
+  34:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  35:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	Control transfers can be of the following type:
+  36:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	0 Standard;
+  37:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	1 Class;
+  38:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	2 Vendor;
+  39:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	3 Reserved.
+  40:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  41:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	A callback can be installed for each of these control transfers using
+  42:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	USBRegisterRequestHandler.
+  43:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	When an OUT request arrives, data is collected in the data store provided
+  44:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	with the USBRegisterRequestHandler call. When the transfer is done, the
+  45:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	callback is called.
+  46:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	When an IN request arrives, the callback is called immediately to either
+  47:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	put the control transfer data in the data store, or to get a pointer to
+  48:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	control transfer data. The data is then packetised and sent to the host.
+  49:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** */
+  50:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  51:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** #include <usbdebug.h>
+  52:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  53:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** #include <usbstruct.h>
+  54:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** #include <usbapi.h>
+  55:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  56:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** #include <lpc_types.h>
+  57:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  58:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** #include <stddef.h>
+  59:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  60:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  61:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  62:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** #define	MAX_CONTROL_SIZE	128	/**< maximum total size of control transfer data */
+  63:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** #define	MAX_REQ_HANDLERS	4	/**< standard, class, vendor, reserved */
+  64:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  65:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** static TSetupPacket		Setup;	/**< setup packet */
+  66:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  67:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** static U8				*pbData;	/**< pointer to data buffer */
+  68:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** static int				iResidue;	/**< remaining bytes in buffer */
+  69:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** static int				iLen;		/**< total length of control transfer */
+  70:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  71:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** /** Array of installed request handler callbacks */
+  72:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** static TFnHandleRequest *apfnReqHandlers[4] = {NULL, NULL, NULL, NULL};
+  73:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** /** Array of installed request data pointers */
+  74:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** static U8				*apbDataStore[4] = {NULL, NULL, NULL, NULL};
+  75:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  76:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** /**
+  77:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	Local function to handle a request by calling one of the installed
+  78:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	request handlers.
+  79:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  80:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	In case of data going from host to device, the data is at *ppbData.
+  81:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	In case of data going from device to host, the handler can either
+  82:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	choose to write its data at *ppbData or update the data pointer.
+  83:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  84:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	@param [in]		pSetup		The setup packet
+  85:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	@param [in,out]	*piLen		Pointer to data length
+  86:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	@param [in,out]	ppbData		Data buffer.
+  87:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  88:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	@return TRUE if the request was handles successfully
+  89:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c ****  */
+  90:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** static BOOL _HandleRequest(TSetupPacket *pSetup, int *piLen, U8 **ppbData)
+  91:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** {
+  45              		.loc 1 91 0
+  46              		.cfi_startproc
+  47              		@ args = 0, pretend = 0, frame = 24
+  48              		@ frame_needed = 1, uses_anonymous_args = 0
+  49 0000 80B5     		push	{r7, lr}
+  50              	.LCFI0:
+  51              		.cfi_def_cfa_offset 8
+  52              		.cfi_offset 14, -4
+  53              		.cfi_offset 7, -8
+  54 0002 86B0     		sub	sp, sp, #24
+  55              	.LCFI1:
+  56              		.cfi_def_cfa_offset 32
+  57 0004 00AF     		add	r7, sp, #0
+  58              	.LCFI2:
+  59              		.cfi_def_cfa_register 7
+  60 0006 F860     		str	r0, [r7, #12]
+  61 0008 B960     		str	r1, [r7, #8]
+  62 000a 7A60     		str	r2, [r7, #4]
+  92:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	TFnHandleRequest *pfnHandler;
+  93:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	int iType;
+  94:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+  95:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	iType = REQTYPE_GET_TYPE(pSetup->bmRequestType);
+  63              		.loc 1 95 0
+  64 000c FB68     		ldr	r3, [r7, #12]
+  65 000e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  66 0010 4FEA5313 		lsr	r3, r3, #5
+  67 0014 DBB2     		uxtb	r3, r3
+  68 0016 03F00303 		and	r3, r3, #3
+  69 001a 7B61     		str	r3, [r7, #20]
+  96:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	pfnHandler = apfnReqHandlers[iType];
+  70              		.loc 1 96 0
+  71 001c 40F20003 		movw	r3, #:lower16:apfnReqHandlers
+  72 0020 C0F20003 		movt	r3, #:upper16:apfnReqHandlers
+  73 0024 7A69     		ldr	r2, [r7, #20]
+  74 0026 53F82230 		ldr	r3, [r3, r2, lsl #2]
+  75 002a 3B61     		str	r3, [r7, #16]
+  97:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	if (pfnHandler == NULL) {
+  76              		.loc 1 97 0
+  77 002c 3B69     		ldr	r3, [r7, #16]
+  78 002e 002B     		cmp	r3, #0
+  79 0030 02D1     		bne	.L2
+  98:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		DBG("No handler for reqtype %d\n", iType);
+  99:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		return FALSE;
+  80              		.loc 1 99 0
+  81 0032 4FF00003 		mov	r3, #0
+  82 0036 05E0     		b	.L3
+  83              	.L2:
+ 100:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	}
+ 101:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 102:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	return pfnHandler(pSetup, piLen, ppbData);
+  84              		.loc 1 102 0
+  85 0038 3B69     		ldr	r3, [r7, #16]
+  86 003a F868     		ldr	r0, [r7, #12]
+  87 003c B968     		ldr	r1, [r7, #8]
+  88 003e 7A68     		ldr	r2, [r7, #4]
+  89 0040 9847     		blx	r3
+  90 0042 0346     		mov	r3, r0
+  91              	.L3:
+ 103:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** }
+  92              		.loc 1 103 0
+  93 0044 1846     		mov	r0, r3
+  94 0046 07F11807 		add	r7, r7, #24
+  95 004a BD46     		mov	sp, r7
+  96 004c 80BD     		pop	{r7, pc}
+  97              		.cfi_endproc
+  98              	.LFE0:
+ 100 004e 00BF     		.align	2
+ 101              		.thumb
+ 102              		.thumb_func
+ 104              	StallControlPipe:
+ 105              	.LFB1:
+ 104:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 105:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 106:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** /**
+ 107:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	Local function to stall the control endpoint
+ 108:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 109:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	@param [in]	bEPStat	Endpoint status
+ 110:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c ****  */
+ 111:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** static void StallControlPipe(U8 bEPStat)
+ 112:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** {
+ 106              		.loc 1 112 0
+ 107              		.cfi_startproc
+ 108              		@ args = 0, pretend = 0, frame = 16
+ 109              		@ frame_needed = 1, uses_anonymous_args = 0
+ 110 0050 80B5     		push	{r7, lr}
+ 111              	.LCFI3:
+ 112              		.cfi_def_cfa_offset 8
+ 113              		.cfi_offset 14, -4
+ 114              		.cfi_offset 7, -8
+ 115 0052 84B0     		sub	sp, sp, #16
+ 116              	.LCFI4:
+ 117              		.cfi_def_cfa_offset 24
+ 118 0054 00AF     		add	r7, sp, #0
+ 119              	.LCFI5:
+ 120              		.cfi_def_cfa_register 7
+ 121 0056 0346     		mov	r3, r0
+ 122 0058 FB71     		strb	r3, [r7, #7]
+ 113:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	U8	*pb;
+ 114:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	int	i;
+ 115:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 116:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	USBHwEPStall(0x80, TRUE);
+ 123              		.loc 1 116 0
+ 124 005a 4FF08000 		mov	r0, #128
+ 125 005e 4FF00101 		mov	r1, #1
+ 126 0062 FFF7FEFF 		bl	USBHwEPStall
+ 117:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 118:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c ****     /* dump setup packet */
+ 119:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	DBG("STALL on [");
+ 120:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	pb = (U8 *)&Setup;
+ 127              		.loc 1 120 0
+ 128 0066 40F20003 		movw	r3, #:lower16:Setup
+ 129 006a C0F20003 		movt	r3, #:upper16:Setup
+ 130 006e BB60     		str	r3, [r7, #8]
+ 121:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	for (i = 0; i < 8; i++) {
+ 131              		.loc 1 121 0
+ 132 0070 4FF00003 		mov	r3, #0
+ 133 0074 FB60     		str	r3, [r7, #12]
+ 134 0076 03E0     		b	.L5
+ 135              	.L6:
+ 136              		.loc 1 121 0 is_stmt 0 discriminator 2
+ 137 0078 FB68     		ldr	r3, [r7, #12]
+ 138 007a 03F10103 		add	r3, r3, #1
+ 139 007e FB60     		str	r3, [r7, #12]
+ 140              	.L5:
+ 141              		.loc 1 121 0 discriminator 1
+ 142 0080 FB68     		ldr	r3, [r7, #12]
+ 143 0082 072B     		cmp	r3, #7
+ 144 0084 F8DD     		ble	.L6
+ 122:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		DBG(" %02x", *pb++);
+ 123:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	}
+ 124:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	DBG("] stat=%x\n", bEPStat);
+ 125:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** }
+ 145              		.loc 1 125 0 is_stmt 1
+ 146 0086 07F11007 		add	r7, r7, #16
+ 147 008a BD46     		mov	sp, r7
+ 148 008c 80BD     		pop	{r7, pc}
+ 149              		.cfi_endproc
+ 150              	.LFE1:
+ 152 008e 00BF     		.align	2
+ 153              		.thumb
+ 154              		.thumb_func
+ 156              	DataIn:
+ 157              	.LFB2:
+ 126:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 127:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 128:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** /**
+ 129:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	Sends next chunk of data (possibly 0 bytes) to host
+ 130:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c ****  */
+ 131:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** static void DataIn(void)
+ 132:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** {
+ 158              		.loc 1 132 0
+ 159              		.cfi_startproc
+ 160              		@ args = 0, pretend = 0, frame = 8
+ 161              		@ frame_needed = 1, uses_anonymous_args = 0
+ 162 0090 80B5     		push	{r7, lr}
+ 163              	.LCFI6:
+ 164              		.cfi_def_cfa_offset 8
+ 165              		.cfi_offset 14, -4
+ 166              		.cfi_offset 7, -8
+ 167 0092 82B0     		sub	sp, sp, #8
+ 168              	.LCFI7:
+ 169              		.cfi_def_cfa_offset 16
+ 170 0094 00AF     		add	r7, sp, #0
+ 171              	.LCFI8:
+ 172              		.cfi_def_cfa_register 7
+ 133:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	int iChunk;
+ 134:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 135:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	iChunk = MIN(MAX_PACKET_SIZE0, iResidue);
+ 173              		.loc 1 135 0
+ 174 0096 40F20003 		movw	r3, #:lower16:iResidue
+ 175 009a C0F20003 		movt	r3, #:upper16:iResidue
+ 176 009e 1B68     		ldr	r3, [r3, #0]
+ 177 00a0 402B     		cmp	r3, #64
+ 178 00a2 A8BF     		it	ge
+ 179 00a4 4023     		movge	r3, #64
+ 180 00a6 7B60     		str	r3, [r7, #4]
+ 136:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	USBHwEPWrite(0x80, pbData, iChunk);
+ 181              		.loc 1 136 0
+ 182 00a8 40F20003 		movw	r3, #:lower16:pbData
+ 183 00ac C0F20003 		movt	r3, #:upper16:pbData
+ 184 00b0 1B68     		ldr	r3, [r3, #0]
+ 185 00b2 4FF08000 		mov	r0, #128
+ 186 00b6 1946     		mov	r1, r3
+ 187 00b8 7A68     		ldr	r2, [r7, #4]
+ 188 00ba FFF7FEFF 		bl	USBHwEPWrite
+ 137:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	pbData += iChunk;
+ 189              		.loc 1 137 0
+ 190 00be 40F20003 		movw	r3, #:lower16:pbData
+ 191 00c2 C0F20003 		movt	r3, #:upper16:pbData
+ 192 00c6 1A68     		ldr	r2, [r3, #0]
+ 193 00c8 7B68     		ldr	r3, [r7, #4]
+ 194 00ca D218     		adds	r2, r2, r3
+ 195 00cc 40F20003 		movw	r3, #:lower16:pbData
+ 196 00d0 C0F20003 		movt	r3, #:upper16:pbData
+ 197 00d4 1A60     		str	r2, [r3, #0]
+ 138:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	iResidue -= iChunk;
+ 198              		.loc 1 138 0
+ 199 00d6 40F20003 		movw	r3, #:lower16:iResidue
+ 200 00da C0F20003 		movt	r3, #:upper16:iResidue
+ 201 00de 1A68     		ldr	r2, [r3, #0]
+ 202 00e0 7B68     		ldr	r3, [r7, #4]
+ 203 00e2 D21A     		subs	r2, r2, r3
+ 204 00e4 40F20003 		movw	r3, #:lower16:iResidue
+ 205 00e8 C0F20003 		movt	r3, #:upper16:iResidue
+ 206 00ec 1A60     		str	r2, [r3, #0]
+ 139:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** }
+ 207              		.loc 1 139 0
+ 208 00ee 07F10807 		add	r7, r7, #8
+ 209 00f2 BD46     		mov	sp, r7
+ 210 00f4 80BD     		pop	{r7, pc}
+ 211              		.cfi_endproc
+ 212              	.LFE2:
+ 214 00f6 00BF     		.align	2
+ 215              		.global	USBHandleControlTransfer
+ 216              		.thumb
+ 217              		.thumb_func
+ 219              	USBHandleControlTransfer:
+ 220              	.LFB3:
+ 140:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 141:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 142:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** /**
+ 143:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c ****  *	Handles IN/OUT transfers on EP0
+ 144:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c ****  *
+ 145:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c ****  *	@param [in]	bEP		Endpoint address
+ 146:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c ****  *	@param [in]	bEPStat	Endpoint status
+ 147:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c ****  */
+ 148:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** void USBHandleControlTransfer(U8 bEP, U8 bEPStat)
+ 149:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** {
+ 221              		.loc 1 149 0
+ 222              		.cfi_startproc
+ 223              		@ args = 0, pretend = 0, frame = 16
+ 224              		@ frame_needed = 1, uses_anonymous_args = 0
+ 225 00f8 80B5     		push	{r7, lr}
+ 226              	.LCFI9:
+ 227              		.cfi_def_cfa_offset 8
+ 228              		.cfi_offset 14, -4
+ 229              		.cfi_offset 7, -8
+ 230 00fa 84B0     		sub	sp, sp, #16
+ 231              	.LCFI10:
+ 232              		.cfi_def_cfa_offset 24
+ 233 00fc 00AF     		add	r7, sp, #0
+ 234              	.LCFI11:
+ 235              		.cfi_def_cfa_register 7
+ 236 00fe 0246     		mov	r2, r0
+ 237 0100 0B46     		mov	r3, r1
+ 238 0102 FA71     		strb	r2, [r7, #7]
+ 239 0104 BB71     		strb	r3, [r7, #6]
+ 150:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	int iChunk, iType;
+ 151:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 152:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	if (bEP == 0x00) {
+ 240              		.loc 1 152 0
+ 241 0106 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 242 0108 002B     		cmp	r3, #0
+ 243 010a 40F0F680 		bne	.L9
+ 153:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		/* OUT transfer */
+ 154:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		if (bEPStat & EP_STATUS_SETUP) {
+ 244              		.loc 1 154 0
+ 245 010e BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 246 0110 03F00403 		and	r3, r3, #4
+ 247 0114 002B     		cmp	r3, #0
+ 248 0116 77D0     		beq	.L10
+ 155:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			/* setup packet, reset request message state machine */
+ 156:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			USBHwEPRead(0x00, (U8 *)&Setup, sizeof(Setup));
+ 249              		.loc 1 156 0
+ 250 0118 4FF00000 		mov	r0, #0
+ 251 011c 40F20001 		movw	r1, #:lower16:Setup
+ 252 0120 C0F20001 		movt	r1, #:upper16:Setup
+ 253 0124 4FF00802 		mov	r2, #8
+ 254 0128 FFF7FEFF 		bl	USBHwEPRead
+ 157:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			DBG("S%x", Setup.bRequest);
+ 158:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 159:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			/* defaults for data pointer and residue */
+ 160:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			iType = REQTYPE_GET_TYPE(Setup.bmRequestType);
+ 255              		.loc 1 160 0
+ 256 012c 40F20003 		movw	r3, #:lower16:Setup
+ 257 0130 C0F20003 		movt	r3, #:upper16:Setup
+ 258 0134 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 259 0136 4FEA5313 		lsr	r3, r3, #5
+ 260 013a DBB2     		uxtb	r3, r3
+ 261 013c 03F00303 		and	r3, r3, #3
+ 262 0140 FB60     		str	r3, [r7, #12]
+ 161:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			pbData = apbDataStore[iType];
+ 263              		.loc 1 161 0
+ 264 0142 40F20003 		movw	r3, #:lower16:apbDataStore
+ 265 0146 C0F20003 		movt	r3, #:upper16:apbDataStore
+ 266 014a FA68     		ldr	r2, [r7, #12]
+ 267 014c 53F82220 		ldr	r2, [r3, r2, lsl #2]
+ 268 0150 40F20003 		movw	r3, #:lower16:pbData
+ 269 0154 C0F20003 		movt	r3, #:upper16:pbData
+ 270 0158 1A60     		str	r2, [r3, #0]
+ 162:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			iResidue = Setup.wLength;
+ 271              		.loc 1 162 0
+ 272 015a 40F20003 		movw	r3, #:lower16:Setup
+ 273 015e C0F20003 		movt	r3, #:upper16:Setup
+ 274 0162 DB88     		ldrh	r3, [r3, #6]
+ 275 0164 1A46     		mov	r2, r3
+ 276 0166 40F20003 		movw	r3, #:lower16:iResidue
+ 277 016a C0F20003 		movt	r3, #:upper16:iResidue
+ 278 016e 1A60     		str	r2, [r3, #0]
+ 163:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			iLen = Setup.wLength;
+ 279              		.loc 1 163 0
+ 280 0170 40F20003 		movw	r3, #:lower16:Setup
+ 281 0174 C0F20003 		movt	r3, #:upper16:Setup
+ 282 0178 DB88     		ldrh	r3, [r3, #6]
+ 283 017a 1A46     		mov	r2, r3
+ 284 017c 40F20003 		movw	r3, #:lower16:iLen
+ 285 0180 C0F20003 		movt	r3, #:upper16:iLen
+ 286 0184 1A60     		str	r2, [r3, #0]
+ 164:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 165:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			if ((Setup.wLength == 0) ||
+ 287              		.loc 1 165 0
+ 288 0186 40F20003 		movw	r3, #:lower16:Setup
+ 289 018a C0F20003 		movt	r3, #:upper16:Setup
+ 290 018e DB88     		ldrh	r3, [r3, #6]
+ 291 0190 002B     		cmp	r3, #0
+ 292 0192 0DD0     		beq	.L11
+ 166:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				(REQTYPE_GET_DIR(Setup.bmRequestType) == REQTYPE_DIR_TO_HOST)) {
+ 293              		.loc 1 166 0 discriminator 1
+ 294 0194 40F20003 		movw	r3, #:lower16:Setup
+ 295 0198 C0F20003 		movt	r3, #:upper16:Setup
+ 296 019c 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 297 019e 4FEAD313 		lsr	r3, r3, #7
+ 298 01a2 DBB2     		uxtb	r3, r3
+ 299 01a4 03F00103 		and	r3, r3, #1
+ 300 01a8 DBB2     		uxtb	r3, r3
+ 165:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			if ((Setup.wLength == 0) ||
+ 301              		.loc 1 165 0 discriminator 1
+ 302 01aa 002B     		cmp	r3, #0
+ 303 01ac 00F0AA80 		beq	.L8
+ 304              	.L11:
+ 167:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				/* ask installed handler to process request */
+ 168:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				if (!_HandleRequest(&Setup, &iLen, &pbData)) {
+ 305              		.loc 1 168 0
+ 306 01b0 40F20000 		movw	r0, #:lower16:Setup
+ 307 01b4 C0F20000 		movt	r0, #:upper16:Setup
+ 308 01b8 40F20001 		movw	r1, #:lower16:iLen
+ 309 01bc C0F20001 		movt	r1, #:upper16:iLen
+ 310 01c0 40F20002 		movw	r2, #:lower16:pbData
+ 311 01c4 C0F20002 		movt	r2, #:upper16:pbData
+ 312 01c8 FFF71AFF 		bl	_HandleRequest
+ 313 01cc 0346     		mov	r3, r0
+ 314 01ce 002B     		cmp	r3, #0
+ 315 01d0 04D1     		bne	.L13
+ 169:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					DBG("_HandleRequest1 failed\n");
+ 170:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					StallControlPipe(bEPStat);
+ 316              		.loc 1 170 0
+ 317 01d2 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 318 01d4 1846     		mov	r0, r3
+ 319 01d6 FFF73BFF 		bl	StallControlPipe
+ 171:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					return;
+ 320              		.loc 1 171 0
+ 321 01da 93E0     		b	.L8
+ 322              	.L13:
+ 172:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				}
+ 173:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				/* send smallest of requested and offered length */
+ 174:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				iResidue = MIN(iLen, Setup.wLength);
+ 323              		.loc 1 174 0
+ 324 01dc 40F20003 		movw	r3, #:lower16:Setup
+ 325 01e0 C0F20003 		movt	r3, #:upper16:Setup
+ 326 01e4 DB88     		ldrh	r3, [r3, #6]
+ 327 01e6 1A46     		mov	r2, r3
+ 328 01e8 40F20003 		movw	r3, #:lower16:iLen
+ 329 01ec C0F20003 		movt	r3, #:upper16:iLen
+ 330 01f0 1B68     		ldr	r3, [r3, #0]
+ 331 01f2 9A42     		cmp	r2, r3
+ 332 01f4 A8BF     		it	ge
+ 333 01f6 1A46     		movge	r2, r3
+ 334 01f8 40F20003 		movw	r3, #:lower16:iResidue
+ 335 01fc C0F20003 		movt	r3, #:upper16:iResidue
+ 336 0200 1A60     		str	r2, [r3, #0]
+ 175:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				/* send first part (possibly a zero-length status message) */
+ 176:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				DataIn();
+ 337              		.loc 1 176 0
+ 338 0202 FFF745FF 		bl	DataIn
+ 339 0206 7DE0     		b	.L8
+ 340              	.L10:
+ 177:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			}
+ 178:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		}
+ 179:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		else {
+ 180:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			if (iResidue > 0) {
+ 341              		.loc 1 180 0
+ 342 0208 40F20003 		movw	r3, #:lower16:iResidue
+ 343 020c C0F20003 		movt	r3, #:upper16:iResidue
+ 344 0210 1B68     		ldr	r3, [r3, #0]
+ 345 0212 002B     		cmp	r3, #0
+ 346 0214 67DD     		ble	.L14
+ 181:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				/* store data */
+ 182:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				iChunk = USBHwEPRead(0x00, pbData, iResidue);
+ 347              		.loc 1 182 0
+ 348 0216 40F20003 		movw	r3, #:lower16:pbData
+ 349 021a C0F20003 		movt	r3, #:upper16:pbData
+ 350 021e 1A68     		ldr	r2, [r3, #0]
+ 351 0220 40F20003 		movw	r3, #:lower16:iResidue
+ 352 0224 C0F20003 		movt	r3, #:upper16:iResidue
+ 353 0228 1B68     		ldr	r3, [r3, #0]
+ 354 022a 4FF00000 		mov	r0, #0
+ 355 022e 1146     		mov	r1, r2
+ 356 0230 1A46     		mov	r2, r3
+ 357 0232 FFF7FEFF 		bl	USBHwEPRead
+ 358 0236 B860     		str	r0, [r7, #8]
+ 183:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				if (iChunk < 0) {
+ 359              		.loc 1 183 0
+ 360 0238 BB68     		ldr	r3, [r7, #8]
+ 361 023a 002B     		cmp	r3, #0
+ 362 023c 04DA     		bge	.L15
+ 184:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					StallControlPipe(bEPStat);
+ 363              		.loc 1 184 0
+ 364 023e BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 365 0240 1846     		mov	r0, r3
+ 366 0242 FFF705FF 		bl	StallControlPipe
+ 185:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					return;
+ 367              		.loc 1 185 0
+ 368 0246 5DE0     		b	.L8
+ 369              	.L15:
+ 186:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				}
+ 187:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				pbData += iChunk;
+ 370              		.loc 1 187 0
+ 371 0248 40F20003 		movw	r3, #:lower16:pbData
+ 372 024c C0F20003 		movt	r3, #:upper16:pbData
+ 373 0250 1A68     		ldr	r2, [r3, #0]
+ 374 0252 BB68     		ldr	r3, [r7, #8]
+ 375 0254 D218     		adds	r2, r2, r3
+ 376 0256 40F20003 		movw	r3, #:lower16:pbData
+ 377 025a C0F20003 		movt	r3, #:upper16:pbData
+ 378 025e 1A60     		str	r2, [r3, #0]
+ 188:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				iResidue -= iChunk;
+ 379              		.loc 1 188 0
+ 380 0260 40F20003 		movw	r3, #:lower16:iResidue
+ 381 0264 C0F20003 		movt	r3, #:upper16:iResidue
+ 382 0268 1A68     		ldr	r2, [r3, #0]
+ 383 026a BB68     		ldr	r3, [r7, #8]
+ 384 026c D21A     		subs	r2, r2, r3
+ 385 026e 40F20003 		movw	r3, #:lower16:iResidue
+ 386 0272 C0F20003 		movt	r3, #:upper16:iResidue
+ 387 0276 1A60     		str	r2, [r3, #0]
+ 189:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				if (iResidue == 0) {
+ 388              		.loc 1 189 0
+ 389 0278 40F20003 		movw	r3, #:lower16:iResidue
+ 390 027c C0F20003 		movt	r3, #:upper16:iResidue
+ 391 0280 1B68     		ldr	r3, [r3, #0]
+ 392 0282 002B     		cmp	r3, #0
+ 393 0284 3ED1     		bne	.L8
+ 190:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					/* received all, send data to handler */
+ 191:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					iType = REQTYPE_GET_TYPE(Setup.bmRequestType);
+ 394              		.loc 1 191 0
+ 395 0286 40F20003 		movw	r3, #:lower16:Setup
+ 396 028a C0F20003 		movt	r3, #:upper16:Setup
+ 397 028e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 398 0290 4FEA5313 		lsr	r3, r3, #5
+ 399 0294 DBB2     		uxtb	r3, r3
+ 400 0296 03F00303 		and	r3, r3, #3
+ 401 029a FB60     		str	r3, [r7, #12]
+ 192:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					pbData = apbDataStore[iType];
+ 402              		.loc 1 192 0
+ 403 029c 40F20003 		movw	r3, #:lower16:apbDataStore
+ 404 02a0 C0F20003 		movt	r3, #:upper16:apbDataStore
+ 405 02a4 FA68     		ldr	r2, [r7, #12]
+ 406 02a6 53F82220 		ldr	r2, [r3, r2, lsl #2]
+ 407 02aa 40F20003 		movw	r3, #:lower16:pbData
+ 408 02ae C0F20003 		movt	r3, #:upper16:pbData
+ 409 02b2 1A60     		str	r2, [r3, #0]
+ 193:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					if (!_HandleRequest(&Setup, &iLen, &pbData)) {
+ 410              		.loc 1 193 0
+ 411 02b4 40F20000 		movw	r0, #:lower16:Setup
+ 412 02b8 C0F20000 		movt	r0, #:upper16:Setup
+ 413 02bc 40F20001 		movw	r1, #:lower16:iLen
+ 414 02c0 C0F20001 		movt	r1, #:upper16:iLen
+ 415 02c4 40F20002 		movw	r2, #:lower16:pbData
+ 416 02c8 C0F20002 		movt	r2, #:upper16:pbData
+ 417 02cc FFF798FE 		bl	_HandleRequest
+ 418 02d0 0346     		mov	r3, r0
+ 419 02d2 002B     		cmp	r3, #0
+ 420 02d4 04D1     		bne	.L16
+ 194:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 						DBG("_HandleRequest2 failed\n");
+ 195:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 						StallControlPipe(bEPStat);
+ 421              		.loc 1 195 0
+ 422 02d6 BB79     		ldrb	r3, [r7, #6]	@ zero_extendqisi2
+ 423 02d8 1846     		mov	r0, r3
+ 424 02da FFF7B9FE 		bl	StallControlPipe
+ 196:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 						return;
+ 425              		.loc 1 196 0
+ 426 02de 11E0     		b	.L8
+ 427              	.L16:
+ 197:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					}
+ 198:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					/* send status to host */
+ 199:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 					DataIn();
+ 428              		.loc 1 199 0
+ 429 02e0 FFF7D6FE 		bl	DataIn
+ 430 02e4 0EE0     		b	.L8
+ 431              	.L14:
+ 200:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				}
+ 201:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			}
+ 202:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			else {
+ 203:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				/* absorb zero-length status message */
+ 204:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				iChunk = USBHwEPRead(0x00, NULL, 0);
+ 432              		.loc 1 204 0
+ 433 02e6 4FF00000 		mov	r0, #0
+ 434 02ea 4FF00001 		mov	r1, #0
+ 435 02ee 4FF00002 		mov	r2, #0
+ 436 02f2 FFF7FEFF 		bl	USBHwEPRead
+ 437 02f6 B860     		str	r0, [r7, #8]
+ 438 02f8 04E0     		b	.L8
+ 439              	.L9:
+ 205:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 				DBG(iChunk > 0 ? "?" : "");
+ 206:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 			}
+ 207:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		}
+ 208:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	}
+ 209:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	else if (bEP == 0x80) {
+ 440              		.loc 1 209 0
+ 441 02fa FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 442 02fc 802B     		cmp	r3, #128
+ 443 02fe 01D1     		bne	.L8
+ 210:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		/* IN transfer */
+ 211:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		/* send more data if available (possibly a 0-length packet) */
+ 212:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		DataIn();
+ 444              		.loc 1 212 0
+ 445 0300 FFF7C6FE 		bl	DataIn
+ 446              	.L8:
+ 213:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	}
+ 214:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	else {
+ 215:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 		ASSERT(FALSE);
+ 216:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	}
+ 217:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** }
+ 447              		.loc 1 217 0
+ 448 0304 07F11007 		add	r7, r7, #16
+ 449 0308 BD46     		mov	sp, r7
+ 450 030a 80BD     		pop	{r7, pc}
+ 451              		.cfi_endproc
+ 452              	.LFE3:
+ 454              		.align	2
+ 455              		.global	USBRegisterRequestHandler
+ 456              		.thumb
+ 457              		.thumb_func
+ 459              	USBRegisterRequestHandler:
+ 460              	.LFB4:
+ 218:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 219:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 220:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** /**
+ 221:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	Registers a callback for handling requests
+ 222:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 
+ 223:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	@param [in]	iType			Type of request, e.g. REQTYPE_TYPE_STANDARD
+ 224:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	@param [in]	*pfnHandler		Callback function pointer
+ 225:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	@param [in]	*pbDataStore	Data storage area for this type of request
+ 226:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c ****  */
+ 227:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** void USBRegisterRequestHandler(int iType, TFnHandleRequest *pfnHandler, U8 *pbDataStore)
+ 228:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** {
+ 461              		.loc 1 228 0
+ 462              		.cfi_startproc
+ 463              		@ args = 0, pretend = 0, frame = 16
+ 464              		@ frame_needed = 1, uses_anonymous_args = 0
+ 465              		@ link register save eliminated.
+ 466 030c 80B4     		push	{r7}
+ 467              	.LCFI12:
+ 468              		.cfi_def_cfa_offset 4
+ 469              		.cfi_offset 7, -4
+ 470 030e 85B0     		sub	sp, sp, #20
+ 471              	.LCFI13:
+ 472              		.cfi_def_cfa_offset 24
+ 473 0310 00AF     		add	r7, sp, #0
+ 474              	.LCFI14:
+ 475              		.cfi_def_cfa_register 7
+ 476 0312 F860     		str	r0, [r7, #12]
+ 477 0314 B960     		str	r1, [r7, #8]
+ 478 0316 7A60     		str	r2, [r7, #4]
+ 229:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	ASSERT(iType >= 0);
+ 230:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	ASSERT(iType < 4);
+ 231:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	apfnReqHandlers[iType] = pfnHandler;
+ 479              		.loc 1 231 0
+ 480 0318 40F20003 		movw	r3, #:lower16:apfnReqHandlers
+ 481 031c C0F20003 		movt	r3, #:upper16:apfnReqHandlers
+ 482 0320 FA68     		ldr	r2, [r7, #12]
+ 483 0322 B968     		ldr	r1, [r7, #8]
+ 484 0324 43F82210 		str	r1, [r3, r2, lsl #2]
+ 232:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** 	apbDataStore[iType] = pbDataStore;
+ 485              		.loc 1 232 0
+ 486 0328 40F20003 		movw	r3, #:lower16:apbDataStore
+ 487 032c C0F20003 		movt	r3, #:upper16:apbDataStore
+ 488 0330 FA68     		ldr	r2, [r7, #12]
+ 489 0332 7968     		ldr	r1, [r7, #4]
+ 490 0334 43F82210 		str	r1, [r3, r2, lsl #2]
+ 233:Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c **** }
+ 491              		.loc 1 233 0
+ 492 0338 07F11407 		add	r7, r7, #20
+ 493 033c BD46     		mov	sp, r7
+ 494 033e 80BC     		pop	{r7}
+ 495 0340 7047     		bx	lr
+ 496              		.cfi_endproc
+ 497              	.LFE4:
+ 499              	.Letext0:
+ 500              		.file 2 "/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none
+ 501              		.file 3 "Libraries/CM3/inc/lpc_types.h"
+ 502              		.file 4 "Libraries/uC-CSP/LPC17xx/USB/inc/usbstruct.h"
+ 503              		.file 5 "Libraries/uC-CSP/LPC17xx/USB/inc/usbapi.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 usbcontrol.c
+     /tmp/ccDXVu8K.s:19     .bss:00000000 $d
+     /tmp/ccDXVu8K.s:20     .bss:00000000 Setup
+     /tmp/ccDXVu8K.s:23     .bss:00000008 pbData
+     /tmp/ccDXVu8K.s:26     .bss:0000000c iResidue
+     /tmp/ccDXVu8K.s:29     .bss:00000010 iLen
+     /tmp/ccDXVu8K.s:32     .bss:00000014 apfnReqHandlers
+     /tmp/ccDXVu8K.s:35     .bss:00000024 apbDataStore
+     /tmp/ccDXVu8K.s:38     .text:00000000 $t
+     /tmp/ccDXVu8K.s:42     .text:00000000 _HandleRequest
+     /tmp/ccDXVu8K.s:104    .text:00000050 StallControlPipe
+     /tmp/ccDXVu8K.s:156    .text:00000090 DataIn
+     /tmp/ccDXVu8K.s:219    .text:000000f8 USBHandleControlTransfer
+     /tmp/ccDXVu8K.s:459    .text:0000030c USBRegisterRequestHandler
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+USBHwEPStall
+USBHwEPWrite
+USBHwEPRead

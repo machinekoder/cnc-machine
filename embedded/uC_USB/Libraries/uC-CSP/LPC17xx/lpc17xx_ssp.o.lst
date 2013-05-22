@@ -1,0 +1,2166 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"lpc17xx_ssp.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.thumb
+  20              		.thumb_func
+  22              	setSSPclock:
+  23              	.LFB55:
+  24              		.file 1 "Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c"
+   1:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /**********************************************************************
+   2:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * $Id$		lpc17xx_ssp.c				2010-06-18
+   3:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *//**
+   4:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @file		lpc17xx_ssp.c
+   5:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @brief	Contains all functions support for SSP firmware library on LPC17xx
+   6:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @version	3.0
+   7:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @date		18. June. 2010
+   8:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @author	NXP MCU SW Application Team
+   9:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *
+  10:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * Copyright(C) 2010, NXP Semiconductor
+  11:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * All rights reserved.
+  12:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *
+  13:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** ***********************************************************************
+  14:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * Software that is described herein is for illustrative purposes only
+  15:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * which provides customers with programming information regarding the
+  16:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * products. This software is supplied "AS IS" without any warranties.
+  17:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * NXP Semiconductors assumes no responsibility or liability for the
+  18:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * use of the software, conveys no license or title under any patent,
+  19:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * copyright, or mask work right to the product. NXP Semiconductors
+  20:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * reserves the right to make changes in the software without
+  21:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * notification. NXP Semiconductors also make no representation or
+  22:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * warranty that such application will be suitable for the specified
+  23:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * use without further testing or modification.
+  24:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** **********************************************************************/
+  25:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  26:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /* Peripheral group ----------------------------------------------------------- */
+  27:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /** @addtogroup SSP
+  28:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @{
+  29:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  */
+  30:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  31:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /* Includes ------------------------------------------------------------------- */
+  32:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** #include "lpc17xx_ssp.h"
+  33:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** #include "lpc17xx_clkpwr.h"
+  34:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  35:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  36:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /* If this source file built with example, the LPC17xx FW library configuration
+  37:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * file in each example directory ("lpc17xx_libcfg.h") must be included,
+  38:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * otherwise the default FW library configuration file must be included instead
+  39:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  */
+  40:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** //#ifdef __BUILD_WITH_EXAMPLE__
+  41:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** //#include "lpc17xx_libcfg.h"
+  42:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** //#else
+  43:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** //#include "lpc17xx_libcfg_default.h"
+  44:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** //#endif /* __BUILD_WITH_EXAMPLE__ */
+  45:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  46:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  47:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** #ifdef _SSP
+  48:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  49:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /* Public Functions ----------------------------------------------------------- */
+  50:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /** @addtogroup SSP_Public_Functions
+  51:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @{
+  52:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  */
+  53:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** static void setSSPclock (LPC_SSP_TypeDef *SSPx, uint32_t target_clock);
+  54:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  55:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+  56:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief 		Setup clock rate for SSP device
+  57:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in] 	SSPx	SSP peripheral definition, should be:
+  58:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP0: SSP0 peripheral
+  59:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+  60:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	target_clock : clock of SSP (Hz)
+  61:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return 		None
+  62:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  ***********************************************************************/
+  63:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** static void setSSPclock (LPC_SSP_TypeDef *SSPx, uint32_t target_clock)
+  64:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+  25              		.loc 1 64 0
+  26              		.cfi_startproc
+  27              		@ args = 0, pretend = 0, frame = 24
+  28              		@ frame_needed = 1, uses_anonymous_args = 0
+  29 0000 80B5     		push	{r7, lr}
+  30              	.LCFI0:
+  31              		.cfi_def_cfa_offset 8
+  32              		.cfi_offset 14, -4
+  33              		.cfi_offset 7, -8
+  34 0002 86B0     		sub	sp, sp, #24
+  35              	.LCFI1:
+  36              		.cfi_def_cfa_offset 32
+  37 0004 00AF     		add	r7, sp, #0
+  38              	.LCFI2:
+  39              		.cfi_def_cfa_register 7
+  40 0006 7860     		str	r0, [r7, #4]
+  41 0008 3960     		str	r1, [r7, #0]
+  65:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     uint32_t prescale, cr0_div, cmp_clk, ssp_clk;
+  66:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  67:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  68:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     /* The SSP clock is derived from the (main system oscillator / 2),
+  69:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****        so compute the best divider from that clock */
+  70:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     if (SSPx == LPC_SSP0){
+  42              		.loc 1 70 0
+  43 000a 7A68     		ldr	r2, [r7, #4]
+  44 000c 4FF40043 		mov	r3, #32768
+  45 0010 C4F20803 		movt	r3, 16392
+  46 0014 9A42     		cmp	r2, r3
+  47 0016 05D1     		bne	.L2
+  71:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     	ssp_clk = CLKPWR_GetPCLK (CLKPWR_PCLKSEL_SSP0);
+  48              		.loc 1 71 0
+  49 0018 4FF02A00 		mov	r0, #42
+  50 001c FFF7FEFF 		bl	CLKPWR_GetPCLK
+  51 0020 B860     		str	r0, [r7, #8]
+  52 0022 0BE0     		b	.L3
+  53              	.L2:
+  72:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     } else if (SSPx == LPC_SSP1) {
+  54              		.loc 1 72 0
+  55 0024 7A68     		ldr	r2, [r7, #4]
+  56 0026 4FF00003 		mov	r3, #0
+  57 002a C4F20303 		movt	r3, 16387
+  58 002e 9A42     		cmp	r2, r3
+  59 0030 44D1     		bne	.L8
+  73:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     	ssp_clk = CLKPWR_GetPCLK (CLKPWR_PCLKSEL_SSP1);
+  60              		.loc 1 73 0
+  61 0032 4FF01400 		mov	r0, #20
+  62 0036 FFF7FEFF 		bl	CLKPWR_GetPCLK
+  63 003a B860     		str	r0, [r7, #8]
+  64              	.L3:
+  74:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     } else {
+  75:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     	return;
+  76:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     }
+  77:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  78:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	/* Find closest divider to get at or under the target frequency.
+  79:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	   Use smallest prescale possible and rely on the divider to get
+  80:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	   the closest target frequency */
+  81:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	cr0_div = 0;
+  65              		.loc 1 81 0
+  66 003c 4FF00003 		mov	r3, #0
+  67 0040 3B61     		str	r3, [r7, #16]
+  82:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	cmp_clk = 0xFFFFFFFF;
+  68              		.loc 1 82 0
+  69 0042 4FF0FF33 		mov	r3, #-1
+  70 0046 FB60     		str	r3, [r7, #12]
+  83:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	prescale = 2;
+  71              		.loc 1 83 0
+  72 0048 4FF00203 		mov	r3, #2
+  73 004c 7B61     		str	r3, [r7, #20]
+  84:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	while (cmp_clk > target_clock)
+  74              		.loc 1 84 0
+  75 004e 1BE0     		b	.L6
+  76              	.L7:
+  85:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+  86:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		cmp_clk = ssp_clk / ((cr0_div + 1) * prescale);
+  77              		.loc 1 86 0
+  78 0050 3B69     		ldr	r3, [r7, #16]
+  79 0052 03F10103 		add	r3, r3, #1
+  80 0056 7A69     		ldr	r2, [r7, #20]
+  81 0058 02FB03F3 		mul	r3, r2, r3
+  82 005c BA68     		ldr	r2, [r7, #8]
+  83 005e B2FBF3F3 		udiv	r3, r2, r3
+  84 0062 FB60     		str	r3, [r7, #12]
+  87:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		if (cmp_clk > target_clock)
+  85              		.loc 1 87 0
+  86 0064 FA68     		ldr	r2, [r7, #12]
+  87 0066 3B68     		ldr	r3, [r7, #0]
+  88 0068 9A42     		cmp	r2, r3
+  89 006a 0DD9     		bls	.L6
+  88:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		{
+  89:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			cr0_div++;
+  90              		.loc 1 89 0
+  91 006c 3B69     		ldr	r3, [r7, #16]
+  92 006e 03F10103 		add	r3, r3, #1
+  93 0072 3B61     		str	r3, [r7, #16]
+  90:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			if (cr0_div > 0xFF)
+  94              		.loc 1 90 0
+  95 0074 3B69     		ldr	r3, [r7, #16]
+  96 0076 FF2B     		cmp	r3, #255
+  97 0078 06D9     		bls	.L6
+  91:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			{
+  92:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				cr0_div = 0;
+  98              		.loc 1 92 0
+  99 007a 4FF00003 		mov	r3, #0
+ 100 007e 3B61     		str	r3, [r7, #16]
+  93:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				prescale += 2;
+ 101              		.loc 1 93 0
+ 102 0080 7B69     		ldr	r3, [r7, #20]
+ 103 0082 03F10203 		add	r3, r3, #2
+ 104 0086 7B61     		str	r3, [r7, #20]
+ 105              	.L6:
+  84:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	while (cmp_clk > target_clock)
+ 106              		.loc 1 84 0 discriminator 1
+ 107 0088 FA68     		ldr	r2, [r7, #12]
+ 108 008a 3B68     		ldr	r3, [r7, #0]
+ 109 008c 9A42     		cmp	r2, r3
+ 110 008e DFD8     		bhi	.L7
+  94:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			}
+  95:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		}
+  96:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+  97:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+  98:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     /* Write computed prescaler and divider back to register */
+  99:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     SSPx->CR0 &= (~SSP_CR0_SCR(0xFF)) & SSP_CR0_BITMASK;
+ 111              		.loc 1 99 0
+ 112 0090 7B68     		ldr	r3, [r7, #4]
+ 113 0092 1B68     		ldr	r3, [r3, #0]
+ 114 0094 DAB2     		uxtb	r2, r3
+ 115 0096 7B68     		ldr	r3, [r7, #4]
+ 116 0098 1A60     		str	r2, [r3, #0]
+ 100:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     SSPx->CR0 |= (SSP_CR0_SCR(cr0_div)) & SSP_CR0_BITMASK;
+ 117              		.loc 1 100 0
+ 118 009a 7B68     		ldr	r3, [r7, #4]
+ 119 009c 1A68     		ldr	r2, [r3, #0]
+ 120 009e 3B69     		ldr	r3, [r7, #16]
+ 121 00a0 4FEA0323 		lsl	r3, r3, #8
+ 122 00a4 4FEA0343 		lsl	r3, r3, #16
+ 123 00a8 4FEA1343 		lsr	r3, r3, #16
+ 124 00ac 1A43     		orrs	r2, r2, r3
+ 125 00ae 7B68     		ldr	r3, [r7, #4]
+ 126 00b0 1A60     		str	r2, [r3, #0]
+ 101:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     SSPx->CPSR = prescale & SSP_CPSR_BITMASK;
+ 127              		.loc 1 101 0
+ 128 00b2 7B69     		ldr	r3, [r7, #20]
+ 129 00b4 DAB2     		uxtb	r2, r3
+ 130 00b6 7B68     		ldr	r3, [r7, #4]
+ 131 00b8 1A61     		str	r2, [r3, #16]
+ 132 00ba 00E0     		b	.L1
+ 133              	.L8:
+  75:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     	return;
+ 134              		.loc 1 75 0
+ 135 00bc 00BF     		nop
+ 136              	.L1:
+ 102:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 137              		.loc 1 102 0
+ 138 00be 07F11807 		add	r7, r7, #24
+ 139 00c2 BD46     		mov	sp, r7
+ 140 00c4 80BD     		pop	{r7, pc}
+ 141              		.cfi_endproc
+ 142              	.LFE55:
+ 144 00c6 00BF     		.align	2
+ 145              		.global	SSP_Init
+ 146              		.thumb
+ 147              		.thumb_func
+ 149              	SSP_Init:
+ 150              	.LFB56:
+ 103:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 104:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /**
+ 105:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @}
+ 106:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  */
+ 107:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 108:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /* Public Functions ----------------------------------------------------------- */
+ 109:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /** @addtogroup SSP_Public_Functions
+ 110:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @{
+ 111:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  */
+ 112:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 113:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /********************************************************************//**
+ 114:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief		Initializes the SSPx peripheral according to the specified
+ 115:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *               parameters in the SSP_ConfigStruct.
+ 116:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 117:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				 		- LPC_SSP0: SSP0 peripheral
+ 118:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 119:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSP_ConfigStruct Pointer to a SSP_CFG_Type structure
+ 120:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *                    that contains the configuration information for the
+ 121:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *                    specified SSP peripheral.
+ 122:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return 		None
+ 123:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  *********************************************************************/
+ 124:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** void SSP_Init(LPC_SSP_TypeDef *SSPx, SSP_CFG_Type *SSP_ConfigStruct)
+ 125:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 151              		.loc 1 125 0
+ 152              		.cfi_startproc
+ 153              		@ args = 0, pretend = 0, frame = 16
+ 154              		@ frame_needed = 1, uses_anonymous_args = 0
+ 155 00c8 80B5     		push	{r7, lr}
+ 156              	.LCFI3:
+ 157              		.cfi_def_cfa_offset 8
+ 158              		.cfi_offset 14, -4
+ 159              		.cfi_offset 7, -8
+ 160 00ca 84B0     		sub	sp, sp, #16
+ 161              	.LCFI4:
+ 162              		.cfi_def_cfa_offset 24
+ 163 00cc 00AF     		add	r7, sp, #0
+ 164              	.LCFI5:
+ 165              		.cfi_def_cfa_register 7
+ 166 00ce 7860     		str	r0, [r7, #4]
+ 167 00d0 3960     		str	r1, [r7, #0]
+ 126:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	uint32_t tmp;
+ 127:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 128:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 129:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	if(SSPx == LPC_SSP0) {
+ 168              		.loc 1 129 0
+ 169 00d2 7A68     		ldr	r2, [r7, #4]
+ 170 00d4 4FF40043 		mov	r3, #32768
+ 171 00d8 C4F20803 		movt	r3, 16392
+ 172 00dc 9A42     		cmp	r2, r3
+ 173 00de 06D1     		bne	.L10
+ 130:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		/* Set up clock and power for SSP0 module */
+ 131:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		CLKPWR_ConfigPPWR (CLKPWR_PCONP_PCSSP0, ENABLE);
+ 174              		.loc 1 131 0
+ 175 00e0 4FF40010 		mov	r0, #2097152
+ 176 00e4 4FF00101 		mov	r1, #1
+ 177 00e8 FFF7FEFF 		bl	CLKPWR_ConfigPPWR
+ 178 00ec 0CE0     		b	.L11
+ 179              	.L10:
+ 132:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	} else if(SSPx == LPC_SSP1) {
+ 180              		.loc 1 132 0
+ 181 00ee 7A68     		ldr	r2, [r7, #4]
+ 182 00f0 4FF00003 		mov	r3, #0
+ 183 00f4 C4F20303 		movt	r3, 16387
+ 184 00f8 9A42     		cmp	r2, r3
+ 185 00fa 27D1     		bne	.L14
+ 133:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		/* Set up clock and power for SSP1 module */
+ 134:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		CLKPWR_ConfigPPWR (CLKPWR_PCONP_PCSSP1, ENABLE);
+ 186              		.loc 1 134 0
+ 187 00fc 4FF48060 		mov	r0, #1024
+ 188 0100 4FF00101 		mov	r1, #1
+ 189 0104 FFF7FEFF 		bl	CLKPWR_ConfigPPWR
+ 190              	.L11:
+ 135:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	} else {
+ 136:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		return;
+ 137:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 138:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 139:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	/* Configure SSP, interrupt is disable, LoopBack mode is disable,
+ 140:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	 * SSP is disable, Slave output is disable as default
+ 141:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	 */
+ 142:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	tmp = ((SSP_ConfigStruct->CPHA) | (SSP_ConfigStruct->CPOL) \
+ 191              		.loc 1 142 0
+ 192 0108 3B68     		ldr	r3, [r7, #0]
+ 193 010a 5A68     		ldr	r2, [r3, #4]
+ 194 010c 3B68     		ldr	r3, [r7, #0]
+ 195 010e 9B68     		ldr	r3, [r3, #8]
+ 196 0110 1A43     		orrs	r2, r2, r3
+ 143:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		| (SSP_ConfigStruct->FrameFormat) | (SSP_ConfigStruct->Databit))
+ 197              		.loc 1 143 0
+ 198 0112 3B68     		ldr	r3, [r7, #0]
+ 199 0114 1B69     		ldr	r3, [r3, #16]
+ 200 0116 1A43     		orrs	r2, r2, r3
+ 201 0118 3B68     		ldr	r3, [r7, #0]
+ 202 011a 1B68     		ldr	r3, [r3, #0]
+ 203 011c 1343     		orrs	r3, r3, r2
+ 142:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	tmp = ((SSP_ConfigStruct->CPHA) | (SSP_ConfigStruct->CPOL) \
+ 204              		.loc 1 142 0
+ 205 011e 4FEA0343 		lsl	r3, r3, #16
+ 206 0122 4FEA1343 		lsr	r3, r3, #16
+ 207 0126 FB60     		str	r3, [r7, #12]
+ 144:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		& SSP_CR0_BITMASK;
+ 145:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	// write back to SSP control register
+ 146:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSPx->CR0 = tmp;
+ 208              		.loc 1 146 0
+ 209 0128 7B68     		ldr	r3, [r7, #4]
+ 210 012a FA68     		ldr	r2, [r7, #12]
+ 211 012c 1A60     		str	r2, [r3, #0]
+ 147:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 148:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	tmp = SSP_ConfigStruct->Mode & SSP_CR1_BITMASK;
+ 212              		.loc 1 148 0
+ 213 012e 3B68     		ldr	r3, [r7, #0]
+ 214 0130 DB68     		ldr	r3, [r3, #12]
+ 215 0132 03F00F03 		and	r3, r3, #15
+ 216 0136 FB60     		str	r3, [r7, #12]
+ 149:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	// Write back to CR1
+ 150:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSPx->CR1 = tmp;
+ 217              		.loc 1 150 0
+ 218 0138 7B68     		ldr	r3, [r7, #4]
+ 219 013a FA68     		ldr	r2, [r7, #12]
+ 220 013c 5A60     		str	r2, [r3, #4]
+ 151:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 152:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	// Set clock rate for SSP peripheral
+ 153:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	setSSPclock(SSPx, SSP_ConfigStruct->ClockRate);
+ 221              		.loc 1 153 0
+ 222 013e 3B68     		ldr	r3, [r7, #0]
+ 223 0140 5B69     		ldr	r3, [r3, #20]
+ 224 0142 7868     		ldr	r0, [r7, #4]
+ 225 0144 1946     		mov	r1, r3
+ 226 0146 FFF75BFF 		bl	setSSPclock
+ 227 014a 00E0     		b	.L9
+ 228              	.L14:
+ 136:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		return;
+ 229              		.loc 1 136 0
+ 230 014c 00BF     		nop
+ 231              	.L9:
+ 154:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 232              		.loc 1 154 0
+ 233 014e 07F11007 		add	r7, r7, #16
+ 234 0152 BD46     		mov	sp, r7
+ 235 0154 80BD     		pop	{r7, pc}
+ 236              		.cfi_endproc
+ 237              	.LFE56:
+ 239 0156 00BF     		.align	2
+ 240              		.global	SSP_DeInit
+ 241              		.thumb
+ 242              		.thumb_func
+ 244              	SSP_DeInit:
+ 245              	.LFB57:
+ 155:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 156:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 157:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 158:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief		De-initializes the SSPx peripheral registers to their
+ 159:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *                  default reset values.
+ 160:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 161:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				 		- LPC_SSP0: SSP0 peripheral
+ 162:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 163:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return 		None
+ 164:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 165:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** void SSP_DeInit(LPC_SSP_TypeDef* SSPx)
+ 166:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 246              		.loc 1 166 0
+ 247              		.cfi_startproc
+ 248              		@ args = 0, pretend = 0, frame = 8
+ 249              		@ frame_needed = 1, uses_anonymous_args = 0
+ 250 0158 80B5     		push	{r7, lr}
+ 251              	.LCFI6:
+ 252              		.cfi_def_cfa_offset 8
+ 253              		.cfi_offset 14, -4
+ 254              		.cfi_offset 7, -8
+ 255 015a 82B0     		sub	sp, sp, #8
+ 256              	.LCFI7:
+ 257              		.cfi_def_cfa_offset 16
+ 258 015c 00AF     		add	r7, sp, #0
+ 259              	.LCFI8:
+ 260              		.cfi_def_cfa_register 7
+ 261 015e 7860     		str	r0, [r7, #4]
+ 167:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSPx(SSPx));
+ 168:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 169:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	if (SSPx == LPC_SSP0){
+ 262              		.loc 1 169 0
+ 263 0160 7A68     		ldr	r2, [r7, #4]
+ 264 0162 4FF40043 		mov	r3, #32768
+ 265 0166 C4F20803 		movt	r3, 16392
+ 266 016a 9A42     		cmp	r2, r3
+ 267 016c 06D1     		bne	.L16
+ 170:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		/* Set up clock and power for SSP0 module */
+ 171:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		CLKPWR_ConfigPPWR (CLKPWR_PCONP_PCSSP0, DISABLE);
+ 268              		.loc 1 171 0
+ 269 016e 4FF40010 		mov	r0, #2097152
+ 270 0172 4FF00001 		mov	r1, #0
+ 271 0176 FFF7FEFF 		bl	CLKPWR_ConfigPPWR
+ 272 017a 0CE0     		b	.L15
+ 273              	.L16:
+ 172:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	} else if (SSPx == LPC_SSP1) {
+ 274              		.loc 1 172 0
+ 275 017c 7A68     		ldr	r2, [r7, #4]
+ 276 017e 4FF00003 		mov	r3, #0
+ 277 0182 C4F20303 		movt	r3, 16387
+ 278 0186 9A42     		cmp	r2, r3
+ 279 0188 05D1     		bne	.L15
+ 173:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		/* Set up clock and power for SSP1 module */
+ 174:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		CLKPWR_ConfigPPWR (CLKPWR_PCONP_PCSSP1, DISABLE);
+ 280              		.loc 1 174 0
+ 281 018a 4FF48060 		mov	r0, #1024
+ 282 018e 4FF00001 		mov	r1, #0
+ 283 0192 FFF7FEFF 		bl	CLKPWR_ConfigPPWR
+ 284              	.L15:
+ 175:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 176:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 285              		.loc 1 176 0
+ 286 0196 07F10807 		add	r7, r7, #8
+ 287 019a BD46     		mov	sp, r7
+ 288 019c 80BD     		pop	{r7, pc}
+ 289              		.cfi_endproc
+ 290              	.LFE57:
+ 292 019e 00BF     		.align	2
+ 293              		.global	SSP_GetDataSize
+ 294              		.thumb
+ 295              		.thumb_func
+ 297              	SSP_GetDataSize:
+ 298              	.LFB58:
+ 177:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 178:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*****************************************************************************//**
+ 179:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @brief		Get data size bit selected
+ 180:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @param[in]	SSPx pointer to LPC_SSP_TypeDef structure, should be:
+ 181:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * 				- LPC_SSP0: SSP0 peripheral
+ 182:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * 				- LPC_SSP1: SSP1 peripheral
+ 183:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @return		Data size, could be:
+ 184:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *				- SSP_DATABIT_4: 4 bit transfer
+ 185:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *				- SSP_DATABIT_5: 5 bit transfer
+ 186:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *				...
+ 187:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *				- SSP_DATABIT_16: 16 bit transfer
+ 188:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *******************************************************************************/
+ 189:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** uint8_t SSP_GetDataSize(LPC_SSP_TypeDef* SSPx)
+ 190:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 299              		.loc 1 190 0
+ 300              		.cfi_startproc
+ 301              		@ args = 0, pretend = 0, frame = 8
+ 302              		@ frame_needed = 1, uses_anonymous_args = 0
+ 303              		@ link register save eliminated.
+ 304 01a0 80B4     		push	{r7}
+ 305              	.LCFI9:
+ 306              		.cfi_def_cfa_offset 4
+ 307              		.cfi_offset 7, -4
+ 308 01a2 83B0     		sub	sp, sp, #12
+ 309              	.LCFI10:
+ 310              		.cfi_def_cfa_offset 16
+ 311 01a4 00AF     		add	r7, sp, #0
+ 312              	.LCFI11:
+ 313              		.cfi_def_cfa_register 7
+ 314 01a6 7860     		str	r0, [r7, #4]
+ 191:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	return (SSPx->CR0 & (0xF));
+ 315              		.loc 1 191 0
+ 316 01a8 7B68     		ldr	r3, [r7, #4]
+ 317 01aa 1B68     		ldr	r3, [r3, #0]
+ 318 01ac DBB2     		uxtb	r3, r3
+ 319 01ae 03F00F03 		and	r3, r3, #15
+ 320 01b2 DBB2     		uxtb	r3, r3
+ 192:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 321              		.loc 1 192 0
+ 322 01b4 1846     		mov	r0, r3
+ 323 01b6 07F10C07 		add	r7, r7, #12
+ 324 01ba BD46     		mov	sp, r7
+ 325 01bc 80BC     		pop	{r7}
+ 326 01be 7047     		bx	lr
+ 327              		.cfi_endproc
+ 328              	.LFE58:
+ 330              		.align	2
+ 331              		.global	SSP_ConfigStructInit
+ 332              		.thumb
+ 333              		.thumb_func
+ 335              	SSP_ConfigStructInit:
+ 336              	.LFB59:
+ 193:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 194:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*****************************************************************************//**
+ 195:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @brief		Fills each SSP_InitStruct member with its default value:
+ 196:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * 				- CPHA = SSP_CPHA_FIRST
+ 197:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * 				- CPOL = SSP_CPOL_HI
+ 198:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * 				- ClockRate = 1000000
+ 199:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * 				- Databit = SSP_DATABIT_8
+ 200:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * 				- Mode = SSP_MASTER_MODE
+ 201:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * 				- FrameFormat = SSP_FRAME_SSP
+ 202:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @param[in]	SSP_InitStruct Pointer to a SSP_CFG_Type structure
+ 203:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *                    which will be initialized.
+ 204:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** * @return		None
+ 205:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** *******************************************************************************/
+ 206:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** void SSP_ConfigStructInit(SSP_CFG_Type *SSP_InitStruct)
+ 207:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 337              		.loc 1 207 0
+ 338              		.cfi_startproc
+ 339              		@ args = 0, pretend = 0, frame = 8
+ 340              		@ frame_needed = 1, uses_anonymous_args = 0
+ 341              		@ link register save eliminated.
+ 342 01c0 80B4     		push	{r7}
+ 343              	.LCFI12:
+ 344              		.cfi_def_cfa_offset 4
+ 345              		.cfi_offset 7, -4
+ 346 01c2 83B0     		sub	sp, sp, #12
+ 347              	.LCFI13:
+ 348              		.cfi_def_cfa_offset 16
+ 349 01c4 00AF     		add	r7, sp, #0
+ 350              	.LCFI14:
+ 351              		.cfi_def_cfa_register 7
+ 352 01c6 7860     		str	r0, [r7, #4]
+ 208:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSP_InitStruct->CPHA = SSP_CPHA_FIRST;
+ 353              		.loc 1 208 0
+ 354 01c8 7B68     		ldr	r3, [r7, #4]
+ 355 01ca 4FF00002 		mov	r2, #0
+ 356 01ce 5A60     		str	r2, [r3, #4]
+ 209:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSP_InitStruct->CPOL = SSP_CPOL_HI;
+ 357              		.loc 1 209 0
+ 358 01d0 7B68     		ldr	r3, [r7, #4]
+ 359 01d2 4FF00002 		mov	r2, #0
+ 360 01d6 9A60     		str	r2, [r3, #8]
+ 210:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSP_InitStruct->ClockRate = 1000000;
+ 361              		.loc 1 210 0
+ 362 01d8 7A68     		ldr	r2, [r7, #4]
+ 363 01da 44F24023 		movw	r3, #16960
+ 364 01de C0F20F03 		movt	r3, 15
+ 365 01e2 5361     		str	r3, [r2, #20]
+ 211:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSP_InitStruct->Databit = SSP_DATABIT_8;
+ 366              		.loc 1 211 0
+ 367 01e4 7B68     		ldr	r3, [r7, #4]
+ 368 01e6 4FF00702 		mov	r2, #7
+ 369 01ea 1A60     		str	r2, [r3, #0]
+ 212:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSP_InitStruct->Mode = SSP_MASTER_MODE;
+ 370              		.loc 1 212 0
+ 371 01ec 7B68     		ldr	r3, [r7, #4]
+ 372 01ee 4FF00002 		mov	r2, #0
+ 373 01f2 DA60     		str	r2, [r3, #12]
+ 213:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSP_InitStruct->FrameFormat = SSP_FRAME_SPI;
+ 374              		.loc 1 213 0
+ 375 01f4 7B68     		ldr	r3, [r7, #4]
+ 376 01f6 4FF00002 		mov	r2, #0
+ 377 01fa 1A61     		str	r2, [r3, #16]
+ 214:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 378              		.loc 1 214 0
+ 379 01fc 07F10C07 		add	r7, r7, #12
+ 380 0200 BD46     		mov	sp, r7
+ 381 0202 80BC     		pop	{r7}
+ 382 0204 7047     		bx	lr
+ 383              		.cfi_endproc
+ 384              	.LFE59:
+ 386 0206 00BF     		.align	2
+ 387              		.global	SSP_Cmd
+ 388              		.thumb
+ 389              		.thumb_func
+ 391              	SSP_Cmd:
+ 392              	.LFB60:
+ 215:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 216:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 217:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 218:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief		Enable or disable SSP peripheral's operation
+ 219:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral, should be:
+ 220:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- LPC_SSP0: SSP0 peripheral
+ 221:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- LPC_SSP1: SSP1 peripheral
+ 222:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	NewState New State of SSPx peripheral's operation
+ 223:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return 		none
+ 224:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 225:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** void SSP_Cmd(LPC_SSP_TypeDef* SSPx, FunctionalState NewState)
+ 226:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 393              		.loc 1 226 0
+ 394              		.cfi_startproc
+ 395              		@ args = 0, pretend = 0, frame = 8
+ 396              		@ frame_needed = 1, uses_anonymous_args = 0
+ 397              		@ link register save eliminated.
+ 398 0208 80B4     		push	{r7}
+ 399              	.LCFI15:
+ 400              		.cfi_def_cfa_offset 4
+ 401              		.cfi_offset 7, -4
+ 402 020a 83B0     		sub	sp, sp, #12
+ 403              	.LCFI16:
+ 404              		.cfi_def_cfa_offset 16
+ 405 020c 00AF     		add	r7, sp, #0
+ 406              	.LCFI17:
+ 407              		.cfi_def_cfa_register 7
+ 408 020e 7860     		str	r0, [r7, #4]
+ 409 0210 0B46     		mov	r3, r1
+ 410 0212 FB70     		strb	r3, [r7, #3]
+ 227:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSPx(SSPx));
+ 228:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_FUNCTIONALSTATE(NewState));
+ 229:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 230:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	if (NewState == ENABLE)
+ 411              		.loc 1 230 0
+ 412 0214 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 413 0216 012B     		cmp	r3, #1
+ 414 0218 06D1     		bne	.L21
+ 231:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+ 232:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		SSPx->CR1 |= SSP_CR1_SSP_EN;
+ 415              		.loc 1 232 0
+ 416 021a 7B68     		ldr	r3, [r7, #4]
+ 417 021c 5B68     		ldr	r3, [r3, #4]
+ 418 021e 43F00202 		orr	r2, r3, #2
+ 419 0222 7B68     		ldr	r3, [r7, #4]
+ 420 0224 5A60     		str	r2, [r3, #4]
+ 421 0226 05E0     		b	.L20
+ 422              	.L21:
+ 233:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 234:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	else
+ 235:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+ 236:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		SSPx->CR1 &= (~SSP_CR1_SSP_EN) & SSP_CR1_BITMASK;
+ 423              		.loc 1 236 0
+ 424 0228 7B68     		ldr	r3, [r7, #4]
+ 425 022a 5B68     		ldr	r3, [r3, #4]
+ 426 022c 03F00D02 		and	r2, r3, #13
+ 427 0230 7B68     		ldr	r3, [r7, #4]
+ 428 0232 5A60     		str	r2, [r3, #4]
+ 429              	.L20:
+ 237:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 238:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 430              		.loc 1 238 0
+ 431 0234 07F10C07 		add	r7, r7, #12
+ 432 0238 BD46     		mov	sp, r7
+ 433 023a 80BC     		pop	{r7}
+ 434 023c 7047     		bx	lr
+ 435              		.cfi_endproc
+ 436              	.LFE60:
+ 438 023e 00BF     		.align	2
+ 439              		.global	SSP_LoopBackCmd
+ 440              		.thumb
+ 441              		.thumb_func
+ 443              	SSP_LoopBackCmd:
+ 444              	.LFB61:
+ 239:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 240:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 241:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief		Enable or disable Loop Back mode function in SSP peripheral
+ 242:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 243:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  *  					- LPC_SSP0: SSP0 peripheral
+ 244:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 245:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	NewState	New State of Loop Back mode, should be:
+ 246:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 							- ENABLE: Enable this function
+ 247:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 							- DISABLE: Disable this function
+ 248:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return 		None
+ 249:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 250:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** void SSP_LoopBackCmd(LPC_SSP_TypeDef* SSPx, FunctionalState NewState)
+ 251:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 445              		.loc 1 251 0
+ 446              		.cfi_startproc
+ 447              		@ args = 0, pretend = 0, frame = 8
+ 448              		@ frame_needed = 1, uses_anonymous_args = 0
+ 449              		@ link register save eliminated.
+ 450 0240 80B4     		push	{r7}
+ 451              	.LCFI18:
+ 452              		.cfi_def_cfa_offset 4
+ 453              		.cfi_offset 7, -4
+ 454 0242 83B0     		sub	sp, sp, #12
+ 455              	.LCFI19:
+ 456              		.cfi_def_cfa_offset 16
+ 457 0244 00AF     		add	r7, sp, #0
+ 458              	.LCFI20:
+ 459              		.cfi_def_cfa_register 7
+ 460 0246 7860     		str	r0, [r7, #4]
+ 461 0248 0B46     		mov	r3, r1
+ 462 024a FB70     		strb	r3, [r7, #3]
+ 252:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSPx(SSPx));
+ 253:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_FUNCTIONALSTATE(NewState));
+ 254:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 255:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	if (NewState == ENABLE)
+ 463              		.loc 1 255 0
+ 464 024c FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 465 024e 012B     		cmp	r3, #1
+ 466 0250 06D1     		bne	.L24
+ 256:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+ 257:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		SSPx->CR1 |= SSP_CR1_LBM_EN;
+ 467              		.loc 1 257 0
+ 468 0252 7B68     		ldr	r3, [r7, #4]
+ 469 0254 5B68     		ldr	r3, [r3, #4]
+ 470 0256 43F00102 		orr	r2, r3, #1
+ 471 025a 7B68     		ldr	r3, [r7, #4]
+ 472 025c 5A60     		str	r2, [r3, #4]
+ 473 025e 05E0     		b	.L23
+ 474              	.L24:
+ 258:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 259:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	else
+ 260:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+ 261:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		SSPx->CR1 &= (~SSP_CR1_LBM_EN) & SSP_CR1_BITMASK;
+ 475              		.loc 1 261 0
+ 476 0260 7B68     		ldr	r3, [r7, #4]
+ 477 0262 5B68     		ldr	r3, [r3, #4]
+ 478 0264 03F00E02 		and	r2, r3, #14
+ 479 0268 7B68     		ldr	r3, [r7, #4]
+ 480 026a 5A60     		str	r2, [r3, #4]
+ 481              	.L23:
+ 262:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 263:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 482              		.loc 1 263 0
+ 483 026c 07F10C07 		add	r7, r7, #12
+ 484 0270 BD46     		mov	sp, r7
+ 485 0272 80BC     		pop	{r7}
+ 486 0274 7047     		bx	lr
+ 487              		.cfi_endproc
+ 488              	.LFE61:
+ 490 0276 00BF     		.align	2
+ 491              		.global	SSP_SlaveOutputCmd
+ 492              		.thumb
+ 493              		.thumb_func
+ 495              	SSP_SlaveOutputCmd:
+ 496              	.LFB62:
+ 264:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 265:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 266:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief		Enable or disable Slave Output function in SSP peripheral
+ 267:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 268:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP0: SSP0 peripheral
+ 269:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 270:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	NewState	New State of Slave Output function, should be:
+ 271:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 							- ENABLE: Slave Output in normal operation
+ 272:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 							- DISABLE: Slave Output is disabled. This blocks
+ 273:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 							SSP controller from driving the transmit data
+ 274:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 							line (MISO)
+ 275:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * Note: 		This function is available when SSP peripheral in Slave mode
+ 276:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return 		None
+ 277:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 278:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** void SSP_SlaveOutputCmd(LPC_SSP_TypeDef* SSPx, FunctionalState NewState)
+ 279:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 497              		.loc 1 279 0
+ 498              		.cfi_startproc
+ 499              		@ args = 0, pretend = 0, frame = 8
+ 500              		@ frame_needed = 1, uses_anonymous_args = 0
+ 501              		@ link register save eliminated.
+ 502 0278 80B4     		push	{r7}
+ 503              	.LCFI21:
+ 504              		.cfi_def_cfa_offset 4
+ 505              		.cfi_offset 7, -4
+ 506 027a 83B0     		sub	sp, sp, #12
+ 507              	.LCFI22:
+ 508              		.cfi_def_cfa_offset 16
+ 509 027c 00AF     		add	r7, sp, #0
+ 510              	.LCFI23:
+ 511              		.cfi_def_cfa_register 7
+ 512 027e 7860     		str	r0, [r7, #4]
+ 513 0280 0B46     		mov	r3, r1
+ 514 0282 FB70     		strb	r3, [r7, #3]
+ 280:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSPx(SSPx));
+ 281:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_FUNCTIONALSTATE(NewState));
+ 282:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 283:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	if (NewState == ENABLE)
+ 515              		.loc 1 283 0
+ 516 0284 FB78     		ldrb	r3, [r7, #3]	@ zero_extendqisi2
+ 517 0286 012B     		cmp	r3, #1
+ 518 0288 06D1     		bne	.L27
+ 284:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+ 285:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		SSPx->CR1 &= (~SSP_CR1_SO_DISABLE) & SSP_CR1_BITMASK;
+ 519              		.loc 1 285 0
+ 520 028a 7B68     		ldr	r3, [r7, #4]
+ 521 028c 5B68     		ldr	r3, [r3, #4]
+ 522 028e 03F00702 		and	r2, r3, #7
+ 523 0292 7B68     		ldr	r3, [r7, #4]
+ 524 0294 5A60     		str	r2, [r3, #4]
+ 525 0296 05E0     		b	.L26
+ 526              	.L27:
+ 286:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 287:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	else
+ 288:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+ 289:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		SSPx->CR1 |= SSP_CR1_SO_DISABLE;
+ 527              		.loc 1 289 0
+ 528 0298 7B68     		ldr	r3, [r7, #4]
+ 529 029a 5B68     		ldr	r3, [r3, #4]
+ 530 029c 43F00802 		orr	r2, r3, #8
+ 531 02a0 7B68     		ldr	r3, [r7, #4]
+ 532 02a2 5A60     		str	r2, [r3, #4]
+ 533              	.L26:
+ 290:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 291:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 534              		.loc 1 291 0
+ 535 02a4 07F10C07 		add	r7, r7, #12
+ 536 02a8 BD46     		mov	sp, r7
+ 537 02aa 80BC     		pop	{r7}
+ 538 02ac 7047     		bx	lr
+ 539              		.cfi_endproc
+ 540              	.LFE62:
+ 542 02ae 00BF     		.align	2
+ 543              		.global	SSP_SendData
+ 544              		.thumb
+ 545              		.thumb_func
+ 547              	SSP_SendData:
+ 548              	.LFB63:
+ 292:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 293:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 294:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 295:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 296:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief		Transmit a single data through SSPx peripheral
+ 297:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 298:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP0: SSP0 peripheral
+ 299:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 300:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	Data	Data to transmit (must be 16 or 8-bit long,
+ 301:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						this depend on SSP data bit number configured)
+ 302:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return 		none
+ 303:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 304:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** void SSP_SendData(LPC_SSP_TypeDef* SSPx, uint16_t Data)
+ 305:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 549              		.loc 1 305 0
+ 550              		.cfi_startproc
+ 551              		@ args = 0, pretend = 0, frame = 8
+ 552              		@ frame_needed = 1, uses_anonymous_args = 0
+ 553              		@ link register save eliminated.
+ 554 02b0 80B4     		push	{r7}
+ 555              	.LCFI24:
+ 556              		.cfi_def_cfa_offset 4
+ 557              		.cfi_offset 7, -4
+ 558 02b2 83B0     		sub	sp, sp, #12
+ 559              	.LCFI25:
+ 560              		.cfi_def_cfa_offset 16
+ 561 02b4 00AF     		add	r7, sp, #0
+ 562              	.LCFI26:
+ 563              		.cfi_def_cfa_register 7
+ 564 02b6 7860     		str	r0, [r7, #4]
+ 565 02b8 0B46     		mov	r3, r1
+ 566 02ba 7B80     		strh	r3, [r7, #2]	@ movhi
+ 306:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 307:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSPx->DR = SSP_DR_BITMASK(Data);
+ 567              		.loc 1 307 0
+ 568 02bc 7A88     		ldrh	r2, [r7, #2]
+ 569 02be 7B68     		ldr	r3, [r7, #4]
+ 570 02c0 9A60     		str	r2, [r3, #8]
+ 308:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 571              		.loc 1 308 0
+ 572 02c2 07F10C07 		add	r7, r7, #12
+ 573 02c6 BD46     		mov	sp, r7
+ 574 02c8 80BC     		pop	{r7}
+ 575 02ca 7047     		bx	lr
+ 576              		.cfi_endproc
+ 577              	.LFE63:
+ 579              		.align	2
+ 580              		.global	SSP_ReceiveData
+ 581              		.thumb
+ 582              		.thumb_func
+ 584              	SSP_ReceiveData:
+ 585              	.LFB64:
+ 309:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 310:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 311:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 312:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 313:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief		Receive a single data from SSPx peripheral
+ 314:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be
+ 315:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP0: SSP0 peripheral
+ 316:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 317:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return 		Data received (16-bit long)
+ 318:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 319:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** uint16_t SSP_ReceiveData(LPC_SSP_TypeDef* SSPx)
+ 320:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 586              		.loc 1 320 0
+ 587              		.cfi_startproc
+ 588              		@ args = 0, pretend = 0, frame = 8
+ 589              		@ frame_needed = 1, uses_anonymous_args = 0
+ 590              		@ link register save eliminated.
+ 591 02cc 80B4     		push	{r7}
+ 592              	.LCFI27:
+ 593              		.cfi_def_cfa_offset 4
+ 594              		.cfi_offset 7, -4
+ 595 02ce 83B0     		sub	sp, sp, #12
+ 596              	.LCFI28:
+ 597              		.cfi_def_cfa_offset 16
+ 598 02d0 00AF     		add	r7, sp, #0
+ 599              	.LCFI29:
+ 600              		.cfi_def_cfa_register 7
+ 601 02d2 7860     		str	r0, [r7, #4]
+ 321:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 322:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	return ((uint16_t) (SSP_DR_BITMASK(SSPx->DR)));
+ 602              		.loc 1 322 0
+ 603 02d4 7B68     		ldr	r3, [r7, #4]
+ 604 02d6 9B68     		ldr	r3, [r3, #8]
+ 605 02d8 9BB2     		uxth	r3, r3
+ 323:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 606              		.loc 1 323 0
+ 607 02da 1846     		mov	r0, r3
+ 608 02dc 07F10C07 		add	r7, r7, #12
+ 609 02e0 BD46     		mov	sp, r7
+ 610 02e2 80BC     		pop	{r7}
+ 611 02e4 7047     		bx	lr
+ 612              		.cfi_endproc
+ 613              	.LFE64:
+ 615 02e6 00BF     		.align	2
+ 616              		.global	SSP_ReadWrite
+ 617              		.thumb
+ 618              		.thumb_func
+ 620              	SSP_ReadWrite:
+ 621              	.LFB65:
+ 324:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 325:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 326:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief 		SSP Read write data function
+ 327:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx 	Pointer to SSP peripheral, should be
+ 328:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP0: SSP0 peripheral
+ 329:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 330:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	dataCfg	Pointer to a SSP_DATA_SETUP_Type structure that
+ 331:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						contains specified information about transmit
+ 332:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						data configuration.
+ 333:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	xfType	Transfer type, should be:
+ 334:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- SSP_TRANSFER_POLLING: Polling mode
+ 335:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- SSP_TRANSFER_INTERRUPT: Interrupt mode
+ 336:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return 		Actual Data length has been transferred in polling mode.
+ 337:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				In interrupt mode, always return (0)
+ 338:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				Return (-1) if error.
+ 339:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * Note: This function can be used in both master and slave mode.
+ 340:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  ***********************************************************************/
+ 341:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** int32_t SSP_ReadWrite (LPC_SSP_TypeDef *SSPx, SSP_DATA_SETUP_Type *dataCfg, \
+ 342:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						SSP_TRANSFER_Type xfType)
+ 343:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 622              		.loc 1 343 0
+ 623              		.cfi_startproc
+ 624              		@ args = 0, pretend = 0, frame = 48
+ 625              		@ frame_needed = 1, uses_anonymous_args = 0
+ 626 02e8 80B5     		push	{r7, lr}
+ 627              	.LCFI30:
+ 628              		.cfi_def_cfa_offset 8
+ 629              		.cfi_offset 14, -4
+ 630              		.cfi_offset 7, -8
+ 631 02ea 8CB0     		sub	sp, sp, #48
+ 632              	.LCFI31:
+ 633              		.cfi_def_cfa_offset 56
+ 634 02ec 00AF     		add	r7, sp, #0
+ 635              	.LCFI32:
+ 636              		.cfi_def_cfa_register 7
+ 637 02ee F860     		str	r0, [r7, #12]
+ 638 02f0 B960     		str	r1, [r7, #8]
+ 639 02f2 1346     		mov	r3, r2
+ 640 02f4 FB71     		strb	r3, [r7, #7]
+ 344:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	uint8_t *rdata8;
+ 345:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     uint8_t *wdata8;
+ 346:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	uint16_t *rdata16;
+ 347:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     uint16_t *wdata16;
+ 348:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     uint32_t stat;
+ 349:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     uint32_t tmp;
+ 350:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     int32_t dataword;
+ 351:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 352:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     dataCfg->rx_cnt = 0;
+ 641              		.loc 1 352 0
+ 642 02f6 BB68     		ldr	r3, [r7, #8]
+ 643 02f8 4FF00002 		mov	r2, #0
+ 644 02fc DA60     		str	r2, [r3, #12]
+ 353:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     dataCfg->tx_cnt = 0;
+ 645              		.loc 1 353 0
+ 646 02fe BB68     		ldr	r3, [r7, #8]
+ 647 0300 4FF00002 		mov	r2, #0
+ 648 0304 5A60     		str	r2, [r3, #4]
+ 354:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****     dataCfg->status = 0;
+ 649              		.loc 1 354 0
+ 650 0306 BB68     		ldr	r3, [r7, #8]
+ 651 0308 4FF00002 		mov	r2, #0
+ 652 030c 5A61     		str	r2, [r3, #20]
+ 355:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 356:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 357:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	/* Clear all remaining data in RX FIFO */
+ 358:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	while (SSPx->SR & SSP_SR_RNE){
+ 653              		.loc 1 358 0
+ 654 030e 04E0     		b	.L32
+ 655              	.L33:
+ 359:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		tmp = (uint32_t) SSP_ReceiveData(SSPx);
+ 656              		.loc 1 359 0
+ 657 0310 F868     		ldr	r0, [r7, #12]
+ 658 0312 FFF7FEFF 		bl	SSP_ReceiveData
+ 659 0316 0346     		mov	r3, r0
+ 660 0318 BB61     		str	r3, [r7, #24]
+ 661              	.L32:
+ 358:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	while (SSPx->SR & SSP_SR_RNE){
+ 662              		.loc 1 358 0 discriminator 1
+ 663 031a FB68     		ldr	r3, [r7, #12]
+ 664 031c DB68     		ldr	r3, [r3, #12]
+ 665 031e 03F00403 		and	r3, r3, #4
+ 666 0322 002B     		cmp	r3, #0
+ 667 0324 F4D1     		bne	.L33
+ 360:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 361:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 362:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	// Clear status
+ 363:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSPx->ICR = SSP_ICR_BITMASK;
+ 668              		.loc 1 363 0
+ 669 0326 FB68     		ldr	r3, [r7, #12]
+ 670 0328 4FF00302 		mov	r2, #3
+ 671 032c 1A62     		str	r2, [r3, #32]
+ 364:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	if(SSP_GetDataSize(SSPx)>8)
+ 672              		.loc 1 364 0
+ 673 032e F868     		ldr	r0, [r7, #12]
+ 674 0330 FFF7FEFF 		bl	SSP_GetDataSize
+ 675 0334 0346     		mov	r3, r0
+ 676 0336 082B     		cmp	r3, #8
+ 677 0338 03D9     		bls	.L34
+ 365:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		dataword = 1;
+ 678              		.loc 1 365 0
+ 679 033a 4FF00103 		mov	r3, #1
+ 680 033e FB61     		str	r3, [r7, #28]
+ 681 0340 02E0     		b	.L35
+ 682              	.L34:
+ 366:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	else dataword = 0;
+ 683              		.loc 1 366 0
+ 684 0342 4FF00003 		mov	r3, #0
+ 685 0346 FB61     		str	r3, [r7, #28]
+ 686              	.L35:
+ 367:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 368:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	// Polling mode ----------------------------------------------------------------------
+ 369:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	if (xfType == SSP_TRANSFER_POLLING){
+ 687              		.loc 1 369 0
+ 688 0348 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 689 034a 002B     		cmp	r3, #0
+ 690 034c 40F0D380 		bne	.L36
+ 370:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		if (dataword == 0){
+ 691              		.loc 1 370 0
+ 692 0350 FB69     		ldr	r3, [r7, #28]
+ 693 0352 002B     		cmp	r3, #0
+ 694 0354 06D1     		bne	.L37
+ 371:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			rdata8 = (uint8_t *)dataCfg->rx_data;
+ 695              		.loc 1 371 0
+ 696 0356 BB68     		ldr	r3, [r7, #8]
+ 697 0358 9B68     		ldr	r3, [r3, #8]
+ 698 035a FB62     		str	r3, [r7, #44]
+ 372:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			wdata8 = (uint8_t *)dataCfg->tx_data;
+ 699              		.loc 1 372 0
+ 700 035c BB68     		ldr	r3, [r7, #8]
+ 701 035e 1B68     		ldr	r3, [r3, #0]
+ 702 0360 BB62     		str	r3, [r7, #40]
+ 373:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		} else {
+ 374:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			rdata16 = (uint16_t *)dataCfg->rx_data;
+ 375:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			wdata16 = (uint16_t *)dataCfg->tx_data;
+ 376:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		}
+ 377:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		while ((dataCfg->tx_cnt != dataCfg->length) || (dataCfg->rx_cnt != dataCfg->length)){
+ 703              		.loc 1 377 0
+ 704 0362 A5E0     		b	.L39
+ 705              	.L37:
+ 374:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			rdata16 = (uint16_t *)dataCfg->rx_data;
+ 706              		.loc 1 374 0
+ 707 0364 BB68     		ldr	r3, [r7, #8]
+ 708 0366 9B68     		ldr	r3, [r3, #8]
+ 709 0368 7B62     		str	r3, [r7, #36]
+ 375:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			wdata16 = (uint16_t *)dataCfg->tx_data;
+ 710              		.loc 1 375 0
+ 711 036a BB68     		ldr	r3, [r7, #8]
+ 712 036c 1B68     		ldr	r3, [r3, #0]
+ 713 036e 3B62     		str	r3, [r7, #32]
+ 714              		.loc 1 377 0
+ 715 0370 9EE0     		b	.L39
+ 716              	.L52:
+ 378:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			if ((SSPx->SR & SSP_SR_TNF) && (dataCfg->tx_cnt != dataCfg->length)){
+ 717              		.loc 1 378 0
+ 718 0372 FB68     		ldr	r3, [r7, #12]
+ 719 0374 DB68     		ldr	r3, [r3, #12]
+ 720 0376 03F00203 		and	r3, r3, #2
+ 721 037a 002B     		cmp	r3, #0
+ 722 037c 48D0     		beq	.L40
+ 723              		.loc 1 378 0 is_stmt 0 discriminator 1
+ 724 037e BB68     		ldr	r3, [r7, #8]
+ 725 0380 5A68     		ldr	r2, [r3, #4]
+ 726 0382 BB68     		ldr	r3, [r7, #8]
+ 727 0384 1B69     		ldr	r3, [r3, #16]
+ 728 0386 9A42     		cmp	r2, r3
+ 729 0388 42D0     		beq	.L40
+ 379:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				// Write data to buffer
+ 380:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				if(dataCfg->tx_data == NULL){
+ 730              		.loc 1 380 0 is_stmt 1
+ 731 038a BB68     		ldr	r3, [r7, #8]
+ 732 038c 1B68     		ldr	r3, [r3, #0]
+ 733 038e 002B     		cmp	r3, #0
+ 734 0390 1AD1     		bne	.L41
+ 381:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					if (dataword == 0){
+ 735              		.loc 1 381 0
+ 736 0392 FB69     		ldr	r3, [r7, #28]
+ 737 0394 002B     		cmp	r3, #0
+ 738 0396 0BD1     		bne	.L42
+ 382:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						SSP_SendData(SSPx, 0xFF);
+ 739              		.loc 1 382 0
+ 740 0398 F868     		ldr	r0, [r7, #12]
+ 741 039a 4FF0FF01 		mov	r1, #255
+ 742 039e FFF7FEFF 		bl	SSP_SendData
+ 383:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						dataCfg->tx_cnt++;
+ 743              		.loc 1 383 0
+ 744 03a2 BB68     		ldr	r3, [r7, #8]
+ 745 03a4 5B68     		ldr	r3, [r3, #4]
+ 746 03a6 03F10102 		add	r2, r3, #1
+ 747 03aa BB68     		ldr	r3, [r7, #8]
+ 748 03ac 5A60     		str	r2, [r3, #4]
+ 749 03ae 2FE0     		b	.L40
+ 750              	.L42:
+ 384:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					} else {
+ 385:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						SSP_SendData(SSPx, 0xFFFF);
+ 751              		.loc 1 385 0
+ 752 03b0 F868     		ldr	r0, [r7, #12]
+ 753 03b2 4FF6FF71 		movw	r1, #65535
+ 754 03b6 FFF7FEFF 		bl	SSP_SendData
+ 386:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						dataCfg->tx_cnt += 2;
+ 755              		.loc 1 386 0
+ 756 03ba BB68     		ldr	r3, [r7, #8]
+ 757 03bc 5B68     		ldr	r3, [r3, #4]
+ 758 03be 03F10202 		add	r2, r3, #2
+ 759 03c2 BB68     		ldr	r3, [r7, #8]
+ 760 03c4 5A60     		str	r2, [r3, #4]
+ 761 03c6 23E0     		b	.L40
+ 762              	.L41:
+ 387:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					}
+ 388:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				} else {
+ 389:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					if (dataword == 0){
+ 763              		.loc 1 389 0
+ 764 03c8 FB69     		ldr	r3, [r7, #28]
+ 765 03ca 002B     		cmp	r3, #0
+ 766 03cc 10D1     		bne	.L43
+ 390:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						SSP_SendData(SSPx, *wdata8);
+ 767              		.loc 1 390 0
+ 768 03ce BB6A     		ldr	r3, [r7, #40]
+ 769 03d0 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 770 03d2 F868     		ldr	r0, [r7, #12]
+ 771 03d4 1946     		mov	r1, r3
+ 772 03d6 FFF7FEFF 		bl	SSP_SendData
+ 391:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						wdata8++;
+ 773              		.loc 1 391 0
+ 774 03da BB6A     		ldr	r3, [r7, #40]
+ 775 03dc 03F10103 		add	r3, r3, #1
+ 776 03e0 BB62     		str	r3, [r7, #40]
+ 392:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						dataCfg->tx_cnt++;
+ 777              		.loc 1 392 0
+ 778 03e2 BB68     		ldr	r3, [r7, #8]
+ 779 03e4 5B68     		ldr	r3, [r3, #4]
+ 780 03e6 03F10102 		add	r2, r3, #1
+ 781 03ea BB68     		ldr	r3, [r7, #8]
+ 782 03ec 5A60     		str	r2, [r3, #4]
+ 783 03ee 0FE0     		b	.L40
+ 784              	.L43:
+ 393:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					} else {
+ 394:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						SSP_SendData(SSPx, *wdata16);
+ 785              		.loc 1 394 0
+ 786 03f0 3B6A     		ldr	r3, [r7, #32]
+ 787 03f2 1B88     		ldrh	r3, [r3, #0]
+ 788 03f4 F868     		ldr	r0, [r7, #12]
+ 789 03f6 1946     		mov	r1, r3
+ 790 03f8 FFF7FEFF 		bl	SSP_SendData
+ 395:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						wdata16++;
+ 791              		.loc 1 395 0
+ 792 03fc 3B6A     		ldr	r3, [r7, #32]
+ 793 03fe 03F10203 		add	r3, r3, #2
+ 794 0402 3B62     		str	r3, [r7, #32]
+ 396:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						dataCfg->tx_cnt += 2;
+ 795              		.loc 1 396 0
+ 796 0404 BB68     		ldr	r3, [r7, #8]
+ 797 0406 5B68     		ldr	r3, [r3, #4]
+ 798 0408 03F10202 		add	r2, r3, #2
+ 799 040c BB68     		ldr	r3, [r7, #8]
+ 800 040e 5A60     		str	r2, [r3, #4]
+ 801              	.L40:
+ 397:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					}
+ 398:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				}
+ 399:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			}
+ 400:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 401:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			// Check overrun error
+ 402:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			if ((stat = SSPx->RIS) & SSP_RIS_ROR){
+ 802              		.loc 1 402 0
+ 803 0410 FB68     		ldr	r3, [r7, #12]
+ 804 0412 9B69     		ldr	r3, [r3, #24]
+ 805 0414 7B61     		str	r3, [r7, #20]
+ 806 0416 7B69     		ldr	r3, [r7, #20]
+ 807 0418 03F00103 		and	r3, r3, #1
+ 808 041c DBB2     		uxtb	r3, r3
+ 809 041e 002B     		cmp	r3, #0
+ 810 0420 35D0     		beq	.L72
+ 403:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				// save status and return
+ 404:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				dataCfg->status = stat | SSP_STAT_ERROR;
+ 811              		.loc 1 404 0
+ 812 0422 7B69     		ldr	r3, [r7, #20]
+ 813 0424 43F40072 		orr	r2, r3, #512
+ 814 0428 BB68     		ldr	r3, [r7, #8]
+ 815 042a 5A61     		str	r2, [r3, #20]
+ 405:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				return (-1);
+ 816              		.loc 1 405 0
+ 817 042c 4FF0FF33 		mov	r3, #-1
+ 818 0430 20E1     		b	.L45
+ 819              	.L51:
+ 406:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			}
+ 407:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 408:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			// Check for any data available in RX FIFO
+ 409:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			while ((SSPx->SR & SSP_SR_RNE) && (dataCfg->rx_cnt != dataCfg->length)){
+ 410:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				// Read data from SSP data
+ 411:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				tmp = SSP_ReceiveData(SSPx);
+ 820              		.loc 1 411 0
+ 821 0432 F868     		ldr	r0, [r7, #12]
+ 822 0434 FFF7FEFF 		bl	SSP_ReceiveData
+ 823 0438 0346     		mov	r3, r0
+ 824 043a BB61     		str	r3, [r7, #24]
+ 412:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 413:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				// Store data to destination
+ 414:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				if (dataCfg->rx_data != NULL)
+ 825              		.loc 1 414 0
+ 826 043c BB68     		ldr	r3, [r7, #8]
+ 827 043e 9B68     		ldr	r3, [r3, #8]
+ 828 0440 002B     		cmp	r3, #0
+ 829 0442 13D0     		beq	.L47
+ 415:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				{
+ 416:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					if (dataword == 0){
+ 830              		.loc 1 416 0
+ 831 0444 FB69     		ldr	r3, [r7, #28]
+ 832 0446 002B     		cmp	r3, #0
+ 833 0448 08D1     		bne	.L48
+ 417:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						*(rdata8) = (uint8_t) tmp;
+ 834              		.loc 1 417 0
+ 835 044a BB69     		ldr	r3, [r7, #24]
+ 836 044c DAB2     		uxtb	r2, r3
+ 837 044e FB6A     		ldr	r3, [r7, #44]
+ 838 0450 1A70     		strb	r2, [r3, #0]
+ 418:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						rdata8++;
+ 839              		.loc 1 418 0
+ 840 0452 FB6A     		ldr	r3, [r7, #44]
+ 841 0454 03F10103 		add	r3, r3, #1
+ 842 0458 FB62     		str	r3, [r7, #44]
+ 843 045a 07E0     		b	.L47
+ 844              	.L48:
+ 419:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					} else {
+ 420:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						*(rdata16) = (uint16_t) tmp;
+ 845              		.loc 1 420 0
+ 846 045c BB69     		ldr	r3, [r7, #24]
+ 847 045e 9AB2     		uxth	r2, r3
+ 848 0460 7B6A     		ldr	r3, [r7, #36]
+ 849 0462 1A80     		strh	r2, [r3, #0]	@ movhi
+ 421:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						rdata16++;
+ 850              		.loc 1 421 0
+ 851 0464 7B6A     		ldr	r3, [r7, #36]
+ 852 0466 03F10203 		add	r3, r3, #2
+ 853 046a 7B62     		str	r3, [r7, #36]
+ 854              	.L47:
+ 422:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					}
+ 423:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				}
+ 424:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				// Increase counter
+ 425:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				if (dataword == 0){
+ 855              		.loc 1 425 0
+ 856 046c FB69     		ldr	r3, [r7, #28]
+ 857 046e 002B     		cmp	r3, #0
+ 858 0470 06D1     		bne	.L49
+ 426:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					dataCfg->rx_cnt++;
+ 859              		.loc 1 426 0
+ 860 0472 BB68     		ldr	r3, [r7, #8]
+ 861 0474 DB68     		ldr	r3, [r3, #12]
+ 862 0476 03F10102 		add	r2, r3, #1
+ 863 047a BB68     		ldr	r3, [r7, #8]
+ 864 047c DA60     		str	r2, [r3, #12]
+ 865 047e 07E0     		b	.L46
+ 866              	.L49:
+ 427:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				} else {
+ 428:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					dataCfg->rx_cnt += 2;
+ 867              		.loc 1 428 0
+ 868 0480 BB68     		ldr	r3, [r7, #8]
+ 869 0482 DB68     		ldr	r3, [r3, #12]
+ 870 0484 03F10202 		add	r2, r3, #2
+ 871 0488 BB68     		ldr	r3, [r7, #8]
+ 872 048a DA60     		str	r2, [r3, #12]
+ 873 048c 00E0     		b	.L46
+ 874              	.L72:
+ 409:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			while ((SSPx->SR & SSP_SR_RNE) && (dataCfg->rx_cnt != dataCfg->length)){
+ 875              		.loc 1 409 0
+ 876 048e 00BF     		nop
+ 877              	.L46:
+ 409:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			while ((SSPx->SR & SSP_SR_RNE) && (dataCfg->rx_cnt != dataCfg->length)){
+ 878              		.loc 1 409 0 is_stmt 0 discriminator 1
+ 879 0490 FB68     		ldr	r3, [r7, #12]
+ 880 0492 DB68     		ldr	r3, [r3, #12]
+ 881 0494 03F00403 		and	r3, r3, #4
+ 882 0498 002B     		cmp	r3, #0
+ 883 049a 05D0     		beq	.L50
+ 409:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			while ((SSPx->SR & SSP_SR_RNE) && (dataCfg->rx_cnt != dataCfg->length)){
+ 884              		.loc 1 409 0 discriminator 2
+ 885 049c BB68     		ldr	r3, [r7, #8]
+ 886 049e DA68     		ldr	r2, [r3, #12]
+ 887 04a0 BB68     		ldr	r3, [r7, #8]
+ 888 04a2 1B69     		ldr	r3, [r3, #16]
+ 889 04a4 9A42     		cmp	r2, r3
+ 890 04a6 C4D1     		bne	.L51
+ 891              	.L50:
+ 429:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				}
+ 430:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			}
+ 431:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			dataCfg->rx_cnt = dataCfg->length;
+ 892              		.loc 1 431 0 is_stmt 1
+ 893 04a8 BB68     		ldr	r3, [r7, #8]
+ 894 04aa 1A69     		ldr	r2, [r3, #16]
+ 895 04ac BB68     		ldr	r3, [r7, #8]
+ 896 04ae DA60     		str	r2, [r3, #12]
+ 897              	.L39:
+ 377:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		while ((dataCfg->tx_cnt != dataCfg->length) || (dataCfg->rx_cnt != dataCfg->length)){
+ 898              		.loc 1 377 0 discriminator 1
+ 899 04b0 BB68     		ldr	r3, [r7, #8]
+ 900 04b2 5A68     		ldr	r2, [r3, #4]
+ 901 04b4 BB68     		ldr	r3, [r7, #8]
+ 902 04b6 1B69     		ldr	r3, [r3, #16]
+ 903 04b8 9A42     		cmp	r2, r3
+ 904 04ba 7FF45AAF 		bne	.L52
+ 377:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		while ((dataCfg->tx_cnt != dataCfg->length) || (dataCfg->rx_cnt != dataCfg->length)){
+ 905              		.loc 1 377 0 is_stmt 0 discriminator 2
+ 906 04be BB68     		ldr	r3, [r7, #8]
+ 907 04c0 DA68     		ldr	r2, [r3, #12]
+ 908 04c2 BB68     		ldr	r3, [r7, #8]
+ 909 04c4 1B69     		ldr	r3, [r3, #16]
+ 910 04c6 9A42     		cmp	r2, r3
+ 911 04c8 7FF453AF 		bne	.L52
+ 432:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		}
+ 433:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 434:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		// save status
+ 435:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		dataCfg->status = SSP_STAT_DONE;
+ 912              		.loc 1 435 0 is_stmt 1
+ 913 04cc BB68     		ldr	r3, [r7, #8]
+ 914 04ce 4FF48072 		mov	r2, #256
+ 915 04d2 5A61     		str	r2, [r3, #20]
+ 436:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 437:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		if (dataCfg->tx_data != NULL){
+ 916              		.loc 1 437 0
+ 917 04d4 BB68     		ldr	r3, [r7, #8]
+ 918 04d6 1B68     		ldr	r3, [r3, #0]
+ 919 04d8 002B     		cmp	r3, #0
+ 920 04da 02D0     		beq	.L53
+ 438:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			return dataCfg->tx_cnt;
+ 921              		.loc 1 438 0
+ 922 04dc BB68     		ldr	r3, [r7, #8]
+ 923 04de 5B68     		ldr	r3, [r3, #4]
+ 924 04e0 C8E0     		b	.L45
+ 925              	.L53:
+ 439:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		} else if (dataCfg->rx_data != NULL){
+ 926              		.loc 1 439 0
+ 927 04e2 BB68     		ldr	r3, [r7, #8]
+ 928 04e4 9B68     		ldr	r3, [r3, #8]
+ 929 04e6 002B     		cmp	r3, #0
+ 930 04e8 02D0     		beq	.L54
+ 440:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			return dataCfg->rx_cnt;
+ 931              		.loc 1 440 0
+ 932 04ea BB68     		ldr	r3, [r7, #8]
+ 933 04ec DB68     		ldr	r3, [r3, #12]
+ 934 04ee C1E0     		b	.L45
+ 935              	.L54:
+ 441:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		} else {
+ 442:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			return (0);
+ 936              		.loc 1 442 0
+ 937 04f0 4FF00003 		mov	r3, #0
+ 938 04f4 BEE0     		b	.L45
+ 939              	.L36:
+ 443:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		}
+ 444:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 445:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 446:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	// Interrupt mode ----------------------------------------------------------------------
+ 447:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	else if (xfType == SSP_TRANSFER_INTERRUPT){
+ 940              		.loc 1 447 0
+ 941 04f6 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 942 04f8 012B     		cmp	r3, #1
+ 943 04fa 40F0B980 		bne	.L55
+ 448:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 449:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		while ((SSPx->SR & SSP_SR_TNF) && (dataCfg->tx_cnt != dataCfg->length)){
+ 944              		.loc 1 449 0
+ 945 04fe 92E0     		b	.L56
+ 946              	.L68:
+ 450:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			// Write data to buffer
+ 451:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			if(dataCfg->tx_data == NULL){
+ 947              		.loc 1 451 0
+ 948 0500 BB68     		ldr	r3, [r7, #8]
+ 949 0502 1B68     		ldr	r3, [r3, #0]
+ 950 0504 002B     		cmp	r3, #0
+ 951 0506 1AD1     		bne	.L57
+ 452:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				if (dataword == 0){
+ 952              		.loc 1 452 0
+ 953 0508 FB69     		ldr	r3, [r7, #28]
+ 954 050a 002B     		cmp	r3, #0
+ 955 050c 0BD1     		bne	.L58
+ 453:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					SSP_SendData(SSPx, 0xFF);
+ 956              		.loc 1 453 0
+ 957 050e F868     		ldr	r0, [r7, #12]
+ 958 0510 4FF0FF01 		mov	r1, #255
+ 959 0514 FFF7FEFF 		bl	SSP_SendData
+ 454:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					dataCfg->tx_cnt++;
+ 960              		.loc 1 454 0
+ 961 0518 BB68     		ldr	r3, [r7, #8]
+ 962 051a 5B68     		ldr	r3, [r3, #4]
+ 963 051c 03F10102 		add	r2, r3, #1
+ 964 0520 BB68     		ldr	r3, [r7, #8]
+ 965 0522 5A60     		str	r2, [r3, #4]
+ 966 0524 31E0     		b	.L59
+ 967              	.L58:
+ 455:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				} else {
+ 456:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					SSP_SendData(SSPx, 0xFFFF);
+ 968              		.loc 1 456 0
+ 969 0526 F868     		ldr	r0, [r7, #12]
+ 970 0528 4FF6FF71 		movw	r1, #65535
+ 971 052c FFF7FEFF 		bl	SSP_SendData
+ 457:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					dataCfg->tx_cnt += 2;
+ 972              		.loc 1 457 0
+ 973 0530 BB68     		ldr	r3, [r7, #8]
+ 974 0532 5B68     		ldr	r3, [r3, #4]
+ 975 0534 03F10202 		add	r2, r3, #2
+ 976 0538 BB68     		ldr	r3, [r7, #8]
+ 977 053a 5A60     		str	r2, [r3, #4]
+ 978 053c 25E0     		b	.L59
+ 979              	.L57:
+ 458:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				}
+ 459:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			} else {
+ 460:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				if (dataword == 0){
+ 980              		.loc 1 460 0
+ 981 053e FB69     		ldr	r3, [r7, #28]
+ 982 0540 002B     		cmp	r3, #0
+ 983 0542 11D1     		bne	.L60
+ 461:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					SSP_SendData(SSPx, (*(uint8_t *)((uint32_t)dataCfg->tx_data + dataCfg->tx_cnt)));
+ 984              		.loc 1 461 0
+ 985 0544 BB68     		ldr	r3, [r7, #8]
+ 986 0546 1B68     		ldr	r3, [r3, #0]
+ 987 0548 1A46     		mov	r2, r3
+ 988 054a BB68     		ldr	r3, [r7, #8]
+ 989 054c 5B68     		ldr	r3, [r3, #4]
+ 990 054e D318     		adds	r3, r2, r3
+ 991 0550 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 992 0552 F868     		ldr	r0, [r7, #12]
+ 993 0554 1946     		mov	r1, r3
+ 994 0556 FFF7FEFF 		bl	SSP_SendData
+ 462:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					dataCfg->tx_cnt++;
+ 995              		.loc 1 462 0
+ 996 055a BB68     		ldr	r3, [r7, #8]
+ 997 055c 5B68     		ldr	r3, [r3, #4]
+ 998 055e 03F10102 		add	r2, r3, #1
+ 999 0562 BB68     		ldr	r3, [r7, #8]
+ 1000 0564 5A60     		str	r2, [r3, #4]
+ 1001 0566 10E0     		b	.L59
+ 1002              	.L60:
+ 463:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				} else {
+ 464:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					SSP_SendData(SSPx, (*(uint16_t *)((uint32_t)dataCfg->tx_data + dataCfg->tx_cnt)));
+ 1003              		.loc 1 464 0
+ 1004 0568 BB68     		ldr	r3, [r7, #8]
+ 1005 056a 1B68     		ldr	r3, [r3, #0]
+ 1006 056c 1A46     		mov	r2, r3
+ 1007 056e BB68     		ldr	r3, [r7, #8]
+ 1008 0570 5B68     		ldr	r3, [r3, #4]
+ 1009 0572 D318     		adds	r3, r2, r3
+ 1010 0574 1B88     		ldrh	r3, [r3, #0]
+ 1011 0576 F868     		ldr	r0, [r7, #12]
+ 1012 0578 1946     		mov	r1, r3
+ 1013 057a FFF7FEFF 		bl	SSP_SendData
+ 465:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					dataCfg->tx_cnt += 2;
+ 1014              		.loc 1 465 0
+ 1015 057e BB68     		ldr	r3, [r7, #8]
+ 1016 0580 5B68     		ldr	r3, [r3, #4]
+ 1017 0582 03F10202 		add	r2, r3, #2
+ 1018 0586 BB68     		ldr	r3, [r7, #8]
+ 1019 0588 5A60     		str	r2, [r3, #4]
+ 1020              	.L59:
+ 466:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				}
+ 467:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			}
+ 468:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 469:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			// Check error
+ 470:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			if ((stat = SSPx->RIS) & SSP_RIS_ROR){
+ 1021              		.loc 1 470 0
+ 1022 058a FB68     		ldr	r3, [r7, #12]
+ 1023 058c 9B69     		ldr	r3, [r3, #24]
+ 1024 058e 7B61     		str	r3, [r7, #20]
+ 1025 0590 7B69     		ldr	r3, [r7, #20]
+ 1026 0592 03F00103 		and	r3, r3, #1
+ 1027 0596 DBB2     		uxtb	r3, r3
+ 1028 0598 002B     		cmp	r3, #0
+ 1029 059a 37D0     		beq	.L73
+ 471:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				// save status and return
+ 472:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				dataCfg->status = stat | SSP_STAT_ERROR;
+ 1030              		.loc 1 472 0
+ 1031 059c 7B69     		ldr	r3, [r7, #20]
+ 1032 059e 43F40072 		orr	r2, r3, #512
+ 1033 05a2 BB68     		ldr	r3, [r7, #8]
+ 1034 05a4 5A61     		str	r2, [r3, #20]
+ 473:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				return (-1);
+ 1035              		.loc 1 473 0
+ 1036 05a6 4FF0FF33 		mov	r3, #-1
+ 1037 05aa 63E0     		b	.L45
+ 1038              	.L66:
+ 474:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			}
+ 475:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 476:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			// Check for any data available in RX FIFO
+ 477:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			while ((SSPx->SR & SSP_SR_RNE) && (dataCfg->rx_cnt != dataCfg->length)){
+ 478:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				// Read data from SSP data
+ 479:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				tmp = SSP_ReceiveData(SSPx);
+ 1039              		.loc 1 479 0
+ 1040 05ac F868     		ldr	r0, [r7, #12]
+ 1041 05ae FFF7FEFF 		bl	SSP_ReceiveData
+ 1042 05b2 0346     		mov	r3, r0
+ 1043 05b4 BB61     		str	r3, [r7, #24]
+ 480:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 481:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				// Store data to destination
+ 482:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				if (dataCfg->rx_data != NULL)
+ 1044              		.loc 1 482 0
+ 1045 05b6 BB68     		ldr	r3, [r7, #8]
+ 1046 05b8 9B68     		ldr	r3, [r3, #8]
+ 1047 05ba 002B     		cmp	r3, #0
+ 1048 05bc 15D0     		beq	.L63
+ 483:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				{
+ 484:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					if (dataword == 0){
+ 1049              		.loc 1 484 0
+ 1050 05be FB69     		ldr	r3, [r7, #28]
+ 1051 05c0 002B     		cmp	r3, #0
+ 1052 05c2 09D1     		bne	.L64
+ 485:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						*(uint8_t *)((uint32_t)dataCfg->rx_data + dataCfg->rx_cnt) = (uint8_t) tmp;
+ 1053              		.loc 1 485 0
+ 1054 05c4 BB68     		ldr	r3, [r7, #8]
+ 1055 05c6 9B68     		ldr	r3, [r3, #8]
+ 1056 05c8 1A46     		mov	r2, r3
+ 1057 05ca BB68     		ldr	r3, [r7, #8]
+ 1058 05cc DB68     		ldr	r3, [r3, #12]
+ 1059 05ce D318     		adds	r3, r2, r3
+ 1060 05d0 BA69     		ldr	r2, [r7, #24]
+ 1061 05d2 D2B2     		uxtb	r2, r2
+ 1062 05d4 1A70     		strb	r2, [r3, #0]
+ 1063 05d6 08E0     		b	.L63
+ 1064              	.L64:
+ 486:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					} else {
+ 487:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 						*(uint16_t *)((uint32_t)dataCfg->rx_data + dataCfg->rx_cnt) = (uint16_t) tmp;
+ 1065              		.loc 1 487 0
+ 1066 05d8 BB68     		ldr	r3, [r7, #8]
+ 1067 05da 9B68     		ldr	r3, [r3, #8]
+ 1068 05dc 1A46     		mov	r2, r3
+ 1069 05de BB68     		ldr	r3, [r7, #8]
+ 1070 05e0 DB68     		ldr	r3, [r3, #12]
+ 1071 05e2 D318     		adds	r3, r2, r3
+ 1072 05e4 BA69     		ldr	r2, [r7, #24]
+ 1073 05e6 92B2     		uxth	r2, r2
+ 1074 05e8 1A80     		strh	r2, [r3, #0]	@ movhi
+ 1075              	.L63:
+ 488:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					}
+ 489:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				}
+ 490:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				// Increase counter
+ 491:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				if (dataword == 0){
+ 1076              		.loc 1 491 0
+ 1077 05ea FB69     		ldr	r3, [r7, #28]
+ 1078 05ec 002B     		cmp	r3, #0
+ 1079 05ee 06D1     		bne	.L65
+ 492:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					dataCfg->rx_cnt++;
+ 1080              		.loc 1 492 0
+ 1081 05f0 BB68     		ldr	r3, [r7, #8]
+ 1082 05f2 DB68     		ldr	r3, [r3, #12]
+ 1083 05f4 03F10102 		add	r2, r3, #1
+ 1084 05f8 BB68     		ldr	r3, [r7, #8]
+ 1085 05fa DA60     		str	r2, [r3, #12]
+ 1086 05fc 07E0     		b	.L62
+ 1087              	.L65:
+ 493:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				} else {
+ 494:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 					dataCfg->rx_cnt += 2;
+ 1088              		.loc 1 494 0
+ 1089 05fe BB68     		ldr	r3, [r7, #8]
+ 1090 0600 DB68     		ldr	r3, [r3, #12]
+ 1091 0602 03F10202 		add	r2, r3, #2
+ 1092 0606 BB68     		ldr	r3, [r7, #8]
+ 1093 0608 DA60     		str	r2, [r3, #12]
+ 1094 060a 00E0     		b	.L62
+ 1095              	.L73:
+ 477:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			while ((SSPx->SR & SSP_SR_RNE) && (dataCfg->rx_cnt != dataCfg->length)){
+ 1096              		.loc 1 477 0
+ 1097 060c 00BF     		nop
+ 1098              	.L62:
+ 477:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			while ((SSPx->SR & SSP_SR_RNE) && (dataCfg->rx_cnt != dataCfg->length)){
+ 1099              		.loc 1 477 0 is_stmt 0 discriminator 1
+ 1100 060e FB68     		ldr	r3, [r7, #12]
+ 1101 0610 DB68     		ldr	r3, [r3, #12]
+ 1102 0612 03F00403 		and	r3, r3, #4
+ 1103 0616 002B     		cmp	r3, #0
+ 1104 0618 05D0     		beq	.L56
+ 477:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			while ((SSPx->SR & SSP_SR_RNE) && (dataCfg->rx_cnt != dataCfg->length)){
+ 1105              		.loc 1 477 0 discriminator 2
+ 1106 061a BB68     		ldr	r3, [r7, #8]
+ 1107 061c DA68     		ldr	r2, [r3, #12]
+ 1108 061e BB68     		ldr	r3, [r7, #8]
+ 1109 0620 1B69     		ldr	r3, [r3, #16]
+ 1110 0622 9A42     		cmp	r2, r3
+ 1111 0624 C2D1     		bne	.L66
+ 1112              	.L56:
+ 449:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		while ((SSPx->SR & SSP_SR_TNF) && (dataCfg->tx_cnt != dataCfg->length)){
+ 1113              		.loc 1 449 0 is_stmt 1 discriminator 1
+ 1114 0626 FB68     		ldr	r3, [r7, #12]
+ 1115 0628 DB68     		ldr	r3, [r3, #12]
+ 1116 062a 03F00203 		and	r3, r3, #2
+ 1117 062e 002B     		cmp	r3, #0
+ 1118 0630 06D0     		beq	.L67
+ 449:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		while ((SSPx->SR & SSP_SR_TNF) && (dataCfg->tx_cnt != dataCfg->length)){
+ 1119              		.loc 1 449 0 is_stmt 0 discriminator 2
+ 1120 0632 BB68     		ldr	r3, [r7, #8]
+ 1121 0634 5A68     		ldr	r2, [r3, #4]
+ 1122 0636 BB68     		ldr	r3, [r7, #8]
+ 1123 0638 1B69     		ldr	r3, [r3, #16]
+ 1124 063a 9A42     		cmp	r2, r3
+ 1125 063c 7FF460AF 		bne	.L68
+ 1126              	.L67:
+ 495:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 				}
+ 496:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			}
+ 497:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		}
+ 498:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 499:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		// If there more data to sent or receive
+ 500:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		if ((dataCfg->rx_cnt != dataCfg->length) || (dataCfg->tx_cnt != dataCfg->length)){
+ 1127              		.loc 1 500 0 is_stmt 1
+ 1128 0640 BB68     		ldr	r3, [r7, #8]
+ 1129 0642 DA68     		ldr	r2, [r3, #12]
+ 1130 0644 BB68     		ldr	r3, [r7, #8]
+ 1131 0646 1B69     		ldr	r3, [r3, #16]
+ 1132 0648 9A42     		cmp	r2, r3
+ 1133 064a 05D1     		bne	.L69
+ 1134              		.loc 1 500 0 is_stmt 0 discriminator 1
+ 1135 064c BB68     		ldr	r3, [r7, #8]
+ 1136 064e 5A68     		ldr	r2, [r3, #4]
+ 1137 0650 BB68     		ldr	r3, [r7, #8]
+ 1138 0652 1B69     		ldr	r3, [r3, #16]
+ 1139 0654 9A42     		cmp	r2, r3
+ 1140 0656 04D0     		beq	.L70
+ 1141              	.L69:
+ 501:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			// Enable all interrupt
+ 502:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			SSPx->IMSC = SSP_IMSC_BITMASK;
+ 1142              		.loc 1 502 0 is_stmt 1
+ 1143 0658 FB68     		ldr	r3, [r7, #12]
+ 1144 065a 4FF00F02 		mov	r2, #15
+ 1145 065e 5A61     		str	r2, [r3, #20]
+ 1146 0660 03E0     		b	.L71
+ 1147              	.L70:
+ 503:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		} else {
+ 504:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			// Save status
+ 505:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 			dataCfg->status = SSP_STAT_DONE;
+ 1148              		.loc 1 505 0
+ 1149 0662 BB68     		ldr	r3, [r7, #8]
+ 1150 0664 4FF48072 		mov	r2, #256
+ 1151 0668 5A61     		str	r2, [r3, #20]
+ 1152              	.L71:
+ 506:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		}
+ 507:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		return (0);
+ 1153              		.loc 1 507 0
+ 1154 066a 4FF00003 		mov	r3, #0
+ 1155 066e 01E0     		b	.L45
+ 1156              	.L55:
+ 508:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 509:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 510:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	return (-1);
+ 1157              		.loc 1 510 0
+ 1158 0670 4FF0FF33 		mov	r3, #-1
+ 1159              	.L45:
+ 511:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 1160              		.loc 1 511 0
+ 1161 0674 1846     		mov	r0, r3
+ 1162 0676 07F13007 		add	r7, r7, #48
+ 1163 067a BD46     		mov	sp, r7
+ 1164 067c 80BD     		pop	{r7, pc}
+ 1165              		.cfi_endproc
+ 1166              	.LFE65:
+ 1168 067e 00BF     		.align	2
+ 1169              		.global	SSP_GetStatus
+ 1170              		.thumb
+ 1171              		.thumb_func
+ 1173              	SSP_GetStatus:
+ 1174              	.LFB66:
+ 512:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 513:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 514:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief		Checks whether the specified SSP status flag is set or not
+ 515:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 516:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 		 				- LPC_SSP0: SSP0 peripheral
+ 517:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 518:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	FlagType	Type of flag to check status, should be one
+ 519:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 							of following:
+ 520:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  *							- SSP_STAT_TXFIFO_EMPTY: TX FIFO is empty
+ 521:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  *							- SSP_STAT_TXFIFO_NOTFULL: TX FIFO is not full
+ 522:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  *							- SSP_STAT_RXFIFO_NOTEMPTY: RX FIFO is not empty
+ 523:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  *							- SSP_STAT_RXFIFO_FULL: RX FIFO is full
+ 524:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  *							- SSP_STAT_BUSY: SSP peripheral is busy
+ 525:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return		New State of specified SSP status flag
+ 526:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 527:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** FlagStatus SSP_GetStatus(LPC_SSP_TypeDef* SSPx, uint32_t FlagType)
+ 528:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 1175              		.loc 1 528 0
+ 1176              		.cfi_startproc
+ 1177              		@ args = 0, pretend = 0, frame = 8
+ 1178              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1179              		@ link register save eliminated.
+ 1180 0680 80B4     		push	{r7}
+ 1181              	.LCFI33:
+ 1182              		.cfi_def_cfa_offset 4
+ 1183              		.cfi_offset 7, -4
+ 1184 0682 83B0     		sub	sp, sp, #12
+ 1185              	.LCFI34:
+ 1186              		.cfi_def_cfa_offset 16
+ 1187 0684 00AF     		add	r7, sp, #0
+ 1188              	.LCFI35:
+ 1189              		.cfi_def_cfa_register 7
+ 1190 0686 7860     		str	r0, [r7, #4]
+ 1191 0688 3960     		str	r1, [r7, #0]
+ 529:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSPx(SSPx));
+ 530:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSP_STAT(FlagType));
+ 531:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 532:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	return ((SSPx->SR & FlagType) ? SET : RESET);
+ 1192              		.loc 1 532 0
+ 1193 068a 7B68     		ldr	r3, [r7, #4]
+ 1194 068c DA68     		ldr	r2, [r3, #12]
+ 1195 068e 3B68     		ldr	r3, [r7, #0]
+ 1196 0690 1340     		ands	r3, r3, r2
+ 1197 0692 002B     		cmp	r3, #0
+ 1198 0694 0CBF     		ite	eq
+ 1199 0696 0023     		moveq	r3, #0
+ 1200 0698 0123     		movne	r3, #1
+ 1201 069a DBB2     		uxtb	r3, r3
+ 533:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 1202              		.loc 1 533 0
+ 1203 069c 1846     		mov	r0, r3
+ 1204 069e 07F10C07 		add	r7, r7, #12
+ 1205 06a2 BD46     		mov	sp, r7
+ 1206 06a4 80BC     		pop	{r7}
+ 1207 06a6 7047     		bx	lr
+ 1208              		.cfi_endproc
+ 1209              	.LFE66:
+ 1211              		.align	2
+ 1212              		.global	SSP_IntConfig
+ 1213              		.thumb
+ 1214              		.thumb_func
+ 1216              	SSP_IntConfig:
+ 1217              	.LFB67:
+ 534:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 535:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 536:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief		Enable or disable specified interrupt type in SSP peripheral
+ 537:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 538:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP0: SSP0 peripheral
+ 539:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 540:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	IntType	Interrupt type in SSP peripheral, should be:
+ 541:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTCFG_ROR: Receive Overrun interrupt
+ 542:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTCFG_RT: Receive Time out interrupt
+ 543:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTCFG_RX: RX FIFO is at least half full interrupt
+ 544:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTCFG_TX: TX FIFO is at least half empty interrupt
+ 545:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	NewState New State of specified interrupt type, should be:
+ 546:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- ENABLE: Enable this interrupt type
+ 547:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- DISABLE: Disable this interrupt type
+ 548:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return		None
+ 549:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * Note: We can enable/disable multi-interrupt type by OR multi value
+ 550:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 551:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** void SSP_IntConfig(LPC_SSP_TypeDef *SSPx, uint32_t IntType, FunctionalState NewState)
+ 552:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 1218              		.loc 1 552 0
+ 1219              		.cfi_startproc
+ 1220              		@ args = 0, pretend = 0, frame = 16
+ 1221              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1222              		@ link register save eliminated.
+ 1223 06a8 80B4     		push	{r7}
+ 1224              	.LCFI36:
+ 1225              		.cfi_def_cfa_offset 4
+ 1226              		.cfi_offset 7, -4
+ 1227 06aa 85B0     		sub	sp, sp, #20
+ 1228              	.LCFI37:
+ 1229              		.cfi_def_cfa_offset 24
+ 1230 06ac 00AF     		add	r7, sp, #0
+ 1231              	.LCFI38:
+ 1232              		.cfi_def_cfa_register 7
+ 1233 06ae F860     		str	r0, [r7, #12]
+ 1234 06b0 B960     		str	r1, [r7, #8]
+ 1235 06b2 1346     		mov	r3, r2
+ 1236 06b4 FB71     		strb	r3, [r7, #7]
+ 553:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSPx(SSPx));
+ 554:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 555:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	if (NewState == ENABLE)
+ 1237              		.loc 1 555 0
+ 1238 06b6 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1239 06b8 012B     		cmp	r3, #1
+ 1240 06ba 06D1     		bne	.L76
+ 556:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+ 557:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		SSPx->IMSC |= IntType;
+ 1241              		.loc 1 557 0
+ 1242 06bc FB68     		ldr	r3, [r7, #12]
+ 1243 06be 5A69     		ldr	r2, [r3, #20]
+ 1244 06c0 BB68     		ldr	r3, [r7, #8]
+ 1245 06c2 1A43     		orrs	r2, r2, r3
+ 1246 06c4 FB68     		ldr	r3, [r7, #12]
+ 1247 06c6 5A61     		str	r2, [r3, #20]
+ 1248 06c8 09E0     		b	.L75
+ 1249              	.L76:
+ 558:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 559:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	else
+ 560:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+ 561:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		SSPx->IMSC &= (~IntType) & SSP_IMSC_BITMASK;
+ 1250              		.loc 1 561 0
+ 1251 06ca FB68     		ldr	r3, [r7, #12]
+ 1252 06cc 5A69     		ldr	r2, [r3, #20]
+ 1253 06ce BB68     		ldr	r3, [r7, #8]
+ 1254 06d0 6FEA0303 		mvn	r3, r3
+ 1255 06d4 1340     		ands	r3, r3, r2
+ 1256 06d6 03F00F02 		and	r2, r3, #15
+ 1257 06da FB68     		ldr	r3, [r7, #12]
+ 1258 06dc 5A61     		str	r2, [r3, #20]
+ 1259              	.L75:
+ 562:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 563:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 1260              		.loc 1 563 0
+ 1261 06de 07F11407 		add	r7, r7, #20
+ 1262 06e2 BD46     		mov	sp, r7
+ 1263 06e4 80BC     		pop	{r7}
+ 1264 06e6 7047     		bx	lr
+ 1265              		.cfi_endproc
+ 1266              	.LFE67:
+ 1268              		.align	2
+ 1269              		.global	SSP_GetRawIntStatus
+ 1270              		.thumb
+ 1271              		.thumb_func
+ 1273              	SSP_GetRawIntStatus:
+ 1274              	.LFB68:
+ 564:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 565:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 566:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief	Check whether the specified Raw interrupt status flag is
+ 567:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 			set or not
+ 568:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 569:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP0: SSP0 peripheral
+ 570:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 571:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	RawIntType	Raw Interrupt Type, should be:
+ 572:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTSTAT_RAW_ROR: Receive Overrun interrupt
+ 573:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTSTAT_RAW_RT: Receive Time out interrupt
+ 574:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTSTAT_RAW_RX: RX FIFO is at least half full interrupt
+ 575:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTSTAT_RAW_TX: TX FIFO is at least half empty interrupt
+ 576:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return	New State of specified Raw interrupt status flag in SSP peripheral
+ 577:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * Note: Enabling/Disabling specified interrupt in SSP peripheral does not
+ 578:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 		effect to Raw Interrupt Status flag.
+ 579:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 580:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** IntStatus SSP_GetRawIntStatus(LPC_SSP_TypeDef *SSPx, uint32_t RawIntType)
+ 581:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 1275              		.loc 1 581 0
+ 1276              		.cfi_startproc
+ 1277              		@ args = 0, pretend = 0, frame = 8
+ 1278              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1279              		@ link register save eliminated.
+ 1280 06e8 80B4     		push	{r7}
+ 1281              	.LCFI39:
+ 1282              		.cfi_def_cfa_offset 4
+ 1283              		.cfi_offset 7, -4
+ 1284 06ea 83B0     		sub	sp, sp, #12
+ 1285              	.LCFI40:
+ 1286              		.cfi_def_cfa_offset 16
+ 1287 06ec 00AF     		add	r7, sp, #0
+ 1288              	.LCFI41:
+ 1289              		.cfi_def_cfa_register 7
+ 1290 06ee 7860     		str	r0, [r7, #4]
+ 1291 06f0 3960     		str	r1, [r7, #0]
+ 582:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSPx(SSPx));
+ 583:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSP_INTSTAT_RAW(RawIntType));
+ 584:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 585:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	return ((SSPx->RIS & RawIntType) ? SET : RESET);
+ 1292              		.loc 1 585 0
+ 1293 06f2 7B68     		ldr	r3, [r7, #4]
+ 1294 06f4 9A69     		ldr	r2, [r3, #24]
+ 1295 06f6 3B68     		ldr	r3, [r7, #0]
+ 1296 06f8 1340     		ands	r3, r3, r2
+ 1297 06fa 002B     		cmp	r3, #0
+ 1298 06fc 0CBF     		ite	eq
+ 1299 06fe 0023     		moveq	r3, #0
+ 1300 0700 0123     		movne	r3, #1
+ 1301 0702 DBB2     		uxtb	r3, r3
+ 586:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 1302              		.loc 1 586 0
+ 1303 0704 1846     		mov	r0, r3
+ 1304 0706 07F10C07 		add	r7, r7, #12
+ 1305 070a BD46     		mov	sp, r7
+ 1306 070c 80BC     		pop	{r7}
+ 1307 070e 7047     		bx	lr
+ 1308              		.cfi_endproc
+ 1309              	.LFE68:
+ 1311              		.align	2
+ 1312              		.global	SSP_GetRawIntStatusReg
+ 1313              		.thumb
+ 1314              		.thumb_func
+ 1316              	SSP_GetRawIntStatusReg:
+ 1317              	.LFB69:
+ 587:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 588:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 589:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief		Get Raw Interrupt Status register
+ 590:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 591:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP0: SSP0 peripheral
+ 592:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 593:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return		Raw Interrupt Status (RIS) register value
+ 594:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 595:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** uint32_t SSP_GetRawIntStatusReg(LPC_SSP_TypeDef *SSPx)
+ 596:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 1318              		.loc 1 596 0
+ 1319              		.cfi_startproc
+ 1320              		@ args = 0, pretend = 0, frame = 8
+ 1321              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1322              		@ link register save eliminated.
+ 1323 0710 80B4     		push	{r7}
+ 1324              	.LCFI42:
+ 1325              		.cfi_def_cfa_offset 4
+ 1326              		.cfi_offset 7, -4
+ 1327 0712 83B0     		sub	sp, sp, #12
+ 1328              	.LCFI43:
+ 1329              		.cfi_def_cfa_offset 16
+ 1330 0714 00AF     		add	r7, sp, #0
+ 1331              	.LCFI44:
+ 1332              		.cfi_def_cfa_register 7
+ 1333 0716 7860     		str	r0, [r7, #4]
+ 597:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSPx(SSPx));
+ 598:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	return (SSPx->RIS);
+ 1334              		.loc 1 598 0
+ 1335 0718 7B68     		ldr	r3, [r7, #4]
+ 1336 071a 9B69     		ldr	r3, [r3, #24]
+ 599:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 1337              		.loc 1 599 0
+ 1338 071c 1846     		mov	r0, r3
+ 1339 071e 07F10C07 		add	r7, r7, #12
+ 1340 0722 BD46     		mov	sp, r7
+ 1341 0724 80BC     		pop	{r7}
+ 1342 0726 7047     		bx	lr
+ 1343              		.cfi_endproc
+ 1344              	.LFE69:
+ 1346              		.align	2
+ 1347              		.global	SSP_GetIntStatus
+ 1348              		.thumb
+ 1349              		.thumb_func
+ 1351              	SSP_GetIntStatus:
+ 1352              	.LFB70:
+ 600:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 601:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 602:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief	Check whether the specified interrupt status flag is
+ 603:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 			set or not
+ 604:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 605:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP0: SSP0 peripheral
+ 606:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 607:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	IntType	Raw Interrupt Type, should be:
+ 608:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTSTAT_ROR: Receive Overrun interrupt
+ 609:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTSTAT_RT: Receive Time out interrupt
+ 610:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTSTAT_RX: RX FIFO is at least half full interrupt
+ 611:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 				- SSP_INTSTAT_TX: TX FIFO is at least half empty interrupt
+ 612:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return	New State of specified interrupt status flag in SSP peripheral
+ 613:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * Note: Enabling/Disabling specified interrupt in SSP peripheral effects
+ 614:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 			to Interrupt Status flag.
+ 615:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 616:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** IntStatus SSP_GetIntStatus (LPC_SSP_TypeDef *SSPx, uint32_t IntType)
+ 617:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 1353              		.loc 1 617 0
+ 1354              		.cfi_startproc
+ 1355              		@ args = 0, pretend = 0, frame = 8
+ 1356              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1357              		@ link register save eliminated.
+ 1358 0728 80B4     		push	{r7}
+ 1359              	.LCFI45:
+ 1360              		.cfi_def_cfa_offset 4
+ 1361              		.cfi_offset 7, -4
+ 1362 072a 83B0     		sub	sp, sp, #12
+ 1363              	.LCFI46:
+ 1364              		.cfi_def_cfa_offset 16
+ 1365 072c 00AF     		add	r7, sp, #0
+ 1366              	.LCFI47:
+ 1367              		.cfi_def_cfa_register 7
+ 1368 072e 7860     		str	r0, [r7, #4]
+ 1369 0730 3960     		str	r1, [r7, #0]
+ 618:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSPx(SSPx));
+ 619:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSP_INTSTAT(IntType));
+ 620:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 621:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	return ((SSPx->MIS & IntType) ? SET :RESET);
+ 1370              		.loc 1 621 0
+ 1371 0732 7B68     		ldr	r3, [r7, #4]
+ 1372 0734 DA69     		ldr	r2, [r3, #28]
+ 1373 0736 3B68     		ldr	r3, [r7, #0]
+ 1374 0738 1340     		ands	r3, r3, r2
+ 1375 073a 002B     		cmp	r3, #0
+ 1376 073c 0CBF     		ite	eq
+ 1377 073e 0023     		moveq	r3, #0
+ 1378 0740 0123     		movne	r3, #1
+ 1379 0742 DBB2     		uxtb	r3, r3
+ 622:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 1380              		.loc 1 622 0
+ 1381 0744 1846     		mov	r0, r3
+ 1382 0746 07F10C07 		add	r7, r7, #12
+ 1383 074a BD46     		mov	sp, r7
+ 1384 074c 80BC     		pop	{r7}
+ 1385 074e 7047     		bx	lr
+ 1386              		.cfi_endproc
+ 1387              	.LFE70:
+ 1389              		.align	2
+ 1390              		.global	SSP_ClearIntPending
+ 1391              		.thumb
+ 1392              		.thumb_func
+ 1394              	SSP_ClearIntPending:
+ 1395              	.LFB71:
+ 623:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 624:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 625:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief				Clear specified interrupt pending in SSP peripheral
+ 626:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 627:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  *  					- LPC_SSP0: SSP0 peripheral
+ 628:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 629:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	IntType	Interrupt pending to clear, should be:
+ 630:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- SSP_INTCLR_ROR: clears the "frame was received when
+ 631:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						RxFIFO was full" interrupt.
+ 632:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- SSP_INTCLR_RT: clears the "Rx FIFO was not empty and
+ 633:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						has not been read for a timeout period" interrupt.
+ 634:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return		None
+ 635:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 636:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** void SSP_ClearIntPending(LPC_SSP_TypeDef *SSPx, uint32_t IntType)
+ 637:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 1396              		.loc 1 637 0
+ 1397              		.cfi_startproc
+ 1398              		@ args = 0, pretend = 0, frame = 8
+ 1399              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1400              		@ link register save eliminated.
+ 1401 0750 80B4     		push	{r7}
+ 1402              	.LCFI48:
+ 1403              		.cfi_def_cfa_offset 4
+ 1404              		.cfi_offset 7, -4
+ 1405 0752 83B0     		sub	sp, sp, #12
+ 1406              	.LCFI49:
+ 1407              		.cfi_def_cfa_offset 16
+ 1408 0754 00AF     		add	r7, sp, #0
+ 1409              	.LCFI50:
+ 1410              		.cfi_def_cfa_register 7
+ 1411 0756 7860     		str	r0, [r7, #4]
+ 1412 0758 3960     		str	r1, [r7, #0]
+ 638:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSPx(SSPx));
+ 639:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	////CHECK_PARAM(PARAM_SSP_INTCLR(IntType));
+ 640:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 641:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	SSPx->ICR = IntType;
+ 1413              		.loc 1 641 0
+ 1414 075a 7B68     		ldr	r3, [r7, #4]
+ 1415 075c 3A68     		ldr	r2, [r7, #0]
+ 1416 075e 1A62     		str	r2, [r3, #32]
+ 642:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 1417              		.loc 1 642 0
+ 1418 0760 07F10C07 		add	r7, r7, #12
+ 1419 0764 BD46     		mov	sp, r7
+ 1420 0766 80BC     		pop	{r7}
+ 1421 0768 7047     		bx	lr
+ 1422              		.cfi_endproc
+ 1423              	.LFE71:
+ 1425 076a 00BF     		.align	2
+ 1426              		.global	SSP_DMACmd
+ 1427              		.thumb
+ 1428              		.thumb_func
+ 1430              	SSP_DMACmd:
+ 1431              	.LFB72:
+ 643:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 644:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** /*********************************************************************//**
+ 645:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @brief				Enable/Disable DMA function for SSP peripheral
+ 646:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	SSPx	SSP peripheral selected, should be:
+ 647:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  *  					- LPC_SSP0: SSP0 peripheral
+ 648:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- LPC_SSP1: SSP1 peripheral
+ 649:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	DMAMode	Type of DMA, should be:
+ 650:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- SSP_DMA_TX: DMA for the transmit FIFO
+ 651:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- SSP_DMA_RX: DMA for the Receive FIFO
+ 652:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @param[in]	NewState	New State of DMA function on SSP peripheral,
+ 653:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						should be:
+ 654:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- ENALBE: Enable this function
+ 655:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * 						- DISABLE: Disable this function
+ 656:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  * @return		None
+ 657:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c ****  **********************************************************************/
+ 658:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** void SSP_DMACmd(LPC_SSP_TypeDef *SSPx, uint32_t DMAMode, FunctionalState NewState)
+ 659:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** {
+ 1432              		.loc 1 659 0
+ 1433              		.cfi_startproc
+ 1434              		@ args = 0, pretend = 0, frame = 16
+ 1435              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1436              		@ link register save eliminated.
+ 1437 076c 80B4     		push	{r7}
+ 1438              	.LCFI51:
+ 1439              		.cfi_def_cfa_offset 4
+ 1440              		.cfi_offset 7, -4
+ 1441 076e 85B0     		sub	sp, sp, #20
+ 1442              	.LCFI52:
+ 1443              		.cfi_def_cfa_offset 24
+ 1444 0770 00AF     		add	r7, sp, #0
+ 1445              	.LCFI53:
+ 1446              		.cfi_def_cfa_register 7
+ 1447 0772 F860     		str	r0, [r7, #12]
+ 1448 0774 B960     		str	r1, [r7, #8]
+ 1449 0776 1346     		mov	r3, r2
+ 1450 0778 FB71     		strb	r3, [r7, #7]
+ 660:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	//CHECK_PARAM(PARAM_SSPx(SSPx));
+ 661:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	//CHECK_PARAM(PARAM_SSP_DMA(DMAMode));
+ 662:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	//CHECK_PARAM(PARAM_FUNCTIONALSTATE(NewState));
+ 663:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 
+ 664:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	if (NewState == ENABLE)
+ 1451              		.loc 1 664 0
+ 1452 077a FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 1453 077c 012B     		cmp	r3, #1
+ 1454 077e 06D1     		bne	.L83
+ 665:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+ 666:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		SSPx->DMACR |= DMAMode;
+ 1455              		.loc 1 666 0
+ 1456 0780 FB68     		ldr	r3, [r7, #12]
+ 1457 0782 5A6A     		ldr	r2, [r3, #36]
+ 1458 0784 BB68     		ldr	r3, [r7, #8]
+ 1459 0786 1A43     		orrs	r2, r2, r3
+ 1460 0788 FB68     		ldr	r3, [r7, #12]
+ 1461 078a 5A62     		str	r2, [r3, #36]
+ 1462 078c 09E0     		b	.L82
+ 1463              	.L83:
+ 667:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 668:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	else
+ 669:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	{
+ 670:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 		SSPx->DMACR &= (~DMAMode) & SSP_DMA_BITMASK;
+ 1464              		.loc 1 670 0
+ 1465 078e FB68     		ldr	r3, [r7, #12]
+ 1466 0790 5A6A     		ldr	r2, [r3, #36]
+ 1467 0792 BB68     		ldr	r3, [r7, #8]
+ 1468 0794 6FEA0303 		mvn	r3, r3
+ 1469 0798 1340     		ands	r3, r3, r2
+ 1470 079a 03F00302 		and	r2, r3, #3
+ 1471 079e FB68     		ldr	r3, [r7, #12]
+ 1472 07a0 5A62     		str	r2, [r3, #36]
+ 1473              	.L82:
+ 671:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** 	}
+ 672:Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c **** }
+ 1474              		.loc 1 672 0
+ 1475 07a2 07F11407 		add	r7, r7, #20
+ 1476 07a6 BD46     		mov	sp, r7
+ 1477 07a8 80BC     		pop	{r7}
+ 1478 07aa 7047     		bx	lr
+ 1479              		.cfi_endproc
+ 1480              	.LFE72:
+ 1482              	.Letext0:
+ 1483              		.file 2 "/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none
+ 1484              		.file 3 "Libraries/CM3/inc/LPC17xx.h"
+ 1485              		.file 4 "Libraries/CM3/inc/lpc_types.h"
+ 1486              		.file 5 "Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.h"
+ 1487              		.file 6 "Libraries/CM3/inc/core_cm3.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 lpc17xx_ssp.c
+     /tmp/ccTT1dxi.s:18     .text:00000000 $t
+     /tmp/ccTT1dxi.s:22     .text:00000000 setSSPclock
+     /tmp/ccTT1dxi.s:149    .text:000000c8 SSP_Init
+     /tmp/ccTT1dxi.s:244    .text:00000158 SSP_DeInit
+     /tmp/ccTT1dxi.s:297    .text:000001a0 SSP_GetDataSize
+     /tmp/ccTT1dxi.s:335    .text:000001c0 SSP_ConfigStructInit
+     /tmp/ccTT1dxi.s:391    .text:00000208 SSP_Cmd
+     /tmp/ccTT1dxi.s:443    .text:00000240 SSP_LoopBackCmd
+     /tmp/ccTT1dxi.s:495    .text:00000278 SSP_SlaveOutputCmd
+     /tmp/ccTT1dxi.s:547    .text:000002b0 SSP_SendData
+     /tmp/ccTT1dxi.s:584    .text:000002cc SSP_ReceiveData
+     /tmp/ccTT1dxi.s:620    .text:000002e8 SSP_ReadWrite
+     /tmp/ccTT1dxi.s:1173   .text:00000680 SSP_GetStatus
+     /tmp/ccTT1dxi.s:1216   .text:000006a8 SSP_IntConfig
+     /tmp/ccTT1dxi.s:1273   .text:000006e8 SSP_GetRawIntStatus
+     /tmp/ccTT1dxi.s:1316   .text:00000710 SSP_GetRawIntStatusReg
+     /tmp/ccTT1dxi.s:1351   .text:00000728 SSP_GetIntStatus
+     /tmp/ccTT1dxi.s:1394   .text:00000750 SSP_ClearIntPending
+     /tmp/ccTT1dxi.s:1430   .text:0000076c SSP_DMACmd
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+CLKPWR_GetPCLK
+CLKPWR_ConfigPPWR

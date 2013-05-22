@@ -38,6 +38,7 @@ INCPATH += -I"$(SOURCEPATH)/Libraries/Driver/LPC17xx/inc"
 INCPATH += -I"$(SOURCEPATH)/Libraries/Library/inc"
 INCPATH += -I"$(SOURCEPATH)/Libraries/SYS/inc"
 INCPATH += -I"$(SOURCEPATH)"
+INCPATH += -I"$(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/inc"
 
 ASRC += $(SOURCEPATH)/Libraries/CM3/src/startup_LPC17xx.asm
 ASRC += $(SOURCEPATH)/Libraries/uC-CPU/cpu_a.asm
@@ -101,6 +102,9 @@ SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/lpc17xx_uart.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/csp_int.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/csp_pm.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/csp_dma.c
+
+SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usblibs.c
+SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usbinit.c
 
 SSRC += $(DRVPATH)/lpc17xx_nvic.c
 SSRC += $(DRVPATH)/lpc17xx_dac.c

@@ -1,0 +1,1187 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"os_pend_multi.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.align	2
+  19              		.global	OSPendMulti
+  20              		.thumb
+  21              		.thumb_func
+  23              	OSPendMulti:
+  24              	.LFB0:
+  25              		.file 1 "Libraries/uC-OSIII/os_pend_multi.c"
+   1:Libraries/uC-OSIII/os_pend_multi.c **** /*
+   2:Libraries/uC-OSIII/os_pend_multi.c **** ***************************************************************************************************
+   3:Libraries/uC-OSIII/os_pend_multi.c **** *                                                      uC/OS-III
+   4:Libraries/uC-OSIII/os_pend_multi.c **** *                                                 The Real-Time Kernel
+   5:Libraries/uC-OSIII/os_pend_multi.c **** *
+   6:Libraries/uC-OSIII/os_pend_multi.c **** *                                  (c) Copyright 2009-2010; Micrium, Inc.; Weston, FL
+   7:Libraries/uC-OSIII/os_pend_multi.c **** *                          All rights reserved.  Protected by international copyright laws.
+   8:Libraries/uC-OSIII/os_pend_multi.c **** *
+   9:Libraries/uC-OSIII/os_pend_multi.c **** *                                                PEND ON MULTIPLE OBJECTS
+  10:Libraries/uC-OSIII/os_pend_multi.c **** *
+  11:Libraries/uC-OSIII/os_pend_multi.c **** * File    : OS_SEM.C
+  12:Libraries/uC-OSIII/os_pend_multi.c **** * By      : JJL
+  13:Libraries/uC-OSIII/os_pend_multi.c **** * Version : V3.01.2
+  14:Libraries/uC-OSIII/os_pend_multi.c **** *
+  15:Libraries/uC-OSIII/os_pend_multi.c **** * LICENSING TERMS:
+  16:Libraries/uC-OSIII/os_pend_multi.c **** * ---------------
+  17:Libraries/uC-OSIII/os_pend_multi.c **** *               uC/OS-III is provided in source form to registered licensees ONLY.  It is 
+  18:Libraries/uC-OSIII/os_pend_multi.c **** *               illegal to distribute this source code to any third party unless you receive 
+  19:Libraries/uC-OSIII/os_pend_multi.c **** *               written permission by an authorized Micrium representative.  Knowledge of 
+  20:Libraries/uC-OSIII/os_pend_multi.c **** *               the source code may NOT be used to develop a similar product.
+  21:Libraries/uC-OSIII/os_pend_multi.c **** *
+  22:Libraries/uC-OSIII/os_pend_multi.c **** *               Please help us continue to provide the Embedded community with the finest
+  23:Libraries/uC-OSIII/os_pend_multi.c **** *               software available.  Your honesty is greatly appreciated.
+  24:Libraries/uC-OSIII/os_pend_multi.c **** *
+  25:Libraries/uC-OSIII/os_pend_multi.c **** *               You can contact us at www.micrium.com.
+  26:Libraries/uC-OSIII/os_pend_multi.c **** ***************************************************************************************************
+  27:Libraries/uC-OSIII/os_pend_multi.c **** */
+  28:Libraries/uC-OSIII/os_pend_multi.c **** 
+  29:Libraries/uC-OSIII/os_pend_multi.c **** #include <os.h>
+  30:Libraries/uC-OSIII/os_pend_multi.c **** 
+  31:Libraries/uC-OSIII/os_pend_multi.c **** #ifdef VSC_INCLUDE_SOURCE_FILE_NAMES
+  32:Libraries/uC-OSIII/os_pend_multi.c **** const  CPU_CHAR  *os_pend_multi__c = "$Id: $";
+  33:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+  34:Libraries/uC-OSIII/os_pend_multi.c **** 
+  35:Libraries/uC-OSIII/os_pend_multi.c **** 
+  36:Libraries/uC-OSIII/os_pend_multi.c **** #if (((OS_CFG_Q_EN > 0u) || (OS_CFG_SEM_EN > 0u)) && (OS_CFG_PEND_MULTI_EN > 0u))
+  37:Libraries/uC-OSIII/os_pend_multi.c **** /*
+  38:Libraries/uC-OSIII/os_pend_multi.c **** ***************************************************************************************************
+  39:Libraries/uC-OSIII/os_pend_multi.c **** *                                               PEND ON MULTIPLE OBJECTS
+  40:Libraries/uC-OSIII/os_pend_multi.c **** *
+  41:Libraries/uC-OSIII/os_pend_multi.c **** * Description: This function pends on multiple objects.  The objects pended on MUST be either semap
+  42:Libraries/uC-OSIII/os_pend_multi.c **** *              queues.  If multiple objects are ready at the start of the pend call, then all avail
+  43:Libraries/uC-OSIII/os_pend_multi.c **** *              are ready will be indicated to the caller.  If the task must pend on the multiple ev
+  44:Libraries/uC-OSIII/os_pend_multi.c **** *              as one of the object is either posted, aborted or deleted, the task will be readied.
+  45:Libraries/uC-OSIII/os_pend_multi.c **** *
+  46:Libraries/uC-OSIII/os_pend_multi.c **** *              This function only allows you to pend on semaphores and/or message queues.
+  47:Libraries/uC-OSIII/os_pend_multi.c **** *
+  48:Libraries/uC-OSIII/os_pend_multi.c **** * Arguments  : p_pend_data_tbl   is a pointer to an array of type OS_PEND_DATA which contains a lis
+  49:Libraries/uC-OSIII/os_pend_multi.c **** *                                objects we will be waiting on.  The caller must declare an array o
+  50:Libraries/uC-OSIII/os_pend_multi.c **** *                                and initialize the .PendObjPtr (see below) with a pointer to the o
+  51:Libraries/uC-OSIII/os_pend_multi.c **** *                                message queue) to pend on.
+  52:Libraries/uC-OSIII/os_pend_multi.c **** *
+  53:Libraries/uC-OSIII/os_pend_multi.c **** *                                    OS_PEND_DATA  MyPendArray[?];
+  54:Libraries/uC-OSIII/os_pend_multi.c **** *
+  55:Libraries/uC-OSIII/os_pend_multi.c **** *                                The OS_PEND_DATA field are as follows:
+  56:Libraries/uC-OSIII/os_pend_multi.c **** *
+  57:Libraries/uC-OSIII/os_pend_multi.c **** *                                    OS_PEND_DATA  *PrevPtr;      Used to link OS_PEND_DATA objects
+  58:Libraries/uC-OSIII/os_pend_multi.c **** *                                    OS_PEND_DATA  *NextPtr;      Used to link OS_PEND_DATA objects
+  59:Libraries/uC-OSIII/os_pend_multi.c **** *                                    OS_TCB        *TCBPtr;       Pointer to the TCB that is pendin
+  60:Libraries/uC-OSIII/os_pend_multi.c **** *                                >   OS_PEND_OBJ   *PendObjPtr;   USER supplied field which is a po
+  61:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 semaphore or message queue you wa
+  62:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 you call OSPendMulti() you MUST f
+  63:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 each of the objects you want to p
+  64:Libraries/uC-OSIII/os_pend_multi.c **** *                                    OS_PEND_OBJ   *RdyObjPtr;    OSPendMulti() will return the obj
+  65:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 aborted or deleted in this field.
+  66:Libraries/uC-OSIII/os_pend_multi.c **** *                                    void          *RdyMsgPtr;    OSPendMulti() will fill in this f
+  67:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 posted was a message queue.  This
+  68:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 message posted.
+  69:Libraries/uC-OSIII/os_pend_multi.c **** *                                    OS_MSG_SIZE    RdyMsgSize;   OSPendMulti() will fill in this f
+  70:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 posted was a message queue.  This
+  71:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 size of the message posted.
+  72:Libraries/uC-OSIII/os_pend_multi.c **** *                                    CPU_TS         RdyTS;        OSPendMulti() will fill in this f
+  73:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 was a message queue.  This corres
+  74:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 stamp when the message was posted
+  75:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 object is a semaphore and the obj
+  76:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 the this field will be set to (CP
+  77:Libraries/uC-OSIII/os_pend_multi.c **** *                                                                 not possible to know when the sem
+  78:Libraries/uC-OSIII/os_pend_multi.c **** *
+  79:Libraries/uC-OSIII/os_pend_multi.c **** *              tbl_size      is the size (in number of elements) of the OS_PEND_DATA array passed t
+  80:Libraries/uC-OSIII/os_pend_multi.c **** *                            other words, if the called needs to pend on 4 separate objects (semaph
+  81:Libraries/uC-OSIII/os_pend_multi.c **** *                            then you would pass 4 to this call.
+  82:Libraries/uC-OSIII/os_pend_multi.c **** *
+  83:Libraries/uC-OSIII/os_pend_multi.c **** *              timeout       is an optional timeout period (in clock ticks).  If non-zero, your tas
+  84:Libraries/uC-OSIII/os_pend_multi.c **** *                            the objects up to the amount of time specified by this argument. If yo
+  85:Libraries/uC-OSIII/os_pend_multi.c **** *                            your task will wait forever for the specified objects or, until an obj
+  86:Libraries/uC-OSIII/os_pend_multi.c **** *                            aborted or deleted.
+  87:Libraries/uC-OSIII/os_pend_multi.c **** *
+  88:Libraries/uC-OSIII/os_pend_multi.c **** *              opt           determines whether the user wants to block if none of the objects are 
+  89:Libraries/uC-OSIII/os_pend_multi.c **** *
+  90:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_OPT_PEND_BLOCKING
+  91:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_OPT_PEND_NON_BLOCKING
+  92:Libraries/uC-OSIII/os_pend_multi.c **** *
+  93:Libraries/uC-OSIII/os_pend_multi.c **** *              p_err         is a pointer to where an error message will be deposited.  Possible er
+  94:Libraries/uC-OSIII/os_pend_multi.c **** *
+  95:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_NONE              The call was successful and your task own
+  96:Libraries/uC-OSIII/os_pend_multi.c **** *                                                         the objects you are waiting for occurred.
+  97:Libraries/uC-OSIII/os_pend_multi.c **** *                                                         fields to know which objects have been po
+  98:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_OBJ_TYPE          If any of the .PendPtr is NOT a semaphore
+  99:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_OPT_INVALID       If you specified an invalid option for 'o
+ 100:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_PEND_ABORT        The wait on the events was aborted; check
+ 101:Libraries/uC-OSIII/os_pend_multi.c **** *                                                         for which objects were aborted.
+ 102:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_PEND_DEL          The wait on the events was aborted; check
+ 103:Libraries/uC-OSIII/os_pend_multi.c **** *                                                         for which objects were aborted.
+ 104:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_PEND_ISR          If you called this function from an ISR
+ 105:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_PEND_LOCKED       If you called this function when the sche
+ 106:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_PEND_WOULD_BLOCK  If the caller didn't want to block and no
+ 107:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_STATUS_INVALID    Invalid pend status
+ 108:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_PTR_INVALID       If you passes a NULL pointer of 'p_pend_d
+ 109:Libraries/uC-OSIII/os_pend_multi.c **** *                                OS_ERR_TIMEOUT           The objects were not posted within the sp
+ 110:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 111:Libraries/uC-OSIII/os_pend_multi.c **** * Returns    : >  0          the number of objects returned as ready, aborted or deleted
+ 112:Libraries/uC-OSIII/os_pend_multi.c **** *              == 0          if no events are returned as ready because of timeout or upon error.
+ 113:Libraries/uC-OSIII/os_pend_multi.c **** ***************************************************************************************************
+ 114:Libraries/uC-OSIII/os_pend_multi.c **** */
+ 115:Libraries/uC-OSIII/os_pend_multi.c **** /*$PAGE*/
+ 116:Libraries/uC-OSIII/os_pend_multi.c **** OS_OBJ_QTY  OSPendMulti (OS_PEND_DATA  *p_pend_data_tbl,
+ 117:Libraries/uC-OSIII/os_pend_multi.c ****                          OS_OBJ_QTY     tbl_size,
+ 118:Libraries/uC-OSIII/os_pend_multi.c ****                          OS_TICK        timeout,
+ 119:Libraries/uC-OSIII/os_pend_multi.c ****                          OS_OPT         opt,
+ 120:Libraries/uC-OSIII/os_pend_multi.c ****                          OS_ERR        *p_err)
+ 121:Libraries/uC-OSIII/os_pend_multi.c **** {
+  26              		.loc 1 121 0
+  27              		.cfi_startproc
+  28              		@ args = 4, pretend = 0, frame = 24
+  29              		@ frame_needed = 1, uses_anonymous_args = 0
+  30 0000 80B5     		push	{r7, lr}
+  31              	.LCFI0:
+  32              		.cfi_def_cfa_offset 8
+  33              		.cfi_offset 14, -4
+  34              		.cfi_offset 7, -8
+  35 0002 86B0     		sub	sp, sp, #24
+  36              	.LCFI1:
+  37              		.cfi_def_cfa_offset 32
+  38 0004 00AF     		add	r7, sp, #0
+  39              	.LCFI2:
+  40              		.cfi_def_cfa_register 7
+  41 0006 F860     		str	r0, [r7, #12]
+  42 0008 7A60     		str	r2, [r7, #4]
+  43 000a 0A46     		mov	r2, r1	@ movhi
+  44 000c 7A81     		strh	r2, [r7, #10]	@ movhi
+  45 000e 3B81     		strh	r3, [r7, #8]	@ movhi
+ 122:Libraries/uC-OSIII/os_pend_multi.c ****     CPU_BOOLEAN   valid;
+ 123:Libraries/uC-OSIII/os_pend_multi.c ****     OS_OBJ_QTY    nbr_obj_rdy;
+ 124:Libraries/uC-OSIII/os_pend_multi.c ****     CPU_SR_ALLOC();
+  46              		.loc 1 124 0
+  47 0010 4FF00003 		mov	r3, #0
+  48 0014 7B61     		str	r3, [r7, #20]
+ 125:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 126:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 127:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 128:Libraries/uC-OSIII/os_pend_multi.c **** #ifdef OS_SAFETY_CRITICAL
+ 129:Libraries/uC-OSIII/os_pend_multi.c ****     if (p_err == (OS_ERR *)0) {
+ 130:Libraries/uC-OSIII/os_pend_multi.c ****         OS_SAFETY_CRITICAL_EXCEPTION();
+ 131:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 132:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 133:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 134:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_CALLED_FROM_ISR_CHK_EN > 0u
+ 135:Libraries/uC-OSIII/os_pend_multi.c ****     if (OSIntNestingCtr > (OS_NESTING_CTR)0) {              /* Can't pend from an ISR              
+  49              		.loc 1 135 0
+  50 0016 40F20003 		movw	r3, #:lower16:OSIntNestingCtr
+  51 001a C0F20003 		movt	r3, #:upper16:OSIntNestingCtr
+  52 001e 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+  53 0020 002B     		cmp	r3, #0
+  54 0022 06D0     		beq	.L2
+ 136:Libraries/uC-OSIII/os_pend_multi.c ****        *p_err = OS_ERR_PEND_ISR;
+  55              		.loc 1 136 0
+  56 0024 3B6A     		ldr	r3, [r7, #32]
+  57 0026 46F2AE12 		movw	r2, #25006
+  58 002a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 137:Libraries/uC-OSIII/os_pend_multi.c ****         return ((OS_OBJ_QTY)0);
+  59              		.loc 1 137 0
+  60 002c 4FF00003 		mov	r3, #0
+  61 0030 F5E0     		b	.L3
+  62              	.L2:
+ 138:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 139:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 140:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 141:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_ARG_CHK_EN > 0u
+ 142:Libraries/uC-OSIII/os_pend_multi.c ****     if (p_pend_data_tbl == (OS_PEND_DATA *)0) {             /* Validate 'p_pend_data_tbl'          
+  63              		.loc 1 142 0
+  64 0032 FB68     		ldr	r3, [r7, #12]
+  65 0034 002B     		cmp	r3, #0
+  66 0036 06D1     		bne	.L4
+ 143:Libraries/uC-OSIII/os_pend_multi.c ****         *p_err = OS_ERR_PTR_INVALID;
+  67              		.loc 1 143 0
+  68 0038 3B6A     		ldr	r3, [r7, #32]
+  69 003a 46F2D522 		movw	r2, #25301
+  70 003e 1A80     		strh	r2, [r3, #0]	@ movhi
+ 144:Libraries/uC-OSIII/os_pend_multi.c ****         return ((OS_OBJ_QTY)0);
+  71              		.loc 1 144 0
+  72 0040 4FF00003 		mov	r3, #0
+  73 0044 EBE0     		b	.L3
+  74              	.L4:
+ 145:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 146:Libraries/uC-OSIII/os_pend_multi.c ****     if (tbl_size == (OS_OBJ_QTY)0) {                        /* Array size must be > 0              
+  75              		.loc 1 146 0
+  76 0046 7B89     		ldrh	r3, [r7, #10]
+  77 0048 002B     		cmp	r3, #0
+  78 004a 06D1     		bne	.L5
+ 147:Libraries/uC-OSIII/os_pend_multi.c ****         *p_err = OS_ERR_PTR_INVALID;
+  79              		.loc 1 147 0
+  80 004c 3B6A     		ldr	r3, [r7, #32]
+  81 004e 46F2D522 		movw	r2, #25301
+  82 0052 1A80     		strh	r2, [r3, #0]	@ movhi
+ 148:Libraries/uC-OSIII/os_pend_multi.c ****         return ((OS_OBJ_QTY)0);
+  83              		.loc 1 148 0
+  84 0054 4FF00003 		mov	r3, #0
+  85 0058 E1E0     		b	.L3
+  86              	.L5:
+ 149:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 150:Libraries/uC-OSIII/os_pend_multi.c ****     switch (opt) {
+  87              		.loc 1 150 0
+  88 005a 3B89     		ldrh	r3, [r7, #8]
+  89 005c 002B     		cmp	r3, #0
+  90 005e 09D0     		beq	.L22
+  91 0060 B3F5004F 		cmp	r3, #32768
+  92 0064 06D0     		beq	.L22
+ 151:Libraries/uC-OSIII/os_pend_multi.c ****         case OS_OPT_PEND_BLOCKING:
+ 152:Libraries/uC-OSIII/os_pend_multi.c ****         case OS_OPT_PEND_NON_BLOCKING:
+ 153:Libraries/uC-OSIII/os_pend_multi.c ****              break;
+ 154:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 155:Libraries/uC-OSIII/os_pend_multi.c ****         default:
+ 156:Libraries/uC-OSIII/os_pend_multi.c ****              *p_err = OS_ERR_OPT_INVALID;
+  93              		.loc 1 156 0
+  94 0066 3B6A     		ldr	r3, [r7, #32]
+  95 0068 45F62562 		movw	r2, #24101
+  96 006c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 157:Libraries/uC-OSIII/os_pend_multi.c ****              return ((OS_OBJ_QTY)0);
+  97              		.loc 1 157 0
+  98 006e 4FF00003 		mov	r3, #0
+  99 0072 D4E0     		b	.L3
+ 100              	.L22:
+ 153:Libraries/uC-OSIII/os_pend_multi.c ****              break;
+ 101              		.loc 1 153 0
+ 102 0074 00BF     		nop
+ 103              	.L8:
+ 158:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 159:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 160:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 161:Libraries/uC-OSIII/os_pend_multi.c ****     valid = OS_PendMultiValidate(p_pend_data_tbl,           /* -------- Validate objects to be OS_S
+ 104              		.loc 1 161 0
+ 105 0076 7B89     		ldrh	r3, [r7, #10]
+ 106 0078 F868     		ldr	r0, [r7, #12]
+ 107 007a 1946     		mov	r1, r3
+ 108 007c FFF7FEFF 		bl	OS_PendMultiValidate
+ 109 0080 0346     		mov	r3, r0
+ 110 0082 FB74     		strb	r3, [r7, #19]
+ 162:Libraries/uC-OSIII/os_pend_multi.c ****                                  tbl_size);
+ 163:Libraries/uC-OSIII/os_pend_multi.c ****     if (valid == DEF_FALSE) {
+ 111              		.loc 1 163 0
+ 112 0084 FB7C     		ldrb	r3, [r7, #19]	@ zero_extendqisi2
+ 113 0086 002B     		cmp	r3, #0
+ 114 0088 06D1     		bne	.L9
+ 164:Libraries/uC-OSIII/os_pend_multi.c ****         *p_err = OS_ERR_OBJ_TYPE;                           /* Invalid, not OS_SEM or OS_Q         
+ 115              		.loc 1 164 0
+ 116 008a 3B6A     		ldr	r3, [r7, #32]
+ 117 008c 45F6C452 		movw	r2, #24004
+ 118 0090 1A80     		strh	r2, [r3, #0]	@ movhi
+ 165:Libraries/uC-OSIII/os_pend_multi.c ****         return ((OS_OBJ_QTY)0);
+ 119              		.loc 1 165 0
+ 120 0092 4FF00003 		mov	r3, #0
+ 121 0096 C2E0     		b	.L3
+ 122              	.L9:
+ 166:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 167:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 168:Libraries/uC-OSIII/os_pend_multi.c **** /*$PAGE*/
+ 169:Libraries/uC-OSIII/os_pend_multi.c ****     CPU_CRITICAL_ENTER();
+ 123              		.loc 1 169 0
+ 124 0098 FFF7FEFF 		bl	CPU_SR_Save
+ 125 009c 7861     		str	r0, [r7, #20]
+ 126 009e FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 170:Libraries/uC-OSIII/os_pend_multi.c ****     nbr_obj_rdy = OS_PendMultiGetRdy(p_pend_data_tbl,       /* --------- SEE IF OBJECT(s) HAVE BEEN
+ 127              		.loc 1 170 0
+ 128 00a2 7B89     		ldrh	r3, [r7, #10]
+ 129 00a4 F868     		ldr	r0, [r7, #12]
+ 130 00a6 1946     		mov	r1, r3
+ 131 00a8 FFF7FEFF 		bl	OS_PendMultiGetRdy
+ 132 00ac 0346     		mov	r3, r0
+ 133 00ae 3B82     		strh	r3, [r7, #16]	@ movhi
+ 171:Libraries/uC-OSIII/os_pend_multi.c ****                                      tbl_size);
+ 172:Libraries/uC-OSIII/os_pend_multi.c ****     if (nbr_obj_rdy > (OS_OBJ_QTY)0) {
+ 134              		.loc 1 172 0
+ 135 00b0 3B8A     		ldrh	r3, [r7, #16]
+ 136 00b2 002B     		cmp	r3, #0
+ 137 00b4 0AD0     		beq	.L10
+ 173:Libraries/uC-OSIII/os_pend_multi.c ****         CPU_CRITICAL_EXIT();
+ 138              		.loc 1 173 0
+ 139 00b6 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 140 00ba 7869     		ldr	r0, [r7, #20]
+ 141 00bc FFF7FEFF 		bl	CPU_SR_Restore
+ 174:Libraries/uC-OSIII/os_pend_multi.c ****         *p_err = OS_ERR_NONE;
+ 142              		.loc 1 174 0
+ 143 00c0 3B6A     		ldr	r3, [r7, #32]
+ 144 00c2 4FF00002 		mov	r2, #0
+ 145 00c6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 175:Libraries/uC-OSIII/os_pend_multi.c ****         return ((OS_OBJ_QTY)nbr_obj_rdy);
+ 146              		.loc 1 175 0
+ 147 00c8 3B8A     		ldrh	r3, [r7, #16]
+ 148 00ca A8E0     		b	.L3
+ 149              	.L10:
+ 176:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 177:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 178:Libraries/uC-OSIII/os_pend_multi.c ****     if ((opt & OS_OPT_PEND_NON_BLOCKING) != (OS_OPT)0) {    /* Caller wants to block if not availab
+ 150              		.loc 1 178 0
+ 151 00cc 3B89     		ldrh	r3, [r7, #8]
+ 152 00ce 1BB2     		sxth	r3, r3
+ 153 00d0 002B     		cmp	r3, #0
+ 154 00d2 0BDA     		bge	.L11
+ 179:Libraries/uC-OSIII/os_pend_multi.c ****         CPU_CRITICAL_EXIT();
+ 155              		.loc 1 179 0
+ 156 00d4 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 157 00d8 7869     		ldr	r0, [r7, #20]
+ 158 00da FFF7FEFF 		bl	CPU_SR_Restore
+ 180:Libraries/uC-OSIII/os_pend_multi.c ****         *p_err = OS_ERR_PEND_WOULD_BLOCK;                   /* No                                  
+ 159              		.loc 1 180 0
+ 160 00de 3B6A     		ldr	r3, [r7, #32]
+ 161 00e0 46F2B012 		movw	r2, #25008
+ 162 00e4 1A80     		strh	r2, [r3, #0]	@ movhi
+ 181:Libraries/uC-OSIII/os_pend_multi.c ****         return ((OS_OBJ_QTY)0);
+ 163              		.loc 1 181 0
+ 164 00e6 4FF00003 		mov	r3, #0
+ 165 00ea 98E0     		b	.L3
+ 166              	.L11:
+ 182:Libraries/uC-OSIII/os_pend_multi.c ****     } else {
+ 183:Libraries/uC-OSIII/os_pend_multi.c ****         if (OSSchedLockNestingCtr > (OS_NESTING_CTR)0) {    /* Can't pend when the scheduler is loc
+ 167              		.loc 1 183 0
+ 168 00ec 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 169 00f0 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 170 00f4 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 171 00f6 002B     		cmp	r3, #0
+ 172 00f8 0BD0     		beq	.L12
+ 184:Libraries/uC-OSIII/os_pend_multi.c ****             CPU_CRITICAL_EXIT();
+ 173              		.loc 1 184 0
+ 174 00fa FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 175 00fe 7869     		ldr	r0, [r7, #20]
+ 176 0100 FFF7FEFF 		bl	CPU_SR_Restore
+ 185:Libraries/uC-OSIII/os_pend_multi.c ****             *p_err = OS_ERR_SCHED_LOCKED;
+ 177              		.loc 1 185 0
+ 178 0104 3B6A     		ldr	r3, [r7, #32]
+ 179 0106 46F66252 		movw	r2, #28002
+ 180 010a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 186:Libraries/uC-OSIII/os_pend_multi.c ****             return ((OS_OBJ_QTY)0);
+ 181              		.loc 1 186 0
+ 182 010c 4FF00003 		mov	r3, #0
+ 183 0110 85E0     		b	.L3
+ 184              	.L12:
+ 187:Libraries/uC-OSIII/os_pend_multi.c ****         }
+ 188:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 189:Libraries/uC-OSIII/os_pend_multi.c ****     OS_CRITICAL_ENTER_CPU_CRITICAL_EXIT();                  /* Lock the scheduler/re-enable interru
+ 185              		.loc 1 189 0
+ 186 0112 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 187 0116 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 188 011a 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 189 011c 03F10103 		add	r3, r3, #1
+ 190 0120 DAB2     		uxtb	r2, r3
+ 191 0122 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 192 0126 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 193 012a 1A70     		strb	r2, [r3, #0]
+ 194 012c 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 195 0130 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 196 0134 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 197 0136 012B     		cmp	r3, #1
+ 198 0138 01D1     		bne	.L13
+ 199              		.loc 1 189 0 is_stmt 0 discriminator 1
+ 200 013a FFF7FEFF 		bl	OS_SchedLockTimeMeasStart
+ 201              	.L13:
+ 202              		.loc 1 189 0 discriminator 2
+ 203 013e FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 204 0142 7869     		ldr	r0, [r7, #20]
+ 205 0144 FFF7FEFF 		bl	CPU_SR_Restore
+ 190:Libraries/uC-OSIII/os_pend_multi.c ****                                                             /* ------ NO OBJECT READY, PEND ON MULT
+ 191:Libraries/uC-OSIII/os_pend_multi.c ****     OS_PendMultiWait(p_pend_data_tbl,                       /* Suspend task until object posted or 
+ 206              		.loc 1 191 0 is_stmt 1 discriminator 2
+ 207 0148 7B89     		ldrh	r3, [r7, #10]
+ 208 014a F868     		ldr	r0, [r7, #12]
+ 209 014c 1946     		mov	r1, r3
+ 210 014e 7A68     		ldr	r2, [r7, #4]
+ 211 0150 FFF7FEFF 		bl	OS_PendMultiWait
+ 192:Libraries/uC-OSIII/os_pend_multi.c ****                      tbl_size,
+ 193:Libraries/uC-OSIII/os_pend_multi.c ****                      timeout);
+ 194:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 195:Libraries/uC-OSIII/os_pend_multi.c ****     OS_CRITICAL_EXIT_NO_SCHED();
+ 212              		.loc 1 195 0 discriminator 2
+ 213 0154 FFF7FEFF 		bl	CPU_SR_Save
+ 214 0158 7861     		str	r0, [r7, #20]
+ 215 015a FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 216 015e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 217 0162 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 218 0166 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 219 0168 03F1FF33 		add	r3, r3, #-1
+ 220 016c DAB2     		uxtb	r2, r3
+ 221 016e 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 222 0172 C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 223 0176 1A70     		strb	r2, [r3, #0]
+ 224 0178 40F20003 		movw	r3, #:lower16:OSSchedLockNestingCtr
+ 225 017c C0F20003 		movt	r3, #:upper16:OSSchedLockNestingCtr
+ 226 0180 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 227 0182 002B     		cmp	r3, #0
+ 228 0184 01D1     		bne	.L14
+ 229              		.loc 1 195 0 is_stmt 0 discriminator 1
+ 230 0186 FFF7FEFF 		bl	OS_SchedLockTimeMeasStop
+ 231              	.L14:
+ 232              		.loc 1 195 0 discriminator 2
+ 233 018a FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 234 018e 7869     		ldr	r0, [r7, #20]
+ 235 0190 FFF7FEFF 		bl	CPU_SR_Restore
+ 196:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 197:Libraries/uC-OSIII/os_pend_multi.c ****     OSSched();                                              /* Find next highest priority task read
+ 236              		.loc 1 197 0 is_stmt 1 discriminator 2
+ 237 0194 FFF7FEFF 		bl	OSSched
+ 198:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 199:Libraries/uC-OSIII/os_pend_multi.c ****     CPU_CRITICAL_ENTER();
+ 238              		.loc 1 199 0 discriminator 2
+ 239 0198 FFF7FEFF 		bl	CPU_SR_Save
+ 240 019c 7861     		str	r0, [r7, #20]
+ 241 019e FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 200:Libraries/uC-OSIII/os_pend_multi.c ****     switch (OSTCBCurPtr->PendStatus) {
+ 242              		.loc 1 200 0 discriminator 2
+ 243 01a2 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 244 01a6 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 245 01aa 1B68     		ldr	r3, [r3, #0]
+ 246 01ac 93F8C130 		ldrb	r3, [r3, #193]	@ zero_extendqisi2
+ 247 01b0 032B     		cmp	r3, #3
+ 248 01b2 1FD8     		bhi	.L15
+ 249 01b4 01A2     		adr	r2, .L20
+ 250 01b6 52F823F0 		ldr	pc, [r2, r3, lsl #2]
+ 251 01ba 00BF     		.align	2
+ 252              	.L20:
+ 253 01bc CD010000 		.word	.L16+1
+ 254 01c0 D7010000 		.word	.L17+1
+ 255 01c4 EB010000 		.word	.L18+1
+ 256 01c8 E1010000 		.word	.L19+1
+ 257              	.L16:
+ 201:Libraries/uC-OSIII/os_pend_multi.c ****         case OS_STATUS_PEND_OK:                             /* We got one of the objects posted to 
+ 202:Libraries/uC-OSIII/os_pend_multi.c ****              *p_err = OS_ERR_NONE;
+ 258              		.loc 1 202 0
+ 259 01cc 3B6A     		ldr	r3, [r7, #32]
+ 260 01ce 4FF00002 		mov	r2, #0
+ 261 01d2 1A80     		strh	r2, [r3, #0]	@ movhi
+ 203:Libraries/uC-OSIII/os_pend_multi.c ****              break;
+ 262              		.loc 1 203 0
+ 263 01d4 13E0     		b	.L21
+ 264              	.L17:
+ 204:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 205:Libraries/uC-OSIII/os_pend_multi.c ****         case OS_STATUS_PEND_ABORT:                          /* Indicate that the multi-pend was abo
+ 206:Libraries/uC-OSIII/os_pend_multi.c ****              *p_err = OS_ERR_PEND_ABORT;
+ 265              		.loc 1 206 0
+ 266 01d6 3B6A     		ldr	r3, [r7, #32]
+ 267 01d8 46F2A912 		movw	r2, #25001
+ 268 01dc 1A80     		strh	r2, [r3, #0]	@ movhi
+ 207:Libraries/uC-OSIII/os_pend_multi.c ****              break;
+ 269              		.loc 1 207 0
+ 270 01de 0EE0     		b	.L21
+ 271              	.L19:
+ 208:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 209:Libraries/uC-OSIII/os_pend_multi.c ****         case OS_STATUS_PEND_TIMEOUT:                        /* Indicate that we didn't get semaphor
+ 210:Libraries/uC-OSIII/os_pend_multi.c ****              *p_err = OS_ERR_TIMEOUT;
+ 272              		.loc 1 210 0
+ 273 01e0 3B6A     		ldr	r3, [r7, #32]
+ 274 01e2 47F2D922 		movw	r2, #29401
+ 275 01e6 1A80     		strh	r2, [r3, #0]	@ movhi
+ 211:Libraries/uC-OSIII/os_pend_multi.c ****              break;
+ 276              		.loc 1 211 0
+ 277 01e8 09E0     		b	.L21
+ 278              	.L18:
+ 212:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 213:Libraries/uC-OSIII/os_pend_multi.c ****         case OS_STATUS_PEND_DEL:                            /* Indicate that an object pended on ha
+ 214:Libraries/uC-OSIII/os_pend_multi.c ****              *p_err = OS_ERR_OBJ_DEL;
+ 279              		.loc 1 214 0
+ 280 01ea 3B6A     		ldr	r3, [r7, #32]
+ 281 01ec 45F6C252 		movw	r2, #24002
+ 282 01f0 1A80     		strh	r2, [r3, #0]	@ movhi
+ 215:Libraries/uC-OSIII/os_pend_multi.c ****             break;
+ 283              		.loc 1 215 0
+ 284 01f2 04E0     		b	.L21
+ 285              	.L15:
+ 216:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 217:Libraries/uC-OSIII/os_pend_multi.c ****         default:
+ 218:Libraries/uC-OSIII/os_pend_multi.c ****              *p_err = OS_ERR_STATUS_INVALID;
+ 286              		.loc 1 218 0
+ 287 01f4 3B6A     		ldr	r3, [r7, #32]
+ 288 01f6 46F62B62 		movw	r2, #28203
+ 289 01fa 1A80     		strh	r2, [r3, #0]	@ movhi
+ 219:Libraries/uC-OSIII/os_pend_multi.c ****              break;
+ 290              		.loc 1 219 0
+ 291 01fc 00BF     		nop
+ 292              	.L21:
+ 220:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 221:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 222:Libraries/uC-OSIII/os_pend_multi.c ****     OSTCBCurPtr->PendStatus = OS_STATUS_PEND_OK;
+ 293              		.loc 1 222 0
+ 294 01fe 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 295 0202 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 296 0206 1B68     		ldr	r3, [r3, #0]
+ 297 0208 4FF00002 		mov	r2, #0
+ 298 020c 83F8C120 		strb	r2, [r3, #193]
+ 223:Libraries/uC-OSIII/os_pend_multi.c ****     CPU_CRITICAL_EXIT();
+ 299              		.loc 1 223 0
+ 300 0210 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 301 0214 7869     		ldr	r0, [r7, #20]
+ 302 0216 FFF7FEFF 		bl	CPU_SR_Restore
+ 224:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 225:Libraries/uC-OSIII/os_pend_multi.c ****     return ((OS_OBJ_QTY)1);
+ 303              		.loc 1 225 0
+ 304 021a 4FF00103 		mov	r3, #1
+ 305              	.L3:
+ 226:Libraries/uC-OSIII/os_pend_multi.c **** }
+ 306              		.loc 1 226 0
+ 307 021e 1846     		mov	r0, r3
+ 308 0220 07F11807 		add	r7, r7, #24
+ 309 0224 BD46     		mov	sp, r7
+ 310 0226 80BD     		pop	{r7, pc}
+ 311              		.cfi_endproc
+ 312              	.LFE0:
+ 314              		.align	2
+ 315              		.global	OS_PendMultiGetRdy
+ 316              		.thumb
+ 317              		.thumb_func
+ 319              	OS_PendMultiGetRdy:
+ 320              	.LFB1:
+ 227:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 228:Libraries/uC-OSIII/os_pend_multi.c **** /*$PAGE*/
+ 229:Libraries/uC-OSIII/os_pend_multi.c **** /*
+ 230:Libraries/uC-OSIII/os_pend_multi.c **** ***************************************************************************************************
+ 231:Libraries/uC-OSIII/os_pend_multi.c **** *                                              GET A LIST OF OBJECTS READY
+ 232:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 233:Libraries/uC-OSIII/os_pend_multi.c **** * Description: This function is called by OSPendMulti() to obtain the list of object that are ready
+ 234:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 235:Libraries/uC-OSIII/os_pend_multi.c **** * Arguments  : p_pend_data_tbl   is a pointer to an array of OS_PEND_DATA
+ 236:Libraries/uC-OSIII/os_pend_multi.c **** *              ---------------
+ 237:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 238:Libraries/uC-OSIII/os_pend_multi.c **** *              tbl_size          is the size of the array
+ 239:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 240:Libraries/uC-OSIII/os_pend_multi.c **** * Returns    :  > 0              the number of objects ready
+ 241:Libraries/uC-OSIII/os_pend_multi.c **** *              == 0              if no object ready
+ 242:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 243:Libraries/uC-OSIII/os_pend_multi.c **** * Note       : This function is INTERNAL to uC/OS-III and your application should not call it.
+ 244:Libraries/uC-OSIII/os_pend_multi.c **** ***************************************************************************************************
+ 245:Libraries/uC-OSIII/os_pend_multi.c **** */
+ 246:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 247:Libraries/uC-OSIII/os_pend_multi.c **** OS_OBJ_QTY  OS_PendMultiGetRdy (OS_PEND_DATA  *p_pend_data_tbl,
+ 248:Libraries/uC-OSIII/os_pend_multi.c ****                                 OS_OBJ_QTY     tbl_size)
+ 249:Libraries/uC-OSIII/os_pend_multi.c **** {
+ 321              		.loc 1 249 0
+ 322              		.cfi_startproc
+ 323              		@ args = 0, pretend = 0, frame = 32
+ 324              		@ frame_needed = 1, uses_anonymous_args = 0
+ 325 0228 80B5     		push	{r7, lr}
+ 326              	.LCFI3:
+ 327              		.cfi_def_cfa_offset 8
+ 328              		.cfi_offset 14, -4
+ 329              		.cfi_offset 7, -8
+ 330 022a 88B0     		sub	sp, sp, #32
+ 331              	.LCFI4:
+ 332              		.cfi_def_cfa_offset 40
+ 333 022c 00AF     		add	r7, sp, #0
+ 334              	.LCFI5:
+ 335              		.cfi_def_cfa_register 7
+ 336 022e 7860     		str	r0, [r7, #4]
+ 337 0230 0B46     		mov	r3, r1
+ 338 0232 7B80     		strh	r3, [r7, #2]	@ movhi
+ 250:Libraries/uC-OSIII/os_pend_multi.c ****     OS_OBJ_QTY   i;
+ 251:Libraries/uC-OSIII/os_pend_multi.c ****     OS_OBJ_QTY   nbr_obj_rdy;
+ 252:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_Q_EN > 0u
+ 253:Libraries/uC-OSIII/os_pend_multi.c ****     OS_ERR       err;
+ 254:Libraries/uC-OSIII/os_pend_multi.c ****     OS_MSG_SIZE  msg_size;
+ 255:Libraries/uC-OSIII/os_pend_multi.c ****     OS_Q        *p_q;
+ 256:Libraries/uC-OSIII/os_pend_multi.c ****     void        *p_void;
+ 257:Libraries/uC-OSIII/os_pend_multi.c ****     CPU_TS       ts;
+ 258:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 259:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_SEM_EN  > 0u
+ 260:Libraries/uC-OSIII/os_pend_multi.c ****     OS_SEM      *p_sem;
+ 261:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 262:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 263:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 264:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 265:Libraries/uC-OSIII/os_pend_multi.c ****     nbr_obj_rdy = (OS_OBJ_QTY)0;
+ 339              		.loc 1 265 0
+ 340 0234 4FF00003 		mov	r3, #0
+ 341 0238 BB83     		strh	r3, [r7, #28]	@ movhi
+ 266:Libraries/uC-OSIII/os_pend_multi.c ****     for (i = 0u; i < tbl_size; i++) {
+ 342              		.loc 1 266 0
+ 343 023a 4FF00003 		mov	r3, #0
+ 344 023e FB83     		strh	r3, [r7, #30]	@ movhi
+ 345 0240 72E0     		b	.L24
+ 346              	.L27:
+ 267:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl->RdyObjPtr  = (void         *)0;         /* Clear all fields               
+ 347              		.loc 1 267 0
+ 348 0242 7B68     		ldr	r3, [r7, #4]
+ 349 0244 4FF00002 		mov	r2, #0
+ 350 0248 1A61     		str	r2, [r3, #16]
+ 268:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl->RdyMsgPtr  = (void         *)0;
+ 351              		.loc 1 268 0
+ 352 024a 7B68     		ldr	r3, [r7, #4]
+ 353 024c 4FF00002 		mov	r2, #0
+ 354 0250 5A61     		str	r2, [r3, #20]
+ 269:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl->RdyMsgSize = (OS_MSG_SIZE   )0;
+ 355              		.loc 1 269 0
+ 356 0252 7B68     		ldr	r3, [r7, #4]
+ 357 0254 4FF00002 		mov	r2, #0
+ 358 0258 1A83     		strh	r2, [r3, #24]	@ movhi
+ 270:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl->RdyTS      = (CPU_TS        )0;
+ 359              		.loc 1 270 0
+ 360 025a 7B68     		ldr	r3, [r7, #4]
+ 361 025c 4FF00002 		mov	r2, #0
+ 362 0260 DA61     		str	r2, [r3, #28]
+ 271:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl->NextPtr    = (OS_PEND_DATA *)0;
+ 363              		.loc 1 271 0
+ 364 0262 7B68     		ldr	r3, [r7, #4]
+ 365 0264 4FF00002 		mov	r2, #0
+ 366 0268 5A60     		str	r2, [r3, #4]
+ 272:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl->PrevPtr    = (OS_PEND_DATA *)0;
+ 367              		.loc 1 272 0
+ 368 026a 7B68     		ldr	r3, [r7, #4]
+ 369 026c 4FF00002 		mov	r2, #0
+ 370 0270 1A60     		str	r2, [r3, #0]
+ 273:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl->TCBPtr     = (OS_TCB       *)0;
+ 371              		.loc 1 273 0
+ 372 0272 7B68     		ldr	r3, [r7, #4]
+ 373 0274 4FF00002 		mov	r2, #0
+ 374 0278 9A60     		str	r2, [r3, #8]
+ 274:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_Q_EN > 0u
+ 275:Libraries/uC-OSIII/os_pend_multi.c ****         p_q = (OS_Q *)((void *)p_pend_data_tbl->PendObjPtr);     /* Assume we are pointing to a mes
+ 375              		.loc 1 275 0
+ 376 027a 7B68     		ldr	r3, [r7, #4]
+ 377 027c DB68     		ldr	r3, [r3, #12]
+ 378 027e BB61     		str	r3, [r7, #24]
+ 276:Libraries/uC-OSIII/os_pend_multi.c ****         if (p_q->Type == OS_OBJ_TYPE_Q) {                        /* Is it a message queue?         
+ 379              		.loc 1 276 0
+ 380 0280 BB69     		ldr	r3, [r7, #24]
+ 381 0282 1A68     		ldr	r2, [r3, #0]
+ 382 0284 45F25153 		movw	r3, #21841
+ 383 0288 C5F24553 		movt	r3, 21829
+ 384 028c 9A42     		cmp	r2, r3
+ 385 028e 22D1     		bne	.L25
+ 277:Libraries/uC-OSIII/os_pend_multi.c ****             p_void = OS_MsgQGet(&p_q->MsgQ,                      /* Yes, Any message waiting in the
+ 386              		.loc 1 277 0
+ 387 0290 BB69     		ldr	r3, [r7, #24]
+ 388 0292 03F12003 		add	r3, r3, #32
+ 389 0296 1846     		mov	r0, r3
+ 390 0298 07F10C03 		add	r3, r7, #12
+ 391 029c 1946     		mov	r1, r3
+ 392 029e 07F10803 		add	r3, r7, #8
+ 393 02a2 1A46     		mov	r2, r3
+ 394 02a4 07F10E03 		add	r3, r7, #14
+ 395 02a8 FFF7FEFF 		bl	OS_MsgQGet
+ 396 02ac 7861     		str	r0, [r7, #20]
+ 278:Libraries/uC-OSIII/os_pend_multi.c ****                                 &msg_size,
+ 279:Libraries/uC-OSIII/os_pend_multi.c ****                                 &ts,
+ 280:Libraries/uC-OSIII/os_pend_multi.c ****                                 &err);
+ 281:Libraries/uC-OSIII/os_pend_multi.c ****             if (err == OS_ERR_NONE) {
+ 397              		.loc 1 281 0
+ 398 02ae FB89     		ldrh	r3, [r7, #14]
+ 399 02b0 002B     		cmp	r3, #0
+ 400 02b2 10D1     		bne	.L25
+ 282:Libraries/uC-OSIII/os_pend_multi.c ****                 p_pend_data_tbl->RdyObjPtr  = p_pend_data_tbl->PendObjPtr;
+ 401              		.loc 1 282 0
+ 402 02b4 7B68     		ldr	r3, [r7, #4]
+ 403 02b6 DA68     		ldr	r2, [r3, #12]
+ 404 02b8 7B68     		ldr	r3, [r7, #4]
+ 405 02ba 1A61     		str	r2, [r3, #16]
+ 283:Libraries/uC-OSIII/os_pend_multi.c ****                 p_pend_data_tbl->RdyMsgPtr  = p_void;            /*      Yes, save the message rece
+ 406              		.loc 1 283 0
+ 407 02bc 7B68     		ldr	r3, [r7, #4]
+ 408 02be 7A69     		ldr	r2, [r7, #20]
+ 409 02c0 5A61     		str	r2, [r3, #20]
+ 284:Libraries/uC-OSIII/os_pend_multi.c ****                 p_pend_data_tbl->RdyMsgSize = msg_size;
+ 410              		.loc 1 284 0
+ 411 02c2 BA89     		ldrh	r2, [r7, #12]
+ 412 02c4 7B68     		ldr	r3, [r7, #4]
+ 413 02c6 1A83     		strh	r2, [r3, #24]	@ movhi
+ 285:Libraries/uC-OSIII/os_pend_multi.c ****                 p_pend_data_tbl->RdyTS      = ts;
+ 414              		.loc 1 285 0
+ 415 02c8 BA68     		ldr	r2, [r7, #8]
+ 416 02ca 7B68     		ldr	r3, [r7, #4]
+ 417 02cc DA61     		str	r2, [r3, #28]
+ 286:Libraries/uC-OSIII/os_pend_multi.c ****                 nbr_obj_rdy++;
+ 418              		.loc 1 286 0
+ 419 02ce BB8B     		ldrh	r3, [r7, #28]	@ movhi
+ 420 02d0 03F10103 		add	r3, r3, #1
+ 421 02d4 BB83     		strh	r3, [r7, #28]	@ movhi
+ 422              	.L25:
+ 287:Libraries/uC-OSIII/os_pend_multi.c ****             }
+ 288:Libraries/uC-OSIII/os_pend_multi.c ****         }
+ 289:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 290:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 291:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_SEM_EN > 0u
+ 292:Libraries/uC-OSIII/os_pend_multi.c ****         p_sem = (OS_SEM *)((void *)p_pend_data_tbl->PendObjPtr); /* Assume we are pointing to a sem
+ 423              		.loc 1 292 0
+ 424 02d6 7B68     		ldr	r3, [r7, #4]
+ 425 02d8 DB68     		ldr	r3, [r3, #12]
+ 426 02da 3B61     		str	r3, [r7, #16]
+ 293:Libraries/uC-OSIII/os_pend_multi.c ****         if (p_sem->Type == OS_OBJ_TYPE_SEM) {                    /* Is it a semaphore?             
+ 427              		.loc 1 293 0
+ 428 02dc 3B69     		ldr	r3, [r7, #16]
+ 429 02de 1A68     		ldr	r2, [r3, #0]
+ 430 02e0 44F25353 		movw	r3, #17747
+ 431 02e4 C4F24D13 		movt	r3, 16717
+ 432 02e8 9A42     		cmp	r2, r3
+ 433 02ea 15D1     		bne	.L26
+ 294:Libraries/uC-OSIII/os_pend_multi.c ****             if (p_sem->Ctr > 0u) {                               /* Yes, Semaphore has been signale
+ 434              		.loc 1 294 0
+ 435 02ec 3B69     		ldr	r3, [r7, #16]
+ 436 02ee 1B6A     		ldr	r3, [r3, #32]
+ 437 02f0 002B     		cmp	r3, #0
+ 438 02f2 11D0     		beq	.L26
+ 295:Libraries/uC-OSIII/os_pend_multi.c ****                 p_sem->Ctr--;                                    /*      Yes, caller may proceed   
+ 439              		.loc 1 295 0
+ 440 02f4 3B69     		ldr	r3, [r7, #16]
+ 441 02f6 1B6A     		ldr	r3, [r3, #32]
+ 442 02f8 03F1FF32 		add	r2, r3, #-1
+ 443 02fc 3B69     		ldr	r3, [r7, #16]
+ 444 02fe 1A62     		str	r2, [r3, #32]
+ 296:Libraries/uC-OSIII/os_pend_multi.c ****                 p_pend_data_tbl->RdyObjPtr  = p_pend_data_tbl->PendObjPtr;
+ 445              		.loc 1 296 0
+ 446 0300 7B68     		ldr	r3, [r7, #4]
+ 447 0302 DA68     		ldr	r2, [r3, #12]
+ 448 0304 7B68     		ldr	r3, [r7, #4]
+ 449 0306 1A61     		str	r2, [r3, #16]
+ 297:Libraries/uC-OSIII/os_pend_multi.c ****                 p_pend_data_tbl->RdyTS      = p_sem->TS;
+ 450              		.loc 1 297 0
+ 451 0308 3B69     		ldr	r3, [r7, #16]
+ 452 030a 5A6A     		ldr	r2, [r3, #36]
+ 453 030c 7B68     		ldr	r3, [r7, #4]
+ 454 030e DA61     		str	r2, [r3, #28]
+ 298:Libraries/uC-OSIII/os_pend_multi.c ****                 nbr_obj_rdy++;
+ 455              		.loc 1 298 0
+ 456 0310 BB8B     		ldrh	r3, [r7, #28]	@ movhi
+ 457 0312 03F10103 		add	r3, r3, #1
+ 458 0316 BB83     		strh	r3, [r7, #28]	@ movhi
+ 459              	.L26:
+ 299:Libraries/uC-OSIII/os_pend_multi.c ****             }
+ 300:Libraries/uC-OSIII/os_pend_multi.c ****         }
+ 301:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 302:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 303:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl++;
+ 460              		.loc 1 303 0
+ 461 0318 7B68     		ldr	r3, [r7, #4]
+ 462 031a 03F12003 		add	r3, r3, #32
+ 463 031e 7B60     		str	r3, [r7, #4]
+ 266:Libraries/uC-OSIII/os_pend_multi.c ****     for (i = 0u; i < tbl_size; i++) {
+ 464              		.loc 1 266 0
+ 465 0320 FB8B     		ldrh	r3, [r7, #30]	@ movhi
+ 466 0322 03F10103 		add	r3, r3, #1
+ 467 0326 FB83     		strh	r3, [r7, #30]	@ movhi
+ 468              	.L24:
+ 266:Libraries/uC-OSIII/os_pend_multi.c ****     for (i = 0u; i < tbl_size; i++) {
+ 469              		.loc 1 266 0 is_stmt 0 discriminator 1
+ 470 0328 FA8B     		ldrh	r2, [r7, #30]
+ 471 032a 7B88     		ldrh	r3, [r7, #2]
+ 472 032c 9A42     		cmp	r2, r3
+ 473 032e 88D3     		bcc	.L27
+ 304:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 305:Libraries/uC-OSIII/os_pend_multi.c ****     return (nbr_obj_rdy);
+ 474              		.loc 1 305 0 is_stmt 1
+ 475 0330 BB8B     		ldrh	r3, [r7, #28]
+ 306:Libraries/uC-OSIII/os_pend_multi.c **** }
+ 476              		.loc 1 306 0
+ 477 0332 1846     		mov	r0, r3
+ 478 0334 07F12007 		add	r7, r7, #32
+ 479 0338 BD46     		mov	sp, r7
+ 480 033a 80BD     		pop	{r7, pc}
+ 481              		.cfi_endproc
+ 482              	.LFE1:
+ 484              		.align	2
+ 485              		.global	OS_PendMultiValidate
+ 486              		.thumb
+ 487              		.thumb_func
+ 489              	OS_PendMultiValidate:
+ 490              	.LFB2:
+ 307:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 308:Libraries/uC-OSIII/os_pend_multi.c **** /*$PAGE*/
+ 309:Libraries/uC-OSIII/os_pend_multi.c **** /*
+ 310:Libraries/uC-OSIII/os_pend_multi.c **** ***************************************************************************************************
+ 311:Libraries/uC-OSIII/os_pend_multi.c **** *                                 VERIFY THAT OBJECTS PENDED ON ARE EITHER SEMAPHORES or QUEUES
+ 312:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 313:Libraries/uC-OSIII/os_pend_multi.c **** * Description: This function is called by OSPendMulti() to verify that we are multi-pending on eith
+ 314:Libraries/uC-OSIII/os_pend_multi.c **** *              message queues.
+ 315:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 316:Libraries/uC-OSIII/os_pend_multi.c **** * Arguments  : p_pend_data_tbl    is a pointer to an array of OS_PEND_DATA
+ 317:Libraries/uC-OSIII/os_pend_multi.c **** *              ---------------
+ 318:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 319:Libraries/uC-OSIII/os_pend_multi.c **** *              tbl_size           is the size of the array
+ 320:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 321:Libraries/uC-OSIII/os_pend_multi.c **** * Returns    : TRUE               if all objects pended on are either semaphores of queues
+ 322:Libraries/uC-OSIII/os_pend_multi.c **** *              FALSE              if at least one object is not a semaphore or queue.
+ 323:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 324:Libraries/uC-OSIII/os_pend_multi.c **** * Note       : This function is INTERNAL to uC/OS-III and your application should not call it.
+ 325:Libraries/uC-OSIII/os_pend_multi.c **** ***************************************************************************************************
+ 326:Libraries/uC-OSIII/os_pend_multi.c **** */
+ 327:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 328:Libraries/uC-OSIII/os_pend_multi.c **** CPU_BOOLEAN  OS_PendMultiValidate (OS_PEND_DATA  *p_pend_data_tbl,
+ 329:Libraries/uC-OSIII/os_pend_multi.c ****                                    OS_OBJ_QTY     tbl_size)
+ 330:Libraries/uC-OSIII/os_pend_multi.c **** {
+ 491              		.loc 1 330 0
+ 492              		.cfi_startproc
+ 493              		@ args = 0, pretend = 0, frame = 24
+ 494              		@ frame_needed = 1, uses_anonymous_args = 0
+ 495              		@ link register save eliminated.
+ 496 033c 80B4     		push	{r7}
+ 497              	.LCFI6:
+ 498              		.cfi_def_cfa_offset 4
+ 499              		.cfi_offset 7, -4
+ 500 033e 87B0     		sub	sp, sp, #28
+ 501              	.LCFI7:
+ 502              		.cfi_def_cfa_offset 32
+ 503 0340 00AF     		add	r7, sp, #0
+ 504              	.LCFI8:
+ 505              		.cfi_def_cfa_register 7
+ 506 0342 7860     		str	r0, [r7, #4]
+ 507 0344 0B46     		mov	r3, r1
+ 508 0346 7B80     		strh	r3, [r7, #2]	@ movhi
+ 331:Libraries/uC-OSIII/os_pend_multi.c ****     OS_OBJ_QTY  i;
+ 332:Libraries/uC-OSIII/os_pend_multi.c ****     OS_OBJ_QTY  ctr;
+ 333:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_SEM_EN  > 0u
+ 334:Libraries/uC-OSIII/os_pend_multi.c ****     OS_SEM      *p_sem;
+ 335:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 336:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_Q_EN > 0u
+ 337:Libraries/uC-OSIII/os_pend_multi.c ****     OS_Q        *p_q;
+ 338:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 339:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 340:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 341:Libraries/uC-OSIII/os_pend_multi.c ****     for (i = 0u; i < tbl_size; i++) {
+ 509              		.loc 1 341 0
+ 510 0348 4FF00003 		mov	r3, #0
+ 511 034c FB82     		strh	r3, [r7, #22]	@ movhi
+ 512 034e 35E0     		b	.L29
+ 513              	.L35:
+ 342:Libraries/uC-OSIII/os_pend_multi.c ****         if (p_pend_data_tbl->PendObjPtr == (OS_PEND_OBJ *)0) {   /* All .PendObjPtr in the table MU
+ 514              		.loc 1 342 0
+ 515 0350 7B68     		ldr	r3, [r7, #4]
+ 516 0352 DB68     		ldr	r3, [r3, #12]
+ 517 0354 002B     		cmp	r3, #0
+ 518 0356 02D1     		bne	.L30
+ 343:Libraries/uC-OSIII/os_pend_multi.c ****             return (DEF_FALSE);
+ 519              		.loc 1 343 0
+ 520 0358 4FF00003 		mov	r3, #0
+ 521 035c 34E0     		b	.L31
+ 522              	.L30:
+ 344:Libraries/uC-OSIII/os_pend_multi.c ****         }
+ 345:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 346:Libraries/uC-OSIII/os_pend_multi.c ****         ctr = 0u;
+ 523              		.loc 1 346 0
+ 524 035e 4FF00003 		mov	r3, #0
+ 525 0362 BB82     		strh	r3, [r7, #20]	@ movhi
+ 347:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_SEM_EN  > 0u
+ 348:Libraries/uC-OSIII/os_pend_multi.c ****         p_sem = (OS_SEM *)((void *)p_pend_data_tbl->PendObjPtr); /* All objects to pend on must be 
+ 526              		.loc 1 348 0
+ 527 0364 7B68     		ldr	r3, [r7, #4]
+ 528 0366 DB68     		ldr	r3, [r3, #12]
+ 529 0368 3B61     		str	r3, [r7, #16]
+ 349:Libraries/uC-OSIII/os_pend_multi.c ****         if (p_sem->Type == OS_OBJ_TYPE_SEM) {
+ 530              		.loc 1 349 0
+ 531 036a 3B69     		ldr	r3, [r7, #16]
+ 532 036c 1A68     		ldr	r2, [r3, #0]
+ 533 036e 44F25353 		movw	r3, #17747
+ 534 0372 C4F24D13 		movt	r3, 16717
+ 535 0376 9A42     		cmp	r2, r3
+ 536 0378 03D1     		bne	.L32
+ 350:Libraries/uC-OSIII/os_pend_multi.c ****             ctr++;
+ 537              		.loc 1 350 0
+ 538 037a BB8A     		ldrh	r3, [r7, #20]	@ movhi
+ 539 037c 03F10103 		add	r3, r3, #1
+ 540 0380 BB82     		strh	r3, [r7, #20]	@ movhi
+ 541              	.L32:
+ 351:Libraries/uC-OSIII/os_pend_multi.c ****         }
+ 352:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 353:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 354:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_Q_EN > 0u
+ 355:Libraries/uC-OSIII/os_pend_multi.c ****         p_q = (OS_Q *)((void *)p_pend_data_tbl->PendObjPtr);     /* ... or of type OS_Q            
+ 542              		.loc 1 355 0
+ 543 0382 7B68     		ldr	r3, [r7, #4]
+ 544 0384 DB68     		ldr	r3, [r3, #12]
+ 545 0386 FB60     		str	r3, [r7, #12]
+ 356:Libraries/uC-OSIII/os_pend_multi.c ****         if (p_q->Type == OS_OBJ_TYPE_Q) {
+ 546              		.loc 1 356 0
+ 547 0388 FB68     		ldr	r3, [r7, #12]
+ 548 038a 1A68     		ldr	r2, [r3, #0]
+ 549 038c 45F25153 		movw	r3, #21841
+ 550 0390 C5F24553 		movt	r3, 21829
+ 551 0394 9A42     		cmp	r2, r3
+ 552 0396 03D1     		bne	.L33
+ 357:Libraries/uC-OSIII/os_pend_multi.c ****             ctr++;
+ 553              		.loc 1 357 0
+ 554 0398 BB8A     		ldrh	r3, [r7, #20]	@ movhi
+ 555 039a 03F10103 		add	r3, r3, #1
+ 556 039e BB82     		strh	r3, [r7, #20]	@ movhi
+ 557              	.L33:
+ 358:Libraries/uC-OSIII/os_pend_multi.c ****         }
+ 359:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 360:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 361:Libraries/uC-OSIII/os_pend_multi.c ****         if (ctr == (OS_OBJ_QTY)0) {
+ 558              		.loc 1 361 0
+ 559 03a0 BB8A     		ldrh	r3, [r7, #20]
+ 560 03a2 002B     		cmp	r3, #0
+ 561 03a4 02D1     		bne	.L34
+ 362:Libraries/uC-OSIII/os_pend_multi.c ****             return (DEF_FALSE);                                  /* Found at least one invalid obje
+ 562              		.loc 1 362 0
+ 563 03a6 4FF00003 		mov	r3, #0
+ 564 03aa 0DE0     		b	.L31
+ 565              	.L34:
+ 363:Libraries/uC-OSIII/os_pend_multi.c ****         }
+ 364:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl++;
+ 566              		.loc 1 364 0
+ 567 03ac 7B68     		ldr	r3, [r7, #4]
+ 568 03ae 03F12003 		add	r3, r3, #32
+ 569 03b2 7B60     		str	r3, [r7, #4]
+ 341:Libraries/uC-OSIII/os_pend_multi.c ****     for (i = 0u; i < tbl_size; i++) {
+ 570              		.loc 1 341 0
+ 571 03b4 FB8A     		ldrh	r3, [r7, #22]	@ movhi
+ 572 03b6 03F10103 		add	r3, r3, #1
+ 573 03ba FB82     		strh	r3, [r7, #22]	@ movhi
+ 574              	.L29:
+ 341:Libraries/uC-OSIII/os_pend_multi.c ****     for (i = 0u; i < tbl_size; i++) {
+ 575              		.loc 1 341 0 is_stmt 0 discriminator 1
+ 576 03bc FA8A     		ldrh	r2, [r7, #22]
+ 577 03be 7B88     		ldrh	r3, [r7, #2]
+ 578 03c0 9A42     		cmp	r2, r3
+ 579 03c2 C5D3     		bcc	.L35
+ 365:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 366:Libraries/uC-OSIII/os_pend_multi.c ****     return (DEF_TRUE);
+ 580              		.loc 1 366 0 is_stmt 1
+ 581 03c4 4FF00103 		mov	r3, #1
+ 582              	.L31:
+ 367:Libraries/uC-OSIII/os_pend_multi.c **** }
+ 583              		.loc 1 367 0
+ 584 03c8 1846     		mov	r0, r3
+ 585 03ca 07F11C07 		add	r7, r7, #28
+ 586 03ce BD46     		mov	sp, r7
+ 587 03d0 80BC     		pop	{r7}
+ 588 03d2 7047     		bx	lr
+ 589              		.cfi_endproc
+ 590              	.LFE2:
+ 592              		.align	2
+ 593              		.global	OS_PendMultiWait
+ 594              		.thumb
+ 595              		.thumb_func
+ 597              	OS_PendMultiWait:
+ 598              	.LFB3:
+ 368:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 369:Libraries/uC-OSIII/os_pend_multi.c **** /*$PAGE*/
+ 370:Libraries/uC-OSIII/os_pend_multi.c **** /*
+ 371:Libraries/uC-OSIII/os_pend_multi.c **** ***************************************************************************************************
+ 372:Libraries/uC-OSIII/os_pend_multi.c **** *                                 MAKE TASK WAIT FOR ANY OF MULTIPLE EVENTS TO OCCUR
+ 373:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 374:Libraries/uC-OSIII/os_pend_multi.c **** * Description: This function is called by OSPendMulti() to suspend a task because any one of multip
+ 375:Libraries/uC-OSIII/os_pend_multi.c **** *              not been posted to.
+ 376:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 377:Libraries/uC-OSIII/os_pend_multi.c **** * Arguments  : p_pend_data_tbl    is a pointer to an array of OS_PEND_DATA
+ 378:Libraries/uC-OSIII/os_pend_multi.c **** *              ---------------
+ 379:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 380:Libraries/uC-OSIII/os_pend_multi.c **** *              tbl_size           is the size of the array
+ 381:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 382:Libraries/uC-OSIII/os_pend_multi.c **** *              timeout            is the timeout to wait in case none of the objects become ready
+ 383:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 384:Libraries/uC-OSIII/os_pend_multi.c **** * Returns    : none
+ 385:Libraries/uC-OSIII/os_pend_multi.c **** *
+ 386:Libraries/uC-OSIII/os_pend_multi.c **** * Note       : This function is INTERNAL to uC/OS-III and your application should not call it.
+ 387:Libraries/uC-OSIII/os_pend_multi.c **** ***************************************************************************************************
+ 388:Libraries/uC-OSIII/os_pend_multi.c **** */
+ 389:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 390:Libraries/uC-OSIII/os_pend_multi.c **** void  OS_PendMultiWait (OS_PEND_DATA  *p_pend_data_tbl,
+ 391:Libraries/uC-OSIII/os_pend_multi.c ****                         OS_OBJ_QTY     tbl_size,
+ 392:Libraries/uC-OSIII/os_pend_multi.c ****                         OS_TICK        timeout)
+ 393:Libraries/uC-OSIII/os_pend_multi.c **** {
+ 599              		.loc 1 393 0
+ 600              		.cfi_startproc
+ 601              		@ args = 0, pretend = 0, frame = 32
+ 602              		@ frame_needed = 1, uses_anonymous_args = 0
+ 603 03d4 80B5     		push	{r7, lr}
+ 604              	.LCFI9:
+ 605              		.cfi_def_cfa_offset 8
+ 606              		.cfi_offset 14, -4
+ 607              		.cfi_offset 7, -8
+ 608 03d6 88B0     		sub	sp, sp, #32
+ 609              	.LCFI10:
+ 610              		.cfi_def_cfa_offset 40
+ 611 03d8 00AF     		add	r7, sp, #0
+ 612              	.LCFI11:
+ 613              		.cfi_def_cfa_register 7
+ 614 03da F860     		str	r0, [r7, #12]
+ 615 03dc 0B46     		mov	r3, r1
+ 616 03de 7A60     		str	r2, [r7, #4]
+ 617 03e0 7B81     		strh	r3, [r7, #10]	@ movhi
+ 394:Libraries/uC-OSIII/os_pend_multi.c ****     OS_OBJ_QTY      i;
+ 395:Libraries/uC-OSIII/os_pend_multi.c ****     OS_PEND_LIST   *p_pend_list;
+ 396:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 397:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_Q_EN > 0u
+ 398:Libraries/uC-OSIII/os_pend_multi.c ****     OS_Q           *p_q;
+ 399:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 400:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 401:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_SEM_EN > 0u
+ 402:Libraries/uC-OSIII/os_pend_multi.c ****     OS_SEM         *p_sem;
+ 403:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 404:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 405:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 406:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 407:Libraries/uC-OSIII/os_pend_multi.c ****     OSTCBCurPtr->PendOn             = OS_TASK_PEND_ON_MULTI;   /* Resource not available, wait unti
+ 618              		.loc 1 407 0
+ 619 03e2 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 620 03e6 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 621 03ea 1B68     		ldr	r3, [r3, #0]
+ 622 03ec 4FF00302 		mov	r2, #3
+ 623 03f0 83F8C020 		strb	r2, [r3, #192]
+ 408:Libraries/uC-OSIII/os_pend_multi.c ****     OSTCBCurPtr->PendStatus         = OS_STATUS_PEND_OK;
+ 624              		.loc 1 408 0
+ 625 03f4 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 626 03f8 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 627 03fc 1B68     		ldr	r3, [r3, #0]
+ 628 03fe 4FF00002 		mov	r2, #0
+ 629 0402 83F8C120 		strb	r2, [r3, #193]
+ 409:Libraries/uC-OSIII/os_pend_multi.c ****     OSTCBCurPtr->PendDataTblEntries = tbl_size;
+ 630              		.loc 1 409 0
+ 631 0406 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 632 040a C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 633 040e 1B68     		ldr	r3, [r3, #0]
+ 634 0410 7A89     		ldrh	r2, [r7, #10]	@ movhi
+ 635 0412 9A86     		strh	r2, [r3, #52]	@ movhi
+ 410:Libraries/uC-OSIII/os_pend_multi.c ****     OSTCBCurPtr->PendDataTblPtr     = p_pend_data_tbl;
+ 636              		.loc 1 410 0
+ 637 0414 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 638 0418 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 639 041c 1B68     		ldr	r3, [r3, #0]
+ 640 041e FA68     		ldr	r2, [r7, #12]
+ 641 0420 1A63     		str	r2, [r3, #48]
+ 411:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 412:Libraries/uC-OSIII/os_pend_multi.c ****     OS_TaskBlock(OSTCBCurPtr,                                  /* Block the task waiting for object
+ 642              		.loc 1 412 0
+ 643 0422 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 644 0426 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 645 042a 1B68     		ldr	r3, [r3, #0]
+ 646 042c 1846     		mov	r0, r3
+ 647 042e 7968     		ldr	r1, [r7, #4]
+ 648 0430 FFF7FEFF 		bl	OS_TaskBlock
+ 413:Libraries/uC-OSIII/os_pend_multi.c ****                  timeout);                                     /* ... but with a timeout if not    
+ 414:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 415:Libraries/uC-OSIII/os_pend_multi.c ****     for (i = 0u; i < tbl_size; i++) {
+ 649              		.loc 1 415 0
+ 650 0434 4FF00003 		mov	r3, #0
+ 651 0438 FB83     		strh	r3, [r7, #30]	@ movhi
+ 652 043a 34E0     		b	.L37
+ 653              	.L40:
+ 416:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl->TCBPtr = OSTCBCurPtr;                 /* Every entry points back to the TC
+ 654              		.loc 1 416 0
+ 655 043c 40F20003 		movw	r3, #:lower16:OSTCBCurPtr
+ 656 0440 C0F20003 		movt	r3, #:upper16:OSTCBCurPtr
+ 657 0444 1A68     		ldr	r2, [r3, #0]
+ 658 0446 FB68     		ldr	r3, [r7, #12]
+ 659 0448 9A60     		str	r2, [r3, #8]
+ 417:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 418:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_SEM_EN > 0u
+ 419:Libraries/uC-OSIII/os_pend_multi.c ****         p_sem = (OS_SEM *)((void *)p_pend_data_tbl->PendObjPtr);
+ 660              		.loc 1 419 0
+ 661 044a FB68     		ldr	r3, [r7, #12]
+ 662 044c DB68     		ldr	r3, [r3, #12]
+ 663 044e BB61     		str	r3, [r7, #24]
+ 420:Libraries/uC-OSIII/os_pend_multi.c ****         if (p_sem->Type == OS_OBJ_TYPE_SEM) {
+ 664              		.loc 1 420 0
+ 665 0450 BB69     		ldr	r3, [r7, #24]
+ 666 0452 1A68     		ldr	r2, [r3, #0]
+ 667 0454 44F25353 		movw	r3, #17747
+ 668 0458 C4F24D13 		movt	r3, 16717
+ 669 045c 9A42     		cmp	r2, r3
+ 670 045e 07D1     		bne	.L38
+ 421:Libraries/uC-OSIII/os_pend_multi.c ****             p_pend_list = &p_sem->PendList;
+ 671              		.loc 1 421 0
+ 672 0460 BB69     		ldr	r3, [r7, #24]
+ 673 0462 03F10803 		add	r3, r3, #8
+ 674 0466 7B61     		str	r3, [r7, #20]
+ 422:Libraries/uC-OSIII/os_pend_multi.c ****             OS_PendListInsertPrio(p_pend_list,
+ 675              		.loc 1 422 0
+ 676 0468 7869     		ldr	r0, [r7, #20]
+ 677 046a F968     		ldr	r1, [r7, #12]
+ 678 046c FFF7FEFF 		bl	OS_PendListInsertPrio
+ 679              	.L38:
+ 423:Libraries/uC-OSIII/os_pend_multi.c ****                                   p_pend_data_tbl);
+ 424:Libraries/uC-OSIII/os_pend_multi.c ****         }
+ 425:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 426:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 427:Libraries/uC-OSIII/os_pend_multi.c **** #if OS_CFG_Q_EN > 0u
+ 428:Libraries/uC-OSIII/os_pend_multi.c ****         p_q = (OS_Q *)((void *)p_pend_data_tbl->PendObjPtr);
+ 680              		.loc 1 428 0
+ 681 0470 FB68     		ldr	r3, [r7, #12]
+ 682 0472 DB68     		ldr	r3, [r3, #12]
+ 683 0474 3B61     		str	r3, [r7, #16]
+ 429:Libraries/uC-OSIII/os_pend_multi.c ****         if (p_q->Type == OS_OBJ_TYPE_Q) {
+ 684              		.loc 1 429 0
+ 685 0476 3B69     		ldr	r3, [r7, #16]
+ 686 0478 1A68     		ldr	r2, [r3, #0]
+ 687 047a 45F25153 		movw	r3, #21841
+ 688 047e C5F24553 		movt	r3, 21829
+ 689 0482 9A42     		cmp	r2, r3
+ 690 0484 07D1     		bne	.L39
+ 430:Libraries/uC-OSIII/os_pend_multi.c ****             p_pend_list = &p_q->PendList;
+ 691              		.loc 1 430 0
+ 692 0486 3B69     		ldr	r3, [r7, #16]
+ 693 0488 03F10803 		add	r3, r3, #8
+ 694 048c 7B61     		str	r3, [r7, #20]
+ 431:Libraries/uC-OSIII/os_pend_multi.c ****             OS_PendListInsertPrio(p_pend_list,
+ 695              		.loc 1 431 0
+ 696 048e 7869     		ldr	r0, [r7, #20]
+ 697 0490 F968     		ldr	r1, [r7, #12]
+ 698 0492 FFF7FEFF 		bl	OS_PendListInsertPrio
+ 699              	.L39:
+ 432:Libraries/uC-OSIII/os_pend_multi.c ****                                   p_pend_data_tbl);
+ 433:Libraries/uC-OSIII/os_pend_multi.c ****         }
+ 434:Libraries/uC-OSIII/os_pend_multi.c **** #endif
+ 435:Libraries/uC-OSIII/os_pend_multi.c **** 
+ 436:Libraries/uC-OSIII/os_pend_multi.c ****         p_pend_data_tbl++;
+ 700              		.loc 1 436 0
+ 701 0496 FB68     		ldr	r3, [r7, #12]
+ 702 0498 03F12003 		add	r3, r3, #32
+ 703 049c FB60     		str	r3, [r7, #12]
+ 415:Libraries/uC-OSIII/os_pend_multi.c ****     for (i = 0u; i < tbl_size; i++) {
+ 704              		.loc 1 415 0
+ 705 049e FB8B     		ldrh	r3, [r7, #30]	@ movhi
+ 706 04a0 03F10103 		add	r3, r3, #1
+ 707 04a4 FB83     		strh	r3, [r7, #30]	@ movhi
+ 708              	.L37:
+ 415:Libraries/uC-OSIII/os_pend_multi.c ****     for (i = 0u; i < tbl_size; i++) {
+ 709              		.loc 1 415 0 is_stmt 0 discriminator 1
+ 710 04a6 FA8B     		ldrh	r2, [r7, #30]
+ 711 04a8 7B89     		ldrh	r3, [r7, #10]
+ 712 04aa 9A42     		cmp	r2, r3
+ 713 04ac C6D3     		bcc	.L40
+ 437:Libraries/uC-OSIII/os_pend_multi.c ****     }
+ 438:Libraries/uC-OSIII/os_pend_multi.c **** }
+ 714              		.loc 1 438 0 is_stmt 1
+ 715 04ae 07F12007 		add	r7, r7, #32
+ 716 04b2 BD46     		mov	sp, r7
+ 717 04b4 80BD     		pop	{r7, pc}
+ 718              		.cfi_endproc
+ 719              	.LFE3:
+ 721              	.Letext0:
+ 722              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 723              		.file 3 "Libraries/uC-CPU/cpu_core.h"
+ 724              		.file 4 "Libraries/uC-OSIII/os_type.h"
+ 725              		.file 5 "Libraries/uC-OSIII/os.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 os_pend_multi.c
+     /tmp/cc6uy9eR.s:18     .text:00000000 $t
+     /tmp/cc6uy9eR.s:23     .text:00000000 OSPendMulti
+     /tmp/cc6uy9eR.s:489    .text:0000033c OS_PendMultiValidate
+     /tmp/cc6uy9eR.s:319    .text:00000228 OS_PendMultiGetRdy
+     /tmp/cc6uy9eR.s:597    .text:000003d4 OS_PendMultiWait
+     /tmp/cc6uy9eR.s:253    .text:000001bc $d
+     /tmp/cc6uy9eR.s:259    .text:000001cc $t
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+OSIntNestingCtr
+CPU_SR_Save
+CPU_IntDisMeasStart
+CPU_IntDisMeasStop
+CPU_SR_Restore
+OSSchedLockNestingCtr
+OS_SchedLockTimeMeasStart
+OS_SchedLockTimeMeasStop
+OSSched
+OSTCBCurPtr
+OS_MsgQGet
+OS_TaskBlock
+OS_PendListInsertPrio

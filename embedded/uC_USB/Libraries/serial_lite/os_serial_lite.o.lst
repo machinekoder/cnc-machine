@@ -1,0 +1,939 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"os_serial_lite.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.comm	com_context,16,4
+  19              		.align	2
+  20              		.global	os_serial_pincfg
+  21              		.thumb
+  22              		.thumb_func
+  24              	os_serial_pincfg:
+  25              	.LFB55:
+  26              		.file 1 "Libraries/serial_lite/os_serial_lite.c"
+   1:Libraries/serial_lite/os_serial_lite.c **** /*
+   2:Libraries/serial_lite/os_serial_lite.c ****  * os_serial_lite.c
+   3:Libraries/serial_lite/os_serial_lite.c ****  *
+   4:Libraries/serial_lite/os_serial_lite.c ****  *  Created on: 27 Nov 2012
+   5:Libraries/serial_lite/os_serial_lite.c ****  *      Author: es
+   6:Libraries/serial_lite/os_serial_lite.c ****  */
+   7:Libraries/serial_lite/os_serial_lite.c **** 
+   8:Libraries/serial_lite/os_serial_lite.c **** #include <os_serial_lite.h>
+   9:Libraries/serial_lite/os_serial_lite.c **** 
+  10:Libraries/serial_lite/os_serial_lite.c **** 
+  11:Libraries/serial_lite/os_serial_lite.c **** int os_serial_pincfg(uint8_t dev) {
+  27              		.loc 1 11 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 16
+  30              		@ frame_needed = 1, uses_anonymous_args = 0
+  31 0000 80B5     		push	{r7, lr}
+  32              	.LCFI0:
+  33              		.cfi_def_cfa_offset 8
+  34              		.cfi_offset 14, -4
+  35              		.cfi_offset 7, -8
+  36 0002 84B0     		sub	sp, sp, #16
+  37              	.LCFI1:
+  38              		.cfi_def_cfa_offset 24
+  39 0004 00AF     		add	r7, sp, #0
+  40              	.LCFI2:
+  41              		.cfi_def_cfa_register 7
+  42 0006 0346     		mov	r3, r0
+  43 0008 FB71     		strb	r3, [r7, #7]
+  12:Libraries/serial_lite/os_serial_lite.c **** 
+  13:Libraries/serial_lite/os_serial_lite.c **** 	PINSEL_CFG_Type PINSEL_InitStruct;
+  14:Libraries/serial_lite/os_serial_lite.c **** 
+  15:Libraries/serial_lite/os_serial_lite.c **** 	if(dev == 0) {
+  44              		.loc 1 15 0
+  45 000a FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+  46 000c 002B     		cmp	r3, #0
+  47 000e 1ED1     		bne	.L2
+  16:Libraries/serial_lite/os_serial_lite.c **** 
+  17:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.Funcnum=PINSEL_FUNC_1;/*alternative function*/
+  48              		.loc 1 17 0
+  49 0010 4FF00103 		mov	r3, #1
+  50 0014 BB72     		strb	r3, [r7, #10]
+  18:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.OpenDrain=PINSEL_PINMODE_NORMAL;
+  51              		.loc 1 18 0
+  52 0016 4FF00003 		mov	r3, #0
+  53 001a 3B73     		strb	r3, [r7, #12]
+  19:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.Pinmode=PINSEL_PINMODE_TRISTATE;
+  54              		.loc 1 19 0
+  55 001c 4FF00203 		mov	r3, #2
+  56 0020 FB72     		strb	r3, [r7, #11]
+  20:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.Pinnum=PINSEL_PIN_2; /*UART0 TXD*/
+  57              		.loc 1 20 0
+  58 0022 4FF00203 		mov	r3, #2
+  59 0026 7B72     		strb	r3, [r7, #9]
+  21:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.Portnum=PINSEL_PORT_0;
+  60              		.loc 1 21 0
+  61 0028 4FF00003 		mov	r3, #0
+  62 002c 3B72     		strb	r3, [r7, #8]
+  22:Libraries/serial_lite/os_serial_lite.c **** 
+  23:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_ConfigPin(&PINSEL_InitStruct);
+  63              		.loc 1 23 0
+  64 002e 07F10803 		add	r3, r7, #8
+  65 0032 1846     		mov	r0, r3
+  66 0034 FFF7FEFF 		bl	PINSEL_ConfigPin
+  24:Libraries/serial_lite/os_serial_lite.c **** 
+  25:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.Pinnum=PINSEL_PIN_3; /*UART0 RXD*/
+  67              		.loc 1 25 0
+  68 0038 4FF00303 		mov	r3, #3
+  69 003c 7B72     		strb	r3, [r7, #9]
+  26:Libraries/serial_lite/os_serial_lite.c **** 
+  27:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_ConfigPin(&PINSEL_InitStruct);
+  70              		.loc 1 27 0
+  71 003e 07F10803 		add	r3, r7, #8
+  72 0042 1846     		mov	r0, r3
+  73 0044 FFF7FEFF 		bl	PINSEL_ConfigPin
+  28:Libraries/serial_lite/os_serial_lite.c **** 
+  29:Libraries/serial_lite/os_serial_lite.c **** 		return 0;
+  74              		.loc 1 29 0
+  75 0048 4FF00003 		mov	r3, #0
+  76 004c 23E0     		b	.L3
+  77              	.L2:
+  30:Libraries/serial_lite/os_serial_lite.c **** 
+  31:Libraries/serial_lite/os_serial_lite.c **** 	} else if (dev == 1) {
+  78              		.loc 1 31 0
+  79 004e FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+  80 0050 012B     		cmp	r3, #1
+  81 0052 1ED1     		bne	.L4
+  32:Libraries/serial_lite/os_serial_lite.c **** 
+  33:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.Funcnum=PINSEL_FUNC_1;/*alternative function*/
+  82              		.loc 1 33 0
+  83 0054 4FF00103 		mov	r3, #1
+  84 0058 BB72     		strb	r3, [r7, #10]
+  34:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.OpenDrain=PINSEL_PINMODE_NORMAL;
+  85              		.loc 1 34 0
+  86 005a 4FF00003 		mov	r3, #0
+  87 005e 3B73     		strb	r3, [r7, #12]
+  35:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.Pinmode=PINSEL_PINMODE_TRISTATE;
+  88              		.loc 1 35 0
+  89 0060 4FF00203 		mov	r3, #2
+  90 0064 FB72     		strb	r3, [r7, #11]
+  36:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.Pinnum=PINSEL_PIN_15; /*UART1 TXD*/
+  91              		.loc 1 36 0
+  92 0066 4FF00F03 		mov	r3, #15
+  93 006a 7B72     		strb	r3, [r7, #9]
+  37:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.Portnum=PINSEL_PORT_0;
+  94              		.loc 1 37 0
+  95 006c 4FF00003 		mov	r3, #0
+  96 0070 3B72     		strb	r3, [r7, #8]
+  38:Libraries/serial_lite/os_serial_lite.c **** 
+  39:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_ConfigPin(&PINSEL_InitStruct);
+  97              		.loc 1 39 0
+  98 0072 07F10803 		add	r3, r7, #8
+  99 0076 1846     		mov	r0, r3
+ 100 0078 FFF7FEFF 		bl	PINSEL_ConfigPin
+  40:Libraries/serial_lite/os_serial_lite.c **** 
+  41:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_InitStruct.Pinnum=PINSEL_PIN_16; /*UART1 RXD*/
+ 101              		.loc 1 41 0
+ 102 007c 4FF01003 		mov	r3, #16
+ 103 0080 7B72     		strb	r3, [r7, #9]
+  42:Libraries/serial_lite/os_serial_lite.c **** 
+  43:Libraries/serial_lite/os_serial_lite.c **** 		PINSEL_ConfigPin(&PINSEL_InitStruct);
+ 104              		.loc 1 43 0
+ 105 0082 07F10803 		add	r3, r7, #8
+ 106 0086 1846     		mov	r0, r3
+ 107 0088 FFF7FEFF 		bl	PINSEL_ConfigPin
+  44:Libraries/serial_lite/os_serial_lite.c **** 
+  45:Libraries/serial_lite/os_serial_lite.c **** 
+  46:Libraries/serial_lite/os_serial_lite.c **** 		return 0;
+ 108              		.loc 1 46 0
+ 109 008c 4FF00003 		mov	r3, #0
+ 110 0090 01E0     		b	.L3
+ 111              	.L4:
+  47:Libraries/serial_lite/os_serial_lite.c **** 	} else {
+  48:Libraries/serial_lite/os_serial_lite.c **** 
+  49:Libraries/serial_lite/os_serial_lite.c **** 		return -1;
+ 112              		.loc 1 49 0
+ 113 0092 4FF0FF33 		mov	r3, #-1
+ 114              	.L3:
+  50:Libraries/serial_lite/os_serial_lite.c **** 	}
+  51:Libraries/serial_lite/os_serial_lite.c **** 
+  52:Libraries/serial_lite/os_serial_lite.c **** }
+ 115              		.loc 1 52 0
+ 116 0096 1846     		mov	r0, r3
+ 117 0098 07F11007 		add	r7, r7, #16
+ 118 009c BD46     		mov	sp, r7
+ 119 009e 80BD     		pop	{r7, pc}
+ 120              		.cfi_endproc
+ 121              	.LFE55:
+ 123              		.align	2
+ 124              		.global	os_serial_lite_tx_enable
+ 125              		.thumb
+ 126              		.thumb_func
+ 128              	os_serial_lite_tx_enable:
+ 129              	.LFB56:
+  53:Libraries/serial_lite/os_serial_lite.c **** 
+  54:Libraries/serial_lite/os_serial_lite.c **** int os_serial_lite_tx_enable(uint8_t dev) {
+ 130              		.loc 1 54 0
+ 131              		.cfi_startproc
+ 132              		@ args = 0, pretend = 0, frame = 16
+ 133              		@ frame_needed = 1, uses_anonymous_args = 0
+ 134              		@ link register save eliminated.
+ 135 00a0 80B4     		push	{r7}
+ 136              	.LCFI3:
+ 137              		.cfi_def_cfa_offset 4
+ 138              		.cfi_offset 7, -4
+ 139 00a2 85B0     		sub	sp, sp, #20
+ 140              	.LCFI4:
+ 141              		.cfi_def_cfa_offset 24
+ 142 00a4 00AF     		add	r7, sp, #0
+ 143              	.LCFI5:
+ 144              		.cfi_def_cfa_register 7
+ 145 00a6 0346     		mov	r3, r0
+ 146 00a8 FB71     		strb	r3, [r7, #7]
+  55:Libraries/serial_lite/os_serial_lite.c **** 
+  56:Libraries/serial_lite/os_serial_lite.c **** 	int ret = 0;
+ 147              		.loc 1 56 0
+ 148 00aa 4FF00003 		mov	r3, #0
+ 149 00ae FB60     		str	r3, [r7, #12]
+  57:Libraries/serial_lite/os_serial_lite.c **** 
+  58:Libraries/serial_lite/os_serial_lite.c **** 	switch(dev) {
+ 150              		.loc 1 58 0
+ 151 00b0 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 152 00b2 002B     		cmp	r3, #0
+ 153 00b4 02D0     		beq	.L7
+ 154 00b6 012B     		cmp	r3, #1
+ 155 00b8 14D0     		beq	.L8
+ 156 00ba 27E0     		b	.L10
+ 157              	.L7:
+  59:Libraries/serial_lite/os_serial_lite.c **** 
+  60:Libraries/serial_lite/os_serial_lite.c **** 	case 0:
+  61:Libraries/serial_lite/os_serial_lite.c **** 		LPC_UART0->TER |= (1<<7);
+ 158              		.loc 1 61 0
+ 159 00bc 4FF44043 		mov	r3, #49152
+ 160 00c0 C4F20003 		movt	r3, 16384
+ 161 00c4 4FF44042 		mov	r2, #49152
+ 162 00c8 C4F20002 		movt	r2, 16384
+ 163 00cc 92F83020 		ldrb	r2, [r2, #48]
+ 164 00d0 D2B2     		uxtb	r2, r2
+ 165 00d2 62F07F02 		orn	r2, r2, #127
+ 166 00d6 D2B2     		uxtb	r2, r2
+ 167 00d8 83F83020 		strb	r2, [r3, #48]
+  62:Libraries/serial_lite/os_serial_lite.c **** 		ret = 0;
+ 168              		.loc 1 62 0
+ 169 00dc 4FF00003 		mov	r3, #0
+ 170 00e0 FB60     		str	r3, [r7, #12]
+  63:Libraries/serial_lite/os_serial_lite.c **** 		break;
+ 171              		.loc 1 63 0
+ 172 00e2 17E0     		b	.L9
+ 173              	.L8:
+  64:Libraries/serial_lite/os_serial_lite.c **** 	case 1:
+  65:Libraries/serial_lite/os_serial_lite.c **** 		LPC_UART1->TER |= (1<<7);
+ 174              		.loc 1 65 0
+ 175 00e4 4FF00003 		mov	r3, #0
+ 176 00e8 C4F20103 		movt	r3, 16385
+ 177 00ec 4FF00002 		mov	r2, #0
+ 178 00f0 C4F20102 		movt	r2, 16385
+ 179 00f4 92F83020 		ldrb	r2, [r2, #48]
+ 180 00f8 D2B2     		uxtb	r2, r2
+ 181 00fa 62F07F02 		orn	r2, r2, #127
+ 182 00fe D2B2     		uxtb	r2, r2
+ 183 0100 83F83020 		strb	r2, [r3, #48]
+  66:Libraries/serial_lite/os_serial_lite.c **** 		ret = 0;
+ 184              		.loc 1 66 0
+ 185 0104 4FF00003 		mov	r3, #0
+ 186 0108 FB60     		str	r3, [r7, #12]
+  67:Libraries/serial_lite/os_serial_lite.c **** 		break;
+ 187              		.loc 1 67 0
+ 188 010a 03E0     		b	.L9
+ 189              	.L10:
+  68:Libraries/serial_lite/os_serial_lite.c **** 
+  69:Libraries/serial_lite/os_serial_lite.c **** 	default:
+  70:Libraries/serial_lite/os_serial_lite.c **** 		ret = -1;
+ 190              		.loc 1 70 0
+ 191 010c 4FF0FF33 		mov	r3, #-1
+ 192 0110 FB60     		str	r3, [r7, #12]
+  71:Libraries/serial_lite/os_serial_lite.c **** 		break;
+ 193              		.loc 1 71 0
+ 194 0112 00BF     		nop
+ 195              	.L9:
+  72:Libraries/serial_lite/os_serial_lite.c **** 	};
+  73:Libraries/serial_lite/os_serial_lite.c **** 
+  74:Libraries/serial_lite/os_serial_lite.c **** 	return ret;
+ 196              		.loc 1 74 0
+ 197 0114 FB68     		ldr	r3, [r7, #12]
+  75:Libraries/serial_lite/os_serial_lite.c **** }
+ 198              		.loc 1 75 0
+ 199 0116 1846     		mov	r0, r3
+ 200 0118 07F11407 		add	r7, r7, #20
+ 201 011c BD46     		mov	sp, r7
+ 202 011e 80BC     		pop	{r7}
+ 203 0120 7047     		bx	lr
+ 204              		.cfi_endproc
+ 205              	.LFE56:
+ 207 0122 00BF     		.align	2
+ 208              		.global	os_serial_lite_init
+ 209              		.thumb
+ 210              		.thumb_func
+ 212              	os_serial_lite_init:
+ 213              	.LFB57:
+  76:Libraries/serial_lite/os_serial_lite.c **** 
+  77:Libraries/serial_lite/os_serial_lite.c **** int os_serial_lite_init(uint8_t dev, UART_CFG_Type *cfg) {
+ 214              		.loc 1 77 0
+ 215              		.cfi_startproc
+ 216              		@ args = 0, pretend = 0, frame = 24
+ 217              		@ frame_needed = 1, uses_anonymous_args = 0
+ 218 0124 80B5     		push	{r7, lr}
+ 219              	.LCFI6:
+ 220              		.cfi_def_cfa_offset 8
+ 221              		.cfi_offset 14, -4
+ 222              		.cfi_offset 7, -8
+ 223 0126 86B0     		sub	sp, sp, #24
+ 224              	.LCFI7:
+ 225              		.cfi_def_cfa_offset 32
+ 226 0128 00AF     		add	r7, sp, #0
+ 227              	.LCFI8:
+ 228              		.cfi_def_cfa_register 7
+ 229 012a 0346     		mov	r3, r0
+ 230 012c 3960     		str	r1, [r7, #0]
+ 231 012e FB71     		strb	r3, [r7, #7]
+  78:Libraries/serial_lite/os_serial_lite.c **** 
+  79:Libraries/serial_lite/os_serial_lite.c **** 	UART_CFG_Type uart_cfg;
+  80:Libraries/serial_lite/os_serial_lite.c **** 	int ret = 0;;
+ 232              		.loc 1 80 0
+ 233 0130 4FF00003 		mov	r3, #0
+ 234 0134 7B61     		str	r3, [r7, #20]
+  81:Libraries/serial_lite/os_serial_lite.c **** 
+  82:Libraries/serial_lite/os_serial_lite.c **** 	if((cfg != NULL) && (dev != 0)) {
+ 235              		.loc 1 82 0
+ 236 0136 3B68     		ldr	r3, [r7, #0]
+ 237 0138 002B     		cmp	r3, #0
+ 238 013a 09D0     		beq	.L12
+ 239              		.loc 1 82 0 is_stmt 0 discriminator 1
+ 240 013c FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 241 013e 002B     		cmp	r3, #0
+ 242 0140 06D0     		beq	.L12
+  83:Libraries/serial_lite/os_serial_lite.c **** 		/*user configuration*/
+  84:Libraries/serial_lite/os_serial_lite.c **** 		(void)memcpy(&uart_cfg,cfg,sizeof(UART_CFG_Type));
+ 243              		.loc 1 84 0 is_stmt 1
+ 244 0142 3A68     		ldr	r2, [r7, #0]
+ 245 0144 07F10C03 		add	r3, r7, #12
+ 246 0148 1068     		ldr	r0, [r2, #0]	@ unaligned
+ 247 014a 5168     		ldr	r1, [r2, #4]	@ unaligned
+ 248 014c 03C3     		stmia	r3!, {r0, r1}
+ 249 014e 0BE0     		b	.L13
+ 250              	.L12:
+  85:Libraries/serial_lite/os_serial_lite.c **** 	} else {
+  86:Libraries/serial_lite/os_serial_lite.c **** 		/*default configuration*/
+  87:Libraries/serial_lite/os_serial_lite.c **** 		uart_cfg.Baud_rate = 115200;
+ 251              		.loc 1 87 0
+ 252 0150 4FF4E133 		mov	r3, #115200
+ 253 0154 FB60     		str	r3, [r7, #12]
+  88:Libraries/serial_lite/os_serial_lite.c **** 		uart_cfg.Parity = UART_PARITY_NONE;
+ 254              		.loc 1 88 0
+ 255 0156 4FF00003 		mov	r3, #0
+ 256 015a 3B74     		strb	r3, [r7, #16]
+  89:Libraries/serial_lite/os_serial_lite.c **** 		uart_cfg.Stopbits = UART_STOPBIT_1;
+ 257              		.loc 1 89 0
+ 258 015c 4FF00003 		mov	r3, #0
+ 259 0160 BB74     		strb	r3, [r7, #18]
+  90:Libraries/serial_lite/os_serial_lite.c **** 		uart_cfg.Databits = UART_DATABIT_8;
+ 260              		.loc 1 90 0
+ 261 0162 4FF00303 		mov	r3, #3
+ 262 0166 7B74     		strb	r3, [r7, #17]
+ 263              	.L13:
+  91:Libraries/serial_lite/os_serial_lite.c **** 
+  92:Libraries/serial_lite/os_serial_lite.c **** 	}
+  93:Libraries/serial_lite/os_serial_lite.c **** 
+  94:Libraries/serial_lite/os_serial_lite.c **** 	switch(dev) {
+ 264              		.loc 1 94 0
+ 265 0168 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 266 016a 002B     		cmp	r3, #0
+ 267 016c 02D0     		beq	.L15
+ 268 016e 012B     		cmp	r3, #1
+ 269 0170 15D0     		beq	.L16
+ 270 0172 29E0     		b	.L18
+ 271              	.L15:
+  95:Libraries/serial_lite/os_serial_lite.c **** 
+  96:Libraries/serial_lite/os_serial_lite.c **** 	case 0:
+  97:Libraries/serial_lite/os_serial_lite.c **** 		os_serial_pincfg(0);
+ 272              		.loc 1 97 0
+ 273 0174 4FF00000 		mov	r0, #0
+ 274 0178 FFF7FEFF 		bl	os_serial_pincfg
+  98:Libraries/serial_lite/os_serial_lite.c **** 		UART_Init(LPC_UART0, &uart_cfg);
+ 275              		.loc 1 98 0
+ 276 017c 4FF44040 		mov	r0, #49152
+ 277 0180 C4F20000 		movt	r0, 16384
+ 278 0184 07F10C03 		add	r3, r7, #12
+ 279 0188 1946     		mov	r1, r3
+ 280 018a FFF7FEFF 		bl	UART_Init
+  99:Libraries/serial_lite/os_serial_lite.c **** 		os_serial_lite_tx_enable(0);
+ 281              		.loc 1 99 0
+ 282 018e 4FF00000 		mov	r0, #0
+ 283 0192 FFF7FEFF 		bl	os_serial_lite_tx_enable
+ 100:Libraries/serial_lite/os_serial_lite.c **** #ifdef _INTERRUPT_DRIVEN
+ 101:Libraries/serial_lite/os_serial_lite.c **** 		CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
+ 102:Libraries/serial_lite/os_serial_lite.c **** 				                   (CSP_DEV_NBR   )CSP_INT_SRC_NBR_UART_00,
+ 103:Libraries/serial_lite/os_serial_lite.c **** 				                   (CPU_FNCT_PTR  )UART_Interrupt,
+ 104:Libraries/serial_lite/os_serial_lite.c **** 				                   (void         *)&com_context);
+ 105:Libraries/serial_lite/os_serial_lite.c **** 		CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_UART_00);/*enable uart interrupt*/
+ 106:Libraries/serial_lite/os_serial_lite.c **** #endif /*_INTERRUPT_DRIVEN*/
+ 107:Libraries/serial_lite/os_serial_lite.c **** 		ret = 0;
+ 284              		.loc 1 107 0
+ 285 0196 4FF00003 		mov	r3, #0
+ 286 019a 7B61     		str	r3, [r7, #20]
+ 108:Libraries/serial_lite/os_serial_lite.c **** 		break;
+ 287              		.loc 1 108 0
+ 288 019c 18E0     		b	.L17
+ 289              	.L16:
+ 109:Libraries/serial_lite/os_serial_lite.c **** 
+ 110:Libraries/serial_lite/os_serial_lite.c **** 	case 1:
+ 111:Libraries/serial_lite/os_serial_lite.c **** 		os_serial_pincfg(1);
+ 290              		.loc 1 111 0
+ 291 019e 4FF00100 		mov	r0, #1
+ 292 01a2 FFF7FEFF 		bl	os_serial_pincfg
+ 112:Libraries/serial_lite/os_serial_lite.c **** 		UART_Init((LPC_UART_TypeDef *)LPC_UART1, &uart_cfg);
+ 293              		.loc 1 112 0
+ 294 01a6 4FF00000 		mov	r0, #0
+ 295 01aa C4F20100 		movt	r0, 16385
+ 296 01ae 07F10C03 		add	r3, r7, #12
+ 297 01b2 1946     		mov	r1, r3
+ 298 01b4 FFF7FEFF 		bl	UART_Init
+ 113:Libraries/serial_lite/os_serial_lite.c **** 		os_serial_lite_tx_enable(1);
+ 299              		.loc 1 113 0
+ 300 01b8 4FF00100 		mov	r0, #1
+ 301 01bc FFF7FEFF 		bl	os_serial_lite_tx_enable
+ 114:Libraries/serial_lite/os_serial_lite.c **** #ifdef _INTERRUPT_DRIVEN
+ 115:Libraries/serial_lite/os_serial_lite.c **** 		CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
+ 116:Libraries/serial_lite/os_serial_lite.c **** 						                   (CSP_DEV_NBR   )CSP_INT_SRC_NBR_UART_01,
+ 117:Libraries/serial_lite/os_serial_lite.c **** 						                   (CPU_FNCT_PTR  )UART_Interrupt,
+ 118:Libraries/serial_lite/os_serial_lite.c **** 						                   (void         *)&com_context);
+ 119:Libraries/serial_lite/os_serial_lite.c **** 		CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_UART_01);/*enable uart interrupt*/
+ 120:Libraries/serial_lite/os_serial_lite.c **** #endif /*_INTERRUPT_DRIVEN*/
+ 121:Libraries/serial_lite/os_serial_lite.c **** 		ret = 0;
+ 302              		.loc 1 121 0
+ 303 01c0 4FF00003 		mov	r3, #0
+ 304 01c4 7B61     		str	r3, [r7, #20]
+ 122:Libraries/serial_lite/os_serial_lite.c **** 		break;
+ 305              		.loc 1 122 0
+ 306 01c6 03E0     		b	.L17
+ 307              	.L18:
+ 123:Libraries/serial_lite/os_serial_lite.c **** 
+ 124:Libraries/serial_lite/os_serial_lite.c **** 	default:
+ 125:Libraries/serial_lite/os_serial_lite.c **** 		ret = -1;
+ 308              		.loc 1 125 0
+ 309 01c8 4FF0FF33 		mov	r3, #-1
+ 310 01cc 7B61     		str	r3, [r7, #20]
+ 126:Libraries/serial_lite/os_serial_lite.c **** 		break;
+ 311              		.loc 1 126 0
+ 312 01ce 00BF     		nop
+ 313              	.L17:
+ 127:Libraries/serial_lite/os_serial_lite.c **** 
+ 128:Libraries/serial_lite/os_serial_lite.c **** 	};
+ 129:Libraries/serial_lite/os_serial_lite.c **** 
+ 130:Libraries/serial_lite/os_serial_lite.c **** 	return ret;
+ 314              		.loc 1 130 0
+ 315 01d0 7B69     		ldr	r3, [r7, #20]
+ 131:Libraries/serial_lite/os_serial_lite.c **** 
+ 132:Libraries/serial_lite/os_serial_lite.c **** }
+ 316              		.loc 1 132 0
+ 317 01d2 1846     		mov	r0, r3
+ 318 01d4 07F11807 		add	r7, r7, #24
+ 319 01d8 BD46     		mov	sp, r7
+ 320 01da 80BD     		pop	{r7, pc}
+ 321              		.cfi_endproc
+ 322              	.LFE57:
+ 324              		.align	2
+ 325              		.global	os_serial_sync_send
+ 326              		.thumb
+ 327              		.thumb_func
+ 329              	os_serial_sync_send:
+ 330              	.LFB58:
+ 133:Libraries/serial_lite/os_serial_lite.c **** 
+ 134:Libraries/serial_lite/os_serial_lite.c **** int os_serial_sync_send(uint8_t dev, char *buf, uint16_t len) {
+ 331              		.loc 1 134 0
+ 332              		.cfi_startproc
+ 333              		@ args = 0, pretend = 0, frame = 8
+ 334              		@ frame_needed = 1, uses_anonymous_args = 0
+ 335 01dc 80B5     		push	{r7, lr}
+ 336              	.LCFI9:
+ 337              		.cfi_def_cfa_offset 8
+ 338              		.cfi_offset 14, -4
+ 339              		.cfi_offset 7, -8
+ 340 01de 82B0     		sub	sp, sp, #8
+ 341              	.LCFI10:
+ 342              		.cfi_def_cfa_offset 16
+ 343 01e0 00AF     		add	r7, sp, #0
+ 344              	.LCFI11:
+ 345              		.cfi_def_cfa_register 7
+ 346 01e2 3960     		str	r1, [r7, #0]
+ 347 01e4 1346     		mov	r3, r2
+ 348 01e6 0246     		mov	r2, r0
+ 349 01e8 FA71     		strb	r2, [r7, #7]
+ 350 01ea BB80     		strh	r3, [r7, #4]	@ movhi
+ 135:Libraries/serial_lite/os_serial_lite.c **** 
+ 136:Libraries/serial_lite/os_serial_lite.c **** 	/*hand over pointers to communication structure*/
+ 137:Libraries/serial_lite/os_serial_lite.c **** 	com_context.tx_i = 0;
+ 351              		.loc 1 137 0
+ 352 01ec 40F20003 		movw	r3, #:lower16:com_context
+ 353 01f0 C0F20003 		movt	r3, #:upper16:com_context
+ 354 01f4 4FF00002 		mov	r2, #0
+ 355 01f8 DA80     		strh	r2, [r3, #6]	@ movhi
+ 138:Libraries/serial_lite/os_serial_lite.c **** 	com_context.tx_ptr = buf;
+ 356              		.loc 1 138 0
+ 357 01fa 40F20003 		movw	r3, #:lower16:com_context
+ 358 01fe C0F20003 		movt	r3, #:upper16:com_context
+ 359 0202 3A68     		ldr	r2, [r7, #0]
+ 360 0204 1A60     		str	r2, [r3, #0]
+ 139:Libraries/serial_lite/os_serial_lite.c **** 	com_context.tx_len = len;
+ 361              		.loc 1 139 0
+ 362 0206 40F20003 		movw	r3, #:lower16:com_context
+ 363 020a C0F20003 		movt	r3, #:upper16:com_context
+ 364 020e BA88     		ldrh	r2, [r7, #4]	@ movhi
+ 365 0210 9A80     		strh	r2, [r3, #4]	@ movhi
+ 140:Libraries/serial_lite/os_serial_lite.c **** 
+ 141:Libraries/serial_lite/os_serial_lite.c **** 	/*start transmission*/
+ 142:Libraries/serial_lite/os_serial_lite.c **** 	if(dev == 0) {
+ 366              		.loc 1 142 0
+ 367 0212 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 368 0214 002B     		cmp	r3, #0
+ 369 0216 47D1     		bne	.L20
+ 143:Libraries/serial_lite/os_serial_lite.c **** 		if(com_context.tx_len > LPC1343_BUFMAX)
+ 370              		.loc 1 143 0
+ 371 0218 40F20003 		movw	r3, #:lower16:com_context
+ 372 021c C0F20003 		movt	r3, #:upper16:com_context
+ 373 0220 9B88     		ldrh	r3, [r3, #4]
+ 374 0222 1E2B     		cmp	r3, #30
+ 375 0224 32D9     		bls	.L31
+ 144:Libraries/serial_lite/os_serial_lite.c **** 			com_context.tx_len = LPC1343_BUFMAX;
+ 376              		.loc 1 144 0
+ 377 0226 40F20003 		movw	r3, #:lower16:com_context
+ 378 022a C0F20003 		movt	r3, #:upper16:com_context
+ 379 022e 4FF01E02 		mov	r2, #30
+ 380 0232 9A80     		strh	r2, [r3, #4]	@ movhi
+ 145:Libraries/serial_lite/os_serial_lite.c **** 
+ 146:Libraries/serial_lite/os_serial_lite.c **** 			while(com_context.tx_i < com_context.tx_len) {
+ 381              		.loc 1 146 0
+ 382 0234 2AE0     		b	.L31
+ 383              	.L32:
+ 147:Libraries/serial_lite/os_serial_lite.c **** 				while(UART_CheckBusy(LPC_UART0));
+ 384              		.loc 1 147 0
+ 385 0236 00BF     		nop
+ 386              	.L23:
+ 387              		.loc 1 147 0 is_stmt 0 discriminator 1
+ 388 0238 4FF44040 		mov	r0, #49152
+ 389 023c C4F20000 		movt	r0, 16384
+ 390 0240 FFF7FEFF 		bl	UART_CheckBusy
+ 391 0244 0346     		mov	r3, r0
+ 392 0246 002B     		cmp	r3, #0
+ 393 0248 F6D1     		bne	.L23
+ 148:Libraries/serial_lite/os_serial_lite.c **** 				UART_SendByte(LPC_UART0,(uint8_t)com_context.tx_ptr[com_context.tx_i]);
+ 394              		.loc 1 148 0 is_stmt 1
+ 395 024a 40F20003 		movw	r3, #:lower16:com_context
+ 396 024e C0F20003 		movt	r3, #:upper16:com_context
+ 397 0252 1A68     		ldr	r2, [r3, #0]
+ 398 0254 40F20003 		movw	r3, #:lower16:com_context
+ 399 0258 C0F20003 		movt	r3, #:upper16:com_context
+ 400 025c DB88     		ldrh	r3, [r3, #6]
+ 401 025e D318     		adds	r3, r2, r3
+ 402 0260 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 403 0262 4FF44040 		mov	r0, #49152
+ 404 0266 C4F20000 		movt	r0, 16384
+ 405 026a 1946     		mov	r1, r3
+ 406 026c FFF7FEFF 		bl	UART_SendByte
+ 149:Libraries/serial_lite/os_serial_lite.c **** 				com_context.tx_i++;
+ 407              		.loc 1 149 0
+ 408 0270 40F20003 		movw	r3, #:lower16:com_context
+ 409 0274 C0F20003 		movt	r3, #:upper16:com_context
+ 410 0278 DB88     		ldrh	r3, [r3, #6]
+ 411 027a 03F10103 		add	r3, r3, #1
+ 412 027e 9AB2     		uxth	r2, r3
+ 413 0280 40F20003 		movw	r3, #:lower16:com_context
+ 414 0284 C0F20003 		movt	r3, #:upper16:com_context
+ 415 0288 DA80     		strh	r2, [r3, #6]	@ movhi
+ 416 028a 00E0     		b	.L22
+ 417              	.L31:
+ 146:Libraries/serial_lite/os_serial_lite.c **** 			while(com_context.tx_i < com_context.tx_len) {
+ 418              		.loc 1 146 0
+ 419 028c 00BF     		nop
+ 420              	.L22:
+ 146:Libraries/serial_lite/os_serial_lite.c **** 			while(com_context.tx_i < com_context.tx_len) {
+ 421              		.loc 1 146 0 is_stmt 0 discriminator 1
+ 422 028e 40F20003 		movw	r3, #:lower16:com_context
+ 423 0292 C0F20003 		movt	r3, #:upper16:com_context
+ 424 0296 DA88     		ldrh	r2, [r3, #6]
+ 425 0298 40F20003 		movw	r3, #:lower16:com_context
+ 426 029c C0F20003 		movt	r3, #:upper16:com_context
+ 427 02a0 9B88     		ldrh	r3, [r3, #4]
+ 428 02a2 9A42     		cmp	r2, r3
+ 429 02a4 C7D3     		bcc	.L32
+ 146:Libraries/serial_lite/os_serial_lite.c **** 			while(com_context.tx_i < com_context.tx_len) {
+ 430              		.loc 1 146 0
+ 431 02a6 3DE0     		b	.L25
+ 432              	.L20:
+ 150:Libraries/serial_lite/os_serial_lite.c **** 			}
+ 151:Libraries/serial_lite/os_serial_lite.c **** 
+ 152:Libraries/serial_lite/os_serial_lite.c **** 		} else if(dev == 1) {
+ 433              		.loc 1 152 0 is_stmt 1
+ 434 02a8 FB79     		ldrb	r3, [r7, #7]	@ zero_extendqisi2
+ 435 02aa 012B     		cmp	r3, #1
+ 436 02ac 37D1     		bne	.L26
+ 153:Libraries/serial_lite/os_serial_lite.c **** 
+ 154:Libraries/serial_lite/os_serial_lite.c **** 			while(com_context.tx_i < com_context.tx_len) {
+ 437              		.loc 1 154 0
+ 438 02ae 29E0     		b	.L27
+ 439              	.L33:
+ 155:Libraries/serial_lite/os_serial_lite.c **** 				while(UART_CheckBusy((LPC_UART_TypeDef *)LPC_UART1));
+ 440              		.loc 1 155 0
+ 441 02b0 00BF     		nop
+ 442              	.L28:
+ 443              		.loc 1 155 0 is_stmt 0 discriminator 1
+ 444 02b2 4FF00000 		mov	r0, #0
+ 445 02b6 C4F20100 		movt	r0, 16385
+ 446 02ba FFF7FEFF 		bl	UART_CheckBusy
+ 447 02be 0346     		mov	r3, r0
+ 448 02c0 002B     		cmp	r3, #0
+ 449 02c2 F6D1     		bne	.L28
+ 156:Libraries/serial_lite/os_serial_lite.c **** 				UART_SendByte((LPC_UART_TypeDef *)LPC_UART1,(uint8_t)com_context.tx_ptr[com_context.tx_i]);
+ 450              		.loc 1 156 0 is_stmt 1
+ 451 02c4 40F20003 		movw	r3, #:lower16:com_context
+ 452 02c8 C0F20003 		movt	r3, #:upper16:com_context
+ 453 02cc 1A68     		ldr	r2, [r3, #0]
+ 454 02ce 40F20003 		movw	r3, #:lower16:com_context
+ 455 02d2 C0F20003 		movt	r3, #:upper16:com_context
+ 456 02d6 DB88     		ldrh	r3, [r3, #6]
+ 457 02d8 D318     		adds	r3, r2, r3
+ 458 02da 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 459 02dc 4FF00000 		mov	r0, #0
+ 460 02e0 C4F20100 		movt	r0, 16385
+ 461 02e4 1946     		mov	r1, r3
+ 462 02e6 FFF7FEFF 		bl	UART_SendByte
+ 157:Libraries/serial_lite/os_serial_lite.c **** 				com_context.tx_i++;
+ 463              		.loc 1 157 0
+ 464 02ea 40F20003 		movw	r3, #:lower16:com_context
+ 465 02ee C0F20003 		movt	r3, #:upper16:com_context
+ 466 02f2 DB88     		ldrh	r3, [r3, #6]
+ 467 02f4 03F10103 		add	r3, r3, #1
+ 468 02f8 9AB2     		uxth	r2, r3
+ 469 02fa 40F20003 		movw	r3, #:lower16:com_context
+ 470 02fe C0F20003 		movt	r3, #:upper16:com_context
+ 471 0302 DA80     		strh	r2, [r3, #6]	@ movhi
+ 472              	.L27:
+ 154:Libraries/serial_lite/os_serial_lite.c **** 			while(com_context.tx_i < com_context.tx_len) {
+ 473              		.loc 1 154 0 discriminator 1
+ 474 0304 40F20003 		movw	r3, #:lower16:com_context
+ 475 0308 C0F20003 		movt	r3, #:upper16:com_context
+ 476 030c DA88     		ldrh	r2, [r3, #6]
+ 477 030e 40F20003 		movw	r3, #:lower16:com_context
+ 478 0312 C0F20003 		movt	r3, #:upper16:com_context
+ 479 0316 9B88     		ldrh	r3, [r3, #4]
+ 480 0318 9A42     		cmp	r2, r3
+ 481 031a C9D3     		bcc	.L33
+ 154:Libraries/serial_lite/os_serial_lite.c **** 			while(com_context.tx_i < com_context.tx_len) {
+ 482              		.loc 1 154 0 is_stmt 0
+ 483 031c 02E0     		b	.L25
+ 484              	.L26:
+ 158:Libraries/serial_lite/os_serial_lite.c **** 			}
+ 159:Libraries/serial_lite/os_serial_lite.c **** 
+ 160:Libraries/serial_lite/os_serial_lite.c **** 		} else {
+ 161:Libraries/serial_lite/os_serial_lite.c **** 			return -2;
+ 485              		.loc 1 161 0 is_stmt 1
+ 486 031e 6FF00103 		mvn	r3, #1
+ 487 0322 01E0     		b	.L30
+ 488              	.L25:
+ 162:Libraries/serial_lite/os_serial_lite.c **** 		}
+ 163:Libraries/serial_lite/os_serial_lite.c **** 
+ 164:Libraries/serial_lite/os_serial_lite.c **** 		return 0;
+ 489              		.loc 1 164 0
+ 490 0324 4FF00003 		mov	r3, #0
+ 491              	.L30:
+ 165:Libraries/serial_lite/os_serial_lite.c **** 
+ 166:Libraries/serial_lite/os_serial_lite.c **** }
+ 492              		.loc 1 166 0
+ 493 0328 1846     		mov	r0, r3
+ 494 032a 07F10807 		add	r7, r7, #8
+ 495 032e BD46     		mov	sp, r7
+ 496 0330 80BD     		pop	{r7, pc}
+ 497              		.cfi_endproc
+ 498              	.LFE58:
+ 500 0332 00BF     		.align	2
+ 501              		.global	os_serial_async_send
+ 502              		.thumb
+ 503              		.thumb_func
+ 505              	os_serial_async_send:
+ 506              	.LFB59:
+ 167:Libraries/serial_lite/os_serial_lite.c **** 
+ 168:Libraries/serial_lite/os_serial_lite.c **** int os_serial_async_send(uint8_t dev, char *buf, uint16_t len) {
+ 507              		.loc 1 168 0
+ 508              		.cfi_startproc
+ 509              		@ args = 0, pretend = 0, frame = 8
+ 510              		@ frame_needed = 1, uses_anonymous_args = 0
+ 511              		@ link register save eliminated.
+ 512 0334 80B4     		push	{r7}
+ 513              	.LCFI12:
+ 514              		.cfi_def_cfa_offset 4
+ 515              		.cfi_offset 7, -4
+ 516 0336 83B0     		sub	sp, sp, #12
+ 517              	.LCFI13:
+ 518              		.cfi_def_cfa_offset 16
+ 519 0338 00AF     		add	r7, sp, #0
+ 520              	.LCFI14:
+ 521              		.cfi_def_cfa_register 7
+ 522 033a 3960     		str	r1, [r7, #0]
+ 523 033c 1346     		mov	r3, r2
+ 524 033e 0246     		mov	r2, r0
+ 525 0340 FA71     		strb	r2, [r7, #7]
+ 526 0342 BB80     		strh	r3, [r7, #4]	@ movhi
+ 169:Libraries/serial_lite/os_serial_lite.c **** 
+ 170:Libraries/serial_lite/os_serial_lite.c **** #ifdef _INTERRUPT_DRIVEN
+ 171:Libraries/serial_lite/os_serial_lite.c **** 	/*hand over pointers to communication structure*/
+ 172:Libraries/serial_lite/os_serial_lite.c **** 	com_context.tx_i = 0;
+ 173:Libraries/serial_lite/os_serial_lite.c **** 	com_context.tx_ptr = buf;
+ 174:Libraries/serial_lite/os_serial_lite.c **** 	com_context.tx_len = len;
+ 175:Libraries/serial_lite/os_serial_lite.c **** 
+ 176:Libraries/serial_lite/os_serial_lite.c **** 	/*start transmission*/
+ 177:Libraries/serial_lite/os_serial_lite.c **** 	if(dev == 0) {
+ 178:Libraries/serial_lite/os_serial_lite.c **** 		if(com_context.tx_len > LPC1343_BUFMAX)
+ 179:Libraries/serial_lite/os_serial_lite.c **** 			com_context.tx_len = LPC1343_BUFMAX;
+ 180:Libraries/serial_lite/os_serial_lite.c **** 
+ 181:Libraries/serial_lite/os_serial_lite.c **** 		while(UART_CheckBusy(LPC_UART0));
+ 182:Libraries/serial_lite/os_serial_lite.c **** 		UART_SendByte(LPC_UART0,(uint8_t)com_context.tx_ptr[com_context.tx_i]);
+ 183:Libraries/serial_lite/os_serial_lite.c **** 		com_context.tx_i++;
+ 184:Libraries/serial_lite/os_serial_lite.c **** 		UART_IntConfig(LPC_UART0,UART_INTCFG_THRE,ENABLE); /*enable transmit buffer empty interrupt*/
+ 185:Libraries/serial_lite/os_serial_lite.c **** 
+ 186:Libraries/serial_lite/os_serial_lite.c **** 	} else if(dev == 1) {
+ 187:Libraries/serial_lite/os_serial_lite.c **** 
+ 188:Libraries/serial_lite/os_serial_lite.c **** 		while(UART_CheckBusy((LPC_UART_TypeDef *)LPC_UART1));
+ 189:Libraries/serial_lite/os_serial_lite.c **** 		UART_SendByte((LPC_UART_TypeDef *)LPC_UART1,(uint8_t)com_context.tx_ptr[com_context.tx_i]);
+ 190:Libraries/serial_lite/os_serial_lite.c **** 		com_context.tx_i++;
+ 191:Libraries/serial_lite/os_serial_lite.c **** 		UART_IntConfig((LPC_UART_TypeDef *)LPC_UART1,UART_INTCFG_THRE,ENABLE);/*enable transmit buffer em
+ 192:Libraries/serial_lite/os_serial_lite.c **** 
+ 193:Libraries/serial_lite/os_serial_lite.c **** 	} else {
+ 194:Libraries/serial_lite/os_serial_lite.c **** 		return -2;
+ 195:Libraries/serial_lite/os_serial_lite.c **** 	}
+ 196:Libraries/serial_lite/os_serial_lite.c **** 
+ 197:Libraries/serial_lite/os_serial_lite.c **** #endif /*_INTERRUPT_DRIVEN*/
+ 198:Libraries/serial_lite/os_serial_lite.c **** 
+ 199:Libraries/serial_lite/os_serial_lite.c **** 	return 0;
+ 527              		.loc 1 199 0
+ 528 0344 4FF00003 		mov	r3, #0
+ 200:Libraries/serial_lite/os_serial_lite.c **** }
+ 529              		.loc 1 200 0
+ 530 0348 1846     		mov	r0, r3
+ 531 034a 07F10C07 		add	r7, r7, #12
+ 532 034e BD46     		mov	sp, r7
+ 533 0350 80BC     		pop	{r7}
+ 534 0352 7047     		bx	lr
+ 535              		.cfi_endproc
+ 536              	.LFE59:
+ 538              		.align	2
+ 539              		.thumb
+ 540              		.thumb_func
+ 542              	UART_Interrupt:
+ 543              	.LFB60:
+ 201:Libraries/serial_lite/os_serial_lite.c **** 
+ 202:Libraries/serial_lite/os_serial_lite.c **** 
+ 203:Libraries/serial_lite/os_serial_lite.c **** static void  UART_Interrupt(void *p_arg) {
+ 544              		.loc 1 203 0
+ 545              		.cfi_startproc
+ 546              		@ args = 0, pretend = 0, frame = 24
+ 547              		@ frame_needed = 1, uses_anonymous_args = 0
+ 548 0354 80B5     		push	{r7, lr}
+ 549              	.LCFI15:
+ 550              		.cfi_def_cfa_offset 8
+ 551              		.cfi_offset 14, -4
+ 552              		.cfi_offset 7, -8
+ 553 0356 86B0     		sub	sp, sp, #24
+ 554              	.LCFI16:
+ 555              		.cfi_def_cfa_offset 32
+ 556 0358 00AF     		add	r7, sp, #0
+ 557              	.LCFI17:
+ 558              		.cfi_def_cfa_register 7
+ 559 035a 7860     		str	r0, [r7, #4]
+ 204:Libraries/serial_lite/os_serial_lite.c **** 
+ 205:Libraries/serial_lite/os_serial_lite.c **** 	uart_context_t *cont = (uart_context_t *)p_arg;
+ 560              		.loc 1 205 0
+ 561 035c 7B68     		ldr	r3, [r7, #4]
+ 562 035e 7B61     		str	r3, [r7, #20]
+ 206:Libraries/serial_lite/os_serial_lite.c **** 	uint32_t reg0,reg1;
+ 207:Libraries/serial_lite/os_serial_lite.c **** 
+ 208:Libraries/serial_lite/os_serial_lite.c **** 	/* which uart triggered the interrupt?
+ 209:Libraries/serial_lite/os_serial_lite.c **** 	 *
+ 210:Libraries/serial_lite/os_serial_lite.c **** 	 * bit0 in IIR register is 0 if an interrupt occured on the device
+ 211:Libraries/serial_lite/os_serial_lite.c **** 	 * */
+ 212:Libraries/serial_lite/os_serial_lite.c **** 	reg0 = UART_GetIntId(LPC_UART0);
+ 563              		.loc 1 212 0
+ 564 0360 4FF44040 		mov	r0, #49152
+ 565 0364 C4F20000 		movt	r0, 16384
+ 566 0368 FFF7FEFF 		bl	UART_GetIntId
+ 567 036c 3861     		str	r0, [r7, #16]
+ 213:Libraries/serial_lite/os_serial_lite.c **** 	reg1 = UART_GetIntId((LPC_UART_TypeDef *)LPC_UART1);
+ 568              		.loc 1 213 0
+ 569 036e 4FF00000 		mov	r0, #0
+ 570 0372 C4F20100 		movt	r0, 16385
+ 571 0376 FFF7FEFF 		bl	UART_GetIntId
+ 572 037a F860     		str	r0, [r7, #12]
+ 214:Libraries/serial_lite/os_serial_lite.c **** 
+ 215:Libraries/serial_lite/os_serial_lite.c **** 	if(!(reg0 & 0x01)) {
+ 573              		.loc 1 215 0
+ 574 037c 3B69     		ldr	r3, [r7, #16]
+ 575 037e 03F00103 		and	r3, r3, #1
+ 576 0382 002B     		cmp	r3, #0
+ 577 0384 2AD1     		bne	.L36
+ 216:Libraries/serial_lite/os_serial_lite.c **** 		//reg = UART_GetIntId(LPC_UART0);//read from IIR acknowledges interrupt
+ 217:Libraries/serial_lite/os_serial_lite.c **** 		//check if this really is a THRE interrupt
+ 218:Libraries/serial_lite/os_serial_lite.c **** 		if(reg0 & ((1<<1) & ~(1<<2)) ) {
+ 578              		.loc 1 218 0
+ 579 0386 3B69     		ldr	r3, [r7, #16]
+ 580 0388 03F00203 		and	r3, r3, #2
+ 581 038c 002B     		cmp	r3, #0
+ 582 038e 54D0     		beq	.L37
+ 219:Libraries/serial_lite/os_serial_lite.c **** 			//write next byte of uart
+ 220:Libraries/serial_lite/os_serial_lite.c **** 			if(cont->tx_i < cont->tx_len) {
+ 583              		.loc 1 220 0
+ 584 0390 7B69     		ldr	r3, [r7, #20]
+ 585 0392 DA88     		ldrh	r2, [r3, #6]
+ 586 0394 7B69     		ldr	r3, [r7, #20]
+ 587 0396 9B88     		ldrh	r3, [r3, #4]
+ 588 0398 9A42     		cmp	r2, r3
+ 589 039a 14D2     		bcs	.L38
+ 221:Libraries/serial_lite/os_serial_lite.c **** 				UART_SendByte(LPC_UART0,(uint8_t)cont->tx_ptr[cont->tx_i]);
+ 590              		.loc 1 221 0
+ 591 039c 7B69     		ldr	r3, [r7, #20]
+ 592 039e 1A68     		ldr	r2, [r3, #0]
+ 593 03a0 7B69     		ldr	r3, [r7, #20]
+ 594 03a2 DB88     		ldrh	r3, [r3, #6]
+ 595 03a4 D318     		adds	r3, r2, r3
+ 596 03a6 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 597 03a8 4FF44040 		mov	r0, #49152
+ 598 03ac C4F20000 		movt	r0, 16384
+ 599 03b0 1946     		mov	r1, r3
+ 600 03b2 FFF7FEFF 		bl	UART_SendByte
+ 222:Libraries/serial_lite/os_serial_lite.c **** 				cont->tx_i++;
+ 601              		.loc 1 222 0
+ 602 03b6 7B69     		ldr	r3, [r7, #20]
+ 603 03b8 DB88     		ldrh	r3, [r3, #6]
+ 604 03ba 03F10103 		add	r3, r3, #1
+ 605 03be 9AB2     		uxth	r2, r3
+ 606 03c0 7B69     		ldr	r3, [r7, #20]
+ 607 03c2 DA80     		strh	r2, [r3, #6]	@ movhi
+ 608 03c4 39E0     		b	.L37
+ 609              	.L38:
+ 223:Libraries/serial_lite/os_serial_lite.c **** 			} else {
+ 224:Libraries/serial_lite/os_serial_lite.c **** 				/*stop transmission*/
+ 225:Libraries/serial_lite/os_serial_lite.c **** 				UART_IntConfig(LPC_UART0,UART_INTCFG_THRE,DISABLE);
+ 610              		.loc 1 225 0
+ 611 03c6 4FF44040 		mov	r0, #49152
+ 612 03ca C4F20000 		movt	r0, 16384
+ 613 03ce 4FF00101 		mov	r1, #1
+ 614 03d2 4FF00002 		mov	r2, #0
+ 615 03d6 FFF7FEFF 		bl	UART_IntConfig
+ 616 03da 2EE0     		b	.L37
+ 617              	.L36:
+ 226:Libraries/serial_lite/os_serial_lite.c **** 			}
+ 227:Libraries/serial_lite/os_serial_lite.c **** 
+ 228:Libraries/serial_lite/os_serial_lite.c **** 		} /*end THRE check*/
+ 229:Libraries/serial_lite/os_serial_lite.c **** 
+ 230:Libraries/serial_lite/os_serial_lite.c **** 	} else if(!(reg1 & 0x01)) {
+ 618              		.loc 1 230 0
+ 619 03dc FB68     		ldr	r3, [r7, #12]
+ 620 03de 03F00103 		and	r3, r3, #1
+ 621 03e2 002B     		cmp	r3, #0
+ 622 03e4 29D1     		bne	.L37
+ 231:Libraries/serial_lite/os_serial_lite.c **** 		//reg = UART_GetIntId((LPC_UART_TypeDef *)LPC_UART1);
+ 232:Libraries/serial_lite/os_serial_lite.c **** 		//check if this really is a THRE interrupt
+ 233:Libraries/serial_lite/os_serial_lite.c **** 		if(reg1 & ((1<<1) & ~(1<<2)) ) {
+ 623              		.loc 1 233 0
+ 624 03e6 FB68     		ldr	r3, [r7, #12]
+ 625 03e8 03F00203 		and	r3, r3, #2
+ 626 03ec 002B     		cmp	r3, #0
+ 627 03ee 24D0     		beq	.L37
+ 234:Libraries/serial_lite/os_serial_lite.c **** 			//write next byte of uart
+ 235:Libraries/serial_lite/os_serial_lite.c **** 			if(cont->tx_i < cont->tx_len) {
+ 628              		.loc 1 235 0
+ 629 03f0 7B69     		ldr	r3, [r7, #20]
+ 630 03f2 DA88     		ldrh	r2, [r3, #6]
+ 631 03f4 7B69     		ldr	r3, [r7, #20]
+ 632 03f6 9B88     		ldrh	r3, [r3, #4]
+ 633 03f8 9A42     		cmp	r2, r3
+ 634 03fa 14D2     		bcs	.L39
+ 236:Libraries/serial_lite/os_serial_lite.c **** 				UART_SendByte((LPC_UART_TypeDef *)LPC_UART1,(uint8_t)cont->tx_ptr[cont->tx_i]);
+ 635              		.loc 1 236 0
+ 636 03fc 7B69     		ldr	r3, [r7, #20]
+ 637 03fe 1A68     		ldr	r2, [r3, #0]
+ 638 0400 7B69     		ldr	r3, [r7, #20]
+ 639 0402 DB88     		ldrh	r3, [r3, #6]
+ 640 0404 D318     		adds	r3, r2, r3
+ 641 0406 1B78     		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 642 0408 4FF00000 		mov	r0, #0
+ 643 040c C4F20100 		movt	r0, 16385
+ 644 0410 1946     		mov	r1, r3
+ 645 0412 FFF7FEFF 		bl	UART_SendByte
+ 237:Libraries/serial_lite/os_serial_lite.c **** 				cont->tx_i++;
+ 646              		.loc 1 237 0
+ 647 0416 7B69     		ldr	r3, [r7, #20]
+ 648 0418 DB88     		ldrh	r3, [r3, #6]
+ 649 041a 03F10103 		add	r3, r3, #1
+ 650 041e 9AB2     		uxth	r2, r3
+ 651 0420 7B69     		ldr	r3, [r7, #20]
+ 652 0422 DA80     		strh	r2, [r3, #6]	@ movhi
+ 653 0424 09E0     		b	.L37
+ 654              	.L39:
+ 238:Libraries/serial_lite/os_serial_lite.c **** 			} else {
+ 239:Libraries/serial_lite/os_serial_lite.c **** 				/*stop transmission*/
+ 240:Libraries/serial_lite/os_serial_lite.c **** 				UART_IntConfig((LPC_UART_TypeDef *)LPC_UART1,UART_INTCFG_THRE,DISABLE);
+ 655              		.loc 1 240 0
+ 656 0426 4FF00000 		mov	r0, #0
+ 657 042a C4F20100 		movt	r0, 16385
+ 658 042e 4FF00101 		mov	r1, #1
+ 659 0432 4FF00002 		mov	r2, #0
+ 660 0436 FFF7FEFF 		bl	UART_IntConfig
+ 661              	.L37:
+ 241:Libraries/serial_lite/os_serial_lite.c **** 			}
+ 242:Libraries/serial_lite/os_serial_lite.c **** 		} /*end THRE check*/
+ 243:Libraries/serial_lite/os_serial_lite.c **** 	}
+ 244:Libraries/serial_lite/os_serial_lite.c **** 
+ 245:Libraries/serial_lite/os_serial_lite.c **** 
+ 246:Libraries/serial_lite/os_serial_lite.c ****     CPU_IntSrcEn(CPU_INT_SYSTICK);                              /* Enable the SYSTICK interrupt. Re
+ 662              		.loc 1 246 0
+ 663 043a 4FF00F00 		mov	r0, #15
+ 664 043e FFF7FEFF 		bl	CPU_IntSrcEn
+ 247:Libraries/serial_lite/os_serial_lite.c **** }
+ 665              		.loc 1 247 0
+ 666 0442 07F11807 		add	r7, r7, #24
+ 667 0446 BD46     		mov	sp, r7
+ 668 0448 80BD     		pop	{r7, pc}
+ 669              		.cfi_endproc
+ 670              	.LFE60:
+ 672              	.Letext0:
+ 673              		.file 2 "/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none
+ 674              		.file 3 "Libraries/CM3/inc/LPC17xx.h"
+ 675              		.file 4 "Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.h"
+ 676              		.file 5 "Libraries/CM3/inc/lpc_types.h"
+ 677              		.file 6 "Libraries/uC-CSP/LPC17xx/lpc17xx_uart.h"
+ 678              		.file 7 "Libraries/serial_lite/os_serial_lite.h"
+ 679              		.file 8 "Libraries/CM3/inc/core_cm3.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 os_serial_lite.c
+                            *COM*:00000010 com_context
+     /tmp/ccWgIENo.s:19     .text:00000000 $t
+     /tmp/ccWgIENo.s:24     .text:00000000 os_serial_pincfg
+     /tmp/ccWgIENo.s:128    .text:000000a0 os_serial_lite_tx_enable
+     /tmp/ccWgIENo.s:212    .text:00000124 os_serial_lite_init
+     /tmp/ccWgIENo.s:329    .text:000001dc os_serial_sync_send
+     /tmp/ccWgIENo.s:505    .text:00000334 os_serial_async_send
+     /tmp/ccWgIENo.s:542    .text:00000354 UART_Interrupt
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+PINSEL_ConfigPin
+UART_Init
+UART_CheckBusy
+UART_SendByte
+UART_GetIntId
+UART_IntConfig
+CPU_IntSrcEn

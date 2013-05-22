@@ -1,0 +1,41 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"img_tbl.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.global	BSP_LCD_ImgTbl
+  19              		.section	.rodata
+  20              		.align	2
+  23              	BSP_LCD_ImgTbl:
+  24 0000 00000000 		.word	ImgMicriumLogo
+  25 0004 00000000 		.word	ImgKeilLogo
+  26 0008 00000000 		.word	ImgNXP_Logo
+  27 000c 00000000 		.word	ImgOS_Logo
+  28 0010 00000000 		.word	0
+  29              		.text
+  30              	.Letext0:
+  31              		.file 1 "Libraries/uC-CPU/cpu.h"
+  32              		.file 2 "Libraries/BSP/LCD/bsp_lcd.h"
+  33              		.file 3 "Libraries/BSP/LCD/Images/img_tbl.c"
+DEFINED SYMBOLS
+                            *ABS*:00000000 img_tbl.c
+     /tmp/cc2hAeWL.s:23     .rodata:00000000 BSP_LCD_ImgTbl
+     /tmp/cc2hAeWL.s:20     .rodata:00000000 $d
+
+UNDEFINED SYMBOLS
+ImgMicriumLogo
+ImgKeilLogo
+ImgNXP_Logo
+ImgOS_Logo

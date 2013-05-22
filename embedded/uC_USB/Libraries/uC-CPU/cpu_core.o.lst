@@ -1,0 +1,2518 @@
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.file	"cpu_core.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.comm	CPU_Name,16,4
+  19              		.comm	CPU_TS_TmrFreq_Hz,4,4
+  20              		.comm	CPU_IntDisMeasCtr,2,2
+  21              		.comm	CPU_IntDisNestCtr,2,2
+  22              		.comm	CPU_IntDisMeasStart_cnts,4,4
+  23              		.comm	CPU_IntDisMeasStop_cnts,4,4
+  24              		.comm	CPU_IntDisMeasOvrhd_cnts,4,4
+  25              		.comm	CPU_IntDisMeasMaxCur_cnts,4,4
+  26              		.comm	CPU_IntDisMeasMax_cnts,4,4
+  27              		.align	2
+  28              		.global	CPU_Init
+  29              		.thumb
+  30              		.thumb_func
+  32              	CPU_Init:
+  33              	.LFB0:
+  34              		.file 1 "Libraries/uC-CPU/cpu_core.c"
+   1:Libraries/uC-CPU/cpu_core.c **** /*
+   2:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+   3:Libraries/uC-CPU/cpu_core.c **** *                                                uC/CPU
+   4:Libraries/uC-CPU/cpu_core.c **** *                                    CPU CONFIGURATION & PORT LAYER
+   5:Libraries/uC-CPU/cpu_core.c **** *
+   6:Libraries/uC-CPU/cpu_core.c **** *                          (c) Copyright 2004-2011; Micrium, Inc.; Weston, FL
+   7:Libraries/uC-CPU/cpu_core.c **** *
+   8:Libraries/uC-CPU/cpu_core.c **** *               All rights reserved.  Protected by international copyright laws.
+   9:Libraries/uC-CPU/cpu_core.c **** *
+  10:Libraries/uC-CPU/cpu_core.c **** *               uC/CPU is provided in source form to registered licensees ONLY.  It is
+  11:Libraries/uC-CPU/cpu_core.c **** *               illegal to distribute this source code to any third party unless you receive
+  12:Libraries/uC-CPU/cpu_core.c **** *               written permission by an authorized Micrium representative.  Knowledge of
+  13:Libraries/uC-CPU/cpu_core.c **** *               the source code may NOT be used to develop a similar product.
+  14:Libraries/uC-CPU/cpu_core.c **** *
+  15:Libraries/uC-CPU/cpu_core.c **** *               Please help us continue to provide the Embedded community with the finest
+  16:Libraries/uC-CPU/cpu_core.c **** *               software available.  Your honesty is greatly appreciated.
+  17:Libraries/uC-CPU/cpu_core.c **** *
+  18:Libraries/uC-CPU/cpu_core.c **** *               You can contact us at www.micrium.com.
+  19:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  20:Libraries/uC-CPU/cpu_core.c **** */
+  21:Libraries/uC-CPU/cpu_core.c **** 
+  22:Libraries/uC-CPU/cpu_core.c **** /*
+  23:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  24:Libraries/uC-CPU/cpu_core.c **** *
+  25:Libraries/uC-CPU/cpu_core.c **** *                                           CORE CPU MODULE
+  26:Libraries/uC-CPU/cpu_core.c **** *
+  27:Libraries/uC-CPU/cpu_core.c **** * Filename      : cpu_core.c
+  28:Libraries/uC-CPU/cpu_core.c **** * Version       : V1.28.00
+  29:Libraries/uC-CPU/cpu_core.c **** * Programmer(s) : SR
+  30:Libraries/uC-CPU/cpu_core.c **** *                 ITJ
+  31:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  32:Libraries/uC-CPU/cpu_core.c **** */
+  33:Libraries/uC-CPU/cpu_core.c **** 
+  34:Libraries/uC-CPU/cpu_core.c **** 
+  35:Libraries/uC-CPU/cpu_core.c **** /*
+  36:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  37:Libraries/uC-CPU/cpu_core.c **** *                                            INCLUDE FILES
+  38:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  39:Libraries/uC-CPU/cpu_core.c **** */
+  40:Libraries/uC-CPU/cpu_core.c **** 
+  41:Libraries/uC-CPU/cpu_core.c **** #define    CPU_CORE_MODULE
+  42:Libraries/uC-CPU/cpu_core.c **** #include  <cpu_core.h>
+  43:Libraries/uC-CPU/cpu_core.c **** 
+  44:Libraries/uC-CPU/cpu_core.c **** 
+  45:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+  46:Libraries/uC-CPU/cpu_core.c **** /*
+  47:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  48:Libraries/uC-CPU/cpu_core.c **** *                                            LOCAL DEFINES
+  49:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  50:Libraries/uC-CPU/cpu_core.c **** */
+  51:Libraries/uC-CPU/cpu_core.c **** 
+  52:Libraries/uC-CPU/cpu_core.c **** 
+  53:Libraries/uC-CPU/cpu_core.c **** /*
+  54:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  55:Libraries/uC-CPU/cpu_core.c **** *                                           LOCAL CONSTANTS
+  56:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  57:Libraries/uC-CPU/cpu_core.c **** */
+  58:Libraries/uC-CPU/cpu_core.c **** 
+  59:Libraries/uC-CPU/cpu_core.c **** 
+  60:Libraries/uC-CPU/cpu_core.c **** /*
+  61:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  62:Libraries/uC-CPU/cpu_core.c **** *                                          LOCAL DATA TYPES
+  63:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  64:Libraries/uC-CPU/cpu_core.c **** */
+  65:Libraries/uC-CPU/cpu_core.c **** 
+  66:Libraries/uC-CPU/cpu_core.c **** 
+  67:Libraries/uC-CPU/cpu_core.c **** /*
+  68:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  69:Libraries/uC-CPU/cpu_core.c **** *                                            LOCAL TABLES
+  70:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  71:Libraries/uC-CPU/cpu_core.c **** */
+  72:Libraries/uC-CPU/cpu_core.c **** 
+  73:Libraries/uC-CPU/cpu_core.c **** /*
+  74:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  75:Libraries/uC-CPU/cpu_core.c **** *                                  CPU COUNT LEAD ZEROs LOOKUP TABLE
+  76:Libraries/uC-CPU/cpu_core.c **** *
+  77:Libraries/uC-CPU/cpu_core.c **** * Note(s) : (1) Index into bit pattern table determines the number of leading zeros in an 8-bit val
+  78:Libraries/uC-CPU/cpu_core.c **** *
+  79:Libraries/uC-CPU/cpu_core.c **** *                         b07  b06  b05  b04  b03  b02  b01  b00    # Leading Zeros
+  80:Libraries/uC-CPU/cpu_core.c **** *                         ---  ---  ---  ---  ---  ---  ---  ---    ---------------
+  81:Libraries/uC-CPU/cpu_core.c **** *                          1    x    x    x    x    x    x    x            0
+  82:Libraries/uC-CPU/cpu_core.c **** *                          0    1    x    x    x    x    x    x            1
+  83:Libraries/uC-CPU/cpu_core.c **** *                          0    0    1    x    x    x    x    x            2
+  84:Libraries/uC-CPU/cpu_core.c **** *                          0    0    0    1    x    x    x    x            3
+  85:Libraries/uC-CPU/cpu_core.c **** *                          0    0    0    0    1    x    x    x            4
+  86:Libraries/uC-CPU/cpu_core.c **** *                          0    0    0    0    0    1    x    x            5
+  87:Libraries/uC-CPU/cpu_core.c **** *                          0    0    0    0    0    0    1    x            6
+  88:Libraries/uC-CPU/cpu_core.c **** *                          0    0    0    0    0    0    0    1            7
+  89:Libraries/uC-CPU/cpu_core.c **** *                          0    0    0    0    0    0    0    0            8
+  90:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+  91:Libraries/uC-CPU/cpu_core.c **** */
+  92:Libraries/uC-CPU/cpu_core.c **** 
+  93:Libraries/uC-CPU/cpu_core.c **** #ifndef   CPU_CFG_LEAD_ZEROS_ASM_PRESENT
+  94:Libraries/uC-CPU/cpu_core.c **** static  const  CPU_INT08U  CPU_CntLeadZerosTbl[256] = {                             /* Data vals : 
+  95:Libraries/uC-CPU/cpu_core.c **** /*   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F   */
+  96:Libraries/uC-CPU/cpu_core.c ****     8u,  7u,  6u,  6u,  5u,  5u,  5u,  5u,  4u,  4u,  4u,  4u,  4u,  4u,  4u,  4u,  /*   0x00 to 0x
+  97:Libraries/uC-CPU/cpu_core.c ****     3u,  3u,  3u,  3u,  3u,  3u,  3u,  3u,  3u,  3u,  3u,  3u,  3u,  3u,  3u,  3u,  /*   0x10 to 0x
+  98:Libraries/uC-CPU/cpu_core.c ****     2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  /*   0x20 to 0x
+  99:Libraries/uC-CPU/cpu_core.c ****     2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  2u,  /*   0x30 to 0x
+ 100:Libraries/uC-CPU/cpu_core.c ****     1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  /*   0x40 to 0x
+ 101:Libraries/uC-CPU/cpu_core.c ****     1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  /*   0x50 to 0x
+ 102:Libraries/uC-CPU/cpu_core.c ****     1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  /*   0x60 to 0x
+ 103:Libraries/uC-CPU/cpu_core.c ****     1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  1u,  /*   0x70 to 0x
+ 104:Libraries/uC-CPU/cpu_core.c ****     0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  /*   0x80 to 0x
+ 105:Libraries/uC-CPU/cpu_core.c ****     0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  /*   0x90 to 0x
+ 106:Libraries/uC-CPU/cpu_core.c ****     0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  /*   0xA0 to 0x
+ 107:Libraries/uC-CPU/cpu_core.c ****     0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  /*   0xB0 to 0x
+ 108:Libraries/uC-CPU/cpu_core.c ****     0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  /*   0xC0 to 0x
+ 109:Libraries/uC-CPU/cpu_core.c ****     0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  /*   0xD0 to 0x
+ 110:Libraries/uC-CPU/cpu_core.c ****     0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  /*   0xE0 to 0x
+ 111:Libraries/uC-CPU/cpu_core.c ****     0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u,  0u   /*   0xF0 to 0x
+ 112:Libraries/uC-CPU/cpu_core.c **** };
+ 113:Libraries/uC-CPU/cpu_core.c **** #endif
+ 114:Libraries/uC-CPU/cpu_core.c **** 
+ 115:Libraries/uC-CPU/cpu_core.c **** 
+ 116:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 117:Libraries/uC-CPU/cpu_core.c **** /*
+ 118:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 119:Libraries/uC-CPU/cpu_core.c **** *                                       LOCAL GLOBAL VARIABLES
+ 120:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 121:Libraries/uC-CPU/cpu_core.c **** */
+ 122:Libraries/uC-CPU/cpu_core.c **** 
+ 123:Libraries/uC-CPU/cpu_core.c **** 
+ 124:Libraries/uC-CPU/cpu_core.c **** /*
+ 125:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 126:Libraries/uC-CPU/cpu_core.c **** *                                      LOCAL FUNCTION PROTOTYPES
+ 127:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 128:Libraries/uC-CPU/cpu_core.c **** */
+ 129:Libraries/uC-CPU/cpu_core.c **** 
+ 130:Libraries/uC-CPU/cpu_core.c **** #if    (CPU_CFG_NAME_EN   == DEF_ENABLED)                           /* ---------------- CPU NAME FN
+ 131:Libraries/uC-CPU/cpu_core.c **** static  void        CPU_NameInit         (void);
+ 132:Libraries/uC-CPU/cpu_core.c **** #endif
+ 133:Libraries/uC-CPU/cpu_core.c **** 
+ 134:Libraries/uC-CPU/cpu_core.c **** 
+ 135:Libraries/uC-CPU/cpu_core.c ****                                                                     /* ----------------- CPU TS FNC
+ 136:Libraries/uC-CPU/cpu_core.c **** #if   ((CPU_CFG_TS_EN     == DEF_ENABLED) || \
+ 137:Libraries/uC-CPU/cpu_core.c ****        (CPU_CFG_TS_TMR_EN == DEF_ENABLED))
+ 138:Libraries/uC-CPU/cpu_core.c **** static  void        CPU_TS_Init          (void);
+ 139:Libraries/uC-CPU/cpu_core.c **** #endif
+ 140:Libraries/uC-CPU/cpu_core.c **** 
+ 141:Libraries/uC-CPU/cpu_core.c **** 
+ 142:Libraries/uC-CPU/cpu_core.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN                                     /* ---------- CPU INT DIS TIME 
+ 143:Libraries/uC-CPU/cpu_core.c **** static  void        CPU_IntDisMeasInit   (void);
+ 144:Libraries/uC-CPU/cpu_core.c **** 
+ 145:Libraries/uC-CPU/cpu_core.c **** static  CPU_TS_TMR  CPU_IntDisMeasMaxCalc(CPU_TS_TMR  time_tot_cnts);
+ 146:Libraries/uC-CPU/cpu_core.c **** #endif
+ 147:Libraries/uC-CPU/cpu_core.c **** 
+ 148:Libraries/uC-CPU/cpu_core.c **** 
+ 149:Libraries/uC-CPU/cpu_core.c **** /*
+ 150:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 151:Libraries/uC-CPU/cpu_core.c **** *                                     LOCAL CONFIGURATION ERRORS
+ 152:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 153:Libraries/uC-CPU/cpu_core.c **** */
+ 154:Libraries/uC-CPU/cpu_core.c **** 
+ 155:Libraries/uC-CPU/cpu_core.c **** 
+ 156:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 157:Libraries/uC-CPU/cpu_core.c **** /*
+ 158:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 159:Libraries/uC-CPU/cpu_core.c **** *                                             CPU_Init()
+ 160:Libraries/uC-CPU/cpu_core.c **** *
+ 161:Libraries/uC-CPU/cpu_core.c **** * Description : (1) Initialize CPU module :
+ 162:Libraries/uC-CPU/cpu_core.c **** *
+ 163:Libraries/uC-CPU/cpu_core.c **** *                   (a) Initialize CPU timestamps
+ 164:Libraries/uC-CPU/cpu_core.c **** *                   (b) Initialize CPU interrupts disabled time measurements
+ 165:Libraries/uC-CPU/cpu_core.c **** *                   (c) Initialize CPU host name
+ 166:Libraries/uC-CPU/cpu_core.c **** *
+ 167:Libraries/uC-CPU/cpu_core.c **** *
+ 168:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 169:Libraries/uC-CPU/cpu_core.c **** *
+ 170:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+ 171:Libraries/uC-CPU/cpu_core.c **** *
+ 172:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : Your Product's Application.
+ 173:Libraries/uC-CPU/cpu_core.c **** *
+ 174:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU initialization function & MAY be called by application/
+ 175:Libraries/uC-CPU/cpu_core.c **** *               initialization function(s).
+ 176:Libraries/uC-CPU/cpu_core.c **** *
+ 177:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (2) CPU_Init() MUST be called ... :
+ 178:Libraries/uC-CPU/cpu_core.c **** *
+ 179:Libraries/uC-CPU/cpu_core.c **** *                   (a) ONLY ONCE from a product's application; ...
+ 180:Libraries/uC-CPU/cpu_core.c **** *                   (b) BEFORE product's application calls any core CPU module function(s)
+ 181:Libraries/uC-CPU/cpu_core.c **** *
+ 182:Libraries/uC-CPU/cpu_core.c **** *               (3) The following initialization functions MUST be sequenced as follows :
+ 183:Libraries/uC-CPU/cpu_core.c **** *
+ 184:Libraries/uC-CPU/cpu_core.c **** *                   (a) CPU_TS_Init()           SHOULD precede ALL calls to other CPU timestamp fun
+ 185:Libraries/uC-CPU/cpu_core.c **** *
+ 186:Libraries/uC-CPU/cpu_core.c **** *                   (b) CPU_IntDisMeasInit()    SHOULD precede ALL calls to CPU_CRITICAL_ENTER()/CP
+ 187:Libraries/uC-CPU/cpu_core.c **** *                                                   & other CPU interrupts disabled time measuremen
+ 188:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 189:Libraries/uC-CPU/cpu_core.c **** */
+ 190:Libraries/uC-CPU/cpu_core.c **** 
+ 191:Libraries/uC-CPU/cpu_core.c **** void  CPU_Init (void)
+ 192:Libraries/uC-CPU/cpu_core.c **** {
+  35              		.loc 1 192 0
+  36              		.cfi_startproc
+  37              		@ args = 0, pretend = 0, frame = 0
+  38              		@ frame_needed = 1, uses_anonymous_args = 0
+  39 0000 80B5     		push	{r7, lr}
+  40              	.LCFI0:
+  41              		.cfi_def_cfa_offset 8
+  42              		.cfi_offset 14, -4
+  43              		.cfi_offset 7, -8
+  44 0002 00AF     		add	r7, sp, #0
+  45              	.LCFI1:
+  46              		.cfi_def_cfa_register 7
+ 193:Libraries/uC-CPU/cpu_core.c ****                                                                 /* --------------------- INIT TS --
+ 194:Libraries/uC-CPU/cpu_core.c **** #if ((CPU_CFG_TS_EN     == DEF_ENABLED) || \
+ 195:Libraries/uC-CPU/cpu_core.c ****      (CPU_CFG_TS_TMR_EN == DEF_ENABLED))
+ 196:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_Init();                                              /* See Note #3a.                   
+  47              		.loc 1 196 0
+  48 0004 00F0A8F9 		bl	CPU_TS_Init
+ 197:Libraries/uC-CPU/cpu_core.c **** #endif
+ 198:Libraries/uC-CPU/cpu_core.c ****                                                                 /* -------------- INIT INT DIS TIME
+ 199:Libraries/uC-CPU/cpu_core.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN
+ 200:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasInit();                                       /* See Note #3b.                   
+  49              		.loc 1 200 0
+  50 0008 00F0B2F9 		bl	CPU_IntDisMeasInit
+ 201:Libraries/uC-CPU/cpu_core.c **** #endif
+ 202:Libraries/uC-CPU/cpu_core.c **** 
+ 203:Libraries/uC-CPU/cpu_core.c ****                                                                 /* ------------------ INIT CPU NAME
+ 204:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_NAME_EN == DEF_ENABLED)
+ 205:Libraries/uC-CPU/cpu_core.c ****      CPU_NameInit();
+  51              		.loc 1 205 0
+  52 000c 00F09EF9 		bl	CPU_NameInit
+ 206:Libraries/uC-CPU/cpu_core.c **** #endif
+ 207:Libraries/uC-CPU/cpu_core.c **** }
+  53              		.loc 1 207 0
+  54 0010 80BD     		pop	{r7, pc}
+  55              		.cfi_endproc
+  56              	.LFE0:
+  58 0012 00BF     		.align	2
+  59              		.global	CPU_SW_Exception
+  60              		.thumb
+  61              		.thumb_func
+  63              	CPU_SW_Exception:
+  64              	.LFB1:
+ 208:Libraries/uC-CPU/cpu_core.c **** 
+ 209:Libraries/uC-CPU/cpu_core.c **** 
+ 210:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 211:Libraries/uC-CPU/cpu_core.c **** /*
+ 212:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 213:Libraries/uC-CPU/cpu_core.c **** *                                         CPU_SW_Exception()
+ 214:Libraries/uC-CPU/cpu_core.c **** *
+ 215:Libraries/uC-CPU/cpu_core.c **** * Description : Trap unrecoverable software exception.
+ 216:Libraries/uC-CPU/cpu_core.c **** *
+ 217:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 218:Libraries/uC-CPU/cpu_core.c **** *
+ 219:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+ 220:Libraries/uC-CPU/cpu_core.c **** *
+ 221:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : various.
+ 222:Libraries/uC-CPU/cpu_core.c **** *
+ 223:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) CPU_SW_Exception() deadlocks the current code execution -- whether multi-tasked
+ 224:Libraries/uC-CPU/cpu_core.c **** *                   -processed/-threaded or single-threaded -- when the current code execution cann
+ 225:Libraries/uC-CPU/cpu_core.c **** *                   gracefully recover or report a fault or exception condition.
+ 226:Libraries/uC-CPU/cpu_core.c **** *
+ 227:Libraries/uC-CPU/cpu_core.c **** *                   See also 'cpu_core.h  CPU_SW_EXCEPTION()  Note #1'.
+ 228:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 229:Libraries/uC-CPU/cpu_core.c **** */
+ 230:Libraries/uC-CPU/cpu_core.c **** 
+ 231:Libraries/uC-CPU/cpu_core.c **** void  CPU_SW_Exception (void)
+ 232:Libraries/uC-CPU/cpu_core.c **** {
+  65              		.loc 1 232 0
+  66              		.cfi_startproc
+  67              		@ args = 0, pretend = 0, frame = 0
+  68              		@ frame_needed = 1, uses_anonymous_args = 0
+  69              		@ link register save eliminated.
+  70 0014 80B4     		push	{r7}
+  71              	.LCFI2:
+  72              		.cfi_def_cfa_offset 4
+  73              		.cfi_offset 7, -4
+  74 0016 00AF     		add	r7, sp, #0
+  75              	.LCFI3:
+  76              		.cfi_def_cfa_register 7
+  77              	.L3:
+ 233:Libraries/uC-CPU/cpu_core.c ****     while (DEF_ON) {
+ 234:Libraries/uC-CPU/cpu_core.c ****         ;
+ 235:Libraries/uC-CPU/cpu_core.c ****     }
+  78              		.loc 1 235 0 discriminator 1
+  79 0018 FEE7     		b	.L3
+  80              		.cfi_endproc
+  81              	.LFE1:
+  83 001a 00BF     		.align	2
+  84              		.global	CPU_NameClr
+  85              		.thumb
+  86              		.thumb_func
+  88              	CPU_NameClr:
+  89              	.LFB2:
+ 236:Libraries/uC-CPU/cpu_core.c **** }
+ 237:Libraries/uC-CPU/cpu_core.c **** 
+ 238:Libraries/uC-CPU/cpu_core.c **** 
+ 239:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 240:Libraries/uC-CPU/cpu_core.c **** /*
+ 241:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 242:Libraries/uC-CPU/cpu_core.c **** *                                            CPU_NameClr()
+ 243:Libraries/uC-CPU/cpu_core.c **** *
+ 244:Libraries/uC-CPU/cpu_core.c **** * Description : Clear CPU Name.
+ 245:Libraries/uC-CPU/cpu_core.c **** *
+ 246:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 247:Libraries/uC-CPU/cpu_core.c **** *
+ 248:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+ 249:Libraries/uC-CPU/cpu_core.c **** *
+ 250:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : CPU_NameInit(),
+ 251:Libraries/uC-CPU/cpu_core.c **** *               Application.
+ 252:Libraries/uC-CPU/cpu_core.c **** *
+ 253:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU module application interface (API) function & MAY be called 
+ 254:Libraries/uC-CPU/cpu_core.c **** *               application function(s).
+ 255:Libraries/uC-CPU/cpu_core.c **** *
+ 256:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : none.
+ 257:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 258:Libraries/uC-CPU/cpu_core.c **** */
+ 259:Libraries/uC-CPU/cpu_core.c **** 
+ 260:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_NAME_EN == DEF_ENABLED)
+ 261:Libraries/uC-CPU/cpu_core.c **** void  CPU_NameClr (void)
+ 262:Libraries/uC-CPU/cpu_core.c **** {
+  90              		.loc 1 262 0
+  91              		.cfi_startproc
+  92              		@ args = 0, pretend = 0, frame = 8
+  93              		@ frame_needed = 1, uses_anonymous_args = 0
+  94 001c 80B5     		push	{r7, lr}
+  95              	.LCFI4:
+  96              		.cfi_def_cfa_offset 8
+  97              		.cfi_offset 14, -4
+  98              		.cfi_offset 7, -8
+  99 001e 82B0     		sub	sp, sp, #8
+ 100              	.LCFI5:
+ 101              		.cfi_def_cfa_offset 16
+ 102 0020 00AF     		add	r7, sp, #0
+ 103              	.LCFI6:
+ 104              		.cfi_def_cfa_register 7
+ 263:Libraries/uC-CPU/cpu_core.c ****     CPU_SR_ALLOC();
+ 105              		.loc 1 263 0
+ 106 0022 4FF00003 		mov	r3, #0
+ 107 0026 7B60     		str	r3, [r7, #4]
+ 264:Libraries/uC-CPU/cpu_core.c **** 
+ 265:Libraries/uC-CPU/cpu_core.c **** 
+ 266:Libraries/uC-CPU/cpu_core.c ****     CPU_CRITICAL_ENTER();
+ 108              		.loc 1 266 0
+ 109 0028 FFF7FEFF 		bl	CPU_SR_Save
+ 110 002c 7860     		str	r0, [r7, #4]
+ 111 002e FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 267:Libraries/uC-CPU/cpu_core.c ****     Mem_Clr((void     *)&CPU_Name[0],
+ 112              		.loc 1 267 0
+ 113 0032 40F20000 		movw	r0, #:lower16:CPU_Name
+ 114 0036 C0F20000 		movt	r0, #:upper16:CPU_Name
+ 115 003a 4FF01001 		mov	r1, #16
+ 116 003e FFF7FEFF 		bl	Mem_Clr
+ 268:Libraries/uC-CPU/cpu_core.c ****             (CPU_SIZE_T) CPU_CFG_NAME_SIZE);
+ 269:Libraries/uC-CPU/cpu_core.c ****     CPU_CRITICAL_EXIT();
+ 117              		.loc 1 269 0
+ 118 0042 FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 119 0046 7868     		ldr	r0, [r7, #4]
+ 120 0048 FFF7FEFF 		bl	CPU_SR_Restore
+ 270:Libraries/uC-CPU/cpu_core.c **** }
+ 121              		.loc 1 270 0
+ 122 004c 07F10807 		add	r7, r7, #8
+ 123 0050 BD46     		mov	sp, r7
+ 124 0052 80BD     		pop	{r7, pc}
+ 125              		.cfi_endproc
+ 126              	.LFE2:
+ 128              		.align	2
+ 129              		.global	CPU_NameGet
+ 130              		.thumb
+ 131              		.thumb_func
+ 133              	CPU_NameGet:
+ 134              	.LFB3:
+ 271:Libraries/uC-CPU/cpu_core.c **** #endif
+ 272:Libraries/uC-CPU/cpu_core.c **** 
+ 273:Libraries/uC-CPU/cpu_core.c **** 
+ 274:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 275:Libraries/uC-CPU/cpu_core.c **** /*
+ 276:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 277:Libraries/uC-CPU/cpu_core.c **** *                                            CPU_NameGet()
+ 278:Libraries/uC-CPU/cpu_core.c **** *
+ 279:Libraries/uC-CPU/cpu_core.c **** * Description : Get CPU host name.
+ 280:Libraries/uC-CPU/cpu_core.c **** *
+ 281:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : p_name      Pointer to an ASCII character array that will receive the return CPU ho
+ 282:Libraries/uC-CPU/cpu_core.c **** *                               name ASCII string from this function (see Note #1).
+ 283:Libraries/uC-CPU/cpu_core.c **** *
+ 284:Libraries/uC-CPU/cpu_core.c **** *               p_err       Pointer to variable that will receive the return error code from this f
+ 285:Libraries/uC-CPU/cpu_core.c **** *
+ 286:Libraries/uC-CPU/cpu_core.c **** *                               CPU_ERR_NONE                    CPU host name successfully returned
+ 287:Libraries/uC-CPU/cpu_core.c **** *                               CPU_ERR_NULL_PTR                Argument 'p_name' passed a NULL poi
+ 288:Libraries/uC-CPU/cpu_core.c **** *
+ 289:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+ 290:Libraries/uC-CPU/cpu_core.c **** *
+ 291:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : Application.
+ 292:Libraries/uC-CPU/cpu_core.c **** *
+ 293:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU module application interface (API) function & MAY be called 
+ 294:Libraries/uC-CPU/cpu_core.c **** *               application function(s).
+ 295:Libraries/uC-CPU/cpu_core.c **** *
+ 296:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) The size of the ASCII character array that will receive the return CPU host nam
+ 297:Libraries/uC-CPU/cpu_core.c **** *                   ASCII string :
+ 298:Libraries/uC-CPU/cpu_core.c **** *
+ 299:Libraries/uC-CPU/cpu_core.c **** *                   (a) MUST   be greater than or equal to the current CPU host name's ASCII string
+ 300:Libraries/uC-CPU/cpu_core.c **** *                           size including the terminating NULL character;
+ 301:Libraries/uC-CPU/cpu_core.c **** *                   (b) SHOULD be greater than or equal to CPU_CFG_NAME_SIZE
+ 302:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 303:Libraries/uC-CPU/cpu_core.c **** */
+ 304:Libraries/uC-CPU/cpu_core.c **** 
+ 305:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_NAME_EN == DEF_ENABLED)
+ 306:Libraries/uC-CPU/cpu_core.c **** void  CPU_NameGet (CPU_CHAR  *p_name,
+ 307:Libraries/uC-CPU/cpu_core.c ****                    CPU_ERR   *p_err)
+ 308:Libraries/uC-CPU/cpu_core.c **** {
+ 135              		.loc 1 308 0
+ 136              		.cfi_startproc
+ 137              		@ args = 0, pretend = 0, frame = 16
+ 138              		@ frame_needed = 1, uses_anonymous_args = 0
+ 139 0054 80B5     		push	{r7, lr}
+ 140              	.LCFI7:
+ 141              		.cfi_def_cfa_offset 8
+ 142              		.cfi_offset 14, -4
+ 143              		.cfi_offset 7, -8
+ 144 0056 84B0     		sub	sp, sp, #16
+ 145              	.LCFI8:
+ 146              		.cfi_def_cfa_offset 24
+ 147 0058 00AF     		add	r7, sp, #0
+ 148              	.LCFI9:
+ 149              		.cfi_def_cfa_register 7
+ 150 005a 7860     		str	r0, [r7, #4]
+ 151 005c 3960     		str	r1, [r7, #0]
+ 309:Libraries/uC-CPU/cpu_core.c ****     CPU_SR_ALLOC();
+ 152              		.loc 1 309 0
+ 153 005e 4FF00003 		mov	r3, #0
+ 154 0062 FB60     		str	r3, [r7, #12]
+ 310:Libraries/uC-CPU/cpu_core.c **** 
+ 311:Libraries/uC-CPU/cpu_core.c **** 
+ 312:Libraries/uC-CPU/cpu_core.c ****     if (p_err == (CPU_ERR *)0) {
+ 155              		.loc 1 312 0
+ 156 0064 3B68     		ldr	r3, [r7, #0]
+ 157 0066 002B     		cmp	r3, #0
+ 158 0068 01D1     		bne	.L6
+ 313:Libraries/uC-CPU/cpu_core.c ****         CPU_SW_EXCEPTION(;);
+ 159              		.loc 1 313 0
+ 160 006a FFF7FEFF 		bl	CPU_SW_Exception
+ 161              	.L6:
+ 314:Libraries/uC-CPU/cpu_core.c ****     }
+ 315:Libraries/uC-CPU/cpu_core.c **** 
+ 316:Libraries/uC-CPU/cpu_core.c ****     if (p_name == (CPU_CHAR *)0) {
+ 162              		.loc 1 316 0
+ 163 006e 7B68     		ldr	r3, [r7, #4]
+ 164 0070 002B     		cmp	r3, #0
+ 165 0072 04D1     		bne	.L7
+ 317:Libraries/uC-CPU/cpu_core.c ****        *p_err = CPU_ERR_NULL_PTR;
+ 166              		.loc 1 317 0
+ 167 0074 3B68     		ldr	r3, [r7, #0]
+ 168 0076 4FF00A02 		mov	r2, #10
+ 169 007a 1A80     		strh	r2, [r3, #0]	@ movhi
+ 318:Libraries/uC-CPU/cpu_core.c ****         return;
+ 170              		.loc 1 318 0
+ 171 007c 16E0     		b	.L5
+ 172              	.L7:
+ 319:Libraries/uC-CPU/cpu_core.c ****     }
+ 320:Libraries/uC-CPU/cpu_core.c **** 
+ 321:Libraries/uC-CPU/cpu_core.c ****     CPU_CRITICAL_ENTER();
+ 173              		.loc 1 321 0
+ 174 007e FFF7FEFF 		bl	CPU_SR_Save
+ 175 0082 F860     		str	r0, [r7, #12]
+ 176 0084 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 322:Libraries/uC-CPU/cpu_core.c ****    (void)Str_Copy_N(p_name,
+ 177              		.loc 1 322 0
+ 178 0088 7868     		ldr	r0, [r7, #4]
+ 179 008a 40F20001 		movw	r1, #:lower16:CPU_Name
+ 180 008e C0F20001 		movt	r1, #:upper16:CPU_Name
+ 181 0092 4FF01002 		mov	r2, #16
+ 182 0096 FFF7FEFF 		bl	Str_Copy_N
+ 323:Libraries/uC-CPU/cpu_core.c ****                    &CPU_Name[0],
+ 324:Libraries/uC-CPU/cpu_core.c ****                     CPU_CFG_NAME_SIZE);
+ 325:Libraries/uC-CPU/cpu_core.c ****     CPU_CRITICAL_EXIT();
+ 183              		.loc 1 325 0
+ 184 009a FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 185 009e F868     		ldr	r0, [r7, #12]
+ 186 00a0 FFF7FEFF 		bl	CPU_SR_Restore
+ 326:Libraries/uC-CPU/cpu_core.c **** 
+ 327:Libraries/uC-CPU/cpu_core.c ****    *p_err = CPU_ERR_NONE;
+ 187              		.loc 1 327 0
+ 188 00a4 3B68     		ldr	r3, [r7, #0]
+ 189 00a6 4FF00002 		mov	r2, #0
+ 190 00aa 1A80     		strh	r2, [r3, #0]	@ movhi
+ 191              	.L5:
+ 328:Libraries/uC-CPU/cpu_core.c **** }
+ 192              		.loc 1 328 0
+ 193 00ac 07F11007 		add	r7, r7, #16
+ 194 00b0 BD46     		mov	sp, r7
+ 195 00b2 80BD     		pop	{r7, pc}
+ 196              		.cfi_endproc
+ 197              	.LFE3:
+ 199              		.align	2
+ 200              		.global	CPU_NameSet
+ 201              		.thumb
+ 202              		.thumb_func
+ 204              	CPU_NameSet:
+ 205              	.LFB4:
+ 329:Libraries/uC-CPU/cpu_core.c **** #endif
+ 330:Libraries/uC-CPU/cpu_core.c **** 
+ 331:Libraries/uC-CPU/cpu_core.c **** 
+ 332:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 333:Libraries/uC-CPU/cpu_core.c **** /*
+ 334:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 335:Libraries/uC-CPU/cpu_core.c **** *                                            CPU_NameSet()
+ 336:Libraries/uC-CPU/cpu_core.c **** *
+ 337:Libraries/uC-CPU/cpu_core.c **** * Description : Set CPU host name.
+ 338:Libraries/uC-CPU/cpu_core.c **** *
+ 339:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : p_name      Pointer to CPU host name to set.
+ 340:Libraries/uC-CPU/cpu_core.c **** *
+ 341:Libraries/uC-CPU/cpu_core.c **** *               p_err       Pointer to variable that will receive the return error code from this f
+ 342:Libraries/uC-CPU/cpu_core.c **** *
+ 343:Libraries/uC-CPU/cpu_core.c **** *                               CPU_ERR_NONE                    CPU host name successfully set.
+ 344:Libraries/uC-CPU/cpu_core.c **** *                               CPU_ERR_NULL_PTR                Argument 'p_name' passed a NULL poi
+ 345:Libraries/uC-CPU/cpu_core.c **** *                               CPU_ERR_NAME_SIZE               Invalid CPU host name size (see Not
+ 346:Libraries/uC-CPU/cpu_core.c **** *
+ 347:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+ 348:Libraries/uC-CPU/cpu_core.c **** *
+ 349:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : Application.
+ 350:Libraries/uC-CPU/cpu_core.c **** *
+ 351:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU module application interface (API) function & MAY be called 
+ 352:Libraries/uC-CPU/cpu_core.c **** *               application function(s).
+ 353:Libraries/uC-CPU/cpu_core.c **** *
+ 354:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) 'p_name' ASCII string size, including the terminating NULL character, MUST be l
+ 355:Libraries/uC-CPU/cpu_core.c **** *                    than or equal to CPU_CFG_NAME_SIZE.
+ 356:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 357:Libraries/uC-CPU/cpu_core.c **** */
+ 358:Libraries/uC-CPU/cpu_core.c **** 
+ 359:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_NAME_EN == DEF_ENABLED)
+ 360:Libraries/uC-CPU/cpu_core.c **** void  CPU_NameSet (const  CPU_CHAR  *p_name,
+ 361:Libraries/uC-CPU/cpu_core.c ****                           CPU_ERR   *p_err)
+ 362:Libraries/uC-CPU/cpu_core.c **** {
+ 206              		.loc 1 362 0
+ 207              		.cfi_startproc
+ 208              		@ args = 0, pretend = 0, frame = 16
+ 209              		@ frame_needed = 1, uses_anonymous_args = 0
+ 210 00b4 80B5     		push	{r7, lr}
+ 211              	.LCFI10:
+ 212              		.cfi_def_cfa_offset 8
+ 213              		.cfi_offset 14, -4
+ 214              		.cfi_offset 7, -8
+ 215 00b6 84B0     		sub	sp, sp, #16
+ 216              	.LCFI11:
+ 217              		.cfi_def_cfa_offset 24
+ 218 00b8 00AF     		add	r7, sp, #0
+ 219              	.LCFI12:
+ 220              		.cfi_def_cfa_register 7
+ 221 00ba 7860     		str	r0, [r7, #4]
+ 222 00bc 3960     		str	r1, [r7, #0]
+ 363:Libraries/uC-CPU/cpu_core.c ****     CPU_SIZE_T  len;
+ 364:Libraries/uC-CPU/cpu_core.c ****     CPU_SR_ALLOC();
+ 223              		.loc 1 364 0
+ 224 00be 4FF00003 		mov	r3, #0
+ 225 00c2 FB60     		str	r3, [r7, #12]
+ 365:Libraries/uC-CPU/cpu_core.c **** 
+ 366:Libraries/uC-CPU/cpu_core.c **** 
+ 367:Libraries/uC-CPU/cpu_core.c ****     if (p_err == (CPU_ERR *)0) {
+ 226              		.loc 1 367 0
+ 227 00c4 3B68     		ldr	r3, [r7, #0]
+ 228 00c6 002B     		cmp	r3, #0
+ 229 00c8 01D1     		bne	.L10
+ 368:Libraries/uC-CPU/cpu_core.c ****         CPU_SW_EXCEPTION(;);
+ 230              		.loc 1 368 0
+ 231 00ca FFF7FEFF 		bl	CPU_SW_Exception
+ 232              	.L10:
+ 369:Libraries/uC-CPU/cpu_core.c ****     }
+ 370:Libraries/uC-CPU/cpu_core.c **** 
+ 371:Libraries/uC-CPU/cpu_core.c ****     if (p_name == (const CPU_CHAR *)0) {
+ 233              		.loc 1 371 0
+ 234 00ce 7B68     		ldr	r3, [r7, #4]
+ 235 00d0 002B     		cmp	r3, #0
+ 236 00d2 04D1     		bne	.L11
+ 372:Libraries/uC-CPU/cpu_core.c ****        *p_err = CPU_ERR_NULL_PTR;
+ 237              		.loc 1 372 0
+ 238 00d4 3B68     		ldr	r3, [r7, #0]
+ 239 00d6 4FF00A02 		mov	r2, #10
+ 240 00da 1A80     		strh	r2, [r3, #0]	@ movhi
+ 373:Libraries/uC-CPU/cpu_core.c ****         return;
+ 241              		.loc 1 373 0
+ 242 00dc 24E0     		b	.L9
+ 243              	.L11:
+ 374:Libraries/uC-CPU/cpu_core.c ****     }
+ 375:Libraries/uC-CPU/cpu_core.c **** 
+ 376:Libraries/uC-CPU/cpu_core.c ****     len = Str_Len_N(p_name,
+ 244              		.loc 1 376 0
+ 245 00de 7868     		ldr	r0, [r7, #4]
+ 246 00e0 4FF01001 		mov	r1, #16
+ 247 00e4 FFF7FEFF 		bl	Str_Len_N
+ 248 00e8 B860     		str	r0, [r7, #8]
+ 377:Libraries/uC-CPU/cpu_core.c ****                     CPU_CFG_NAME_SIZE);
+ 378:Libraries/uC-CPU/cpu_core.c ****     if (len < CPU_CFG_NAME_SIZE) {                              /* If       cfg name len < max name
+ 249              		.loc 1 378 0
+ 250 00ea BB68     		ldr	r3, [r7, #8]
+ 251 00ec 0F2B     		cmp	r3, #15
+ 252 00ee 17D8     		bhi	.L13
+ 379:Libraries/uC-CPU/cpu_core.c ****         CPU_CRITICAL_ENTER();
+ 253              		.loc 1 379 0
+ 254 00f0 FFF7FEFF 		bl	CPU_SR_Save
+ 255 00f4 F860     		str	r0, [r7, #12]
+ 256 00f6 FFF7FEFF 		bl	CPU_IntDisMeasStart
+ 380:Libraries/uC-CPU/cpu_core.c ****        (void)Str_Copy_N(&CPU_Name[0],                           /* ... copy cfg name to CPU host na
+ 257              		.loc 1 380 0
+ 258 00fa 40F20000 		movw	r0, #:lower16:CPU_Name
+ 259 00fe C0F20000 		movt	r0, #:upper16:CPU_Name
+ 260 0102 7968     		ldr	r1, [r7, #4]
+ 261 0104 4FF01002 		mov	r2, #16
+ 262 0108 FFF7FEFF 		bl	Str_Copy_N
+ 381:Libraries/uC-CPU/cpu_core.c ****                          p_name,
+ 382:Libraries/uC-CPU/cpu_core.c ****                          CPU_CFG_NAME_SIZE);
+ 383:Libraries/uC-CPU/cpu_core.c ****         CPU_CRITICAL_EXIT();
+ 263              		.loc 1 383 0
+ 264 010c FFF7FEFF 		bl	CPU_IntDisMeasStop
+ 265 0110 F868     		ldr	r0, [r7, #12]
+ 266 0112 FFF7FEFF 		bl	CPU_SR_Restore
+ 384:Libraries/uC-CPU/cpu_core.c ****        *p_err = CPU_ERR_NONE;
+ 267              		.loc 1 384 0
+ 268 0116 3B68     		ldr	r3, [r7, #0]
+ 269 0118 4FF00002 		mov	r2, #0
+ 270 011c 1A80     		strh	r2, [r3, #0]	@ movhi
+ 271 011e 03E0     		b	.L9
+ 272              	.L13:
+ 385:Libraries/uC-CPU/cpu_core.c **** 
+ 386:Libraries/uC-CPU/cpu_core.c ****     } else {
+ 387:Libraries/uC-CPU/cpu_core.c ****        *p_err = CPU_ERR_NAME_SIZE;
+ 273              		.loc 1 387 0
+ 274 0120 3B68     		ldr	r3, [r7, #0]
+ 275 0122 4FF47A72 		mov	r2, #1000
+ 276 0126 1A80     		strh	r2, [r3, #0]	@ movhi
+ 277              	.L9:
+ 388:Libraries/uC-CPU/cpu_core.c ****     }
+ 389:Libraries/uC-CPU/cpu_core.c **** }
+ 278              		.loc 1 389 0
+ 279 0128 07F11007 		add	r7, r7, #16
+ 280 012c BD46     		mov	sp, r7
+ 281 012e 80BD     		pop	{r7, pc}
+ 282              		.cfi_endproc
+ 283              	.LFE4:
+ 285              		.align	2
+ 286              		.global	CPU_TS_Get32
+ 287              		.thumb
+ 288              		.thumb_func
+ 290              	CPU_TS_Get32:
+ 291              	.LFB5:
+ 390:Libraries/uC-CPU/cpu_core.c **** #endif
+ 391:Libraries/uC-CPU/cpu_core.c **** 
+ 392:Libraries/uC-CPU/cpu_core.c **** 
+ 393:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 394:Libraries/uC-CPU/cpu_core.c **** /*
+ 395:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 396:Libraries/uC-CPU/cpu_core.c **** *                                           CPU_TS_Get32()
+ 397:Libraries/uC-CPU/cpu_core.c **** *
+ 398:Libraries/uC-CPU/cpu_core.c **** * Description : Get current 32-bit CPU timestamp.
+ 399:Libraries/uC-CPU/cpu_core.c **** *
+ 400:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 401:Libraries/uC-CPU/cpu_core.c **** *
+ 402:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : Current 32-bit CPU timestamp (in timestamp timer counts).
+ 403:Libraries/uC-CPU/cpu_core.c **** *
+ 404:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : Application.
+ 405:Libraries/uC-CPU/cpu_core.c **** *
+ 406:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU module application interface (API) function & MAY be called 
+ 407:Libraries/uC-CPU/cpu_core.c **** *               application function(s).
+ 408:Libraries/uC-CPU/cpu_core.c **** *
+ 409:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) When applicable, the amount of time measured by CPU timestamps is calculated by
+ 410:Libraries/uC-CPU/cpu_core.c **** *                   either of the following equations :
+ 411:Libraries/uC-CPU/cpu_core.c **** *
+ 412:Libraries/uC-CPU/cpu_core.c **** *                       (a) Time measured  =  Number timer counts  *  Timer period
+ 413:Libraries/uC-CPU/cpu_core.c **** *
+ 414:Libraries/uC-CPU/cpu_core.c **** *                               where
+ 415:Libraries/uC-CPU/cpu_core.c **** *
+ 416:Libraries/uC-CPU/cpu_core.c **** *                                   Number timer counts     Number of timer counts measured
+ 417:Libraries/uC-CPU/cpu_core.c **** *                                   Timer period            Timer's period in some units of
+ 418:Libraries/uC-CPU/cpu_core.c **** *                                                               (fractional) seconds
+ 419:Libraries/uC-CPU/cpu_core.c **** *                                   Time measured           Amount of time measured, in same
+ 420:Libraries/uC-CPU/cpu_core.c **** *                                                               units of (fractional) seconds
+ 421:Libraries/uC-CPU/cpu_core.c **** *                                                               as the Timer period
+ 422:Libraries/uC-CPU/cpu_core.c **** *
+ 423:Libraries/uC-CPU/cpu_core.c **** *                                              Number timer counts
+ 424:Libraries/uC-CPU/cpu_core.c **** *                       (b) Time measured  =  ---------------------
+ 425:Libraries/uC-CPU/cpu_core.c **** *                                                Timer frequency
+ 426:Libraries/uC-CPU/cpu_core.c **** *
+ 427:Libraries/uC-CPU/cpu_core.c **** *                               where
+ 428:Libraries/uC-CPU/cpu_core.c **** *
+ 429:Libraries/uC-CPU/cpu_core.c **** *                                   Number timer counts     Number of timer counts measured
+ 430:Libraries/uC-CPU/cpu_core.c **** *                                   Timer frequency         Timer's frequency in some units
+ 431:Libraries/uC-CPU/cpu_core.c **** *                                                               of counts per second
+ 432:Libraries/uC-CPU/cpu_core.c **** *                                   Time measured           Amount of time measured, in seconds
+ 433:Libraries/uC-CPU/cpu_core.c **** *
+ 434:Libraries/uC-CPU/cpu_core.c **** *                   See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TS_TmrRd()  Note #2c1'.
+ 435:Libraries/uC-CPU/cpu_core.c **** *
+ 436:Libraries/uC-CPU/cpu_core.c **** *               (2) In case the CPU timestamp timer has lower precision than the 32-bit CPU timesta
+ 437:Libraries/uC-CPU/cpu_core.c **** *                   its precision is extended via periodic updates by accumulating the deltas of th
+ 438:Libraries/uC-CPU/cpu_core.c **** *                   timestamp timer count values into the higher-precision 32-bit CPU timestamp.
+ 439:Libraries/uC-CPU/cpu_core.c **** *
+ 440:Libraries/uC-CPU/cpu_core.c **** *               (3) After initialization, 'CPU_TS_32_Accum' & 'CPU_TS_32_TmrPrev' MUST ALWAYS
+ 441:Libraries/uC-CPU/cpu_core.c **** *                   be accessed AND updated exclusively with interrupts disabled -- but NOT
+ 442:Libraries/uC-CPU/cpu_core.c **** *                   with critical sections.
+ 443:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 444:Libraries/uC-CPU/cpu_core.c **** */
+ 445:Libraries/uC-CPU/cpu_core.c **** 
+ 446:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_TS_32_EN == DEF_ENABLED)
+ 447:Libraries/uC-CPU/cpu_core.c **** CPU_TS32  CPU_TS_Get32 (void)
+ 448:Libraries/uC-CPU/cpu_core.c **** {
+ 292              		.loc 1 448 0
+ 293              		.cfi_startproc
+ 294              		@ args = 0, pretend = 0, frame = 8
+ 295              		@ frame_needed = 1, uses_anonymous_args = 0
+ 296 0130 80B5     		push	{r7, lr}
+ 297              	.LCFI13:
+ 298              		.cfi_def_cfa_offset 8
+ 299              		.cfi_offset 14, -4
+ 300              		.cfi_offset 7, -8
+ 301 0132 82B0     		sub	sp, sp, #8
+ 302              	.LCFI14:
+ 303              		.cfi_def_cfa_offset 16
+ 304 0134 00AF     		add	r7, sp, #0
+ 305              	.LCFI15:
+ 306              		.cfi_def_cfa_register 7
+ 449:Libraries/uC-CPU/cpu_core.c ****     CPU_TS32    ts;
+ 450:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_TS_TMR_SIZE <  CPU_WORD_SIZE_32)
+ 451:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  tmr_cur;
+ 452:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  tmr_delta;
+ 453:Libraries/uC-CPU/cpu_core.c ****     CPU_SR_ALLOC();
+ 454:Libraries/uC-CPU/cpu_core.c **** #endif
+ 455:Libraries/uC-CPU/cpu_core.c **** 
+ 456:Libraries/uC-CPU/cpu_core.c **** 
+ 457:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_TS_TMR_SIZE >= CPU_WORD_SIZE_32)
+ 458:Libraries/uC-CPU/cpu_core.c ****     ts = (CPU_TS32)CPU_TS_TmrRd();                                  /* Get cur ts tmr val (in 32-bi
+ 307              		.loc 1 458 0
+ 308 0136 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 309 013a 7860     		str	r0, [r7, #4]
+ 459:Libraries/uC-CPU/cpu_core.c **** 
+ 460:Libraries/uC-CPU/cpu_core.c **** #else
+ 461:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_DIS();
+ 462:Libraries/uC-CPU/cpu_core.c ****     tmr_cur            = (CPU_TS_TMR) CPU_TS_TmrRd();               /* Get cur ts tmr val (in ts tm
+ 463:Libraries/uC-CPU/cpu_core.c ****     tmr_delta          = (CPU_TS_TMR)(tmr_cur - CPU_TS_32_TmrPrev); /* Calc      delta ts tmr cnts.
+ 464:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_32_Accum   += (CPU_TS32  ) tmr_delta;                    /* Inc ts by delta ts tmr cnts 
+ 465:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_32_TmrPrev  = (CPU_TS_TMR) tmr_cur;                      /* Save cur ts tmr cnts for nex
+ 466:Libraries/uC-CPU/cpu_core.c ****     ts                 = (CPU_TS32  ) CPU_TS_32_Accum;
+ 467:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_EN();
+ 468:Libraries/uC-CPU/cpu_core.c **** #endif
+ 469:Libraries/uC-CPU/cpu_core.c **** 
+ 470:Libraries/uC-CPU/cpu_core.c ****     return (ts);
+ 310              		.loc 1 470 0
+ 311 013c 7B68     		ldr	r3, [r7, #4]
+ 471:Libraries/uC-CPU/cpu_core.c **** }
+ 312              		.loc 1 471 0
+ 313 013e 1846     		mov	r0, r3
+ 314 0140 07F10807 		add	r7, r7, #8
+ 315 0144 BD46     		mov	sp, r7
+ 316 0146 80BD     		pop	{r7, pc}
+ 317              		.cfi_endproc
+ 318              	.LFE5:
+ 320              		.align	2
+ 321              		.global	CPU_TS_Update
+ 322              		.thumb
+ 323              		.thumb_func
+ 325              	CPU_TS_Update:
+ 326              	.LFB6:
+ 472:Libraries/uC-CPU/cpu_core.c **** #endif
+ 473:Libraries/uC-CPU/cpu_core.c **** 
+ 474:Libraries/uC-CPU/cpu_core.c **** 
+ 475:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 476:Libraries/uC-CPU/cpu_core.c **** /*
+ 477:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 478:Libraries/uC-CPU/cpu_core.c **** *                                           CPU_TS_Get64()
+ 479:Libraries/uC-CPU/cpu_core.c **** *
+ 480:Libraries/uC-CPU/cpu_core.c **** * Description : Get current 64-bit CPU timestamp.
+ 481:Libraries/uC-CPU/cpu_core.c **** *
+ 482:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 483:Libraries/uC-CPU/cpu_core.c **** *
+ 484:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : Current 64-bit CPU timestamp (in timestamp timer counts).
+ 485:Libraries/uC-CPU/cpu_core.c **** *
+ 486:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : Application.
+ 487:Libraries/uC-CPU/cpu_core.c **** *
+ 488:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU module application interface (API) function & MAY be called 
+ 489:Libraries/uC-CPU/cpu_core.c **** *               application function(s).
+ 490:Libraries/uC-CPU/cpu_core.c **** *
+ 491:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) When applicable, the amount of time measured by CPU timestamps is calculated by
+ 492:Libraries/uC-CPU/cpu_core.c **** *                   either of the following equations :
+ 493:Libraries/uC-CPU/cpu_core.c **** *
+ 494:Libraries/uC-CPU/cpu_core.c **** *                       (a) Time measured  =  Number timer counts  *  Timer period
+ 495:Libraries/uC-CPU/cpu_core.c **** *
+ 496:Libraries/uC-CPU/cpu_core.c **** *                               where
+ 497:Libraries/uC-CPU/cpu_core.c **** *
+ 498:Libraries/uC-CPU/cpu_core.c **** *                                   Number timer counts     Number of timer counts measured
+ 499:Libraries/uC-CPU/cpu_core.c **** *                                   Timer period            Timer's period in some units of
+ 500:Libraries/uC-CPU/cpu_core.c **** *                                                               (fractional) seconds
+ 501:Libraries/uC-CPU/cpu_core.c **** *                                   Time measured           Amount of time measured, in same
+ 502:Libraries/uC-CPU/cpu_core.c **** *                                                               units of (fractional) seconds
+ 503:Libraries/uC-CPU/cpu_core.c **** *                                                               as the Timer period
+ 504:Libraries/uC-CPU/cpu_core.c **** *
+ 505:Libraries/uC-CPU/cpu_core.c **** *                                              Number timer counts
+ 506:Libraries/uC-CPU/cpu_core.c **** *                       (b) Time measured  =  ---------------------
+ 507:Libraries/uC-CPU/cpu_core.c **** *                                                Timer frequency
+ 508:Libraries/uC-CPU/cpu_core.c **** *
+ 509:Libraries/uC-CPU/cpu_core.c **** *                               where
+ 510:Libraries/uC-CPU/cpu_core.c **** *
+ 511:Libraries/uC-CPU/cpu_core.c **** *                                   Number timer counts     Number of timer counts measured
+ 512:Libraries/uC-CPU/cpu_core.c **** *                                   Timer frequency         Timer's frequency in some units
+ 513:Libraries/uC-CPU/cpu_core.c **** *                                                               of counts per second
+ 514:Libraries/uC-CPU/cpu_core.c **** *                                   Time measured           Amount of time measured, in seconds
+ 515:Libraries/uC-CPU/cpu_core.c **** *
+ 516:Libraries/uC-CPU/cpu_core.c **** *                   See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TS_TmrRd()  Note #2c1'.
+ 517:Libraries/uC-CPU/cpu_core.c **** *
+ 518:Libraries/uC-CPU/cpu_core.c **** *               (2) In case the CPU timestamp timer has lower precision than the 64-bit CPU timesta
+ 519:Libraries/uC-CPU/cpu_core.c **** *                   its precision is extended via periodic updates by accumulating the deltas of th
+ 520:Libraries/uC-CPU/cpu_core.c **** *                   timestamp timer count values into the higher-precision 64-bit CPU timestamp.
+ 521:Libraries/uC-CPU/cpu_core.c **** *
+ 522:Libraries/uC-CPU/cpu_core.c **** *               (3) After initialization, 'CPU_TS_64_Accum' & 'CPU_TS_64_TmrPrev' MUST ALWAYS
+ 523:Libraries/uC-CPU/cpu_core.c **** *                   be accessed AND updated exclusively with interrupts disabled -- but NOT
+ 524:Libraries/uC-CPU/cpu_core.c **** *                   with critical sections.
+ 525:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 526:Libraries/uC-CPU/cpu_core.c **** */
+ 527:Libraries/uC-CPU/cpu_core.c **** 
+ 528:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_TS_64_EN == DEF_ENABLED)
+ 529:Libraries/uC-CPU/cpu_core.c **** CPU_TS64  CPU_TS_Get64 (void)
+ 530:Libraries/uC-CPU/cpu_core.c **** {
+ 531:Libraries/uC-CPU/cpu_core.c ****     CPU_TS64    ts;
+ 532:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_TS_TMR_SIZE <  CPU_WORD_SIZE_64)
+ 533:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  tmr_cur;
+ 534:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  tmr_delta;
+ 535:Libraries/uC-CPU/cpu_core.c ****     CPU_SR_ALLOC();
+ 536:Libraries/uC-CPU/cpu_core.c **** #endif
+ 537:Libraries/uC-CPU/cpu_core.c **** 
+ 538:Libraries/uC-CPU/cpu_core.c **** 
+ 539:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_TS_TMR_SIZE >= CPU_WORD_SIZE_64)
+ 540:Libraries/uC-CPU/cpu_core.c ****     ts = (CPU_TS64)CPU_TS_TmrRd();                                  /* Get cur ts tmr val (in 64-bi
+ 541:Libraries/uC-CPU/cpu_core.c **** 
+ 542:Libraries/uC-CPU/cpu_core.c **** #else
+ 543:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_DIS();
+ 544:Libraries/uC-CPU/cpu_core.c ****     tmr_cur            = (CPU_TS_TMR) CPU_TS_TmrRd();               /* Get cur ts tmr val (in ts tm
+ 545:Libraries/uC-CPU/cpu_core.c ****     tmr_delta          = (CPU_TS_TMR)(tmr_cur - CPU_TS_64_TmrPrev); /* Calc      delta ts tmr cnts.
+ 546:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_64_Accum   += (CPU_TS64  ) tmr_delta;                    /* Inc ts by delta ts tmr cnts 
+ 547:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_64_TmrPrev  = (CPU_TS_TMR) tmr_cur;                      /* Save cur ts tmr cnts for nex
+ 548:Libraries/uC-CPU/cpu_core.c ****     ts                 = (CPU_TS64  ) CPU_TS_64_Accum;
+ 549:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_EN();
+ 550:Libraries/uC-CPU/cpu_core.c **** #endif
+ 551:Libraries/uC-CPU/cpu_core.c **** 
+ 552:Libraries/uC-CPU/cpu_core.c ****     return (ts);
+ 553:Libraries/uC-CPU/cpu_core.c **** }
+ 554:Libraries/uC-CPU/cpu_core.c **** #endif
+ 555:Libraries/uC-CPU/cpu_core.c **** 
+ 556:Libraries/uC-CPU/cpu_core.c **** 
+ 557:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 558:Libraries/uC-CPU/cpu_core.c **** /*
+ 559:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 560:Libraries/uC-CPU/cpu_core.c **** *                                           CPU_TS_Update()
+ 561:Libraries/uC-CPU/cpu_core.c **** *
+ 562:Libraries/uC-CPU/cpu_core.c **** * Description : Update current CPU timestamp(s).
+ 563:Libraries/uC-CPU/cpu_core.c **** *
+ 564:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 565:Libraries/uC-CPU/cpu_core.c **** *
+ 566:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+ 567:Libraries/uC-CPU/cpu_core.c **** *
+ 568:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : Application/BSP periodic time handler (see Note #1).
+ 569:Libraries/uC-CPU/cpu_core.c **** *
+ 570:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU timestamp BSP function & SHOULD be called only by appropriat
+ 571:Libraries/uC-CPU/cpu_core.c **** *               application/BSP function(s).
+ 572:Libraries/uC-CPU/cpu_core.c **** *
+ 573:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) (a) CPU timestamp(s) MUST be updated periodically by some application (or BSP) 
+ 574:Libraries/uC-CPU/cpu_core.c **** *                       handler in order to (adequately) maintain CPU timestamp(s)' time.
+ 575:Libraries/uC-CPU/cpu_core.c **** *
+ 576:Libraries/uC-CPU/cpu_core.c **** *                   (b) CPU timestamp(s) MUST be updated more frequently than the CPU timestamp tim
+ 577:Libraries/uC-CPU/cpu_core.c **** *                       overflows; otherwise, CPU timestamp(s) will lose time.
+ 578:Libraries/uC-CPU/cpu_core.c **** *
+ 579:Libraries/uC-CPU/cpu_core.c **** *                       See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TS_TmrRd()  Note #2c2'.
+ 580:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 581:Libraries/uC-CPU/cpu_core.c **** */
+ 582:Libraries/uC-CPU/cpu_core.c **** 
+ 583:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_TS_EN == DEF_ENABLED)
+ 584:Libraries/uC-CPU/cpu_core.c **** void  CPU_TS_Update (void)
+ 585:Libraries/uC-CPU/cpu_core.c **** {
+ 327              		.loc 1 585 0
+ 328              		.cfi_startproc
+ 329              		@ args = 0, pretend = 0, frame = 0
+ 330              		@ frame_needed = 1, uses_anonymous_args = 0
+ 331              		@ link register save eliminated.
+ 332 0148 80B4     		push	{r7}
+ 333              	.LCFI16:
+ 334              		.cfi_def_cfa_offset 4
+ 335              		.cfi_offset 7, -4
+ 336 014a 00AF     		add	r7, sp, #0
+ 337              	.LCFI17:
+ 338              		.cfi_def_cfa_register 7
+ 586:Libraries/uC-CPU/cpu_core.c **** #if ((CPU_CFG_TS_32_EN    == DEF_ENABLED)  && \
+ 587:Libraries/uC-CPU/cpu_core.c ****      (CPU_CFG_TS_TMR_SIZE <  CPU_WORD_SIZE_32))
+ 588:Libraries/uC-CPU/cpu_core.c ****    (void)CPU_TS_Get32();
+ 589:Libraries/uC-CPU/cpu_core.c **** #endif
+ 590:Libraries/uC-CPU/cpu_core.c **** 
+ 591:Libraries/uC-CPU/cpu_core.c **** #if ((CPU_CFG_TS_64_EN    == DEF_ENABLED)  && \
+ 592:Libraries/uC-CPU/cpu_core.c ****      (CPU_CFG_TS_TMR_SIZE <  CPU_WORD_SIZE_64))
+ 593:Libraries/uC-CPU/cpu_core.c ****    (void)CPU_TS_Get64();
+ 594:Libraries/uC-CPU/cpu_core.c **** #endif
+ 595:Libraries/uC-CPU/cpu_core.c **** }
+ 339              		.loc 1 595 0
+ 340 014c BD46     		mov	sp, r7
+ 341 014e 80BC     		pop	{r7}
+ 342 0150 7047     		bx	lr
+ 343              		.cfi_endproc
+ 344              	.LFE6:
+ 346 0152 00BF     		.align	2
+ 347              		.global	CPU_TS_TmrFreqGet
+ 348              		.thumb
+ 349              		.thumb_func
+ 351              	CPU_TS_TmrFreqGet:
+ 352              	.LFB7:
+ 596:Libraries/uC-CPU/cpu_core.c **** #endif
+ 597:Libraries/uC-CPU/cpu_core.c **** 
+ 598:Libraries/uC-CPU/cpu_core.c **** 
+ 599:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 600:Libraries/uC-CPU/cpu_core.c **** /*
+ 601:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 602:Libraries/uC-CPU/cpu_core.c **** *                                         CPU_TS_TmrFreqGet()
+ 603:Libraries/uC-CPU/cpu_core.c **** *
+ 604:Libraries/uC-CPU/cpu_core.c **** * Description : Get CPU timestamp's timer frequency.
+ 605:Libraries/uC-CPU/cpu_core.c **** *
+ 606:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : p_err       Pointer to variable that will receive the return error code from this f
+ 607:Libraries/uC-CPU/cpu_core.c **** *
+ 608:Libraries/uC-CPU/cpu_core.c **** *                               CPU_ERR_NONE                    CPU timestamp's timer frequency suc
+ 609:Libraries/uC-CPU/cpu_core.c **** *                                                                   returned.
+ 610:Libraries/uC-CPU/cpu_core.c **** *                               CPU_ERR_TS_FREQ_INVALID         CPU timestamp's timer frequency inv
+ 611:Libraries/uC-CPU/cpu_core.c **** *                                                                   NOT yet configured.
+ 612:Libraries/uC-CPU/cpu_core.c **** *
+ 613:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : CPU timestamp's timer frequency (in Hertz), if NO error(s).
+ 614:Libraries/uC-CPU/cpu_core.c **** *
+ 615:Libraries/uC-CPU/cpu_core.c **** *               0,                                          otherwise.
+ 616:Libraries/uC-CPU/cpu_core.c **** *
+ 617:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : Application.
+ 618:Libraries/uC-CPU/cpu_core.c **** *
+ 619:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU module application interface (API) function & MAY be called 
+ 620:Libraries/uC-CPU/cpu_core.c **** *               application function(s).
+ 621:Libraries/uC-CPU/cpu_core.c **** *
+ 622:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : none.
+ 623:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 624:Libraries/uC-CPU/cpu_core.c **** */
+ 625:Libraries/uC-CPU/cpu_core.c **** 
+ 626:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_TS_TMR_EN == DEF_ENABLED)
+ 627:Libraries/uC-CPU/cpu_core.c **** CPU_TS_TMR_FREQ  CPU_TS_TmrFreqGet (CPU_ERR  *p_err)
+ 628:Libraries/uC-CPU/cpu_core.c **** {
+ 353              		.loc 1 628 0
+ 354              		.cfi_startproc
+ 355              		@ args = 0, pretend = 0, frame = 16
+ 356              		@ frame_needed = 1, uses_anonymous_args = 0
+ 357 0154 80B5     		push	{r7, lr}
+ 358              	.LCFI18:
+ 359              		.cfi_def_cfa_offset 8
+ 360              		.cfi_offset 14, -4
+ 361              		.cfi_offset 7, -8
+ 362 0156 84B0     		sub	sp, sp, #16
+ 363              	.LCFI19:
+ 364              		.cfi_def_cfa_offset 24
+ 365 0158 00AF     		add	r7, sp, #0
+ 366              	.LCFI20:
+ 367              		.cfi_def_cfa_register 7
+ 368 015a 7860     		str	r0, [r7, #4]
+ 629:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR_FREQ  freq_hz;
+ 630:Libraries/uC-CPU/cpu_core.c **** 
+ 631:Libraries/uC-CPU/cpu_core.c **** 
+ 632:Libraries/uC-CPU/cpu_core.c ****     if (p_err == (CPU_ERR *)0) {
+ 369              		.loc 1 632 0
+ 370 015c 7B68     		ldr	r3, [r7, #4]
+ 371 015e 002B     		cmp	r3, #0
+ 372 0160 01D1     		bne	.L17
+ 633:Libraries/uC-CPU/cpu_core.c ****         CPU_SW_EXCEPTION(;);
+ 373              		.loc 1 633 0
+ 374 0162 FFF7FEFF 		bl	CPU_SW_Exception
+ 375              	.L17:
+ 634:Libraries/uC-CPU/cpu_core.c ****     }
+ 635:Libraries/uC-CPU/cpu_core.c **** 
+ 636:Libraries/uC-CPU/cpu_core.c ****     freq_hz =  CPU_TS_TmrFreq_Hz;
+ 376              		.loc 1 636 0
+ 377 0166 40F20003 		movw	r3, #:lower16:CPU_TS_TmrFreq_Hz
+ 378 016a C0F20003 		movt	r3, #:upper16:CPU_TS_TmrFreq_Hz
+ 379 016e 1B68     		ldr	r3, [r3, #0]
+ 380 0170 FB60     		str	r3, [r7, #12]
+ 637:Libraries/uC-CPU/cpu_core.c ****    *p_err   = (freq_hz != 0) ? CPU_ERR_NONE : CPU_ERR_TS_FREQ_INVALID;
+ 381              		.loc 1 637 0
+ 382 0172 FB68     		ldr	r3, [r7, #12]
+ 383 0174 002B     		cmp	r3, #0
+ 384 0176 02D0     		beq	.L18
+ 385              		.loc 1 637 0 is_stmt 0 discriminator 1
+ 386 0178 4FF00003 		mov	r3, #0
+ 387 017c 01E0     		b	.L19
+ 388              	.L18:
+ 389              		.loc 1 637 0 discriminator 2
+ 390 017e 4FF4FA63 		mov	r3, #2000
+ 391              	.L19:
+ 392              		.loc 1 637 0 discriminator 3
+ 393 0182 7A68     		ldr	r2, [r7, #4]
+ 394 0184 1380     		strh	r3, [r2, #0]	@ movhi
+ 638:Libraries/uC-CPU/cpu_core.c **** 
+ 639:Libraries/uC-CPU/cpu_core.c ****     return (freq_hz);
+ 395              		.loc 1 639 0 is_stmt 1 discriminator 3
+ 396 0186 FB68     		ldr	r3, [r7, #12]
+ 640:Libraries/uC-CPU/cpu_core.c **** }
+ 397              		.loc 1 640 0 discriminator 3
+ 398 0188 1846     		mov	r0, r3
+ 399 018a 07F11007 		add	r7, r7, #16
+ 400 018e BD46     		mov	sp, r7
+ 401 0190 80BD     		pop	{r7, pc}
+ 402              		.cfi_endproc
+ 403              	.LFE7:
+ 405 0192 00BF     		.align	2
+ 406              		.global	CPU_TS_TmrFreqSet
+ 407              		.thumb
+ 408              		.thumb_func
+ 410              	CPU_TS_TmrFreqSet:
+ 411              	.LFB8:
+ 641:Libraries/uC-CPU/cpu_core.c **** #endif
+ 642:Libraries/uC-CPU/cpu_core.c **** 
+ 643:Libraries/uC-CPU/cpu_core.c **** 
+ 644:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 645:Libraries/uC-CPU/cpu_core.c **** /*
+ 646:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 647:Libraries/uC-CPU/cpu_core.c **** *                                         CPU_TS_TmrFreqSet()
+ 648:Libraries/uC-CPU/cpu_core.c **** *
+ 649:Libraries/uC-CPU/cpu_core.c **** * Description : Set CPU timestamp's timer frequency.
+ 650:Libraries/uC-CPU/cpu_core.c **** *
+ 651:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : freq_hz     Frequency (in Hertz) to set for CPU timestamp's timer.
+ 652:Libraries/uC-CPU/cpu_core.c **** *
+ 653:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+ 654:Libraries/uC-CPU/cpu_core.c **** *
+ 655:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : CPU_TS_TmrInit(),
+ 656:Libraries/uC-CPU/cpu_core.c **** *               Application/BSP initialization function(s).
+ 657:Libraries/uC-CPU/cpu_core.c **** *
+ 658:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU module BSP function & SHOULD be called only by appropriate
+ 659:Libraries/uC-CPU/cpu_core.c **** *               application/BSP function(s) [see Note #1].
+ 660:Libraries/uC-CPU/cpu_core.c **** *
+ 661:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) (a) (1) CPU timestamp timer frequency is NOT required for internal CPU timestam
+ 662:Libraries/uC-CPU/cpu_core.c **** *                           operations but may OPTIONALLY be configured by CPU_TS_TmrInit() or othe
+ 663:Libraries/uC-CPU/cpu_core.c **** *                           application/BSP initialization functions.
+ 664:Libraries/uC-CPU/cpu_core.c **** *
+ 665:Libraries/uC-CPU/cpu_core.c **** *                       (2) CPU timestamp timer frequency MAY be used with optional CPU_TSxx_to_uSe
+ 666:Libraries/uC-CPU/cpu_core.c **** *                           to convert CPU timestamps from timer counts into microseconds.
+ 667:Libraries/uC-CPU/cpu_core.c **** *
+ 668:Libraries/uC-CPU/cpu_core.c **** *                           See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TSxx_to_uSec()  Note #2a
+ 669:Libraries/uC-CPU/cpu_core.c **** *
+ 670:Libraries/uC-CPU/cpu_core.c **** *                   (b) CPU timestamp timer period SHOULD be less than the typical measured time bu
+ 671:Libraries/uC-CPU/cpu_core.c **** *                       be less than the maximum measured time; otherwise, timer resolution inadequ
+ 672:Libraries/uC-CPU/cpu_core.c **** *                       measure desired times.
+ 673:Libraries/uC-CPU/cpu_core.c **** *
+ 674:Libraries/uC-CPU/cpu_core.c **** *                       See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TSxx_to_uSec()  Note #2b'.
+ 675:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 676:Libraries/uC-CPU/cpu_core.c **** */
+ 677:Libraries/uC-CPU/cpu_core.c **** 
+ 678:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_TS_TMR_EN == DEF_ENABLED)
+ 679:Libraries/uC-CPU/cpu_core.c **** void  CPU_TS_TmrFreqSet (CPU_TS_TMR_FREQ  freq_hz)
+ 680:Libraries/uC-CPU/cpu_core.c **** {
+ 412              		.loc 1 680 0
+ 413              		.cfi_startproc
+ 414              		@ args = 0, pretend = 0, frame = 8
+ 415              		@ frame_needed = 1, uses_anonymous_args = 0
+ 416              		@ link register save eliminated.
+ 417 0194 80B4     		push	{r7}
+ 418              	.LCFI21:
+ 419              		.cfi_def_cfa_offset 4
+ 420              		.cfi_offset 7, -4
+ 421 0196 83B0     		sub	sp, sp, #12
+ 422              	.LCFI22:
+ 423              		.cfi_def_cfa_offset 16
+ 424 0198 00AF     		add	r7, sp, #0
+ 425              	.LCFI23:
+ 426              		.cfi_def_cfa_register 7
+ 427 019a 7860     		str	r0, [r7, #4]
+ 681:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TmrFreq_Hz = freq_hz;
+ 428              		.loc 1 681 0
+ 429 019c 40F20003 		movw	r3, #:lower16:CPU_TS_TmrFreq_Hz
+ 430 01a0 C0F20003 		movt	r3, #:upper16:CPU_TS_TmrFreq_Hz
+ 431 01a4 7A68     		ldr	r2, [r7, #4]
+ 432 01a6 1A60     		str	r2, [r3, #0]
+ 682:Libraries/uC-CPU/cpu_core.c **** }
+ 433              		.loc 1 682 0
+ 434 01a8 07F10C07 		add	r7, r7, #12
+ 435 01ac BD46     		mov	sp, r7
+ 436 01ae 80BC     		pop	{r7}
+ 437 01b0 7047     		bx	lr
+ 438              		.cfi_endproc
+ 439              	.LFE8:
+ 441 01b2 00BF     		.align	2
+ 442              		.global	CPU_IntDisMeasMaxCurReset
+ 443              		.thumb
+ 444              		.thumb_func
+ 446              	CPU_IntDisMeasMaxCurReset:
+ 447              	.LFB9:
+ 683:Libraries/uC-CPU/cpu_core.c **** #endif
+ 684:Libraries/uC-CPU/cpu_core.c **** 
+ 685:Libraries/uC-CPU/cpu_core.c **** 
+ 686:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 687:Libraries/uC-CPU/cpu_core.c **** /*
+ 688:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 689:Libraries/uC-CPU/cpu_core.c **** *                                     CPU_IntDisMeasMaxCurReset()
+ 690:Libraries/uC-CPU/cpu_core.c **** *
+ 691:Libraries/uC-CPU/cpu_core.c **** * Description : Reset current maximum interrupts disabled time.
+ 692:Libraries/uC-CPU/cpu_core.c **** *
+ 693:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 694:Libraries/uC-CPU/cpu_core.c **** *
+ 695:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : Maximum interrupts disabled time (in CPU timestamp timer counts) before resetting.
+ 696:Libraries/uC-CPU/cpu_core.c **** *
+ 697:Libraries/uC-CPU/cpu_core.c **** *               See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TS_TmrRd()      Note #2c'
+ 698:Libraries/uC-CPU/cpu_core.c **** *                      & 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TSxx_to_uSec()  Note #2'.
+ 699:Libraries/uC-CPU/cpu_core.c **** *
+ 700:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : Application.
+ 701:Libraries/uC-CPU/cpu_core.c **** *
+ 702:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU module application interface (API) function & MAY be called
+ 703:Libraries/uC-CPU/cpu_core.c **** *               by application function(s).
+ 704:Libraries/uC-CPU/cpu_core.c **** *
+ 705:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) After initialization, 'CPU_IntDisMeasMaxCur_cnts' MUST ALWAYS be accessed
+ 706:Libraries/uC-CPU/cpu_core.c **** *                   exclusively with interrupts disabled -- but NOT with critical sections.
+ 707:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 708:Libraries/uC-CPU/cpu_core.c **** */
+ 709:Libraries/uC-CPU/cpu_core.c **** 
+ 710:Libraries/uC-CPU/cpu_core.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN
+ 711:Libraries/uC-CPU/cpu_core.c **** CPU_TS_TMR  CPU_IntDisMeasMaxCurReset (void)
+ 712:Libraries/uC-CPU/cpu_core.c **** {
+ 448              		.loc 1 712 0
+ 449              		.cfi_startproc
+ 450              		@ args = 0, pretend = 0, frame = 8
+ 451              		@ frame_needed = 1, uses_anonymous_args = 0
+ 452 01b4 80B5     		push	{r7, lr}
+ 453              	.LCFI24:
+ 454              		.cfi_def_cfa_offset 8
+ 455              		.cfi_offset 14, -4
+ 456              		.cfi_offset 7, -8
+ 457 01b6 82B0     		sub	sp, sp, #8
+ 458              	.LCFI25:
+ 459              		.cfi_def_cfa_offset 16
+ 460 01b8 00AF     		add	r7, sp, #0
+ 461              	.LCFI26:
+ 462              		.cfi_def_cfa_register 7
+ 713:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  time_max_cnts;
+ 714:Libraries/uC-CPU/cpu_core.c ****     CPU_SR_ALLOC();
+ 463              		.loc 1 714 0
+ 464 01ba 4FF00003 		mov	r3, #0
+ 465 01be 7B60     		str	r3, [r7, #4]
+ 715:Libraries/uC-CPU/cpu_core.c **** 
+ 716:Libraries/uC-CPU/cpu_core.c **** 
+ 717:Libraries/uC-CPU/cpu_core.c ****     time_max_cnts             = CPU_IntDisMeasMaxCurGet();
+ 466              		.loc 1 717 0
+ 467 01c0 FFF7FEFF 		bl	CPU_IntDisMeasMaxCurGet
+ 468 01c4 3860     		str	r0, [r7, #0]
+ 718:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_DIS();
+ 469              		.loc 1 718 0
+ 470 01c6 FFF7FEFF 		bl	CPU_SR_Save
+ 471 01ca 7860     		str	r0, [r7, #4]
+ 719:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasMaxCur_cnts = 0u;
+ 472              		.loc 1 719 0
+ 473 01cc 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMaxCur_cnts
+ 474 01d0 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMaxCur_cnts
+ 475 01d4 4FF00002 		mov	r2, #0
+ 476 01d8 1A60     		str	r2, [r3, #0]
+ 720:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_EN();
+ 477              		.loc 1 720 0
+ 478 01da 7868     		ldr	r0, [r7, #4]
+ 479 01dc FFF7FEFF 		bl	CPU_SR_Restore
+ 721:Libraries/uC-CPU/cpu_core.c **** 
+ 722:Libraries/uC-CPU/cpu_core.c ****     return (time_max_cnts);
+ 480              		.loc 1 722 0
+ 481 01e0 3B68     		ldr	r3, [r7, #0]
+ 723:Libraries/uC-CPU/cpu_core.c **** }
+ 482              		.loc 1 723 0
+ 483 01e2 1846     		mov	r0, r3
+ 484 01e4 07F10807 		add	r7, r7, #8
+ 485 01e8 BD46     		mov	sp, r7
+ 486 01ea 80BD     		pop	{r7, pc}
+ 487              		.cfi_endproc
+ 488              	.LFE9:
+ 490              		.align	2
+ 491              		.global	CPU_IntDisMeasMaxCurGet
+ 492              		.thumb
+ 493              		.thumb_func
+ 495              	CPU_IntDisMeasMaxCurGet:
+ 496              	.LFB10:
+ 724:Libraries/uC-CPU/cpu_core.c **** #endif
+ 725:Libraries/uC-CPU/cpu_core.c **** 
+ 726:Libraries/uC-CPU/cpu_core.c **** 
+ 727:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 728:Libraries/uC-CPU/cpu_core.c **** /*
+ 729:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 730:Libraries/uC-CPU/cpu_core.c **** *                                      CPU_IntDisMeasMaxCurGet()
+ 731:Libraries/uC-CPU/cpu_core.c **** *
+ 732:Libraries/uC-CPU/cpu_core.c **** * Description : Get current maximum interrupts disabled time.
+ 733:Libraries/uC-CPU/cpu_core.c **** *
+ 734:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 735:Libraries/uC-CPU/cpu_core.c **** *
+ 736:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : Current maximum interrupts disabled time (in CPU timestamp timer counts).
+ 737:Libraries/uC-CPU/cpu_core.c **** *
+ 738:Libraries/uC-CPU/cpu_core.c **** *               See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TS_TmrRd()      Note #2c'
+ 739:Libraries/uC-CPU/cpu_core.c **** *                      & 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TSxx_to_uSec()  Note #2'.
+ 740:Libraries/uC-CPU/cpu_core.c **** *
+ 741:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : CPU_IntDisMeasMaxCurReset(),
+ 742:Libraries/uC-CPU/cpu_core.c **** *               Application.
+ 743:Libraries/uC-CPU/cpu_core.c **** *
+ 744:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU module application interface (API) function & MAY be called
+ 745:Libraries/uC-CPU/cpu_core.c **** *               by application function(s).
+ 746:Libraries/uC-CPU/cpu_core.c **** *
+ 747:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) After initialization, 'CPU_IntDisMeasMaxCur_cnts' MUST ALWAYS be accessed
+ 748:Libraries/uC-CPU/cpu_core.c **** *                   exclusively with interrupts disabled -- but NOT with critical sections.
+ 749:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 750:Libraries/uC-CPU/cpu_core.c **** */
+ 751:Libraries/uC-CPU/cpu_core.c **** 
+ 752:Libraries/uC-CPU/cpu_core.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN
+ 753:Libraries/uC-CPU/cpu_core.c **** CPU_TS_TMR  CPU_IntDisMeasMaxCurGet (void)
+ 754:Libraries/uC-CPU/cpu_core.c **** {
+ 497              		.loc 1 754 0
+ 498              		.cfi_startproc
+ 499              		@ args = 0, pretend = 0, frame = 16
+ 500              		@ frame_needed = 1, uses_anonymous_args = 0
+ 501 01ec 80B5     		push	{r7, lr}
+ 502              	.LCFI27:
+ 503              		.cfi_def_cfa_offset 8
+ 504              		.cfi_offset 14, -4
+ 505              		.cfi_offset 7, -8
+ 506 01ee 84B0     		sub	sp, sp, #16
+ 507              	.LCFI28:
+ 508              		.cfi_def_cfa_offset 24
+ 509 01f0 00AF     		add	r7, sp, #0
+ 510              	.LCFI29:
+ 511              		.cfi_def_cfa_register 7
+ 755:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  time_tot_cnts;
+ 756:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  time_max_cnts;
+ 757:Libraries/uC-CPU/cpu_core.c ****     CPU_SR_ALLOC();
+ 512              		.loc 1 757 0
+ 513 01f2 4FF00003 		mov	r3, #0
+ 514 01f6 FB60     		str	r3, [r7, #12]
+ 758:Libraries/uC-CPU/cpu_core.c **** 
+ 759:Libraries/uC-CPU/cpu_core.c **** 
+ 760:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_DIS();
+ 515              		.loc 1 760 0
+ 516 01f8 FFF7FEFF 		bl	CPU_SR_Save
+ 517 01fc F860     		str	r0, [r7, #12]
+ 761:Libraries/uC-CPU/cpu_core.c ****     time_tot_cnts = CPU_IntDisMeasMaxCur_cnts;
+ 518              		.loc 1 761 0
+ 519 01fe 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMaxCur_cnts
+ 520 0202 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMaxCur_cnts
+ 521 0206 1B68     		ldr	r3, [r3, #0]
+ 522 0208 BB60     		str	r3, [r7, #8]
+ 762:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_EN();
+ 523              		.loc 1 762 0
+ 524 020a F868     		ldr	r0, [r7, #12]
+ 525 020c FFF7FEFF 		bl	CPU_SR_Restore
+ 763:Libraries/uC-CPU/cpu_core.c ****     time_max_cnts = CPU_IntDisMeasMaxCalc(time_tot_cnts);
+ 526              		.loc 1 763 0
+ 527 0210 B868     		ldr	r0, [r7, #8]
+ 528 0212 00F023F9 		bl	CPU_IntDisMeasMaxCalc
+ 529 0216 7860     		str	r0, [r7, #4]
+ 764:Libraries/uC-CPU/cpu_core.c **** 
+ 765:Libraries/uC-CPU/cpu_core.c ****     return (time_max_cnts);
+ 530              		.loc 1 765 0
+ 531 0218 7B68     		ldr	r3, [r7, #4]
+ 766:Libraries/uC-CPU/cpu_core.c **** }
+ 532              		.loc 1 766 0
+ 533 021a 1846     		mov	r0, r3
+ 534 021c 07F11007 		add	r7, r7, #16
+ 535 0220 BD46     		mov	sp, r7
+ 536 0222 80BD     		pop	{r7, pc}
+ 537              		.cfi_endproc
+ 538              	.LFE10:
+ 540              		.align	2
+ 541              		.global	CPU_IntDisMeasMaxGet
+ 542              		.thumb
+ 543              		.thumb_func
+ 545              	CPU_IntDisMeasMaxGet:
+ 546              	.LFB11:
+ 767:Libraries/uC-CPU/cpu_core.c **** #endif
+ 768:Libraries/uC-CPU/cpu_core.c **** 
+ 769:Libraries/uC-CPU/cpu_core.c **** 
+ 770:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 771:Libraries/uC-CPU/cpu_core.c **** /*
+ 772:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 773:Libraries/uC-CPU/cpu_core.c **** *                                       CPU_IntDisMeasMaxGet()
+ 774:Libraries/uC-CPU/cpu_core.c **** *
+ 775:Libraries/uC-CPU/cpu_core.c **** * Description : Get (non-resetable) maximum interrupts disabled time.
+ 776:Libraries/uC-CPU/cpu_core.c **** *
+ 777:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 778:Libraries/uC-CPU/cpu_core.c **** *
+ 779:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : (Non-resetable) maximum interrupts disabled time (in CPU timestamp timer counts).
+ 780:Libraries/uC-CPU/cpu_core.c **** *
+ 781:Libraries/uC-CPU/cpu_core.c **** *               See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TS_TmrRd()      Note #2c'
+ 782:Libraries/uC-CPU/cpu_core.c **** *                      & 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TSxx_to_uSec()  Note #2'.
+ 783:Libraries/uC-CPU/cpu_core.c **** *
+ 784:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : CPU_IntDisMeasInit(),
+ 785:Libraries/uC-CPU/cpu_core.c **** *               Application.
+ 786:Libraries/uC-CPU/cpu_core.c **** *
+ 787:Libraries/uC-CPU/cpu_core.c **** *               This function is a CPU module application interface (API) function & MAY be called
+ 788:Libraries/uC-CPU/cpu_core.c **** *               by application function(s).
+ 789:Libraries/uC-CPU/cpu_core.c **** *
+ 790:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) After initialization, 'CPU_IntDisMeasMax_cnts' MUST ALWAYS be accessed
+ 791:Libraries/uC-CPU/cpu_core.c **** *                   exclusively with interrupts disabled -- but NOT with critical sections.
+ 792:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 793:Libraries/uC-CPU/cpu_core.c **** */
+ 794:Libraries/uC-CPU/cpu_core.c **** 
+ 795:Libraries/uC-CPU/cpu_core.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN
+ 796:Libraries/uC-CPU/cpu_core.c **** CPU_TS_TMR  CPU_IntDisMeasMaxGet (void)
+ 797:Libraries/uC-CPU/cpu_core.c **** {
+ 547              		.loc 1 797 0
+ 548              		.cfi_startproc
+ 549              		@ args = 0, pretend = 0, frame = 16
+ 550              		@ frame_needed = 1, uses_anonymous_args = 0
+ 551 0224 80B5     		push	{r7, lr}
+ 552              	.LCFI30:
+ 553              		.cfi_def_cfa_offset 8
+ 554              		.cfi_offset 14, -4
+ 555              		.cfi_offset 7, -8
+ 556 0226 84B0     		sub	sp, sp, #16
+ 557              	.LCFI31:
+ 558              		.cfi_def_cfa_offset 24
+ 559 0228 00AF     		add	r7, sp, #0
+ 560              	.LCFI32:
+ 561              		.cfi_def_cfa_register 7
+ 798:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  time_tot_cnts;
+ 799:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  time_max_cnts;
+ 800:Libraries/uC-CPU/cpu_core.c ****     CPU_SR_ALLOC();
+ 562              		.loc 1 800 0
+ 563 022a 4FF00003 		mov	r3, #0
+ 564 022e FB60     		str	r3, [r7, #12]
+ 801:Libraries/uC-CPU/cpu_core.c **** 
+ 802:Libraries/uC-CPU/cpu_core.c **** 
+ 803:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_DIS();
+ 565              		.loc 1 803 0
+ 566 0230 FFF7FEFF 		bl	CPU_SR_Save
+ 567 0234 F860     		str	r0, [r7, #12]
+ 804:Libraries/uC-CPU/cpu_core.c ****     time_tot_cnts = CPU_IntDisMeasMax_cnts;
+ 568              		.loc 1 804 0
+ 569 0236 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMax_cnts
+ 570 023a C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMax_cnts
+ 571 023e 1B68     		ldr	r3, [r3, #0]
+ 572 0240 BB60     		str	r3, [r7, #8]
+ 805:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_EN();
+ 573              		.loc 1 805 0
+ 574 0242 F868     		ldr	r0, [r7, #12]
+ 575 0244 FFF7FEFF 		bl	CPU_SR_Restore
+ 806:Libraries/uC-CPU/cpu_core.c ****     time_max_cnts = CPU_IntDisMeasMaxCalc(time_tot_cnts);
+ 576              		.loc 1 806 0
+ 577 0248 B868     		ldr	r0, [r7, #8]
+ 578 024a 00F007F9 		bl	CPU_IntDisMeasMaxCalc
+ 579 024e 7860     		str	r0, [r7, #4]
+ 807:Libraries/uC-CPU/cpu_core.c **** 
+ 808:Libraries/uC-CPU/cpu_core.c ****     return (time_max_cnts);
+ 580              		.loc 1 808 0
+ 581 0250 7B68     		ldr	r3, [r7, #4]
+ 809:Libraries/uC-CPU/cpu_core.c **** }
+ 582              		.loc 1 809 0
+ 583 0252 1846     		mov	r0, r3
+ 584 0254 07F11007 		add	r7, r7, #16
+ 585 0258 BD46     		mov	sp, r7
+ 586 025a 80BD     		pop	{r7, pc}
+ 587              		.cfi_endproc
+ 588              	.LFE11:
+ 590              		.align	2
+ 591              		.global	CPU_IntDisMeasStart
+ 592              		.thumb
+ 593              		.thumb_func
+ 595              	CPU_IntDisMeasStart:
+ 596              	.LFB12:
+ 810:Libraries/uC-CPU/cpu_core.c **** #endif
+ 811:Libraries/uC-CPU/cpu_core.c **** 
+ 812:Libraries/uC-CPU/cpu_core.c **** 
+ 813:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 814:Libraries/uC-CPU/cpu_core.c **** /*
+ 815:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 816:Libraries/uC-CPU/cpu_core.c **** *                                        CPU_IntDisMeasStart()
+ 817:Libraries/uC-CPU/cpu_core.c **** *
+ 818:Libraries/uC-CPU/cpu_core.c **** * Description : Start interrupts disabled time measurement.
+ 819:Libraries/uC-CPU/cpu_core.c **** *
+ 820:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 821:Libraries/uC-CPU/cpu_core.c **** *
+ 822:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+ 823:Libraries/uC-CPU/cpu_core.c **** *
+ 824:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : CPU_CRITICAL_ENTER().
+ 825:Libraries/uC-CPU/cpu_core.c **** *
+ 826:Libraries/uC-CPU/cpu_core.c **** *               This function is an INTERNAL CPU module function & MUST NOT be called by applicatio
+ 827:Libraries/uC-CPU/cpu_core.c **** *               function(s).
+ 828:Libraries/uC-CPU/cpu_core.c **** *
+ 829:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : none.
+ 830:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 831:Libraries/uC-CPU/cpu_core.c **** */
+ 832:Libraries/uC-CPU/cpu_core.c **** 
+ 833:Libraries/uC-CPU/cpu_core.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN
+ 834:Libraries/uC-CPU/cpu_core.c **** void  CPU_IntDisMeasStart (void)
+ 835:Libraries/uC-CPU/cpu_core.c **** {
+ 597              		.loc 1 835 0
+ 598              		.cfi_startproc
+ 599              		@ args = 0, pretend = 0, frame = 0
+ 600              		@ frame_needed = 1, uses_anonymous_args = 0
+ 601 025c 80B5     		push	{r7, lr}
+ 602              	.LCFI33:
+ 603              		.cfi_def_cfa_offset 8
+ 604              		.cfi_offset 14, -4
+ 605              		.cfi_offset 7, -8
+ 606 025e 00AF     		add	r7, sp, #0
+ 607              	.LCFI34:
+ 608              		.cfi_def_cfa_register 7
+ 836:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasCtr++;
+ 609              		.loc 1 836 0
+ 610 0260 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasCtr
+ 611 0264 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasCtr
+ 612 0268 1B88     		ldrh	r3, [r3, #0]
+ 613 026a 03F10103 		add	r3, r3, #1
+ 614 026e 9AB2     		uxth	r2, r3
+ 615 0270 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasCtr
+ 616 0274 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasCtr
+ 617 0278 1A80     		strh	r2, [r3, #0]	@ movhi
+ 837:Libraries/uC-CPU/cpu_core.c ****     if (CPU_IntDisNestCtr == 0u) {                                  /* If ints NOT yet dis'd, ...  
+ 618              		.loc 1 837 0
+ 619 027a 40F20003 		movw	r3, #:lower16:CPU_IntDisNestCtr
+ 620 027e C0F20003 		movt	r3, #:upper16:CPU_IntDisNestCtr
+ 621 0282 1B88     		ldrh	r3, [r3, #0]
+ 622 0284 002B     		cmp	r3, #0
+ 623 0286 07D1     		bne	.L25
+ 838:Libraries/uC-CPU/cpu_core.c ****         CPU_IntDisMeasStart_cnts = CPU_TS_TmrRd();                  /* ... get ints dis'd start tim
+ 624              		.loc 1 838 0
+ 625 0288 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 626 028c 0246     		mov	r2, r0
+ 627 028e 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasStart_cnts
+ 628 0292 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasStart_cnts
+ 629 0296 1A60     		str	r2, [r3, #0]
+ 630              	.L25:
+ 839:Libraries/uC-CPU/cpu_core.c ****     }
+ 840:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisNestCtr++;
+ 631              		.loc 1 840 0
+ 632 0298 40F20003 		movw	r3, #:lower16:CPU_IntDisNestCtr
+ 633 029c C0F20003 		movt	r3, #:upper16:CPU_IntDisNestCtr
+ 634 02a0 1B88     		ldrh	r3, [r3, #0]
+ 635 02a2 03F10103 		add	r3, r3, #1
+ 636 02a6 9AB2     		uxth	r2, r3
+ 637 02a8 40F20003 		movw	r3, #:lower16:CPU_IntDisNestCtr
+ 638 02ac C0F20003 		movt	r3, #:upper16:CPU_IntDisNestCtr
+ 639 02b0 1A80     		strh	r2, [r3, #0]	@ movhi
+ 841:Libraries/uC-CPU/cpu_core.c **** }
+ 640              		.loc 1 841 0
+ 641 02b2 80BD     		pop	{r7, pc}
+ 642              		.cfi_endproc
+ 643              	.LFE12:
+ 645              		.align	2
+ 646              		.global	CPU_IntDisMeasStop
+ 647              		.thumb
+ 648              		.thumb_func
+ 650              	CPU_IntDisMeasStop:
+ 651              	.LFB13:
+ 842:Libraries/uC-CPU/cpu_core.c **** #endif
+ 843:Libraries/uC-CPU/cpu_core.c **** 
+ 844:Libraries/uC-CPU/cpu_core.c **** 
+ 845:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+ 846:Libraries/uC-CPU/cpu_core.c **** /*
+ 847:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+ 848:Libraries/uC-CPU/cpu_core.c **** *                                        CPU_IntDisMeasStop()
+ 849:Libraries/uC-CPU/cpu_core.c **** *
+ 850:Libraries/uC-CPU/cpu_core.c **** * Description : Stop interrupts disabled time measurement.
+ 851:Libraries/uC-CPU/cpu_core.c **** *
+ 852:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+ 853:Libraries/uC-CPU/cpu_core.c **** *
+ 854:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+ 855:Libraries/uC-CPU/cpu_core.c **** *
+ 856:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : CPU_CRITICAL_EXIT().
+ 857:Libraries/uC-CPU/cpu_core.c **** *
+ 858:Libraries/uC-CPU/cpu_core.c **** *               This function is an INTERNAL CPU module function & MUST NOT be called by applicatio
+ 859:Libraries/uC-CPU/cpu_core.c **** *               function(s).
+ 860:Libraries/uC-CPU/cpu_core.c **** *
+ 861:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) (a) The total amount of time interrupts are disabled by system &/or application
+ 862:Libraries/uC-CPU/cpu_core.c **** *                       during critical sections is calculated by the following equations :
+ 863:Libraries/uC-CPU/cpu_core.c **** *
+ 864:Libraries/uC-CPU/cpu_core.c **** *                       (1) When interrupts disabled time measurements are disabled :
+ 865:Libraries/uC-CPU/cpu_core.c **** *
+ 866:Libraries/uC-CPU/cpu_core.c **** *
+ 867:Libraries/uC-CPU/cpu_core.c **** *                               |   CRITICAL  |                           |   CRITICAL  |
+ 868:Libraries/uC-CPU/cpu_core.c **** *                               |<- SECTION ->|                           |<- SECTION ->|
+ 869:Libraries/uC-CPU/cpu_core.c **** *                               |    ENTER    |                           |    EXIT     |
+ 870:Libraries/uC-CPU/cpu_core.c **** *
+ 871:Libraries/uC-CPU/cpu_core.c **** *                            Disable                                    Enable
+ 872:Libraries/uC-CPU/cpu_core.c **** *                           Interrupts                                Interrupts
+ 873:Libraries/uC-CPU/cpu_core.c **** *
+ 874:Libraries/uC-CPU/cpu_core.c **** *                               ||           ||                           ||           ||
+ 875:Libraries/uC-CPU/cpu_core.c **** *                               ||           ||                           ||           ||
+ 876:Libraries/uC-CPU/cpu_core.c **** *                               ||       |   ||<------------------------->||       |   ||
+ 877:Libraries/uC-CPU/cpu_core.c **** *                               ||       |<->||             |             ||<----->|   ||
+ 878:Libraries/uC-CPU/cpu_core.c **** *                               ||       | | ||             |             ||   |   |   ||
+ 879:Libraries/uC-CPU/cpu_core.c **** *                                        | |                |                  |   |
+ 880:Libraries/uC-CPU/cpu_core.c **** *                                   interrupts            time                 interrupts
+ 881:Libraries/uC-CPU/cpu_core.c **** *                                    disabled                 interrupts       |enabled
+ 882:Libraries/uC-CPU/cpu_core.c **** *                                          |                   disabled        |
+ 883:Libraries/uC-CPU/cpu_core.c **** *                                          |              (via application)    |
+ 884:Libraries/uC-CPU/cpu_core.c **** *                                       time                                 time
+ 885:Libraries/uC-CPU/cpu_core.c **** *                                           interrupts                           interrupts
+ 886:Libraries/uC-CPU/cpu_core.c **** *                                         disabled ovrhd                        enabled ovrhd
+ 887:Libraries/uC-CPU/cpu_core.c **** *
+ 888:Libraries/uC-CPU/cpu_core.c **** *
+ 889:Libraries/uC-CPU/cpu_core.c **** *                           (A) time            =  [ time            -  time           ]  -  time
+ 890:Libraries/uC-CPU/cpu_core.c **** *                                   interrupts     [     interrupts         interrupts ]         to
+ 891:Libraries/uC-CPU/cpu_core.c **** *                                    disabled      [      enabled            disabled  ]         ov
+ 892:Libraries/uC-CPU/cpu_core.c **** *                               (via application)
+ 893:Libraries/uC-CPU/cpu_core.c **** *
+ 894:Libraries/uC-CPU/cpu_core.c **** *
+ 895:Libraries/uC-CPU/cpu_core.c **** *                           (B) time       =  time              +  time
+ 896:Libraries/uC-CPU/cpu_core.c **** *                                   total         interrupts           interrupts
+ 897:Libraries/uC-CPU/cpu_core.c **** *                                   ovrhd        enabled ovrhd       disabled ovrhd
+ 898:Libraries/uC-CPU/cpu_core.c **** *
+ 899:Libraries/uC-CPU/cpu_core.c **** *
+ 900:Libraries/uC-CPU/cpu_core.c **** *                                   where
+ 901:Libraries/uC-CPU/cpu_core.c **** *
+ 902:Libraries/uC-CPU/cpu_core.c **** *                                           time                    time interrupts are disabled be
+ 903:Libraries/uC-CPU/cpu_core.c **** *                                               interrupts              first critical section ente
+ 904:Libraries/uC-CPU/cpu_core.c **** *                                                disabled               last  critical section exit
+ 905:Libraries/uC-CPU/cpu_core.c **** *                                           (via application)           minus total overhead time)
+ 906:Libraries/uC-CPU/cpu_core.c **** *
+ 907:Libraries/uC-CPU/cpu_core.c **** *                                           time                    time when interrupts are disabl
+ 908:Libraries/uC-CPU/cpu_core.c **** *                                               interrupts
+ 909:Libraries/uC-CPU/cpu_core.c **** *                                                disabled
+ 910:Libraries/uC-CPU/cpu_core.c **** *
+ 911:Libraries/uC-CPU/cpu_core.c **** *                                           time                    time when interrupts are  enabl
+ 912:Libraries/uC-CPU/cpu_core.c **** *                                               interrupts
+ 913:Libraries/uC-CPU/cpu_core.c **** *                                                enabled
+ 914:Libraries/uC-CPU/cpu_core.c **** *
+ 915:Libraries/uC-CPU/cpu_core.c **** *
+ 916:Libraries/uC-CPU/cpu_core.c **** *                                           time                    total overhead time to disable/
+ 917:Libraries/uC-CPU/cpu_core.c **** *                                               total                   interrupts during critical 
+ 918:Libraries/uC-CPU/cpu_core.c **** *                                               ovrhd                   enter & exit
+ 919:Libraries/uC-CPU/cpu_core.c **** *
+ 920:Libraries/uC-CPU/cpu_core.c **** *                                           time                    total overhead time to disable 
+ 921:Libraries/uC-CPU/cpu_core.c **** *                                               interrupts              during critical section ent
+ 922:Libraries/uC-CPU/cpu_core.c **** *                                             disabled ovrhd
+ 923:Libraries/uC-CPU/cpu_core.c **** *
+ 924:Libraries/uC-CPU/cpu_core.c **** *                                           time                    total overhead time to enable  
+ 925:Libraries/uC-CPU/cpu_core.c **** *                                               interrupts              during critical section exi
+ 926:Libraries/uC-CPU/cpu_core.c **** *                                              enabled ovrhd
+ 927:Libraries/uC-CPU/cpu_core.c **** *
+ 928:Libraries/uC-CPU/cpu_core.c **** *$PAGE*
+ 929:Libraries/uC-CPU/cpu_core.c **** *
+ 930:Libraries/uC-CPU/cpu_core.c **** *                       (2) When interrupts disabled time measurements are enabled :
+ 931:Libraries/uC-CPU/cpu_core.c **** *
+ 932:Libraries/uC-CPU/cpu_core.c **** *
+ 933:Libraries/uC-CPU/cpu_core.c **** *        |                                    |                           |                        
+ 934:Libraries/uC-CPU/cpu_core.c **** *        |<----- CRITICAL SECTION ENTER ----->|                           |<------- CRITICAL SECTIO
+ 935:Libraries/uC-CPU/cpu_core.c **** *        |                                    |                           |                        
+ 936:Libraries/uC-CPU/cpu_core.c **** *
+ 937:Libraries/uC-CPU/cpu_core.c **** *                   Time                                                 Time
+ 938:Libraries/uC-CPU/cpu_core.c **** *     Disable    Measurement                                          Measurement                  
+ 939:Libraries/uC-CPU/cpu_core.c **** *    Interrupts     Start                                                Stop                    In
+ 940:Libraries/uC-CPU/cpu_core.c **** *
+ 941:Libraries/uC-CPU/cpu_core.c **** *        ||           |                      ||                           ||                       
+ 942:Libraries/uC-CPU/cpu_core.c **** *        ||           |                      ||                           ||                       
+ 943:Libraries/uC-CPU/cpu_core.c **** *        ||           |        |             ||<------------------------->||               |       
+ 944:Libraries/uC-CPU/cpu_core.c **** *        ||       |   |        |<----------->||             |             ||<------------->|       
+ 945:Libraries/uC-CPU/cpu_core.c **** *        ||       |   |        |      |      ||             |             ||       |       |       
+ 946:Libraries/uC-CPU/cpu_core.c **** *                 |            |      |                     |                      |       |       
+ 947:Libraries/uC-CPU/cpu_core.c **** *            interrupts       get     |                   time                     |      get      
+ 948:Libraries/uC-CPU/cpu_core.c **** *             disabled    start time  |                       interrupts           |   stop time   
+ 949:Libraries/uC-CPU/cpu_core.c **** *                            meas     |                        disabled            |     meas
+ 950:Libraries/uC-CPU/cpu_core.c **** *                                   time                  (via application)      time
+ 951:Libraries/uC-CPU/cpu_core.c **** *                                       start meas                                   stop meas
+ 952:Libraries/uC-CPU/cpu_core.c **** *                                         ovrhd                                        ovrhd
+ 953:Libraries/uC-CPU/cpu_core.c **** *
+ 954:Libraries/uC-CPU/cpu_core.c **** *
+ 955:Libraries/uC-CPU/cpu_core.c **** *                           (A) time            =  [ time       -  time      ]  -  time
+ 956:Libraries/uC-CPU/cpu_core.c **** *                                   interrupts     [      stop         start ]         total meas
+ 957:Libraries/uC-CPU/cpu_core.c **** *                                    disabled      [      meas         meas  ]           ovrhd
+ 958:Libraries/uC-CPU/cpu_core.c **** *                               (via application)
+ 959:Libraries/uC-CPU/cpu_core.c **** *
+ 960:Libraries/uC-CPU/cpu_core.c **** *
+ 961:Libraries/uC-CPU/cpu_core.c **** *                           (B) time            =  time            +  time
+ 962:Libraries/uC-CPU/cpu_core.c **** *                                   total meas         start meas         stop meas
+ 963:Libraries/uC-CPU/cpu_core.c **** *                                     ovrhd              ovrhd              ovrhd
+ 964:Libraries/uC-CPU/cpu_core.c **** *
+ 965:Libraries/uC-CPU/cpu_core.c **** *
+ 966:Libraries/uC-CPU/cpu_core.c **** *                                   where
+ 967:Libraries/uC-CPU/cpu_core.c **** *
+ 968:Libraries/uC-CPU/cpu_core.c **** *                                           time                    time interrupts are disabled be
+ 969:Libraries/uC-CPU/cpu_core.c **** *                                               interrupts              critical section enter & la
+ 970:Libraries/uC-CPU/cpu_core.c **** *                                                disabled               section exit (i.e. minus me
+ 971:Libraries/uC-CPU/cpu_core.c **** *                                           (via application)           overhead time; however, thi
+ 972:Libraries/uC-CPU/cpu_core.c **** *                                                                       include any overhead time t
+ 973:Libraries/uC-CPU/cpu_core.c **** *                                                                       or enable interrupts during
+ 974:Libraries/uC-CPU/cpu_core.c **** *                                                                       section enter & exit)
+ 975:Libraries/uC-CPU/cpu_core.c **** *
+ 976:Libraries/uC-CPU/cpu_core.c **** *                                           time                    time of disable interrupts star
+ 977:Libraries/uC-CPU/cpu_core.c **** *                                               start                   measurement (in timer count
+ 978:Libraries/uC-CPU/cpu_core.c **** *                                               meas
+ 979:Libraries/uC-CPU/cpu_core.c **** *
+ 980:Libraries/uC-CPU/cpu_core.c **** *                                           time                    time of disable interrupts stop
+ 981:Libraries/uC-CPU/cpu_core.c **** *                                               stop                    measurement (in timer count
+ 982:Libraries/uC-CPU/cpu_core.c **** *                                               meas
+ 983:Libraries/uC-CPU/cpu_core.c **** *
+ 984:Libraries/uC-CPU/cpu_core.c **** *
+ 985:Libraries/uC-CPU/cpu_core.c **** *                                           time                    total overhead time to start/st
+ 986:Libraries/uC-CPU/cpu_core.c **** *                                               total meas              interrupts time measurement
+ 987:Libraries/uC-CPU/cpu_core.c **** *                                                 ovrhd                 counts)
+ 988:Libraries/uC-CPU/cpu_core.c **** *
+ 989:Libraries/uC-CPU/cpu_core.c **** *                                           time                    total overhead time after getti
+ 990:Libraries/uC-CPU/cpu_core.c **** *                                               start meas              time until end of start mea
+ 991:Libraries/uC-CPU/cpu_core.c **** *                                                 ovrhd                 function  (in timer counts)
+ 992:Libraries/uC-CPU/cpu_core.c **** *
+ 993:Libraries/uC-CPU/cpu_core.c **** *                                           time                    total overhead time from beginn
+ 994:Libraries/uC-CPU/cpu_core.c **** *                                               stop meas               measurement function until 
+ 995:Libraries/uC-CPU/cpu_core.c **** *                                                 ovrhd                 stop time (in timer counts)
+ 996:Libraries/uC-CPU/cpu_core.c **** *
+ 997:Libraries/uC-CPU/cpu_core.c **** *
+ 998:Libraries/uC-CPU/cpu_core.c **** *$PAGE*
+ 999:Libraries/uC-CPU/cpu_core.c **** *                   (b) (1) (A) In order to correctly handle unsigned subtraction overflows of star
+1000:Libraries/uC-CPU/cpu_core.c **** *                               from stop times, CPU timestamp timer count values MUST be returned 
+1001:Libraries/uC-CPU/cpu_core.c **** *                               word-size-configurable 'CPU_TS_TMR' data type.
+1002:Libraries/uC-CPU/cpu_core.c **** *
+1003:Libraries/uC-CPU/cpu_core.c **** *                               See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TS_TmrRd()  Note #2a
+1004:Libraries/uC-CPU/cpu_core.c **** *
+1005:Libraries/uC-CPU/cpu_core.c **** *                           (B) Since unsigned subtraction of start times from stop times assumes i
+1006:Libraries/uC-CPU/cpu_core.c **** *                               values, timestamp timer count values MUST increase with each time c
+1007:Libraries/uC-CPU/cpu_core.c **** *
+1008:Libraries/uC-CPU/cpu_core.c **** *                               See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TS_TmrRd()  Note #2b
+1009:Libraries/uC-CPU/cpu_core.c **** *
+1010:Libraries/uC-CPU/cpu_core.c **** *                       (2) (A) To expedite & reduce interrupts disabled time measurement overhead;
+1011:Libraries/uC-CPU/cpu_core.c **** *                               subtraction of start times from stop times is performed.
+1012:Libraries/uC-CPU/cpu_core.c **** *
+1013:Libraries/uC-CPU/cpu_core.c **** *                           (B) The final calculations to subtract the interrupts disabled time mea
+1014:Libraries/uC-CPU/cpu_core.c **** *                               overhead is performed asynchronously in appropriate API functions.
+1015:Libraries/uC-CPU/cpu_core.c **** *
+1016:Libraries/uC-CPU/cpu_core.c **** *                               See also 'CPU_IntDisMeasMaxCalc()  Note #1b'.
+1017:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1018:Libraries/uC-CPU/cpu_core.c **** */
+1019:Libraries/uC-CPU/cpu_core.c **** 
+1020:Libraries/uC-CPU/cpu_core.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN
+1021:Libraries/uC-CPU/cpu_core.c **** void  CPU_IntDisMeasStop (void)
+1022:Libraries/uC-CPU/cpu_core.c **** {
+ 652              		.loc 1 1022 0
+ 653              		.cfi_startproc
+ 654              		@ args = 0, pretend = 0, frame = 8
+ 655              		@ frame_needed = 1, uses_anonymous_args = 0
+ 656 02b4 80B5     		push	{r7, lr}
+ 657              	.LCFI35:
+ 658              		.cfi_def_cfa_offset 8
+ 659              		.cfi_offset 14, -4
+ 660              		.cfi_offset 7, -8
+ 661 02b6 82B0     		sub	sp, sp, #8
+ 662              	.LCFI36:
+ 663              		.cfi_def_cfa_offset 16
+ 664 02b8 00AF     		add	r7, sp, #0
+ 665              	.LCFI37:
+ 666              		.cfi_def_cfa_register 7
+1023:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  time_ints_disd_cnts;
+1024:Libraries/uC-CPU/cpu_core.c **** 
+1025:Libraries/uC-CPU/cpu_core.c **** 
+1026:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisNestCtr--;
+ 667              		.loc 1 1026 0
+ 668 02ba 40F20003 		movw	r3, #:lower16:CPU_IntDisNestCtr
+ 669 02be C0F20003 		movt	r3, #:upper16:CPU_IntDisNestCtr
+ 670 02c2 1B88     		ldrh	r3, [r3, #0]
+ 671 02c4 03F1FF33 		add	r3, r3, #-1
+ 672 02c8 9AB2     		uxth	r2, r3
+ 673 02ca 40F20003 		movw	r3, #:lower16:CPU_IntDisNestCtr
+ 674 02ce C0F20003 		movt	r3, #:upper16:CPU_IntDisNestCtr
+ 675 02d2 1A80     		strh	r2, [r3, #0]	@ movhi
+1027:Libraries/uC-CPU/cpu_core.c ****     if (CPU_IntDisNestCtr == 0u) {                                  /* If ints NO longer dis'd,    
+ 676              		.loc 1 1027 0
+ 677 02d4 40F20003 		movw	r3, #:lower16:CPU_IntDisNestCtr
+ 678 02d8 C0F20003 		movt	r3, #:upper16:CPU_IntDisNestCtr
+ 679 02dc 1B88     		ldrh	r3, [r3, #0]
+ 680 02de 002B     		cmp	r3, #0
+ 681 02e0 2FD1     		bne	.L26
+1028:Libraries/uC-CPU/cpu_core.c ****         CPU_IntDisMeasStop_cnts = CPU_TS_TmrRd();                   /* ... get  ints dis'd stop tim
+ 682              		.loc 1 1028 0
+ 683 02e2 FFF7FEFF 		bl	CPU_TS_TmrRd
+ 684 02e6 0246     		mov	r2, r0
+ 685 02e8 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasStop_cnts
+ 686 02ec C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasStop_cnts
+ 687 02f0 1A60     		str	r2, [r3, #0]
+1029:Libraries/uC-CPU/cpu_core.c ****                                                                     /* ... calc ints dis'd tot  tim
+1030:Libraries/uC-CPU/cpu_core.c ****         time_ints_disd_cnts     = CPU_IntDisMeasStop_cnts -
+ 688              		.loc 1 1030 0
+ 689 02f2 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasStop_cnts
+ 690 02f6 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasStop_cnts
+ 691 02fa 1A68     		ldr	r2, [r3, #0]
+ 692 02fc 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasStart_cnts
+ 693 0300 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasStart_cnts
+ 694 0304 1B68     		ldr	r3, [r3, #0]
+ 695 0306 D31A     		subs	r3, r2, r3
+ 696 0308 7B60     		str	r3, [r7, #4]
+1031:Libraries/uC-CPU/cpu_core.c ****                                   CPU_IntDisMeasStart_cnts;
+1032:Libraries/uC-CPU/cpu_core.c ****                                                                     /* Calc max ints dis'd times.  
+1033:Libraries/uC-CPU/cpu_core.c ****         if (CPU_IntDisMeasMaxCur_cnts < time_ints_disd_cnts) {
+ 697              		.loc 1 1033 0
+ 698 030a 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMaxCur_cnts
+ 699 030e C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMaxCur_cnts
+ 700 0312 1A68     		ldr	r2, [r3, #0]
+ 701 0314 7B68     		ldr	r3, [r7, #4]
+ 702 0316 9A42     		cmp	r2, r3
+ 703 0318 05D2     		bcs	.L28
+1034:Libraries/uC-CPU/cpu_core.c ****             CPU_IntDisMeasMaxCur_cnts = time_ints_disd_cnts;
+ 704              		.loc 1 1034 0
+ 705 031a 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMaxCur_cnts
+ 706 031e C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMaxCur_cnts
+ 707 0322 7A68     		ldr	r2, [r7, #4]
+ 708 0324 1A60     		str	r2, [r3, #0]
+ 709              	.L28:
+1035:Libraries/uC-CPU/cpu_core.c ****         }
+1036:Libraries/uC-CPU/cpu_core.c ****         if (CPU_IntDisMeasMax_cnts    < time_ints_disd_cnts) {
+ 710              		.loc 1 1036 0
+ 711 0326 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMax_cnts
+ 712 032a C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMax_cnts
+ 713 032e 1A68     		ldr	r2, [r3, #0]
+ 714 0330 7B68     		ldr	r3, [r7, #4]
+ 715 0332 9A42     		cmp	r2, r3
+ 716 0334 05D2     		bcs	.L26
+1037:Libraries/uC-CPU/cpu_core.c ****             CPU_IntDisMeasMax_cnts    = time_ints_disd_cnts;
+ 717              		.loc 1 1037 0
+ 718 0336 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMax_cnts
+ 719 033a C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMax_cnts
+ 720 033e 7A68     		ldr	r2, [r7, #4]
+ 721 0340 1A60     		str	r2, [r3, #0]
+ 722              	.L26:
+1038:Libraries/uC-CPU/cpu_core.c ****         }
+1039:Libraries/uC-CPU/cpu_core.c ****     }
+1040:Libraries/uC-CPU/cpu_core.c **** }
+ 723              		.loc 1 1040 0
+ 724 0342 07F10807 		add	r7, r7, #8
+ 725 0346 BD46     		mov	sp, r7
+ 726 0348 80BD     		pop	{r7, pc}
+ 727              		.cfi_endproc
+ 728              	.LFE13:
+ 730 034a 00BF     		.align	2
+ 731              		.thumb
+ 732              		.thumb_func
+ 734              	CPU_NameInit:
+ 735              	.LFB14:
+1041:Libraries/uC-CPU/cpu_core.c **** #endif
+1042:Libraries/uC-CPU/cpu_core.c **** 
+1043:Libraries/uC-CPU/cpu_core.c **** 
+1044:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+1045:Libraries/uC-CPU/cpu_core.c **** /*
+1046:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1047:Libraries/uC-CPU/cpu_core.c **** *                                         CPU_CntLeadZeros()
+1048:Libraries/uC-CPU/cpu_core.c **** *
+1049:Libraries/uC-CPU/cpu_core.c **** * Description : Count the number of contiguous, most-significant, leading zero bits in a data value
+1050:Libraries/uC-CPU/cpu_core.c **** *
+1051:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : val         Data value to count leading zero bits.
+1052:Libraries/uC-CPU/cpu_core.c **** *
+1053:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : Number of contiguous, most-significant, leading zero bits in 'val', if NO error(s).
+1054:Libraries/uC-CPU/cpu_core.c **** *
+1055:Libraries/uC-CPU/cpu_core.c **** *               0,                                                                  otherwise.
+1056:Libraries/uC-CPU/cpu_core.c **** *
+1057:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : Application.
+1058:Libraries/uC-CPU/cpu_core.c **** *
+1059:Libraries/uC-CPU/cpu_core.c **** *               This function is an INTERNAL CPU module function but MAY be called by application f
+1060:Libraries/uC-CPU/cpu_core.c **** *
+1061:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) (a) Supports the following data value sizes :
+1062:Libraries/uC-CPU/cpu_core.c **** *
+1063:Libraries/uC-CPU/cpu_core.c **** *                       (1)  8-bits
+1064:Libraries/uC-CPU/cpu_core.c **** *                       (2) 16-bits
+1065:Libraries/uC-CPU/cpu_core.c **** *                       (3) 32-bits
+1066:Libraries/uC-CPU/cpu_core.c **** *                       (4) 64-bits
+1067:Libraries/uC-CPU/cpu_core.c **** *
+1068:Libraries/uC-CPU/cpu_core.c **** *                       See also 'cpu_def.h  CPU WORD CONFIGURATION  Note #1'.
+1069:Libraries/uC-CPU/cpu_core.c **** *
+1070:Libraries/uC-CPU/cpu_core.c **** *                   (b) (1) For  8-bit values :
+1071:Libraries/uC-CPU/cpu_core.c **** *
+1072:Libraries/uC-CPU/cpu_core.c **** *                                  b07  b06  b05  b04  b03  b02  b01  b00    # Leading Zeros
+1073:Libraries/uC-CPU/cpu_core.c **** *                                  ---  ---  ---  ---  ---  ---  ---  ---    ---------------
+1074:Libraries/uC-CPU/cpu_core.c **** *                                   1    x    x    x    x    x    x    x            0
+1075:Libraries/uC-CPU/cpu_core.c **** *                                   0    1    x    x    x    x    x    x            1
+1076:Libraries/uC-CPU/cpu_core.c **** *                                   0    0    1    x    x    x    x    x            2
+1077:Libraries/uC-CPU/cpu_core.c **** *                                   0    0    0    1    x    x    x    x            3
+1078:Libraries/uC-CPU/cpu_core.c **** *                                   0    0    0    0    1    x    x    x            4
+1079:Libraries/uC-CPU/cpu_core.c **** *                                   0    0    0    0    0    1    x    x            5
+1080:Libraries/uC-CPU/cpu_core.c **** *                                   0    0    0    0    0    0    1    x            6
+1081:Libraries/uC-CPU/cpu_core.c **** *                                   0    0    0    0    0    0    0    1            7
+1082:Libraries/uC-CPU/cpu_core.c **** *                                   0    0    0    0    0    0    0    0            8
+1083:Libraries/uC-CPU/cpu_core.c **** *
+1084:Libraries/uC-CPU/cpu_core.c **** *
+1085:Libraries/uC-CPU/cpu_core.c **** *                       (2) For 16-bit values :
+1086:Libraries/uC-CPU/cpu_core.c **** *
+1087:Libraries/uC-CPU/cpu_core.c **** *                             b15  b14  b13  ...  b04  b03  b02  b01  b00    # Leading Zeros
+1088:Libraries/uC-CPU/cpu_core.c **** *                             ---  ---  ---       ---  ---  ---  ---  ---    ---------------
+1089:Libraries/uC-CPU/cpu_core.c **** *                              1    x    x         x    x    x    x    x            0
+1090:Libraries/uC-CPU/cpu_core.c **** *                              0    1    x         x    x    x    x    x            1
+1091:Libraries/uC-CPU/cpu_core.c **** *                              0    0    1         x    x    x    x    x            2
+1092:Libraries/uC-CPU/cpu_core.c **** *                              :    :    :         :    :    :    :    :            :
+1093:Libraries/uC-CPU/cpu_core.c **** *                              :    :    :         :    :    :    :    :            :
+1094:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         1    x    x    x    x           11
+1095:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    1    x    x    x           12
+1096:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    1    x    x           13
+1097:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    0    1    x           14
+1098:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    0    0    1           15
+1099:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    0    0    0           16
+1100:Libraries/uC-CPU/cpu_core.c **** *
+1101:Libraries/uC-CPU/cpu_core.c **** *
+1102:Libraries/uC-CPU/cpu_core.c **** *                       (3) For 32-bit values :
+1103:Libraries/uC-CPU/cpu_core.c **** *
+1104:Libraries/uC-CPU/cpu_core.c **** *                             b31  b30  b29  ...  b04  b03  b02  b01  b00    # Leading Zeros
+1105:Libraries/uC-CPU/cpu_core.c **** *                             ---  ---  ---       ---  ---  ---  ---  ---    ---------------
+1106:Libraries/uC-CPU/cpu_core.c **** *                              1    x    x         x    x    x    x    x            0
+1107:Libraries/uC-CPU/cpu_core.c **** *                              0    1    x         x    x    x    x    x            1
+1108:Libraries/uC-CPU/cpu_core.c **** *                              0    0    1         x    x    x    x    x            2
+1109:Libraries/uC-CPU/cpu_core.c **** *                              :    :    :         :    :    :    :    :            :
+1110:Libraries/uC-CPU/cpu_core.c **** *                              :    :    :         :    :    :    :    :            :
+1111:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         1    x    x    x    x           27
+1112:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    1    x    x    x           28
+1113:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    1    x    x           29
+1114:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    0    1    x           30
+1115:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    0    0    1           31
+1116:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    0    0    0           32
+1117:Libraries/uC-CPU/cpu_core.c **** *
+1118:Libraries/uC-CPU/cpu_core.c **** *$PAGE*
+1119:Libraries/uC-CPU/cpu_core.c **** *                       (4) For 64-bit values :
+1120:Libraries/uC-CPU/cpu_core.c **** *
+1121:Libraries/uC-CPU/cpu_core.c **** *                             b63  b62  b61  ...  b04  b03  b02  b01  b00    # Leading Zeros
+1122:Libraries/uC-CPU/cpu_core.c **** *                             ---  ---  ---       ---  ---  ---  ---  ---    ---------------
+1123:Libraries/uC-CPU/cpu_core.c **** *                              1    x    x         x    x    x    x    x            0
+1124:Libraries/uC-CPU/cpu_core.c **** *                              0    1    x         x    x    x    x    x            1
+1125:Libraries/uC-CPU/cpu_core.c **** *                              0    0    1         x    x    x    x    x            2
+1126:Libraries/uC-CPU/cpu_core.c **** *                              :    :    :         :    :    :    :    :            :
+1127:Libraries/uC-CPU/cpu_core.c **** *                              :    :    :         :    :    :    :    :            :
+1128:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         1    x    x    x    x           59
+1129:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    1    x    x    x           60
+1130:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    1    x    x           61
+1131:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    0    1    x           62
+1132:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    0    0    1           63
+1133:Libraries/uC-CPU/cpu_core.c **** *                              0    0    0         0    0    0    0    0           64
+1134:Libraries/uC-CPU/cpu_core.c **** *
+1135:Libraries/uC-CPU/cpu_core.c **** *
+1136:Libraries/uC-CPU/cpu_core.c **** *                       See also 'CPU COUNT LEAD ZEROs LOOKUP TABLE  Note #1'.
+1137:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1138:Libraries/uC-CPU/cpu_core.c **** */
+1139:Libraries/uC-CPU/cpu_core.c **** 
+1140:Libraries/uC-CPU/cpu_core.c **** #ifndef   CPU_CFG_LEAD_ZEROS_ASM_PRESENT
+1141:Libraries/uC-CPU/cpu_core.c **** CPU_DATA  CPU_CntLeadZeros (CPU_DATA  val)
+1142:Libraries/uC-CPU/cpu_core.c **** {
+1143:Libraries/uC-CPU/cpu_core.c ****     CPU_DATA    nbr_lead_zeros;
+1144:Libraries/uC-CPU/cpu_core.c ****     CPU_INT08U  ix;
+1145:Libraries/uC-CPU/cpu_core.c **** 
+1146:Libraries/uC-CPU/cpu_core.c **** 
+1147:Libraries/uC-CPU/cpu_core.c **** #if   (CPU_CFG_DATA_SIZE == CPU_WORD_SIZE_08)                                   /* ----------  8-BI
+1148:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* Chk bits [07:00]
+1149:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1150:Libraries/uC-CPU/cpu_core.c ****     ix             = (CPU_INT08U)(val >>  0u);                                  /* .. lookup tbl ix
+1151:Libraries/uC-CPU/cpu_core.c ****     nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] +  0u);               /* .. plus nbr msb 
+1152:Libraries/uC-CPU/cpu_core.c **** 
+1153:Libraries/uC-CPU/cpu_core.c **** 
+1154:Libraries/uC-CPU/cpu_core.c **** #elif (CPU_CFG_DATA_SIZE == CPU_WORD_SIZE_16)                                   /* ---------- 16-BI
+1155:Libraries/uC-CPU/cpu_core.c ****     if (val > 0x00FFu) {                                                        /* Chk bits [15:08]
+1156:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1157:Libraries/uC-CPU/cpu_core.c ****         ix             = (CPU_INT08U)(val >>  8u);                              /* .. lookup tbl ix
+1158:Libraries/uC-CPU/cpu_core.c ****         nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] +  0u);           /* .. plus nbr msb 
+1159:Libraries/uC-CPU/cpu_core.c **** 
+1160:Libraries/uC-CPU/cpu_core.c ****     } else {                                                                    /* Chk bits [07:00]
+1161:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1162:Libraries/uC-CPU/cpu_core.c ****         ix             = (CPU_INT08U)(val >>  0u);                              /* .. lookup tbl ix
+1163:Libraries/uC-CPU/cpu_core.c ****         nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] +  8u);           /* .. plus nbr msb 
+1164:Libraries/uC-CPU/cpu_core.c ****     }
+1165:Libraries/uC-CPU/cpu_core.c **** 
+1166:Libraries/uC-CPU/cpu_core.c **** 
+1167:Libraries/uC-CPU/cpu_core.c **** #elif (CPU_CFG_DATA_SIZE == CPU_WORD_SIZE_32)                                   /* ---------- 32-BI
+1168:Libraries/uC-CPU/cpu_core.c ****     if (val > 0x0000FFFFu) {
+1169:Libraries/uC-CPU/cpu_core.c ****         if (val > 0x00FFFFFFu) {                                                /* Chk bits [31:24]
+1170:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1171:Libraries/uC-CPU/cpu_core.c ****             ix             = (CPU_INT08U)(val >> 24u);                          /* .. lookup tbl ix
+1172:Libraries/uC-CPU/cpu_core.c ****             nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] +  0u);       /* .. plus nbr msb 
+1173:Libraries/uC-CPU/cpu_core.c **** 
+1174:Libraries/uC-CPU/cpu_core.c ****         } else {                                                                /* Chk bits [23:16]
+1175:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1176:Libraries/uC-CPU/cpu_core.c ****             ix             = (CPU_INT08U)(val >> 16u);                          /* .. lookup tbl ix
+1177:Libraries/uC-CPU/cpu_core.c ****             nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] +  8u);       /* .. plus nbr msb 
+1178:Libraries/uC-CPU/cpu_core.c ****         }
+1179:Libraries/uC-CPU/cpu_core.c **** 
+1180:Libraries/uC-CPU/cpu_core.c ****     } else {
+1181:Libraries/uC-CPU/cpu_core.c ****         if (val > 0x000000FFu) {                                                /* Chk bits [15:08]
+1182:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1183:Libraries/uC-CPU/cpu_core.c ****             ix             = (CPU_INT08U)(val >>  8u);                          /* .. lookup tbl ix
+1184:Libraries/uC-CPU/cpu_core.c ****             nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] + 16u);       /* .. plus nbr msb 
+1185:Libraries/uC-CPU/cpu_core.c **** 
+1186:Libraries/uC-CPU/cpu_core.c ****         } else {                                                                /* Chk bits [07:00]
+1187:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1188:Libraries/uC-CPU/cpu_core.c ****             ix             = (CPU_INT08U)(val >>  0u);                          /* .. lookup tbl ix
+1189:Libraries/uC-CPU/cpu_core.c ****             nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] + 24u);       /* .. plus nbr msb 
+1190:Libraries/uC-CPU/cpu_core.c ****         }
+1191:Libraries/uC-CPU/cpu_core.c ****     }
+1192:Libraries/uC-CPU/cpu_core.c **** 
+1193:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+1194:Libraries/uC-CPU/cpu_core.c **** #elif (CPU_CFG_DATA_SIZE == CPU_WORD_SIZE_64)                                   /* ---------- 64-BI
+1195:Libraries/uC-CPU/cpu_core.c ****     if (val > 0x00000000FFFFFFFFu) {
+1196:Libraries/uC-CPU/cpu_core.c ****         if (val > 0x0000FFFFFFFFFFFFu) {
+1197:Libraries/uC-CPU/cpu_core.c ****             if (val > 0x00FFFFFFFFFFFFFFu) {                                    /* Chk bits [63:56]
+1198:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1199:Libraries/uC-CPU/cpu_core.c ****                 ix             = (CPU_INT08U)(val >> 56u);                      /* .. lookup tbl ix
+1200:Libraries/uC-CPU/cpu_core.c ****                 nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] +  0u);   /* .. plus nbr msb 
+1201:Libraries/uC-CPU/cpu_core.c **** 
+1202:Libraries/uC-CPU/cpu_core.c ****             } else {                                                            /* Chk bits [55:48]
+1203:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1204:Libraries/uC-CPU/cpu_core.c ****                 ix             = (CPU_INT08U)(val >> 48u);                      /* .. lookup tbl ix
+1205:Libraries/uC-CPU/cpu_core.c ****                 nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] +  8u);   /* .. plus nbr msb 
+1206:Libraries/uC-CPU/cpu_core.c ****             }
+1207:Libraries/uC-CPU/cpu_core.c **** 
+1208:Libraries/uC-CPU/cpu_core.c ****         } else {
+1209:Libraries/uC-CPU/cpu_core.c ****             if (val > 0x000000FFFFFFFFFFu) {                                    /* Chk bits [47:40]
+1210:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1211:Libraries/uC-CPU/cpu_core.c ****                 ix             = (CPU_INT08U)(val >> 40u);                      /* .. lookup tbl ix
+1212:Libraries/uC-CPU/cpu_core.c ****                 nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] + 16u);   /* .. plus nbr msb 
+1213:Libraries/uC-CPU/cpu_core.c **** 
+1214:Libraries/uC-CPU/cpu_core.c ****             } else {                                                            /* Chk bits [39:32]
+1215:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1216:Libraries/uC-CPU/cpu_core.c ****                 ix             = (CPU_INT08U)(val >> 32u);                      /* .. lookup tbl ix
+1217:Libraries/uC-CPU/cpu_core.c ****                 nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] + 24u);   /* .. plus nbr msb 
+1218:Libraries/uC-CPU/cpu_core.c ****             }
+1219:Libraries/uC-CPU/cpu_core.c ****         }
+1220:Libraries/uC-CPU/cpu_core.c **** 
+1221:Libraries/uC-CPU/cpu_core.c ****     } else {
+1222:Libraries/uC-CPU/cpu_core.c ****         if (val > 0x000000000000FFFFu) {
+1223:Libraries/uC-CPU/cpu_core.c ****             if (val > 0x0000000000FFFFFFu) {                                    /* Chk bits [31:24]
+1224:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1225:Libraries/uC-CPU/cpu_core.c ****                 ix             = (CPU_INT08U)(val >> 24u);                      /* .. lookup tbl ix
+1226:Libraries/uC-CPU/cpu_core.c ****                 nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] + 32u);   /* .. plus nbr msb 
+1227:Libraries/uC-CPU/cpu_core.c **** 
+1228:Libraries/uC-CPU/cpu_core.c ****             } else {                                                            /* Chk bits [23:16]
+1229:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1230:Libraries/uC-CPU/cpu_core.c ****                 ix             = (CPU_INT08U)(val >> 16u);                      /* .. lookup tbl ix
+1231:Libraries/uC-CPU/cpu_core.c ****                 nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] + 40u);   /* .. plus nbr msb 
+1232:Libraries/uC-CPU/cpu_core.c ****             }
+1233:Libraries/uC-CPU/cpu_core.c **** 
+1234:Libraries/uC-CPU/cpu_core.c ****         } else {
+1235:Libraries/uC-CPU/cpu_core.c ****             if (val > 0x00000000000000FFu) {                                    /* Chk bits [15:08]
+1236:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1237:Libraries/uC-CPU/cpu_core.c ****                 ix             = (CPU_INT08U)(val >>  8u);                      /* .. lookup tbl ix
+1238:Libraries/uC-CPU/cpu_core.c ****                 nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] + 48u);   /* .. plus nbr msb 
+1239:Libraries/uC-CPU/cpu_core.c **** 
+1240:Libraries/uC-CPU/cpu_core.c ****             } else {                                                            /* Chk bits [07:00]
+1241:Libraries/uC-CPU/cpu_core.c ****                                                                                 /* .. Nbr lead zero
+1242:Libraries/uC-CPU/cpu_core.c ****                 ix             = (CPU_INT08U)(val >>  0u);                      /* .. lookup tbl ix
+1243:Libraries/uC-CPU/cpu_core.c ****                 nbr_lead_zeros = (CPU_DATA  )(CPU_CntLeadZerosTbl[ix] + 56u);   /* .. plus nbr msb 
+1244:Libraries/uC-CPU/cpu_core.c ****             }
+1245:Libraries/uC-CPU/cpu_core.c ****         }
+1246:Libraries/uC-CPU/cpu_core.c ****     }
+1247:Libraries/uC-CPU/cpu_core.c **** 
+1248:Libraries/uC-CPU/cpu_core.c **** 
+1249:Libraries/uC-CPU/cpu_core.c **** #else                                                                           /* See Note #1a.   
+1250:Libraries/uC-CPU/cpu_core.c ****    (void)&ix;
+1251:Libraries/uC-CPU/cpu_core.c ****     nbr_lead_zeros = 0u;
+1252:Libraries/uC-CPU/cpu_core.c **** #endif
+1253:Libraries/uC-CPU/cpu_core.c **** 
+1254:Libraries/uC-CPU/cpu_core.c ****     return (nbr_lead_zeros);
+1255:Libraries/uC-CPU/cpu_core.c **** }
+1256:Libraries/uC-CPU/cpu_core.c **** #endif
+1257:Libraries/uC-CPU/cpu_core.c **** 
+1258:Libraries/uC-CPU/cpu_core.c **** 
+1259:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+1260:Libraries/uC-CPU/cpu_core.c **** /*
+1261:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1262:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1263:Libraries/uC-CPU/cpu_core.c **** *                                           LOCAL FUNCTIONS
+1264:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1265:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1266:Libraries/uC-CPU/cpu_core.c **** */
+1267:Libraries/uC-CPU/cpu_core.c **** 
+1268:Libraries/uC-CPU/cpu_core.c **** /*
+1269:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1270:Libraries/uC-CPU/cpu_core.c **** *                                           CPU_NameInit()
+1271:Libraries/uC-CPU/cpu_core.c **** *
+1272:Libraries/uC-CPU/cpu_core.c **** * Description : Initialize CPU Name.
+1273:Libraries/uC-CPU/cpu_core.c **** *
+1274:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+1275:Libraries/uC-CPU/cpu_core.c **** *
+1276:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+1277:Libraries/uC-CPU/cpu_core.c **** *
+1278:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : CPU_Init().
+1279:Libraries/uC-CPU/cpu_core.c **** *
+1280:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : none.
+1281:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1282:Libraries/uC-CPU/cpu_core.c **** */
+1283:Libraries/uC-CPU/cpu_core.c **** 
+1284:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_NAME_EN == DEF_ENABLED)
+1285:Libraries/uC-CPU/cpu_core.c **** static  void  CPU_NameInit (void)
+1286:Libraries/uC-CPU/cpu_core.c **** {
+ 736              		.loc 1 1286 0
+ 737              		.cfi_startproc
+ 738              		@ args = 0, pretend = 0, frame = 0
+ 739              		@ frame_needed = 1, uses_anonymous_args = 0
+ 740 034c 80B5     		push	{r7, lr}
+ 741              	.LCFI38:
+ 742              		.cfi_def_cfa_offset 8
+ 743              		.cfi_offset 14, -4
+ 744              		.cfi_offset 7, -8
+ 745 034e 00AF     		add	r7, sp, #0
+ 746              	.LCFI39:
+ 747              		.cfi_def_cfa_register 7
+1287:Libraries/uC-CPU/cpu_core.c ****     CPU_NameClr();
+ 748              		.loc 1 1287 0
+ 749 0350 FFF7FEFF 		bl	CPU_NameClr
+1288:Libraries/uC-CPU/cpu_core.c **** }
+ 750              		.loc 1 1288 0
+ 751 0354 80BD     		pop	{r7, pc}
+ 752              		.cfi_endproc
+ 753              	.LFE14:
+ 755 0356 00BF     		.align	2
+ 756              		.thumb
+ 757              		.thumb_func
+ 759              	CPU_TS_Init:
+ 760              	.LFB15:
+1289:Libraries/uC-CPU/cpu_core.c **** #endif
+1290:Libraries/uC-CPU/cpu_core.c **** 
+1291:Libraries/uC-CPU/cpu_core.c **** 
+1292:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+1293:Libraries/uC-CPU/cpu_core.c **** /*
+1294:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1295:Libraries/uC-CPU/cpu_core.c **** *                                            CPU_TS_Init()
+1296:Libraries/uC-CPU/cpu_core.c **** *
+1297:Libraries/uC-CPU/cpu_core.c **** * Description : (1) Initialize CPU timestamp :
+1298:Libraries/uC-CPU/cpu_core.c **** *
+1299:Libraries/uC-CPU/cpu_core.c **** *                   (a) Initialize/start CPU timestamp timer                            See Note #1
+1300:Libraries/uC-CPU/cpu_core.c **** *                   (b) Initialize       CPU timestamp controls
+1301:Libraries/uC-CPU/cpu_core.c **** *
+1302:Libraries/uC-CPU/cpu_core.c **** *
+1303:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+1304:Libraries/uC-CPU/cpu_core.c **** *
+1305:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+1306:Libraries/uC-CPU/cpu_core.c **** *
+1307:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : CPU_Init().
+1308:Libraries/uC-CPU/cpu_core.c **** *
+1309:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) The following initialization MUST be sequenced as follows :
+1310:Libraries/uC-CPU/cpu_core.c **** *
+1311:Libraries/uC-CPU/cpu_core.c **** *                   (a) CPU_TS_TmrFreq_Hz     MUST be initialized prior to CPU_TS_TmrInit()
+1312:Libraries/uC-CPU/cpu_core.c **** *                   (b) CPU_TS_TmrInit()      SHOULD precede calls to all other CPU timestamp funct
+1313:Libraries/uC-CPU/cpu_core.c **** *                                                 otherwise, invalid time measurements may be calcu
+1314:Libraries/uC-CPU/cpu_core.c **** *                                                 returned.
+1315:Libraries/uC-CPU/cpu_core.c **** *
+1316:Libraries/uC-CPU/cpu_core.c **** *                   See also 'CPU_Init()  Note #3a'.
+1317:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1318:Libraries/uC-CPU/cpu_core.c **** */
+1319:Libraries/uC-CPU/cpu_core.c **** 
+1320:Libraries/uC-CPU/cpu_core.c **** #if ((CPU_CFG_TS_EN     == DEF_ENABLED) || \
+1321:Libraries/uC-CPU/cpu_core.c ****      (CPU_CFG_TS_TMR_EN == DEF_ENABLED))
+1322:Libraries/uC-CPU/cpu_core.c **** static  void  CPU_TS_Init (void)
+1323:Libraries/uC-CPU/cpu_core.c **** {
+ 761              		.loc 1 1323 0
+ 762              		.cfi_startproc
+ 763              		@ args = 0, pretend = 0, frame = 0
+ 764              		@ frame_needed = 1, uses_anonymous_args = 0
+ 765 0358 80B5     		push	{r7, lr}
+ 766              	.LCFI40:
+ 767              		.cfi_def_cfa_offset 8
+ 768              		.cfi_offset 14, -4
+ 769              		.cfi_offset 7, -8
+ 770 035a 00AF     		add	r7, sp, #0
+ 771              	.LCFI41:
+ 772              		.cfi_def_cfa_register 7
+1324:Libraries/uC-CPU/cpu_core.c **** #if (((CPU_CFG_TS_32_EN    == DEF_ENABLED     )  && \
+1325:Libraries/uC-CPU/cpu_core.c ****       (CPU_CFG_TS_TMR_SIZE <  CPU_WORD_SIZE_32)) || \
+1326:Libraries/uC-CPU/cpu_core.c ****      ((CPU_CFG_TS_64_EN    == DEF_ENABLED     )  && \
+1327:Libraries/uC-CPU/cpu_core.c ****       (CPU_CFG_TS_TMR_SIZE <  CPU_WORD_SIZE_64)))
+1328:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  ts_tmr_cnts;
+1329:Libraries/uC-CPU/cpu_core.c **** #endif
+1330:Libraries/uC-CPU/cpu_core.c **** 
+1331:Libraries/uC-CPU/cpu_core.c **** 
+1332:Libraries/uC-CPU/cpu_core.c ****                                                                 /* ----------------- INIT CPU TS TM
+1333:Libraries/uC-CPU/cpu_core.c **** #if (CPU_CFG_TS_TMR_EN == DEF_ENABLED)
+1334:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TmrFreq_Hz   = 0u;                                   /* Init/clr     ts tmr freq (see No
+ 773              		.loc 1 1334 0
+ 774 035c 40F20003 		movw	r3, #:lower16:CPU_TS_TmrFreq_Hz
+ 775 0360 C0F20003 		movt	r3, #:upper16:CPU_TS_TmrFreq_Hz
+ 776 0364 4FF00002 		mov	r2, #0
+ 777 0368 1A60     		str	r2, [r3, #0]
+1335:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TmrInit();                                           /* Init & start ts tmr      (see No
+ 778              		.loc 1 1335 0
+ 779 036a FFF7FEFF 		bl	CPU_TS_TmrInit
+1336:Libraries/uC-CPU/cpu_core.c **** #endif
+1337:Libraries/uC-CPU/cpu_core.c **** 
+1338:Libraries/uC-CPU/cpu_core.c **** 
+1339:Libraries/uC-CPU/cpu_core.c ****                                                                 /* ------------------- INIT CPU TS 
+1340:Libraries/uC-CPU/cpu_core.c **** #if (((CPU_CFG_TS_32_EN    == DEF_ENABLED     )  && \
+1341:Libraries/uC-CPU/cpu_core.c ****       (CPU_CFG_TS_TMR_SIZE <  CPU_WORD_SIZE_32)) || \
+1342:Libraries/uC-CPU/cpu_core.c ****      ((CPU_CFG_TS_64_EN    == DEF_ENABLED     )  && \
+1343:Libraries/uC-CPU/cpu_core.c ****       (CPU_CFG_TS_TMR_SIZE <  CPU_WORD_SIZE_64)))
+1344:Libraries/uC-CPU/cpu_core.c ****     ts_tmr_cnts = CPU_TS_TmrRd();                               /* Get init ts tmr val (in ts tmr c
+1345:Libraries/uC-CPU/cpu_core.c **** #endif
+1346:Libraries/uC-CPU/cpu_core.c **** 
+1347:Libraries/uC-CPU/cpu_core.c **** #if  ((CPU_CFG_TS_32_EN    == DEF_ENABLED)  && \
+1348:Libraries/uC-CPU/cpu_core.c ****       (CPU_CFG_TS_TMR_SIZE <  CPU_WORD_SIZE_32))
+1349:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_32_Accum   = 0u;                                     /* Init 32-bit accum'd ts.         
+1350:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_32_TmrPrev = ts_tmr_cnts;                            /* Init 32-bit ts prev tmr val.    
+1351:Libraries/uC-CPU/cpu_core.c **** #endif
+1352:Libraries/uC-CPU/cpu_core.c **** 
+1353:Libraries/uC-CPU/cpu_core.c **** #if  ((CPU_CFG_TS_64_EN    == DEF_ENABLED)  && \
+1354:Libraries/uC-CPU/cpu_core.c ****       (CPU_CFG_TS_TMR_SIZE <  CPU_WORD_SIZE_64))
+1355:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_64_Accum   = 0u;                                     /* Init 64-bit accum'd ts.         
+1356:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_64_TmrPrev = ts_tmr_cnts;                            /* Init 64-bit ts prev tmr val.    
+1357:Libraries/uC-CPU/cpu_core.c **** #endif
+1358:Libraries/uC-CPU/cpu_core.c **** }
+ 780              		.loc 1 1358 0
+ 781 036e 80BD     		pop	{r7, pc}
+ 782              		.cfi_endproc
+ 783              	.LFE15:
+ 785              		.align	2
+ 786              		.thumb
+ 787              		.thumb_func
+ 789              	CPU_IntDisMeasInit:
+ 790              	.LFB16:
+1359:Libraries/uC-CPU/cpu_core.c **** #endif
+1360:Libraries/uC-CPU/cpu_core.c **** 
+1361:Libraries/uC-CPU/cpu_core.c **** 
+1362:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+1363:Libraries/uC-CPU/cpu_core.c **** /*
+1364:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1365:Libraries/uC-CPU/cpu_core.c **** *                                        CPU_IntDisMeasInit()
+1366:Libraries/uC-CPU/cpu_core.c **** *
+1367:Libraries/uC-CPU/cpu_core.c **** * Description : (1) Initialize interrupts disabled time measurements feature :
+1368:Libraries/uC-CPU/cpu_core.c **** *
+1369:Libraries/uC-CPU/cpu_core.c **** *                   (a) Initialize interrupts disabled time measurement controls
+1370:Libraries/uC-CPU/cpu_core.c **** *                   (b) Calculate  interrupts disabled time measurement overhead
+1371:Libraries/uC-CPU/cpu_core.c **** *
+1372:Libraries/uC-CPU/cpu_core.c **** *
+1373:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : none.
+1374:Libraries/uC-CPU/cpu_core.c **** *
+1375:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : none.
+1376:Libraries/uC-CPU/cpu_core.c **** *
+1377:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : CPU_Init().
+1378:Libraries/uC-CPU/cpu_core.c **** *
+1379:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (2) CPU_IntDisMeasInit() SHOULD precede ALL calls to CPU_CRITICAL_ENTER()/CPU_CRITI
+1380:Libraries/uC-CPU/cpu_core.c **** *                   & other CPU interrupts disabled time measurement functions; otherwise, invalid 
+1381:Libraries/uC-CPU/cpu_core.c **** *                   disabled time measurements may be calculated/returned.
+1382:Libraries/uC-CPU/cpu_core.c **** *
+1383:Libraries/uC-CPU/cpu_core.c **** *                   See also 'CPU_Init()  Note #3b'.
+1384:Libraries/uC-CPU/cpu_core.c **** *
+1385:Libraries/uC-CPU/cpu_core.c **** *               (3) (a) (1) Interrupts disabled time measurement overhead performed multiple times 
+1386:Libraries/uC-CPU/cpu_core.c **** *                           a rounded average with better accuracy, hopefully of +/- one timer coun
+1387:Libraries/uC-CPU/cpu_core.c **** *
+1388:Libraries/uC-CPU/cpu_core.c **** *                       (2) However, a single overhead time measurement is recommended, even for in
+1389:Libraries/uC-CPU/cpu_core.c **** *                           cache-enabled CPUs, since critical sections are NOT typically called wi
+1390:Libraries/uC-CPU/cpu_core.c **** *                           instruction-cached loops.  Thus, a single non-cached/non-averaged time 
+1391:Libraries/uC-CPU/cpu_core.c **** *                           is a more realistic overhead for the majority of non-cached interrupts 
+1392:Libraries/uC-CPU/cpu_core.c **** *                           time measurements.
+1393:Libraries/uC-CPU/cpu_core.c **** *
+1394:Libraries/uC-CPU/cpu_core.c **** *                   (b) Interrupts MUST be disabled while measuring the interrupts disabled time me
+1395:Libraries/uC-CPU/cpu_core.c **** *                       overhead; otherwise, overhead measurements could be interrupted which would
+1396:Libraries/uC-CPU/cpu_core.c **** *                       calculate an inflated overhead time which would then incorrectly calculate 
+1397:Libraries/uC-CPU/cpu_core.c **** *                       interrupts disabled times.
+1398:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1399:Libraries/uC-CPU/cpu_core.c **** */
+1400:Libraries/uC-CPU/cpu_core.c **** 
+1401:Libraries/uC-CPU/cpu_core.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN
+1402:Libraries/uC-CPU/cpu_core.c **** static  void  CPU_IntDisMeasInit (void)
+1403:Libraries/uC-CPU/cpu_core.c **** {
+ 791              		.loc 1 1403 0
+ 792              		.cfi_startproc
+ 793              		@ args = 0, pretend = 0, frame = 16
+ 794              		@ frame_needed = 1, uses_anonymous_args = 0
+ 795 0370 80B5     		push	{r7, lr}
+ 796              	.LCFI42:
+ 797              		.cfi_def_cfa_offset 8
+ 798              		.cfi_offset 14, -4
+ 799              		.cfi_offset 7, -8
+ 800 0372 84B0     		sub	sp, sp, #16
+ 801              	.LCFI43:
+ 802              		.cfi_def_cfa_offset 24
+ 803 0374 00AF     		add	r7, sp, #0
+ 804              	.LCFI44:
+ 805              		.cfi_def_cfa_register 7
+1404:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  time_meas_tot_cnts;
+1405:Libraries/uC-CPU/cpu_core.c ****     CPU_INT16U  i;
+1406:Libraries/uC-CPU/cpu_core.c ****     CPU_SR_ALLOC();
+ 806              		.loc 1 1406 0
+ 807 0376 4FF00003 		mov	r3, #0
+ 808 037a 7B60     		str	r3, [r7, #4]
+1407:Libraries/uC-CPU/cpu_core.c **** 
+1408:Libraries/uC-CPU/cpu_core.c ****                                                                 /* ----------- INIT INT DIS TIME ME
+1409:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasCtr         = 0u;
+ 809              		.loc 1 1409 0
+ 810 037c 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasCtr
+ 811 0380 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasCtr
+ 812 0384 4FF00002 		mov	r2, #0
+ 813 0388 1A80     		strh	r2, [r3, #0]	@ movhi
+1410:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisNestCtr         = 0u;
+ 814              		.loc 1 1410 0
+ 815 038a 40F20003 		movw	r3, #:lower16:CPU_IntDisNestCtr
+ 816 038e C0F20003 		movt	r3, #:upper16:CPU_IntDisNestCtr
+ 817 0392 4FF00002 		mov	r2, #0
+ 818 0396 1A80     		strh	r2, [r3, #0]	@ movhi
+1411:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasStart_cnts  = 0u;
+ 819              		.loc 1 1411 0
+ 820 0398 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasStart_cnts
+ 821 039c C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasStart_cnts
+ 822 03a0 4FF00002 		mov	r2, #0
+ 823 03a4 1A60     		str	r2, [r3, #0]
+1412:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasStop_cnts   = 0u;
+ 824              		.loc 1 1412 0
+ 825 03a6 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasStop_cnts
+ 826 03aa C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasStop_cnts
+ 827 03ae 4FF00002 		mov	r2, #0
+ 828 03b2 1A60     		str	r2, [r3, #0]
+1413:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasMaxCur_cnts = 0u;
+ 829              		.loc 1 1413 0
+ 830 03b4 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMaxCur_cnts
+ 831 03b8 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMaxCur_cnts
+ 832 03bc 4FF00002 		mov	r2, #0
+ 833 03c0 1A60     		str	r2, [r3, #0]
+1414:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasMax_cnts    = 0u;
+ 834              		.loc 1 1414 0
+ 835 03c2 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMax_cnts
+ 836 03c6 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMax_cnts
+ 837 03ca 4FF00002 		mov	r2, #0
+ 838 03ce 1A60     		str	r2, [r3, #0]
+1415:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasOvrhd_cnts  = 0u;
+ 839              		.loc 1 1415 0
+ 840 03d0 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasOvrhd_cnts
+ 841 03d4 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasOvrhd_cnts
+ 842 03d8 4FF00002 		mov	r2, #0
+ 843 03dc 1A60     		str	r2, [r3, #0]
+1416:Libraries/uC-CPU/cpu_core.c **** 
+1417:Libraries/uC-CPU/cpu_core.c ****                                                                 /* ----------- CALC INT DIS TIME ME
+1418:Libraries/uC-CPU/cpu_core.c ****     time_meas_tot_cnts = 0u;
+ 844              		.loc 1 1418 0
+ 845 03de 4FF00003 		mov	r3, #0
+ 846 03e2 FB60     		str	r3, [r7, #12]
+1419:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_DIS();                                              /* Ints MUST be dis'd for ovrhd cal
+ 847              		.loc 1 1419 0
+ 848 03e4 FFF7FEFF 		bl	CPU_SR_Save
+ 849 03e8 7860     		str	r0, [r7, #4]
+1420:Libraries/uC-CPU/cpu_core.c ****     for (i = 0u; i < CPU_CFG_INT_DIS_MEAS_OVRHD_NBR; i++) {
+ 850              		.loc 1 1420 0
+ 851 03ea 4FF00003 		mov	r3, #0
+ 852 03ee 7B81     		strh	r3, [r7, #10]	@ movhi
+ 853 03f0 16E0     		b	.L32
+ 854              	.L33:
+1421:Libraries/uC-CPU/cpu_core.c ****         CPU_IntDisMeasMaxCur_cnts = 0u;
+ 855              		.loc 1 1421 0 discriminator 2
+ 856 03f2 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMaxCur_cnts
+ 857 03f6 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMaxCur_cnts
+ 858 03fa 4FF00002 		mov	r2, #0
+ 859 03fe 1A60     		str	r2, [r3, #0]
+1422:Libraries/uC-CPU/cpu_core.c ****         CPU_IntDisMeasStart();                                  /* Perform multiple consecutive sta
+ 860              		.loc 1 1422 0 discriminator 2
+ 861 0400 FFF7FEFF 		bl	CPU_IntDisMeasStart
+1423:Libraries/uC-CPU/cpu_core.c ****         CPU_IntDisMeasStop();
+ 862              		.loc 1 1423 0 discriminator 2
+ 863 0404 FFF7FEFF 		bl	CPU_IntDisMeasStop
+1424:Libraries/uC-CPU/cpu_core.c ****         time_meas_tot_cnts += CPU_IntDisMeasMaxCur_cnts;        /* ...       & sum time meas max's 
+ 864              		.loc 1 1424 0 discriminator 2
+ 865 0408 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMaxCur_cnts
+ 866 040c C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMaxCur_cnts
+ 867 0410 1B68     		ldr	r3, [r3, #0]
+ 868 0412 FA68     		ldr	r2, [r7, #12]
+ 869 0414 D318     		adds	r3, r2, r3
+ 870 0416 FB60     		str	r3, [r7, #12]
+1420:Libraries/uC-CPU/cpu_core.c ****     for (i = 0u; i < CPU_CFG_INT_DIS_MEAS_OVRHD_NBR; i++) {
+ 871              		.loc 1 1420 0 discriminator 2
+ 872 0418 7B89     		ldrh	r3, [r7, #10]	@ movhi
+ 873 041a 03F10103 		add	r3, r3, #1
+ 874 041e 7B81     		strh	r3, [r7, #10]	@ movhi
+ 875              	.L32:
+1420:Libraries/uC-CPU/cpu_core.c ****     for (i = 0u; i < CPU_CFG_INT_DIS_MEAS_OVRHD_NBR; i++) {
+ 876              		.loc 1 1420 0 is_stmt 0 discriminator 1
+ 877 0420 7B89     		ldrh	r3, [r7, #10]
+ 878 0422 002B     		cmp	r3, #0
+ 879 0424 E5D0     		beq	.L33
+1425:Libraries/uC-CPU/cpu_core.c ****     }
+1426:Libraries/uC-CPU/cpu_core.c ****                                                                 /* ... to calc avg time meas ovrhd 
+1427:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasOvrhd_cnts  = (time_meas_tot_cnts + (CPU_CFG_INT_DIS_MEAS_OVRHD_NBR / 2))
+ 880              		.loc 1 1427 0 is_stmt 1
+ 881 0426 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasOvrhd_cnts
+ 882 042a C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasOvrhd_cnts
+ 883 042e FA68     		ldr	r2, [r7, #12]
+ 884 0430 1A60     		str	r2, [r3, #0]
+1428:Libraries/uC-CPU/cpu_core.c ****                                                     /  CPU_CFG_INT_DIS_MEAS_OVRHD_NBR;
+1429:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasMaxCur_cnts =  0u;                            /* Reset max ints dis'd times.     
+ 885              		.loc 1 1429 0
+ 886 0432 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMaxCur_cnts
+ 887 0436 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMaxCur_cnts
+ 888 043a 4FF00002 		mov	r2, #0
+ 889 043e 1A60     		str	r2, [r3, #0]
+1430:Libraries/uC-CPU/cpu_core.c ****     CPU_IntDisMeasMax_cnts    =  0u;
+ 890              		.loc 1 1430 0
+ 891 0440 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasMax_cnts
+ 892 0444 C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasMax_cnts
+ 893 0448 4FF00002 		mov	r2, #0
+ 894 044c 1A60     		str	r2, [r3, #0]
+1431:Libraries/uC-CPU/cpu_core.c ****     CPU_INT_EN();
+ 895              		.loc 1 1431 0
+ 896 044e 7868     		ldr	r0, [r7, #4]
+ 897 0450 FFF7FEFF 		bl	CPU_SR_Restore
+1432:Libraries/uC-CPU/cpu_core.c **** }
+ 898              		.loc 1 1432 0
+ 899 0454 07F11007 		add	r7, r7, #16
+ 900 0458 BD46     		mov	sp, r7
+ 901 045a 80BD     		pop	{r7, pc}
+ 902              		.cfi_endproc
+ 903              	.LFE16:
+ 905              		.align	2
+ 906              		.thumb
+ 907              		.thumb_func
+ 909              	CPU_IntDisMeasMaxCalc:
+ 910              	.LFB17:
+1433:Libraries/uC-CPU/cpu_core.c **** #endif
+1434:Libraries/uC-CPU/cpu_core.c **** 
+1435:Libraries/uC-CPU/cpu_core.c **** 
+1436:Libraries/uC-CPU/cpu_core.c **** /*$PAGE*/
+1437:Libraries/uC-CPU/cpu_core.c **** /*
+1438:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1439:Libraries/uC-CPU/cpu_core.c **** *                                       CPU_IntDisMeasMaxCalc()
+1440:Libraries/uC-CPU/cpu_core.c **** *
+1441:Libraries/uC-CPU/cpu_core.c **** * Description : Calculate maximum interrupts disabled time.
+1442:Libraries/uC-CPU/cpu_core.c **** *
+1443:Libraries/uC-CPU/cpu_core.c **** * Argument(s) : time_tot_cnts   Total interrupt disabled time, in timer counts.
+1444:Libraries/uC-CPU/cpu_core.c **** *
+1445:Libraries/uC-CPU/cpu_core.c **** * Return(s)   : Maximum interrupts disabled time (in CPU timestamp timer counts).
+1446:Libraries/uC-CPU/cpu_core.c **** *
+1447:Libraries/uC-CPU/cpu_core.c **** * Caller(s)   : CPU_IntDisMeasMaxCurGet(),
+1448:Libraries/uC-CPU/cpu_core.c **** *               CPU_IntDisMeasMaxGet().
+1449:Libraries/uC-CPU/cpu_core.c **** *
+1450:Libraries/uC-CPU/cpu_core.c **** * Note(s)     : (1) (a) The total amount of time interrupts are disabled by system &/or application
+1451:Libraries/uC-CPU/cpu_core.c **** *                       during critical sections is calculated by the following equations :
+1452:Libraries/uC-CPU/cpu_core.c **** *
+1453:Libraries/uC-CPU/cpu_core.c **** *                       (1) time            =   [ time      -  time      ]  -  time
+1454:Libraries/uC-CPU/cpu_core.c **** *                               interrupts      [     stop         start ]         total meas
+1455:Libraries/uC-CPU/cpu_core.c **** *                                disabled       [     meas         meas  ]           ovrhd
+1456:Libraries/uC-CPU/cpu_core.c **** *                           (via application)
+1457:Libraries/uC-CPU/cpu_core.c **** *
+1458:Libraries/uC-CPU/cpu_core.c **** *
+1459:Libraries/uC-CPU/cpu_core.c **** *                       (2) time            =  time            +  time
+1460:Libraries/uC-CPU/cpu_core.c **** *                               total meas         start meas         stop meas
+1461:Libraries/uC-CPU/cpu_core.c **** *                                 ovrhd              ovrhd              ovrhd
+1462:Libraries/uC-CPU/cpu_core.c **** *
+1463:Libraries/uC-CPU/cpu_core.c **** *
+1464:Libraries/uC-CPU/cpu_core.c **** *                               where
+1465:Libraries/uC-CPU/cpu_core.c **** *
+1466:Libraries/uC-CPU/cpu_core.c **** *                                       time                    time interrupts are disabled betwee
+1467:Libraries/uC-CPU/cpu_core.c **** *                                           interrupts              first critical section enter &
+1468:Libraries/uC-CPU/cpu_core.c **** *                                            disabled               last  critical section exit min
+1469:Libraries/uC-CPU/cpu_core.c **** *                                       (via application)           time measurement overhead
+1470:Libraries/uC-CPU/cpu_core.c **** *
+1471:Libraries/uC-CPU/cpu_core.c **** *                                       time                    time of disable interrupts start ti
+1472:Libraries/uC-CPU/cpu_core.c **** *                                           start                   measurement (in timer counts)
+1473:Libraries/uC-CPU/cpu_core.c **** *                                           meas
+1474:Libraries/uC-CPU/cpu_core.c **** *
+1475:Libraries/uC-CPU/cpu_core.c **** *                                       time                    time of disable interrupts stop  ti
+1476:Libraries/uC-CPU/cpu_core.c **** *                                           stop                    measurement (in timer counts)
+1477:Libraries/uC-CPU/cpu_core.c **** *                                           meas
+1478:Libraries/uC-CPU/cpu_core.c **** *
+1479:Libraries/uC-CPU/cpu_core.c **** *                                       time                    total overhead time to start/stop d
+1480:Libraries/uC-CPU/cpu_core.c **** *                                           total meas              interrupts time measurements (i
+1481:Libraries/uC-CPU/cpu_core.c **** *                                             ovrhd                 counts)
+1482:Libraries/uC-CPU/cpu_core.c **** *
+1483:Libraries/uC-CPU/cpu_core.c **** *                                       time                    total overhead time after getting s
+1484:Libraries/uC-CPU/cpu_core.c **** *                                           start meas              time until end of start measure
+1485:Libraries/uC-CPU/cpu_core.c **** *                                             ovrhd                 function  (in timer counts)
+1486:Libraries/uC-CPU/cpu_core.c **** *
+1487:Libraries/uC-CPU/cpu_core.c **** *                                       time                    total overhead time from beginning 
+1488:Libraries/uC-CPU/cpu_core.c **** *                                           stop meas               measurement function until afte
+1489:Libraries/uC-CPU/cpu_core.c **** *                                             ovrhd                 stop time (in timer counts)
+1490:Libraries/uC-CPU/cpu_core.c **** *
+1491:Libraries/uC-CPU/cpu_core.c **** *
+1492:Libraries/uC-CPU/cpu_core.c **** *                   (b) To expedite & reduce interrupts disabled time measurement overhead, the fin
+1493:Libraries/uC-CPU/cpu_core.c **** *                       calculations to subtract the interrupts disabled time measurement overhead 
+1494:Libraries/uC-CPU/cpu_core.c **** *                       performed asynchronously in API functions.
+1495:Libraries/uC-CPU/cpu_core.c **** *
+1496:Libraries/uC-CPU/cpu_core.c **** *                       See also 'CPU_IntDisMeasStop()  Note #1b2'.
+1497:Libraries/uC-CPU/cpu_core.c **** *$PAGE*
+1498:Libraries/uC-CPU/cpu_core.c **** *                   (c) The amount of time interrupts are disabled is calculated by either of the
+1499:Libraries/uC-CPU/cpu_core.c **** *                       following equations :
+1500:Libraries/uC-CPU/cpu_core.c **** *
+1501:Libraries/uC-CPU/cpu_core.c **** *                       (1) Interrupts disabled time  =  Number timer counts  *  Timer period
+1502:Libraries/uC-CPU/cpu_core.c **** *
+1503:Libraries/uC-CPU/cpu_core.c **** *                               where
+1504:Libraries/uC-CPU/cpu_core.c **** *
+1505:Libraries/uC-CPU/cpu_core.c **** *                                   Number timer counts             Number of timer counts measured
+1506:Libraries/uC-CPU/cpu_core.c **** *                                   Timer period                    Timer's period in some units of
+1507:Libraries/uC-CPU/cpu_core.c **** *                                                                       (fractional) seconds
+1508:Libraries/uC-CPU/cpu_core.c **** *                                   Interrupts disabled time        Amount of time interrupts are
+1509:Libraries/uC-CPU/cpu_core.c **** *                                                                       disabled, in same units of
+1510:Libraries/uC-CPU/cpu_core.c **** *                                                                       (fractional) seconds as the
+1511:Libraries/uC-CPU/cpu_core.c **** *                                                                       Timer period
+1512:Libraries/uC-CPU/cpu_core.c **** *
+1513:Libraries/uC-CPU/cpu_core.c **** *                                                         Number timer counts
+1514:Libraries/uC-CPU/cpu_core.c **** *                       (2) Interrupts disabled time  =  ---------------------
+1515:Libraries/uC-CPU/cpu_core.c **** *                                                           Timer frequency
+1516:Libraries/uC-CPU/cpu_core.c **** *
+1517:Libraries/uC-CPU/cpu_core.c **** *                               where
+1518:Libraries/uC-CPU/cpu_core.c **** *
+1519:Libraries/uC-CPU/cpu_core.c **** *                                   Number timer counts             Number of timer counts measured
+1520:Libraries/uC-CPU/cpu_core.c **** *                                   Timer frequency                 Timer's frequency in some units
+1521:Libraries/uC-CPU/cpu_core.c **** *                                                                       of counts per second
+1522:Libraries/uC-CPU/cpu_core.c **** *                                   Interrupts disabled time        Amount of time interrupts are
+1523:Libraries/uC-CPU/cpu_core.c **** *                                                                       disabled, in seconds
+1524:Libraries/uC-CPU/cpu_core.c **** *
+1525:Libraries/uC-CPU/cpu_core.c **** *                       See also 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TS_TmrRd()      Note #2c'
+1526:Libraries/uC-CPU/cpu_core.c **** *                              & 'cpu_core.h  FUNCTION PROTOTYPES  CPU_TSxx_to_uSec()  Note #2'.
+1527:Libraries/uC-CPU/cpu_core.c **** *
+1528:Libraries/uC-CPU/cpu_core.c **** *               (2) Although it is not typical, it is possible for an interrupts disabled time
+1529:Libraries/uC-CPU/cpu_core.c **** *                   measurement to be less than the interrupts disabled time measurement overhead;
+1530:Libraries/uC-CPU/cpu_core.c **** *                   especially if the overhead was calculated with a single, non-cached measurement
+1531:Libraries/uC-CPU/cpu_core.c **** *                   & critical sections are called within instruction-cached loops.
+1532:Libraries/uC-CPU/cpu_core.c **** ***************************************************************************************************
+1533:Libraries/uC-CPU/cpu_core.c **** */
+1534:Libraries/uC-CPU/cpu_core.c **** 
+1535:Libraries/uC-CPU/cpu_core.c **** #ifdef  CPU_CFG_INT_DIS_MEAS_EN
+1536:Libraries/uC-CPU/cpu_core.c **** static  CPU_TS_TMR  CPU_IntDisMeasMaxCalc (CPU_TS_TMR  time_tot_cnts)
+1537:Libraries/uC-CPU/cpu_core.c **** {
+ 911              		.loc 1 1537 0
+ 912              		.cfi_startproc
+ 913              		@ args = 0, pretend = 0, frame = 16
+ 914              		@ frame_needed = 1, uses_anonymous_args = 0
+ 915              		@ link register save eliminated.
+ 916 045c 80B4     		push	{r7}
+ 917              	.LCFI45:
+ 918              		.cfi_def_cfa_offset 4
+ 919              		.cfi_offset 7, -4
+ 920 045e 85B0     		sub	sp, sp, #20
+ 921              	.LCFI46:
+ 922              		.cfi_def_cfa_offset 24
+ 923 0460 00AF     		add	r7, sp, #0
+ 924              	.LCFI47:
+ 925              		.cfi_def_cfa_register 7
+ 926 0462 7860     		str	r0, [r7, #4]
+1538:Libraries/uC-CPU/cpu_core.c ****     CPU_TS_TMR  time_max_cnts;
+1539:Libraries/uC-CPU/cpu_core.c **** 
+1540:Libraries/uC-CPU/cpu_core.c **** 
+1541:Libraries/uC-CPU/cpu_core.c ****     time_max_cnts = time_tot_cnts;
+ 927              		.loc 1 1541 0
+ 928 0464 7B68     		ldr	r3, [r7, #4]
+ 929 0466 FB60     		str	r3, [r7, #12]
+1542:Libraries/uC-CPU/cpu_core.c ****     if (time_max_cnts >  CPU_IntDisMeasOvrhd_cnts) {            /* If       max ints dis'd time >  
+ 930              		.loc 1 1542 0
+ 931 0468 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasOvrhd_cnts
+ 932 046c C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasOvrhd_cnts
+ 933 0470 1B68     		ldr	r3, [r3, #0]
+ 934 0472 FA68     		ldr	r2, [r7, #12]
+ 935 0474 9A42     		cmp	r2, r3
+ 936 0476 08D9     		bls	.L35
+1543:Libraries/uC-CPU/cpu_core.c ****         time_max_cnts -= CPU_IntDisMeasOvrhd_cnts;              /* ... adj  max ints dis'd time by 
+ 937              		.loc 1 1543 0
+ 938 0478 40F20003 		movw	r3, #:lower16:CPU_IntDisMeasOvrhd_cnts
+ 939 047c C0F20003 		movt	r3, #:upper16:CPU_IntDisMeasOvrhd_cnts
+ 940 0480 1B68     		ldr	r3, [r3, #0]
+ 941 0482 FA68     		ldr	r2, [r7, #12]
+ 942 0484 D31A     		subs	r3, r2, r3
+ 943 0486 FB60     		str	r3, [r7, #12]
+ 944 0488 02E0     		b	.L36
+ 945              	.L35:
+1544:Libraries/uC-CPU/cpu_core.c ****     } else {                                                    /* ... else max ints dis'd time <  
+1545:Libraries/uC-CPU/cpu_core.c ****         time_max_cnts  = 0u;                                    /* ... clr  max ints dis'd time (se
+ 946              		.loc 1 1545 0
+ 947 048a 4FF00003 		mov	r3, #0
+ 948 048e FB60     		str	r3, [r7, #12]
+ 949              	.L36:
+1546:Libraries/uC-CPU/cpu_core.c ****     }
+1547:Libraries/uC-CPU/cpu_core.c **** 
+1548:Libraries/uC-CPU/cpu_core.c ****     return (time_max_cnts);
+ 950              		.loc 1 1548 0
+ 951 0490 FB68     		ldr	r3, [r7, #12]
+1549:Libraries/uC-CPU/cpu_core.c **** }
+ 952              		.loc 1 1549 0
+ 953 0492 1846     		mov	r0, r3
+ 954 0494 07F11407 		add	r7, r7, #20
+ 955 0498 BD46     		mov	sp, r7
+ 956 049a 80BC     		pop	{r7}
+ 957 049c 7047     		bx	lr
+ 958              		.cfi_endproc
+ 959              	.LFE17:
+ 961              	.Letext0:
+ 962              		.file 2 "Libraries/uC-CPU/cpu.h"
+ 963              		.file 3 "Libraries/uC-CPU/cpu_core.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 cpu_core.c
+                            *COM*:00000010 CPU_Name
+                            *COM*:00000004 CPU_TS_TmrFreq_Hz
+                            *COM*:00000002 CPU_IntDisMeasCtr
+                            *COM*:00000002 CPU_IntDisNestCtr
+                            *COM*:00000004 CPU_IntDisMeasStart_cnts
+                            *COM*:00000004 CPU_IntDisMeasStop_cnts
+                            *COM*:00000004 CPU_IntDisMeasOvrhd_cnts
+                            *COM*:00000004 CPU_IntDisMeasMaxCur_cnts
+                            *COM*:00000004 CPU_IntDisMeasMax_cnts
+     /tmp/cc4cFlaI.s:27     .text:00000000 $t
+     /tmp/cc4cFlaI.s:32     .text:00000000 CPU_Init
+     /tmp/cc4cFlaI.s:759    .text:00000358 CPU_TS_Init
+     /tmp/cc4cFlaI.s:789    .text:00000370 CPU_IntDisMeasInit
+     /tmp/cc4cFlaI.s:734    .text:0000034c CPU_NameInit
+     /tmp/cc4cFlaI.s:63     .text:00000014 CPU_SW_Exception
+     /tmp/cc4cFlaI.s:88     .text:0000001c CPU_NameClr
+     /tmp/cc4cFlaI.s:595    .text:0000025c CPU_IntDisMeasStart
+     /tmp/cc4cFlaI.s:650    .text:000002b4 CPU_IntDisMeasStop
+     /tmp/cc4cFlaI.s:133    .text:00000054 CPU_NameGet
+     /tmp/cc4cFlaI.s:204    .text:000000b4 CPU_NameSet
+     /tmp/cc4cFlaI.s:290    .text:00000130 CPU_TS_Get32
+     /tmp/cc4cFlaI.s:325    .text:00000148 CPU_TS_Update
+     /tmp/cc4cFlaI.s:351    .text:00000154 CPU_TS_TmrFreqGet
+     /tmp/cc4cFlaI.s:410    .text:00000194 CPU_TS_TmrFreqSet
+     /tmp/cc4cFlaI.s:446    .text:000001b4 CPU_IntDisMeasMaxCurReset
+     /tmp/cc4cFlaI.s:495    .text:000001ec CPU_IntDisMeasMaxCurGet
+     /tmp/cc4cFlaI.s:909    .text:0000045c CPU_IntDisMeasMaxCalc
+     /tmp/cc4cFlaI.s:545    .text:00000224 CPU_IntDisMeasMaxGet
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+CPU_SR_Save
+Mem_Clr
+CPU_SR_Restore
+Str_Copy_N
+Str_Len_N
+CPU_TS_TmrRd
+CPU_TS_TmrInit

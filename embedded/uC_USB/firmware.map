@@ -1,0 +1,2736 @@
+Archive member included because of file (symbol)
+
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_aeabi_uldivmod.o)
+                              Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o (__aeabi_uldivmod)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(bpabi.o)
+                              /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_aeabi_uldivmod.o) (__gnu_uldivmod_helper)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_dvmd_tls.o)
+                              /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_aeabi_uldivmod.o) (__aeabi_ldiv0)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_divdi3.o)
+                              /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(bpabi.o) (__divdi3)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivdi3.o)
+                              /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(bpabi.o) (__udivdi3)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivsi3.o)
+                              /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_divdi3.o) (__aeabi_uidiv)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-reent.o)
+                              Libraries/CM3/src/libnosys_gnu.o (errno)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strcpy.o)
+                              usb_app.o (strcpy)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strlen.o)
+                              usb_app.o (strlen)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-freer.o)
+                              /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-reent.o) (_free_r)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-impure.o)
+                              /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-reent.o) (_impure_ptr)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mallocr.o)
+                              /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-freer.o) (__malloc_current_mallinfo)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mlock.o)
+                              /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-freer.o) (__malloc_lock)
+/home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-sbrkr.o)
+                              /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-freer.o) (_sbrk_r)
+
+Allocating common symbols
+Common symbol       size              file
+
+com_context         0x10              usb_app.o
+OSSchedLockNestingCtr
+                    0x1               Libraries/uC-OSIII/os_var.o
+OS_AppTaskReturnHookPtr
+                    0x4               Libraries/uC-OSIII/os_var.o
+OSStatTaskTimeMax   0x4               Libraries/uC-OSIII/os_var.o
+OSStatTaskCtr       0x4               Libraries/uC-OSIII/os_var.o
+OSRunning           0x1               Libraries/uC-OSIII/os_var.o
+OSRdyList           0x300             Libraries/uC-OSIII/os_var.o
+OSIntQInPtr         0x4               Libraries/uC-OSIII/os_var.o
+OSPrioHighRdy       0x1               Libraries/uC-OSIII/os_var.o
+OSCfg_IntQTaskStk   0x200             Libraries/uC-OSIII/os_cfg_app.o
+errno               0x4               /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-reent.o)
+OSStatTaskRdy       0x1               Libraries/uC-OSIII/os_var.o
+OSSemDbgListPtr     0x4               Libraries/uC-OSIII/os_var.o
+OSIntQMaxNbrEntries
+                    0x2               Libraries/uC-OSIII/os_var.o
+OS_AppTaskCreateHookPtr
+                    0x4               Libraries/uC-OSIII/os_var.o
+OSCfg_StatTaskStk   0x200             Libraries/uC-OSIII/os_cfg_app.o
+OSCfg_TickWheel     0x88              Libraries/uC-OSIII/os_cfg_app.o
+OSPrioCur           0x1               Libraries/uC-OSIII/os_var.o
+OSTickTaskTCB       0xd0              Libraries/uC-OSIII/os_var.o
+Math_RandSeedCur    0x4               Libraries/uC-LIB/lib_math.o
+CPU_IntDisMeasMax_cnts
+                    0x4               Libraries/uC-CPU/cpu_core.o
+OSIntQTaskTimeMax   0x4               Libraries/uC-OSIII/os_var.o
+OSTmrTickCtr        0x4               Libraries/uC-OSIII/os_var.o
+OSSchedLockTimeBegin
+                    0x4               Libraries/uC-OSIII/os_var.o
+OSTCBCurPtr         0x4               Libraries/uC-OSIII/os_var.o
+OSCfg_MsgPool       0x640             Libraries/uC-OSIII/os_cfg_app.o
+OSQQty              0x2               Libraries/uC-OSIII/os_var.o
+BulkInSize          0x4               usb_app.o
+OSPrioSaved         0x1               Libraries/uC-OSIII/os_var.o
+OSTCBHighRdyPtr     0x4               Libraries/uC-OSIII/os_var.o
+CPU_TS_TmrFreq_Hz   0x4               Libraries/uC-CPU/cpu_core.o
+OSSchedLockTimeMaxCur
+                    0x4               Libraries/uC-OSIII/os_var.o
+CPU_IntDisMeasStart_cnts
+                    0x4               Libraries/uC-CPU/cpu_core.o
+OSTaskDbgListPtr    0x4               Libraries/uC-OSIII/os_var.o
+OSTmrTaskTimeMax    0x4               Libraries/uC-OSIII/os_var.o
+OS_AppTaskDelHookPtr
+                    0x4               Libraries/uC-OSIII/os_var.o
+OS_AppTimeTickHookPtr
+                    0x4               Libraries/uC-OSIII/os_var.o
+Mem_PoolHeap        0x44              Libraries/uC-LIB/lib_mem.o
+OSTaskCtxSwCtr      0x4               Libraries/uC-OSIII/os_var.o
+OSStatTaskCPUUsage  0x1               Libraries/uC-OSIII/os_var.o
+OSIntNestingCtr     0x1               Libraries/uC-OSIII/os_var.o
+abBulkOutBuf        0x168             usb_app.o
+OSTaskQty           0x2               Libraries/uC-OSIII/os_var.o
+OS_CPU_ExceptStkBase
+                    0x4               Libraries/uC-CPU/os_cpu_c.o
+OSTmrTaskTCB        0xd0              Libraries/uC-OSIII/os_var.o
+BulkOutSize         0x4               usb_app.o
+OSMsgPool           0x8               Libraries/uC-OSIII/os_var.o
+OSIntQOutPtr        0x4               Libraries/uC-OSIII/os_var.o
+OSIdleTaskTCB       0xd0              Libraries/uC-OSIII/os_var.o
+OSQDbgListPtr       0x4               Libraries/uC-OSIII/os_var.o
+OSIntQTaskTCB       0xd0              Libraries/uC-OSIII/os_var.o
+OSSemQty            0x2               Libraries/uC-OSIII/os_var.o
+OSMemDbgListPtr     0x4               Libraries/uC-OSIII/os_var.o
+OSSchedRoundRobinDfltTimeQuanta
+                    0x4               Libraries/uC-OSIII/os_var.o
+OSCfg_TmrTaskStk    0x200             Libraries/uC-OSIII/os_cfg_app.o
+OS_AppIdleTaskHookPtr
+                    0x4               Libraries/uC-OSIII/os_var.o
+OSStatTaskCtrMax    0x4               Libraries/uC-OSIII/os_var.o
+OSTickCtr           0x4               Libraries/uC-OSIII/os_var.o
+OS_AppTaskSwHookPtr
+                    0x4               Libraries/uC-OSIII/os_var.o
+CPU_IntDisNestCtr   0x2               Libraries/uC-CPU/cpu_core.o
+OSCfg_TmrWheel      0x88              Libraries/uC-OSIII/os_cfg_app.o
+OSTmrQty            0x2               Libraries/uC-OSIII/os_var.o
+CPU_IntDisMeasStop_cnts
+                    0x4               Libraries/uC-CPU/cpu_core.o
+CPU_IntDisMeasMaxCur_cnts
+                    0x4               Libraries/uC-CPU/cpu_core.o
+OSCfg_ISRStk        0x400             Libraries/uC-OSIII/os_cfg_app.o
+OSIntDisTimeMax     0x4               Libraries/uC-OSIII/os_var.o
+abBulkInBuf         0x168             usb_app.o
+OSIdleTaskCtr       0x4               Libraries/uC-OSIII/os_var.o
+OSStatTaskCtrRun    0x4               Libraries/uC-OSIII/os_var.o
+OS_AppStatTaskHookPtr
+                    0x4               Libraries/uC-OSIII/os_var.o
+OSCfg_TickTaskStk   0x200             Libraries/uC-OSIII/os_cfg_app.o
+CPU_IntDisMeasCtr   0x2               Libraries/uC-CPU/cpu_core.o
+Mem_PoolTbl         0x4               Libraries/uC-LIB/lib_mem.o
+OSFlagQty           0x2               Libraries/uC-OSIII/os_var.o
+OSIntQOvfCtr        0x2               Libraries/uC-OSIII/os_var.o
+OSFlagDbgListPtr    0x4               Libraries/uC-OSIII/os_var.o
+OSSchedLockTimeMax  0x4               Libraries/uC-OSIII/os_var.o
+OSStatResetFlag     0x1               Libraries/uC-OSIII/os_var.o
+OSMemQty            0x2               Libraries/uC-OSIII/os_var.o
+OSMutexQty          0x2               Libraries/uC-OSIII/os_var.o
+CPU_IntDisMeasOvrhd_cnts
+                    0x4               Libraries/uC-CPU/cpu_core.o
+OSStatTaskTCB       0xd0              Libraries/uC-OSIII/os_var.o
+OSPrioTbl           0x8               Libraries/uC-OSIII/os_prio.o
+OSTmrDbgListPtr     0x4               Libraries/uC-OSIII/os_var.o
+OSCfg_IntQ          0x140             Libraries/uC-OSIII/os_cfg_app.o
+OSTickTaskTimeMax   0x4               Libraries/uC-OSIII/os_var.o
+OSTmrUpdateCnt      0x4               Libraries/uC-OSIII/os_var.o
+OSSchedRoundRobinEn
+                    0x1               Libraries/uC-OSIII/os_var.o
+OSMutexDbgListPtr   0x4               Libraries/uC-OSIII/os_var.o
+OSIntQNbrEntries    0x2               Libraries/uC-OSIII/os_var.o
+OSTmrUpdateCtr      0x4               Libraries/uC-OSIII/os_var.o
+OSCfg_IdleTaskStk   0x200             Libraries/uC-OSIII/os_cfg_app.o
+CPU_Name            0x10              Libraries/uC-CPU/cpu_core.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+rom              0x00000000         0x00080000         xr
+ram              0x10000000         0x00008000         xrw
+ethram           0x2007c000         0x00004000         rw
+ethram_buf       0x20080000         0x00004000         rw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD usb_app.o
+LOAD Libraries/uC-CPU/os_cpu_c.o
+LOAD Libraries/uC-CPU/cpu_c.o
+LOAD Libraries/uC-CPU/cpu_core.o
+LOAD Libraries/BSP/LCD/Images/img_tbl.o
+LOAD Libraries/BSP/LCD/Images/img_nxp_logo.o
+LOAD Libraries/BSP/LCD/Images/img_os_logo.o
+LOAD Libraries/BSP/LCD/Images/img_micirum_logo.o
+LOAD Libraries/BSP/LCD/Images/img_keil_logo.o
+LOAD Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+LOAD Libraries/BSP/LCD/Fonts/font_tbl.o
+LOAD Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+LOAD Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+LOAD Libraries/BSP/LCD/bsp_lcd.o
+LOAD Libraries/BSP/cpu_bsp.o
+LOAD Libraries/BSP/bsp.o
+LOAD Libraries/CM3/src/hw_timer.o
+LOAD Libraries/CM3/src/core_cm3.o
+LOAD Libraries/CM3/src/lpc17xx_nvic.o
+LOAD Libraries/CM3/src/system_LPC17xx.o
+LOAD Libraries/CM3/src/libnosys_gnu.o
+LOAD Libraries/CM3/src/NVICInit.o
+LOAD Libraries/uC-LIB/lib_math.o
+LOAD Libraries/uC-LIB/lib_ascii.o
+LOAD Libraries/uC-LIB/lib_str.o
+LOAD Libraries/uC-LIB/lib_mem.o
+LOAD Libraries/uC-OSIII/os_prio.o
+LOAD Libraries/uC-OSIII/os_tmr.o
+LOAD Libraries/uC-OSIII/os_var.o
+LOAD Libraries/uC-OSIII/os_pend_multi.o
+LOAD Libraries/uC-OSIII/os_task.o
+LOAD Libraries/uC-OSIII/os_time.o
+LOAD Libraries/uC-OSIII/os_sem.o
+LOAD Libraries/uC-OSIII/os_flag.o
+LOAD Libraries/uC-OSIII/os_stat.o
+LOAD Libraries/uC-OSIII/os_cfg_app.o
+LOAD Libraries/uC-OSIII/os_mutex.o
+LOAD Libraries/uC-OSIII/os_q.o
+LOAD Libraries/uC-OSIII/os_dbg.o
+LOAD Libraries/uC-OSIII/os_core.o
+LOAD Libraries/uC-OSIII/os_tick.o
+LOAD Libraries/uC-OSIII/os_msg.o
+LOAD Libraries/uC-OSIII/os_mem.o
+LOAD Libraries/uC-OSIII/os_int.o
+LOAD Libraries/CFG/os_app_hooks.o
+LOAD Libraries/serial_lite/os_serial_lite.o
+LOAD Libraries/uC-CSP/os_csp.o
+LOAD Libraries/uC-CSP/csp.o
+LOAD Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+LOAD Libraries/uC-CSP/LPC17xx/csp_gpio.o
+LOAD Libraries/uC-CSP/LPC17xx/csp_tmr.o
+LOAD Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+LOAD Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+LOAD Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+LOAD Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+LOAD Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+LOAD Libraries/uC-CSP/LPC17xx/csp_int.o
+LOAD Libraries/uC-CSP/LPC17xx/csp_pm.o
+LOAD Libraries/uC-CSP/LPC17xx/csp_dma.o
+LOAD Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+LOAD Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+LOAD Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+LOAD Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+LOAD Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+LOAD Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+LOAD Libraries/CM3/src/startup_LPC17xx.o
+LOAD Libraries/uC-CPU/cpu_a.o
+LOAD Libraries/uC-CPU/os_cpu_a.o
+START GROUP
+LOAD /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a
+LOAD /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a
+END GROUP
+                0x10008000                PROVIDE (__cs3_stack, (__cs3_region_start_ram + __cs3_region_size_ram))
+                0x20002e48                PROVIDE (__cs3_stack_size, ((__cs3_region_start_ram + __cs3_region_size_ram) - _end))
+                0x10005bd8                PROVIDE (__cs3_heap_start, _end)
+                0x10008000                PROVIDE (__cs3_heap_end, (__cs3_region_start_ram + __cs3_region_size_ram))
+
+privileged_functions
+                0x00000000      0x400
+                0x00000000                __cs3_region_start_rom = .
+ *(.cs3.region-head.rom)
+                0x00000000                __cs3_interrupt_vector = __cs3_interrupt_vector_cortex_m
+ *(.cs3.interrupt_vector)
+ .cs3.interrupt_vector
+                0x00000000       0x40 Libraries/CM3/src/startup_LPC17xx.o
+                0x00000000                __cs3_interrupt_vector_cortex_m
+                0x00000001                ASSERT ((. != __cs3_interrupt_vector_cortex_m), No interrupt vector)
+ *(.rom)
+ *(.rom.b)
+ *(privileged_functions)
+                0x00000400                . = 0x400
+ *fill*         0x00000040      0x3c0 00
+
+.text           0x00000400    0x2c814
+                0x00000400                __cs3_reset = __cs3_reset_cortex_m
+ *(.cs3.reset)
+ .cs3.reset     0x00000400       0x50 Libraries/CM3/src/startup_LPC17xx.o
+                0x00000400                __cs3_reset_cortex_m
+                0x00000444                NMI_Handler
+                0x00000446                HardFault_Handler
+                0x00000448                MemManage_Handler
+                0x0000044a                BusFault_Handler
+                0x0000044c                UsageFault_Handler
+                0x00000001                ASSERT ((. != __cs3_reset), No reset code)
+ *(.text .text.* .gnu.linkonce.t.*)
+ .text          0x00000450      0x308 usb_app.o
+                0x00000450                main
+ .text          0x00000758      0x458 Libraries/uC-CPU/os_cpu_c.o
+                0x00000758                OSIdleTaskHook
+                0x00000778                OSInitHook
+                0x000007ec                OSStatTaskHook
+                0x0000080c                OSTaskCreateHook
+                0x00000838                OSTaskDelHook
+                0x00000864                OSTaskReturnHook
+                0x00000890                OSTaskStkInit
+                0x000009b8                OSTaskSwHook
+                0x00000ad0                OSTimeTickHook
+                0x00000af0                OS_CPU_SysTickHandler
+                0x00000b3c                OS_CPU_SysTickInit
+ .text          0x00000bb0      0xaac Libraries/uC-CPU/cpu_c.o
+                0x00000bb0                CPU_BitBandClr
+                0x00000c38                CPU_BitBandSet
+                0x00000cc0                CPU_IntSrcDis
+                0x00000e6c                CPU_IntSrcEn
+                0x00001018                CPU_IntSrcPendClr
+                0x000010ec                CPU_IntSrcPrioSet
+                0x000013f0                CPU_IntSrcPrioGet
+ .text          0x0000165c      0x4a0 Libraries/uC-CPU/cpu_core.o
+                0x0000165c                CPU_Init
+                0x00001670                CPU_SW_Exception
+                0x00001678                CPU_NameClr
+                0x000016b0                CPU_NameGet
+                0x00001710                CPU_NameSet
+                0x0000178c                CPU_TS_Get32
+                0x000017a4                CPU_TS_Update
+                0x000017b0                CPU_TS_TmrFreqGet
+                0x000017f0                CPU_TS_TmrFreqSet
+                0x00001810                CPU_IntDisMeasMaxCurReset
+                0x00001848                CPU_IntDisMeasMaxCurGet
+                0x00001880                CPU_IntDisMeasMaxGet
+                0x000018b8                CPU_IntDisMeasStart
+                0x00001910                CPU_IntDisMeasStop
+ .text          0x00001afc        0x0 Libraries/BSP/LCD/Images/img_tbl.o
+ .text          0x00001afc        0x0 Libraries/BSP/LCD/Images/img_nxp_logo.o
+ .text          0x00001afc        0x0 Libraries/BSP/LCD/Images/img_os_logo.o
+ .text          0x00001afc        0x0 Libraries/BSP/LCD/Images/img_micirum_logo.o
+ .text          0x00001afc        0x0 Libraries/BSP/LCD/Images/img_keil_logo.o
+ .text          0x00001afc        0x0 Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+ .text          0x00001afc        0x0 Libraries/BSP/LCD/Fonts/font_tbl.o
+ .text          0x00001afc        0x0 Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+ .text          0x00001afc        0x0 Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+ .text          0x00001afc     0x17d4 Libraries/BSP/LCD/bsp_lcd.o
+                0x00001afc                BSP_LCD_Init
+                0x000020ec                BSP_LCD_Clr
+                0x000021e0                BSP_LCD_BG_ColorSet
+                0x00002208                BSP_LCD_ImgDraw
+                0x00002248                BSP_LCD_ImgTblSet
+                0x00002278                BSP_LCD_ImgGetByName
+                0x00002324                BSP_LCD_TextColorSet
+                0x0000234c                BSP_LCD_TextLineClr
+                0x000024a4                BSP_LCD_TextDispStr
+                0x000024d0                BSP_LCD_TextDispStr_N
+                0x00002628                BSP_LCD_TextDispChar
+                0x00002720                BSP_LCD_TextFontTblSet
+                0x00002750                BSP_LCD_TextFontGetByName
+                0x000027fc                BSP_LCD_TextFontSet
+                0x00002898                BSP_LCD_BarGraphDraw
+                0x00002a04                BSP_LCD_BitmapDraw
+                0x00002a34                BSP_LCD_RectDraw
+                0x00002a74                BSP_LCD_RectDrawFill
+                0x00002ab4                BSP_LCD_RectDrawFillLine
+                0x00002af0                BSP_LCD_Pixel
+                0x00002bd0                BSP_LCD_BackLightOff
+                0x00002be4                BSP_LCD_BackLightOn
+                0x00002bf8                BSP_LCD_BackLightToggle
+ .text          0x000032d0       0x8c Libraries/BSP/cpu_bsp.o
+                0x000032d0                CPU_TS_TmrInit
+                0x0000331c                CPU_TS_TmrRd
+                0x0000333c                CPU_TS32_to_uSec
+ .text          0x0000335c      0x454 Libraries/BSP/bsp.o
+                0x0000335c                BSP_LowLevelInit
+                0x00003368                BSP_PreInit
+                0x00003380                BSP_PostInit
+ .text          0x000037b0       0xdc Libraries/CM3/src/hw_timer.o
+                0x000037b0                TimerInit
+                0x00003838                TimerStart
+                0x00003854                TimerResetStop
+                0x00003870                TimerClrIRFlag
+ .text          0x0000388c        0x0 Libraries/CM3/src/core_cm3.o
+ .text          0x0000388c      0x158 Libraries/CM3/src/lpc17xx_nvic.o
+                0x0000388c                NVIC_DeInit
+                0x00003908                NVIC_SCBDeInit
+                0x000039c4                NVIC_SetVTOR
+ .text          0x000039e4      0x454 Libraries/CM3/src/system_LPC17xx.o
+                0x000039e4                SystemCoreClockUpdate
+                0x00003bf8                SystemInit
+ .text          0x00003e38      0x298 Libraries/CM3/src/libnosys_gnu.o
+                0x00003e38                _close
+                0x00003e50                _execve
+                0x00003e7c                _exit
+                0x00003e8c                _fork
+                0x00003eac                _fstat
+                0x00003ed0                _getpid
+                0x00003ee0                _kill
+                0x00003f08                isatty
+                0x00003f20                _isatty
+                0x00003f38                _link
+                0x00003f60                _lseek
+                0x00003f7c                _open
+                0x00003f98                _read
+                0x00003fb4                _sbrk
+                0x00004028                _stat
+                0x0000404c                _times
+                0x00004064                _unlink
+                0x0000408c                _wait
+                0x000040b4                _write
+ .text          0x000040d0       0x74 Libraries/CM3/src/NVICInit.o
+                0x00004120                NVICInit
+ .text          0x00004144       0xc8 Libraries/uC-LIB/lib_math.o
+                0x00004144                Math_Init
+                0x00004154                Math_RandSetSeed
+                0x0000418c                Math_Rand
+                0x000041d8                Math_RandSeed
+ .text          0x0000420c      0x48c Libraries/uC-LIB/lib_ascii.o
+                0x0000420c                ASCII_IsAlpha
+                0x00004264                ASCII_IsAlphaNum
+                0x000042e4                ASCII_IsLower
+                0x00004314                ASCII_IsUpper
+                0x00004344                ASCII_IsDig
+                0x00004374                ASCII_IsDigOct
+                0x000043a4                ASCII_IsDigHex
+                0x000043ec                ASCII_IsBlank
+                0x0000441c                ASCII_IsSpace
+                0x00004464                ASCII_IsPrint
+                0x00004494                ASCII_IsGraph
+                0x000044c4                ASCII_IsPunct
+                0x000045a0                ASCII_IsCtrl
+                0x000045d8                ASCII_ToLower
+                0x00004618                ASCII_ToUpper
+                0x00004658                ASCII_Cmp
+ .text          0x00004698      0xeac Libraries/uC-LIB/lib_str.o
+                0x00004698                Str_Len
+                0x000046b8                Str_Len_N
+                0x00004704                Str_Copy
+                0x00004728                Str_Copy_N
+                0x000047c8                Str_Cat
+                0x000047ec                Str_Cat_N
+                0x000048b4                Str_Cmp
+                0x000048dc                Str_Cmp_N
+                0x00004a14                Str_CmpIgnoreCase
+                0x00004a3c                Str_CmpIgnoreCase_N
+                0x00004bd0                Str_Char
+                0x00004bf8                Str_Char_N
+                0x00004c94                Str_Char_Last
+                0x00004cbc                Str_Char_Last_N
+                0x00004d44                Str_Str
+                0x00004d68                Str_Str_N
+                0x00004e6c                Str_FmtNbr_Int32U
+                0x00004eac                Str_FmtNbr_Int32S
+                0x00004f08                Str_ParseNbr_Int32U
+                0x00004f3c                Str_ParseNbr_Int32S
+ .text          0x00005544      0xbc8 Libraries/uC-LIB/lib_mem.o
+                0x00005544                Mem_Init
+                0x000055f4                Mem_Clr
+                0x00005614                Mem_Set
+                0x000056f8                Mem_Copy
+                0x00005800                Mem_Cmp
+                0x00005958                Mem_HeapAlloc
+                0x00005a28                Mem_PoolClr
+                0x00005ae0                Mem_PoolCreate
+                0x00005ee8                Mem_PoolBlkGet
+                0x00005f88                Mem_PoolBlkFree
+ .text          0x0000610c      0x144 Libraries/uC-OSIII/os_prio.o
+                0x0000610c                OS_PrioInit
+                0x0000614c                OS_PrioGetHighest
+                0x0000619c                OS_PrioInsert
+                0x000061f4                OS_PrioRemove
+ .text          0x00006250      0xd50 Libraries/uC-OSIII/os_tmr.o
+                0x00006250                OSTmrCreate
+                0x00006364                OSTmrDel
+                0x00006484                OSTmrRemainGet
+                0x000065c8                OSTmrStart
+                0x000066d0                OSTmrStateGet
+                0x00006774                OSTmrStop
+                0x000068d8                OS_TmrClr
+                0x00006954                OS_TmrDbgListAdd
+                0x000069b0                OS_TmrDbgListRemove
+                0x00006a2c                OS_TmrInit
+                0x00006bd8                OS_TmrLink
+                0x00006d74                OS_TmrResetPeak
+                0x00006db8                OS_TmrUnlink
+                0x00006e64                OS_TmrTask
+ .text          0x00006fa0        0x0 Libraries/uC-OSIII/os_var.o
+ .text          0x00006fa0      0x4b8 Libraries/uC-OSIII/os_pend_multi.o
+                0x00006fa0                OSPendMulti
+                0x000071c8                OS_PendMultiGetRdy
+                0x000072dc                OS_PendMultiValidate
+                0x00007374                OS_PendMultiWait
+ .text          0x00007458     0x222c Libraries/uC-OSIII/os_task.o
+                0x00007458                OSTaskChangePrio
+                0x00007678                OSTaskCreate
+                0x000079d8                OSTaskDel
+                0x00007c1c                OSTaskQFlush
+                0x00007d3c                OSTaskQPend
+                0x00008030                OSTaskQPendAbort
+                0x00008164                OSTaskQPost
+                0x000081c8                OSTaskRegGet
+                0x00008238                OSTaskRegSet
+                0x000082a4                OSTaskResume
+                0x000084ac                OSTaskSemPend
+                0x00008778                OSTaskSemPendAbort
+                0x000088c0                OSTaskSemPost
+                0x00008930                OSTaskSemSet
+                0x000089a4                OSTaskStkChk
+                0x00008abc                OSTaskSuspend
+                0x00008ccc                OSTaskTimeQuantaSet
+                0x00008d68                OS_TaskDbgListAdd
+                0x00008dcc                OS_TaskDbgListRemove
+                0x00008e5c                OS_TaskInit
+                0x00008ea0                OS_TaskInitTCB
+                0x000090b0                OS_TaskQPost
+                0x0000933c                OS_TaskReturn
+                0x00009368                OS_TaskSemPost
+ .text          0x00009684      0x7a8 Libraries/uC-OSIII/os_time.o
+                0x00009684                OSTimeDly
+                0x00009830                OSTimeDlyHMSM
+                0x00009b0c                OSTimeDlyResume
+                0x00009d40                OSTimeGet
+                0x00009d84                OSTimeSet
+                0x00009dc4                OSTimeTick
+ .text          0x00009e2c      0xaa8 Libraries/uC-OSIII/os_sem.o
+                0x00009e2c                OSSemCreate
+                0x00009ed8                OSSemDel
+                0x0000a0ac                OSSemPend
+                0x0000a338                OSSemPendAbort
+                0x0000a4bc                OSSemPost
+                0x0000a55c                OSSemSet
+                0x0000a604                OS_SemClr
+                0x0000a648                OS_SemDbgListAdd
+                0x0000a6b0                OS_SemDbgListRemove
+                0x0000a72c                OS_SemInit
+                0x0000a764                OS_SemPost
+ .text          0x0000a8d4     0x1328 Libraries/uC-OSIII/os_flag.o
+                0x0000a8d4                OSFlagCreate
+                0x0000aa18                OSFlagDel
+                0x0000ad2c                OSFlagPend
+                0x0000b45c                OSFlagPendAbort
+                0x0000b5e0                OSFlagPendGetFlagsRdy
+                0x0000b640                OSFlagPost
+                0x0000b700                OS_FlagBlock
+                0x0000b754                OS_FlagClr
+                0x0000b794                OS_FlagInit
+                0x0000b7cc                OS_FlagDbgListAdd
+                0x0000b834                OS_FlagDbgListRemove
+                0x0000b8b0                OS_FlagPost
+                0x0000bb70                OS_FlagTaskRdy
+ .text          0x0000bbfc      0x738 Libraries/uC-OSIII/os_stat.o
+                0x0000bbfc                OSStatReset
+                0x0000bd54                OSStatTaskCPUUsageInit
+                0x0000be64                OS_StatTask
+                0x0000c220                OS_StatTaskInit
+ .text          0x0000c334      0x1ac Libraries/uC-OSIII/os_cfg_app.o
+                0x0000c334                OSCfg_Init
+ .text          0x0000c4e0      0xe84 Libraries/uC-OSIII/os_mutex.o
+                0x0000c4e0                OSMutexCreate
+                0x0000c5a0                OSMutexDel
+                0x0000c99c                OSMutexPend
+                0x0000cd70                OSMutexPendAbort
+                0x0000cef4                OSMutexPost
+                0x0000d1f0                OS_MutexClr
+                0x0000d248                OS_MutexDbgListAdd
+                0x0000d2b0                OS_MutexDbgListRemove
+                0x0000d32c                OS_MutexInit
+ .text          0x0000d364      0xc50 Libraries/uC-OSIII/os_q.o
+                0x0000d364                OSQCreate
+                0x0000d4bc                OSQDel
+                0x0000d690                OSQFlush
+                0x0000d7bc                OSQPend
+                0x0000da88                OSQPendAbort
+                0x0000dc0c                OSQPost
+                0x0000dc9c                OS_QClr
+                0x0000dcec                OS_QDbgListAdd
+                0x0000dd54                OS_QDbgListRemove
+                0x0000ddd0                OS_QInit
+                0x0000de08                OS_QPost
+ .text          0x0000dfb4      0x2d8 Libraries/uC-OSIII/os_dbg.o
+                0x0000dfb4                OS_Dbg_Init
+ .text          0x0000e28c     0x1778 Libraries/uC-OSIII/os_core.o
+                0x0000e28c                OSInit
+                0x0000e4bc                OSIntEnter
+                0x0000e504                OSIntExit
+                0x0000e620                OSSched
+                0x0000e6f8                OSSchedLock
+                0x0000e778                OSSchedUnlock
+                0x0000e820                OSSchedRoundRobinCfg
+                0x0000e8b4                OSSchedRoundRobinYield
+                0x0000e9a8                OSStart
+                0x0000ea54                OSVersion
+                0x0000ea74                OS_IdleTask
+                0x0000eacc                OS_IdleTaskInit
+                0x0000eb50                OS_Pend
+                0x0000ec04                OS_PendAbort
+                0x0000ed0c                OS_PendAbort1
+                0x0000ed60                OS_PendDataInit
+                0x0000eddc                OS_PendDbgNameAdd
+                0x0000ee60                OS_PendDbgNameRemove
+                0x0000eeb4                OS_PendListChangePrio
+                0x0000ef1c                OS_PendListInit
+                0x0000ef48                OS_PendListInsertHead
+                0x0000efa0                OS_PendListInsertPrio
+                0x0000f094                OS_PendListRemove
+                0x0000f0f0                OS_PendListRemove1
+                0x0000f190                OS_PendObjDel
+                0x0000f28c                OS_PendObjDel1
+                0x0000f2e0                OS_Post
+                0x0000f400                OS_Post1
+                0x0000f460                OS_RdyListInit
+                0x0000f4bc                OS_RdyListInsert
+                0x0000f4fc                OS_RdyListInsertHead
+                0x0000f590                OS_RdyListInsertTail
+                0x0000f620                OS_RdyListMoveHeadToTail
+                0x0000f6b8                OS_RdyListRemove
+                0x0000f780                OS_Sched0
+                0x0000f7f4                OS_SchedLockTimeMeasStart
+                0x0000f818                OS_SchedLockTimeMeasStop
+                0x0000f880                OS_SchedRoundRobin
+                0x0000f980                OS_TaskBlock
+                0x0000f9d8                OS_TaskRdy
+ .text          0x0000fa04      0x7b8 Libraries/uC-OSIII/os_tick.o
+                0x0000fa04                OS_TickTask
+                0x0000fa40                OS_TickTaskInit
+                0x0000faf4                OS_TickListInit
+                0x0000fb50                OS_TickListInsert
+                0x0000fdb4                OS_TickListRemove
+                0x0000fe50                OS_TickListResetPeak
+                0x0000fe9c                OS_TickListUpdate
+ .text          0x000101bc      0x4dc Libraries/uC-OSIII/os_msg.o
+                0x000101bc                OSMsgPoolExtend
+                0x00010244                OS_MsgPoolCreate
+                0x000102d8                OS_MsgPoolInit
+                0x00010374                OS_MsgQEntriesPeakReset
+                0x000103a8                OS_MsgQFreeAll
+                0x00010448                OS_MsgQInit
+                0x00010484                OS_MsgQGet
+                0x00010574                OS_MsgQPut
+ .text          0x00010698      0x384 Libraries/uC-OSIII/os_mem.o
+                0x00010698                OSMemCreate
+                0x0001086c                OSMemGet
+                0x000108f4                OSMemPut
+                0x00010988                OS_MemDbgListAdd
+                0x000109e4                OS_MemInit
+ .text          0x00010a1c      0x634 Libraries/uC-OSIII/os_int.o
+                0x00010a1c                OS_IntQPost
+                0x00010ba0                OS_IntQRePost
+                0x00010da4                OS_IntQTask
+                0x00010e84                OS_IntQTaskInit
+ .text          0x00011050      0x1ac Libraries/CFG/os_app_hooks.o
+                0x00011050                App_OS_SetAllHooks
+                0x000110f8                App_OS_ClrAllHooks
+                0x00011184                App_OS_TaskCreateHook
+                0x00011198                App_OS_TaskDelHook
+                0x000111ac                App_OS_TaskReturnHook
+                0x000111c0                App_OS_IdleTaskHook
+                0x000111cc                App_OS_InitHook
+                0x000111d8                App_OS_StatTaskHook
+                0x000111e4                App_OS_TaskSwHook
+                0x000111f0                App_OS_TimeTickHook
+ .text          0x000111fc      0x44c Libraries/serial_lite/os_serial_lite.o
+                0x000111fc                os_serial_pincfg
+                0x0001129c                os_serial_lite_tx_enable
+                0x00011320                os_serial_lite_init
+                0x000113d8                os_serial_sync_send
+                0x00011530                os_serial_async_send
+ .text          0x00011648       0x60 Libraries/uC-CSP/os_csp.o
+                0x00011648                OS_CSP_TickInit
+                0x00011674                OS_CPU_IntHandler
+ .text          0x000116a8       0xd4 Libraries/uC-CSP/csp.o
+                0x000116a8                CSP_IntVectClr
+                0x000116dc                CSP_IntVectSet
+                0x00011710                CSP_IntVectDeref
+ .text          0x0001177c      0x29c Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+                0x0001177c                CLKPWR_SetPCLKDiv
+                0x00011840                CLKPWR_GetPCLKSEL
+                0x00011894                CLKPWR_GetPCLK
+                0x00011904                CLKPWR_ConfigPPWR
+                0x00011978                CLKPWR_Sleep
+                0x00011994                CLKPWR_DeepSleep
+                0x000119c0                CLKPWR_PowerDown
+                0x000119ec                CLKPWR_DeepPowerDown
+ .text          0x00011a18      0xa50 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+                0x00011a18                CSP_GPIO_Init
+                0x00011a24                CSP_GPIO_Cfg
+                0x00012094                CSP_GPIO_BitClr
+                0x000120e4                CSP_GPIO_BitSet
+                0x00012134                CSP_GPIO_BitToggle
+                0x000121d0                CSP_GPIO_Rd
+                0x0001220c                CSP_GPIO_Wr
+                0x00012264                CSP_GPIO_IntClr
+ .text          0x00012468      0x628 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+                0x00012468                CSP_TmrInit
+                0x00012518                CSP_TmrCfg
+                0x00012664                CSP_TmrOutCmpCfg
+                0x0001285c                CSP_TmrIntClr
+                0x00012914                CSP_TmrRst
+                0x00012964                CSP_TmrRd
+                0x000129a0                CSP_TmrStart
+                0x000129f0                CSP_TmrStop
+                0x00012a40                CSP_TmrWr
+ .text          0x00012a90      0x298 Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+                0x00012c44                PINSEL_ConfigTraceFunc
+                0x00012c98                PINSEL_SetI2C0Pins
+                0x00012cd4                PINSEL_ConfigPin
+ .text          0x00012d28      0x890 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+                0x00012e9c                GPIO_SetDir
+                0x00012ee8                GPIO_SetValue
+                0x00012f14                GPIO_ClearValue
+                0x00012f40                GPIO_ReadValue
+                0x00012f70                GPIO_IntCmd
+                0x00012ff4                GPIO_GetIntStatus
+                0x000130ac                GPIO_ClearInt
+                0x000130ec                FIO_SetDir
+                0x00013114                FIO_SetValue
+                0x00013134                FIO_ClearValue
+                0x00013154                FIO_ReadValue
+                0x00013174                FIO_IntCmd
+                0x0001319c                FIO_GetIntStatus
+                0x000131c8                FIO_ClearInt
+                0x000131e8                FIO_SetMask
+                0x00013234                FIO_HalfWordSetDir
+                0x000132c8                FIO_HalfWordSetMask
+                0x0001335c                FIO_HalfWordSetValue
+                0x0001339c                FIO_HalfWordClearValue
+                0x000133dc                FIO_HalfWordReadValue
+                0x00013420                FIO_ByteSetDir
+                0x0001348c                FIO_ByteSetMask
+                0x00013500                FIO_ByteSetValue
+                0x0001353c                FIO_ByteClearValue
+                0x00013578                FIO_ByteReadValue
+ .text          0x000135b8      0xb9c Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+                0x00013994                EMAC_Init
+                0x00013b28                EMAC_DeInit
+                0x00013b54                EMAC_CheckPHYStatus
+                0x00013bc0                EMAC_SetPHYMode
+                0x00013cac                EMAC_UpdatePHYStatus
+                0x00013d64                EMAC_SetHashFilter
+                0x00013e08                EMAC_SetFilterMode
+                0x00013e58                EMAC_GetWoLStatus
+                0x00013e90                EMAC_WritePacketBuffer
+                0x00013f18                EMAC_ReadPacketBuffer
+                0x00013f88                EMAC_IntCmd
+                0x00013fd8                EMAC_IntGetStatus
+                0x00014010                EMAC_CheckReceiveIndex
+                0x0001403c                EMAC_CheckTransmitIndex
+                0x00014074                EMAC_CheckReceiveDataStatus
+                0x000140b0                EMAC_GetReceiveDataSize
+                0x000140e4                EMAC_UpdateRxConsumeIndex
+                0x0001411c                EMAC_UpdateTxProduceIndex
+ .text          0x00014154      0xf60 Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+                0x00014458                UART_Init
+                0x000146bc                UART_DeInit
+                0x0001470c                UART_ConfigStructInit
+                0x00014740                UART_SendByte
+                0x00014774                UART_ReceiveByte
+                0x000147a4                UART_Send
+                0x000148b0                UART_Receive
+                0x00014988                UART_ForceBreak
+                0x000149cc                UART_IntConfig
+                0x00014ab4                UART_GetLineStatus
+                0x00014aec                UART_GetIntId
+                0x00014b0c                UART_CheckBusy
+                0x00014b38                UART_FIFOConfig
+                0x00014be4                UART_FIFOConfigStructInit
+                0x00014c18                UART_ABCmd
+                0x00014d14                UART_ABClearIntPending
+                0x00014d54                UART_TxCmd
+                0x00014ddc                UART_FullModemForcePinState
+                0x00014e54                UART_FullModemConfigMode
+                0x00014ed0                UART_FullModemGetStatus
+                0x00014eec                UART_RS485Config
+                0x00014f9c                UART_RS485ReceiverCmd
+                0x00014fe4                UART_RS485Send
+                0x00015064                UART_RS485SendSlvAddr
+                0x0001508c                UART_RS485SendData
+ .text          0x000150b4      0x7ac Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+                0x0001517c                SSP_Init
+                0x0001520c                SSP_DeInit
+                0x00015254                SSP_GetDataSize
+                0x00015274                SSP_ConfigStructInit
+                0x000152bc                SSP_Cmd
+                0x000152f4                SSP_LoopBackCmd
+                0x0001532c                SSP_SlaveOutputCmd
+                0x00015364                SSP_SendData
+                0x00015380                SSP_ReceiveData
+                0x0001539c                SSP_ReadWrite
+                0x00015734                SSP_GetStatus
+                0x0001575c                SSP_IntConfig
+                0x0001579c                SSP_GetRawIntStatus
+                0x000157c4                SSP_GetRawIntStatusReg
+                0x000157dc                SSP_GetIntStatus
+                0x00015804                SSP_ClearIntPending
+                0x00015820                SSP_DMACmd
+ .text          0x00015860      0x354 Libraries/uC-CSP/LPC17xx/csp_int.o
+                0x00015860                CSP_IntClr
+                0x00015894                CSP_IntDis
+                0x000158c8                CSP_IntDisAll
+                0x0001591c                CSP_IntEn
+                0x00015950                CSP_IntInit
+                0x000159f8                CSP_IntSrcCfg
+                0x00015a44                CSP_IntVectReg
+                0x00015ac8                CSP_IntVectUnreg
+                0x00015b38                CSP_IntHandler
+                0x00015b84                CSP_IntHandlerSrc
+ .text          0x00015bb4      0x4a8 Libraries/uC-CSP/LPC17xx/csp_pm.o
+                0x00015bb4                CSP_PM_Init
+                0x00015bc0                CSP_PM_CPU_ClkFreqGet
+                0x00015c98                CSP_PM_PerClkDivCfg
+                0x00015e24                CSP_PM_PerClkEn
+                0x00015e98                CSP_PM_PerClkDis
+                0x00015f10                CSP_PM_PerClkFreqGet
+                0x00015ffc                CSP_PM_SysClkEn
+                0x00016010                CSP_PM_SysClkDis
+                0x00016024                CSP_PM_SysClkDivCfg
+                0x00016040                CSP_PM_SysClkFreqGet
+ .text          0x0001605c      0x9e4 Libraries/uC-CSP/LPC17xx/csp_dma.o
+                0x0001605c                CSP_DMA_InitExt
+                0x0001614c                CSP_DMA_CH_AllocExt
+                0x000162a0                CSP_DMA_CH_FreeExt
+                0x00016358                CSP_DMA_CH_CfgExt
+                0x00016640                CSP_DMA_XferStartExt
+                0x00016748                CSP_DMA_XferAsyncStartExt
+                0x0001688c                CSP_DMA_XferSizeMaxGetExt
+ .text          0x00016a40       0x94 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+                0x00016ab4                enable_USB_interrupts
+                0x00016ac4                disable_USB_interrupts
+ .text          0x00016ad4      0x344 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+                0x00016bcc                USBHandleControlTransfer
+                0x00016de0                USBRegisterRequestHandler
+ .text          0x00016e18      0x884 Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+                0x00016fa8                USBHwEPConfig
+                0x00016fe8                USBHwRegisterEPIntHandler
+                0x00017070                USBHwRegisterDevIntHandler
+                0x000170ac                USBHwRegisterFrameHandler
+                0x000170e8                USBHwSetAddress
+                0x0001710c                USBHwConnect
+                0x00017134                USBHwNakIntEnable
+                0x00017154                USBHwEPGetStatus
+                0x0001718c                USBHwEPStall
+                0x000171d8                USBHwEPWrite
+                0x0001729c                USBHwEPRead
+                0x00017394                USBHwConfigDevice
+                0x000173bc                USBHwISR
+                0x0001754c                USBHwInit
+ .text          0x0001769c       0x80 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+                0x000176b0                USBInit
+ .text          0x0001771c      0x198 Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+                0x0001771c                deleteBulkOutBuf
+                0x0001776c                deleteBulkInBuf
+                0x000177bc                USB_IRQHandler
+                0x000177dc                BulkOut
+                0x00017870                BulkIn
+ .text          0x000178b4      0x4cc Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+                0x000178b4                USBRegisterDescriptors
+                0x000178d4                USBGetDescriptor
+                0x00017cdc                USBHandleStandardRequest
+                0x00017d60                USBRegisterCustomReqHandler
+ .text          0x00017d80       0x5c Libraries/CM3/src/startup_LPC17xx.o
+                0x00017d80                SVC_Handler
+                0x00017d82                DebugMon_Handler
+                0x00017d84                OS_CPU_PendSVHandler
+                0x00017dc6                SysTick_Handler
+ .text          0x00017ddc       0x2c Libraries/uC-CPU/cpu_a.o
+                0x00017ddc                CPU_IntDis
+                0x00017de0                CPU_IntEn
+                0x00017de4                CPU_SR_Save
+                0x00017dec                CPU_SR_Restore
+                0x00017df2                CPU_CntLeadZeros
+                0x00017df8                CPU_RevBits
+                0x00017dfe                CPU_WaitForInt
+                0x00017e02                CPU_WaitForExcept
+ .text          0x00017e08       0x48 Libraries/uC-CPU/os_cpu_a.o
+                0x00017e08                OSStartHighRdy
+                0x00017e2a                OSCtxSw
+                0x00017e32                OSIntCtxSw
+ .text          0x00017e50       0x2c /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_aeabi_uldivmod.o)
+                0x00017e50                __aeabi_uldivmod
+ .text          0x00017e7c       0x5c /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(bpabi.o)
+                0x00017e7c                __gnu_ldivmod_helper
+                0x00017eac                __gnu_uldivmod_helper
+ .text          0x00017ed8        0x4 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_dvmd_tls.o)
+                0x00017ed8                __aeabi_ldiv0
+                0x00017ed8                __aeabi_idiv0
+ .text          0x00017edc      0x364 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_divdi3.o)
+                0x00017edc                __divdi3
+ .text          0x00018240      0x33c /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivdi3.o)
+                0x00018240                __udivdi3
+ *fill*         0x0001857c        0x4 00
+ .text          0x00018580      0x278 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivsi3.o)
+                0x00018580                __udivsi3
+                0x00018580                __aeabi_uidiv
+                0x000187dc                __aeabi_uidivmod
+ .text          0x000187f8      0x114 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-reent.o)
+                0x000187f8                cleanup_glue
+                0x00018814                _reclaim_reent
+                0x000188d4                _wrapup_reent
+ .text          0x0001890c       0xbc /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strcpy.o)
+                0x0001890c                strcpy
+ .text          0x000189c8       0x60 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strlen.o)
+                0x000189c8                strlen
+ .text          0x00018a28      0x234 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-freer.o)
+                0x00018a28                _malloc_trim_r
+                0x00018acc                _free_r
+ .text          0x00018c5c        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-impure.o)
+ .text          0x00018c5c      0x580 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mallocr.o)
+                0x00018c5c                _malloc_r
+ .text          0x000191dc        0x8 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mlock.o)
+                0x000191dc                __malloc_lock
+                0x000191e0                __malloc_unlock
+ .text          0x000191e4       0x28 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-sbrkr.o)
+                0x000191e4                _sbrk_r
+ *(.plt)
+ *(.gnu.warning)
+ *(.glue_7t)
+ .glue_7t       0x00000000        0x0 linker stubs
+ *(.glue_7)
+ .glue_7        0x00000000        0x0 linker stubs
+ *(.vfp11_veneer)
+ .vfp11_veneer  0x00000000        0x0 linker stubs
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata        0x0001920c       0x94 usb_app.o
+ .rodata        0x000192a0       0x14 Libraries/BSP/LCD/Images/img_tbl.o
+                0x000192a0                BSP_LCD_ImgTbl
+ .rodata        0x000192b4     0x537c Libraries/BSP/LCD/Images/img_nxp_logo.o
+                0x000192b4                ImgNXP_LogoData
+                0x0001e624                ImgNXP_Logo
+ .rodata        0x0001e630     0x4794 Libraries/BSP/LCD/Images/img_os_logo.o
+                0x0001e630                ImgOS_LogoData
+                0x00022db8                ImgOS_Logo
+ .rodata        0x00022dc4     0x29a8 Libraries/BSP/LCD/Images/img_micirum_logo.o
+                0x00022dc4                ImgMicriumLogoData
+                0x00025760                ImgMicriumLogo
+ .rodata        0x0002576c     0x4ca8 Libraries/BSP/LCD/Images/img_keil_logo.o
+                0x0002576c                ImgKeilLogoData
+                0x0002a408                ImgKeilLogo
+ .rodata        0x0002a414      0x60c Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+                0x0002a414                FontTerminal8x8_0020
+                0x0002a41c                FontTerminal8x8_0021
+                0x0002a424                FontTerminal8x8_0022
+                0x0002a42c                FontTerminal8x8_0023
+                0x0002a434                FontTerminal8x8_0024
+                0x0002a43c                FontTerminal8x8_0025
+                0x0002a444                FontTerminal8x8_0026
+                0x0002a44c                FontTerminal8x8_0027
+                0x0002a454                FontTerminal8x8_0028
+                0x0002a45c                FontTerminal8x8_0029
+                0x0002a464                FontTerminal8x8_002A
+                0x0002a46c                FontTerminal8x8_002B
+                0x0002a474                FontTerminal8x8_002C
+                0x0002a47c                FontTerminal8x8_002D
+                0x0002a484                FontTerminal8x8_002E
+                0x0002a48c                FontTerminal8x8_002F
+                0x0002a494                FontTerminal8x8_0030
+                0x0002a49c                FontTerminal8x8_0031
+                0x0002a4a4                FontTerminal8x8_0032
+                0x0002a4ac                FontTerminal8x8_0033
+                0x0002a4b4                FontTerminal8x8_0034
+                0x0002a4bc                FontTerminal8x8_0035
+                0x0002a4c4                FontTerminal8x8_0036
+                0x0002a4cc                FontTerminal8x8_0037
+                0x0002a4d4                FontTerminal8x8_0038
+                0x0002a4dc                FontTerminal8x8_0039
+                0x0002a4e4                FontTerminal8x8_003A
+                0x0002a4ec                FontTerminal8x8_003B
+                0x0002a4f4                FontTerminal8x8_003C
+                0x0002a4fc                FontTerminal8x8_003D
+                0x0002a504                FontTerminal8x8_003E
+                0x0002a50c                FontTerminal8x8_003F
+                0x0002a514                FontTerminal8x8_0040
+                0x0002a51c                FontTerminal8x8_0041
+                0x0002a524                FontTerminal8x8_0042
+                0x0002a52c                FontTerminal8x8_0043
+                0x0002a534                FontTerminal8x8_0044
+                0x0002a53c                FontTerminal8x8_0045
+                0x0002a544                FontTerminal8x8_0046
+                0x0002a54c                FontTerminal8x8_0047
+                0x0002a554                FontTerminal8x8_0048
+                0x0002a55c                FontTerminal8x8_0049
+                0x0002a564                FontTerminal8x8_004A
+                0x0002a56c                FontTerminal8x8_004B
+                0x0002a574                FontTerminal8x8_004C
+                0x0002a57c                FontTerminal8x8_004D
+                0x0002a584                FontTerminal8x8_004E
+                0x0002a58c                FontTerminal8x8_004F
+                0x0002a594                FontTerminal8x8_0050
+                0x0002a59c                FontTerminal8x8_0051
+                0x0002a5a4                FontTerminal8x8_0052
+                0x0002a5ac                FontTerminal8x8_0053
+                0x0002a5b4                FontTerminal8x8_0054
+                0x0002a5bc                FontTerminal8x8_0055
+                0x0002a5c4                FontTerminal8x8_0056
+                0x0002a5cc                FontTerminal8x8_0057
+                0x0002a5d4                FontTerminal8x8_0058
+                0x0002a5dc                FontTerminal8x8_0059
+                0x0002a5e4                FontTerminal8x8_005A
+                0x0002a5ec                FontTerminal8x8_005B
+                0x0002a5f4                FontTerminal8x8_005C
+                0x0002a5fc                FontTerminal8x8_005D
+                0x0002a604                FontTerminal8x8_005E
+                0x0002a60c                FontTerminal8x8_005F
+                0x0002a614                FontTerminal8x8_0060
+                0x0002a61c                FontTerminal8x8_0061
+                0x0002a624                FontTerminal8x8_0062
+                0x0002a62c                FontTerminal8x8_0063
+                0x0002a634                FontTerminal8x8_0064
+                0x0002a63c                FontTerminal8x8_0065
+                0x0002a644                FontTerminal8x8_0066
+                0x0002a64c                FontTerminal8x8_0067
+                0x0002a654                FontTerminal8x8_0068
+                0x0002a65c                FontTerminal8x8_0069
+                0x0002a664                FontTerminal8x8_006A
+                0x0002a66c                FontTerminal8x8_006B
+                0x0002a674                FontTerminal8x8_006C
+                0x0002a67c                FontTerminal8x8_006D
+                0x0002a684                FontTerminal8x8_006E
+                0x0002a68c                FontTerminal8x8_006F
+                0x0002a694                FontTerminal8x8_0070
+                0x0002a69c                FontTerminal8x8_0071
+                0x0002a6a4                FontTerminal8x8_0072
+                0x0002a6ac                FontTerminal8x8_0073
+                0x0002a6b4                FontTerminal8x8_0074
+                0x0002a6bc                FontTerminal8x8_0075
+                0x0002a6c4                FontTerminal8x8_0076
+                0x0002a6cc                FontTerminal8x8_0077
+                0x0002a6d4                FontTerminal8x8_0078
+                0x0002a6dc                FontTerminal8x8_0079
+                0x0002a6e4                FontTerminal8x8_007A
+                0x0002a6ec                FontTerminal8x8_007B
+                0x0002a6f4                FontTerminal8x8_007C
+                0x0002a6fc                FontTerminal8x8_007D
+                0x0002a704                FontTerminal8x8_007E
+                0x0002a70c                FontTerminal8x8_CharTbl
+                0x0002aa10                FontTerminal8x8
+ .rodata        0x0002aa20       0x10 Libraries/BSP/LCD/Fonts/font_tbl.o
+                0x0002aa20                BSP_LCD_FontTbl
+ .rodata        0x0002aa30      0xe3c Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+                0x0002aa30                FontComic18_ASCII_32
+                0x0002aa44                FontComic18_ASCII_33
+                0x0002aa58                FontComic18_ASCII_34
+                0x0002aa6c                FontComic18_ASCII_35
+                0x0002aa90                FontComic18_ASCII_36
+                0x0002aab4                FontComic18_ASCII_37
+                0x0002aad8                FontComic18_ASCII_38
+                0x0002aafc                FontComic18_ASCII_39
+                0x0002ab10                FontComic18_ASCII_40
+                0x0002ab24                FontComic18_ASCII_41
+                0x0002ab38                FontComic18_ASCII_42
+                0x0002ab5c                FontComic18_ASCII_43
+                0x0002ab70                FontComic18_ASCII_44
+                0x0002ab84                FontComic18_ASCII_45
+                0x0002ab98                FontComic18_ASCII_46
+                0x0002abac                FontComic18_ASCII_47
+                0x0002abd0                FontComic18_ASCII_48
+                0x0002abf4                FontComic18_ASCII_49
+                0x0002ac08                FontComic18_ASCII_50
+                0x0002ac2c                FontComic18_ASCII_51
+                0x0002ac50                FontComic18_ASCII_52
+                0x0002ac74                FontComic18_ASCII_53
+                0x0002ac98                FontComic18_ASCII_54
+                0x0002acbc                FontComic18_ASCII_55
+                0x0002ace0                FontComic18_ASCII_56
+                0x0002ad04                FontComic18_ASCII_57
+                0x0002ad28                FontComic18_ASCII_58
+                0x0002ad3c                FontComic18_ASCII_59
+                0x0002ad50                FontComic18_ASCII_60
+                0x0002ad64                FontComic18_ASCII_61
+                0x0002ad78                FontComic18_ASCII_62
+                0x0002ad8c                FontComic18_ASCII_63
+                0x0002adb0                FontComic18_ASCII_64
+                0x0002add4                FontComic18_ASCII_65
+                0x0002adf8                FontComic18_ASCII_66
+                0x0002ae1c                FontComic18_ASCII_67
+                0x0002ae40                FontComic18_ASCII_68
+                0x0002ae64                FontComic18_ASCII_69
+                0x0002ae88                FontComic18_ASCII_70
+                0x0002aeac                FontComic18_ASCII_71
+                0x0002aed0                FontComic18_ASCII_72
+                0x0002aef4                FontComic18_ASCII_73
+                0x0002af18                FontComic18_ASCII_74
+                0x0002af3c                FontComic18_ASCII_75
+                0x0002af60                FontComic18_ASCII_76
+                0x0002af84                FontComic18_ASCII_77
+                0x0002afa8                FontComic18_ASCII_78
+                0x0002afcc                FontComic18_ASCII_79
+                0x0002aff0                FontComic18_ASCII_80
+                0x0002b004                FontComic18_ASCII_81
+                0x0002b028                FontComic18_ASCII_82
+                0x0002b04c                FontComic18_ASCII_83
+                0x0002b070                FontComic18_ASCII_84
+                0x0002b094                FontComic18_ASCII_85
+                0x0002b0b8                FontComic18_ASCII_86
+                0x0002b0dc                FontComic18_ASCII_87
+                0x0002b114                FontComic18_ASCII_88
+                0x0002b138                FontComic18_ASCII_89
+                0x0002b15c                FontComic18_ASCII_90
+                0x0002b180                FontComic18_ASCII_91
+                0x0002b194                FontComic18_ASCII_92
+                0x0002b1a8                FontComic18_ASCII_93
+                0x0002b1bc                FontComic18_ASCII_94
+                0x0002b1d0                FontComic18_ASCII_95
+                0x0002b1f4                FontComic18_ASCII_96
+                0x0002b218                FontComic18_ASCII_97
+                0x0002b22c                FontComic18_ASCII_98
+                0x0002b250                FontComic18_ASCII_99
+                0x0002b264                FontComic18_ASCII_100
+                0x0002b288                FontComic18_ASCII_101
+                0x0002b29c                FontComic18_ASCII_102
+                0x0002b2b0                FontComic18_ASCII_103
+                0x0002b2c4                FontComic18_ASCII_104
+                0x0002b2d8                FontComic18_ASCII_105
+                0x0002b2ec                FontComic18_ASCII_106
+                0x0002b300                FontComic18_ASCII_107
+                0x0002b324                FontComic18_ASCII_108
+                0x0002b338                FontComic18_ASCII_109
+                0x0002b35c                FontComic18_ASCII_110
+                0x0002b370                FontComic18_ASCII_111
+                0x0002b384                FontComic18_ASCII_112
+                0x0002b3a8                FontComic18_ASCII_113
+                0x0002b3bc                FontComic18_ASCII_114
+                0x0002b3d0                FontComic18_ASCII_115
+                0x0002b3e4                FontComic18_ASCII_116
+                0x0002b3f8                FontComic18_ASCII_117
+                0x0002b40c                FontComic18_ASCII_118
+                0x0002b420                FontComic18_ASCII_119
+                0x0002b444                FontComic18_ASCII_120
+                0x0002b468                FontComic18_ASCII_121
+                0x0002b48c                FontComic18_ASCII_122
+                0x0002b4b0                FontComic18_ASCII_123
+                0x0002b4c4                FontComic18_ASCII_124
+                0x0002b4d8                FontComic18_ASCII_125
+                0x0002b4ec                FontComic18_ASCII_126
+                0x0002b510                FontComic18_ASCII_127
+                0x0002b524                FontComic18_ASCII_128
+                0x0002b548                FontComic18_CharTbl
+                0x0002b85c                FontComic18x18
+ .rodata        0x0002b86c      0xa74 Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+                0x0002b86c                FontSwiss16x16_0020
+                0x0002b87c                FontSwiss16x16_0021
+                0x0002b88c                FontSwiss16x16_0022
+                0x0002b89c                FontSwiss16x16_0023
+                0x0002b8ac                FontSwiss16x16_0024
+                0x0002b8bc                FontSwiss16x16_0025
+                0x0002b8dc                FontSwiss16x16_0026
+                0x0002b8fc                FontSwiss16x16_0027
+                0x0002b90c                FontSwiss16x16_0028
+                0x0002b91c                FontSwiss16x16_0029
+                0x0002b92c                FontSwiss16x16_002A
+                0x0002b93c                FontSwiss16x16_002B
+                0x0002b94c                FontSwiss16x16_002C
+                0x0002b95c                FontSwiss16x16_002D
+                0x0002b96c                FontSwiss16x16_002E
+                0x0002b97c                FontSwiss16x16_002F
+                0x0002b98c                FontSwiss16x16_0030
+                0x0002b99c                FontSwiss16x16_0031
+                0x0002b9ac                FontSwiss16x16_0032
+                0x0002b9bc                FontSwiss16x16_0033
+                0x0002b9cc                FontSwiss16x16_0034
+                0x0002b9dc                FontSwiss16x16_0035
+                0x0002b9ec                FontSwiss16x16_0036
+                0x0002b9fc                FontSwiss16x16_0037
+                0x0002ba0c                FontSwiss16x16_0038
+                0x0002ba1c                FontSwiss16x16_0039
+                0x0002ba2c                FontSwiss16x16_003A
+                0x0002ba3c                FontSwiss16x16_003B
+                0x0002ba4c                FontSwiss16x16_003C
+                0x0002ba5c                FontSwiss16x16_003D
+                0x0002ba6c                FontSwiss16x16_003E
+                0x0002ba7c                FontSwiss16x16_003F
+                0x0002ba8c                FontSwiss16x16_0040
+                0x0002baac                FontSwiss16x16_0041
+                0x0002bacc                FontSwiss16x16_0042
+                0x0002baec                FontSwiss16x16_0043
+                0x0002bb0c                FontSwiss16x16_0044
+                0x0002bb2c                FontSwiss16x16_0045
+                0x0002bb3c                FontSwiss16x16_0046
+                0x0002bb4c                FontSwiss16x16_0047
+                0x0002bb6c                FontSwiss16x16_0048
+                0x0002bb8c                FontSwiss16x16_0049
+                0x0002bb9c                FontSwiss16x16_004A
+                0x0002bbac                FontSwiss16x16_004B
+                0x0002bbcc                FontSwiss16x16_004C
+                0x0002bbdc                FontSwiss16x16_004D
+                0x0002bbfc                FontSwiss16x16_004E
+                0x0002bc1c                FontSwiss16x16_004F
+                0x0002bc3c                FontSwiss16x16_0050
+                0x0002bc5c                FontSwiss16x16_0051
+                0x0002bc7c                FontSwiss16x16_0052
+                0x0002bc9c                FontSwiss16x16_0053
+                0x0002bcbc                FontSwiss16x16_0054
+                0x0002bccc                FontSwiss16x16_0055
+                0x0002bcec                FontSwiss16x16_0056
+                0x0002bd0c                FontSwiss16x16_0057
+                0x0002bd2c                FontSwiss16x16_0058
+                0x0002bd4c                FontSwiss16x16_0059
+                0x0002bd5c                FontSwiss16x16_005A
+                0x0002bd6c                FontSwiss16x16_005B
+                0x0002bd7c                FontSwiss16x16_005C
+                0x0002bd8c                FontSwiss16x16_005D
+                0x0002bd9c                FontSwiss16x16_005E
+                0x0002bdac                FontSwiss16x16_005F
+                0x0002bdbc                FontSwiss16x16_0060
+                0x0002bdcc                FontSwiss16x16_0061
+                0x0002bddc                FontSwiss16x16_0062
+                0x0002bdec                FontSwiss16x16_0063
+                0x0002bdfc                FontSwiss16x16_0064
+                0x0002be0c                FontSwiss16x16_0065
+                0x0002be1c                FontSwiss16x16_0066
+                0x0002be2c                FontSwiss16x16_0067
+                0x0002be3c                FontSwiss16x16_0068
+                0x0002be4c                FontSwiss16x16_0069
+                0x0002be5c                FontSwiss16x16_006A
+                0x0002be6c                FontSwiss16x16_006B
+                0x0002be7c                FontSwiss16x16_006C
+                0x0002be8c                FontSwiss16x16_006D
+                0x0002beac                FontSwiss16x16_006E
+                0x0002bebc                FontSwiss16x16_006F
+                0x0002becc                FontSwiss16x16_0070
+                0x0002bedc                FontSwiss16x16_0071
+                0x0002beec                FontSwiss16x16_0072
+                0x0002befc                FontSwiss16x16_0073
+                0x0002bf0c                FontSwiss16x16_0074
+                0x0002bf1c                FontSwiss16x16_0075
+                0x0002bf2c                FontSwiss16x16_0076
+                0x0002bf3c                FontSwiss16x16_0077
+                0x0002bf5c                FontSwiss16x16_0078
+                0x0002bf6c                FontSwiss16x16_0079
+                0x0002bf7c                FontSwiss16x16_007A
+                0x0002bf8c                FontSwiss16x16_007B
+                0x0002bf9c                FontSwiss16x16_007C
+                0x0002bfac                FontSwiss16x16_007D
+                0x0002bfbc                FontSwiss16x16_007E
+                0x0002bfcc                FontSwiss16x16_CharTbl
+                0x0002c2d0                FontSwiss16x16
+ .rodata        0x0002c2e0        0xc Libraries/BSP/LCD/bsp_lcd.o
+ *fill*         0x0002c2ec      0x114 00
+ .rodata        0x0002c400      0x400 Libraries/CM3/src/NVICInit.o
+ .rodata        0x0002c800       0x94 Libraries/uC-LIB/lib_str.o
+ .rodata        0x0002c894       0x20 Libraries/uC-OSIII/os_tmr.o
+ .rodata        0x0002c8b4        0xc Libraries/uC-OSIII/os_task.o
+ .rodata        0x0002c8c0        0xc Libraries/uC-OSIII/os_sem.o
+ .rodata        0x0002c8cc        0xc Libraries/uC-OSIII/os_flag.o
+ .rodata        0x0002c8d8       0x14 Libraries/uC-OSIII/os_stat.o
+ .rodata        0x0002c8ec       0xa4 Libraries/uC-OSIII/os_cfg_app.o
+                0x0002c8ec                OSCfg_IdleTaskStkBasePtr
+                0x0002c8f0                OSCfg_IdleTaskStkLimit
+                0x0002c8f4                OSCfg_IdleTaskStkSize
+                0x0002c8f8                OSCfg_IdleTaskStkSizeRAM
+                0x0002c8fc                OSCfg_IntQBasePtr
+                0x0002c900                OSCfg_IntQSize
+                0x0002c904                OSCfg_IntQSizeRAM
+                0x0002c908                OSCfg_IntQTaskStkBasePtr
+                0x0002c90c                OSCfg_IntQTaskStkLimit
+                0x0002c910                OSCfg_IntQTaskStkSize
+                0x0002c914                OSCfg_IntQTaskStkSizeRAM
+                0x0002c918                OSCfg_ISRStkBasePtr
+                0x0002c91c                OSCfg_ISRStkSize
+                0x0002c920                OSCfg_ISRStkSizeRAM
+                0x0002c924                OSCfg_MsgPoolSize
+                0x0002c928                OSCfg_MsgPoolSizeRAM
+                0x0002c92c                OSCfg_MsgPoolBasePtr
+                0x0002c930                OSCfg_StatTaskPrio
+                0x0002c934                OSCfg_StatTaskRate_Hz
+                0x0002c938                OSCfg_StatTaskStkBasePtr
+                0x0002c93c                OSCfg_StatTaskStkLimit
+                0x0002c940                OSCfg_StatTaskStkSize
+                0x0002c944                OSCfg_StatTaskStkSizeRAM
+                0x0002c948                OSCfg_StkSizeMin
+                0x0002c94c                OSCfg_TickRate_Hz
+                0x0002c950                OSCfg_TickTaskPrio
+                0x0002c954                OSCfg_TickTaskStkBasePtr
+                0x0002c958                OSCfg_TickTaskStkLimit
+                0x0002c95c                OSCfg_TickTaskStkSize
+                0x0002c960                OSCfg_TickTaskStkSizeRAM
+                0x0002c964                OSCfg_TickWheelSize
+                0x0002c968                OSCfg_TickWheelSizeRAM
+                0x0002c96c                OSCfg_TmrTaskPrio
+                0x0002c970                OSCfg_TmrTaskRate_Hz
+                0x0002c974                OSCfg_TmrTaskStkBasePtr
+                0x0002c978                OSCfg_TmrTaskStkLimit
+                0x0002c97c                OSCfg_TmrTaskStkSize
+                0x0002c980                OSCfg_TmrTaskStkSizeRAM
+                0x0002c984                OSCfg_TmrWheelSize
+                0x0002c988                OSCfg_TmrWheelSizeRAM
+                0x0002c98c                OSCfg_DataSizeRAM
+ .rodata        0x0002c990        0xc Libraries/uC-OSIII/os_mutex.o
+ .rodata        0x0002c99c        0x8 Libraries/uC-OSIII/os_q.o
+ .rodata        0x0002c9a4      0x16c Libraries/uC-OSIII/os_dbg.o
+                0x0002c9a4                OSDbg_DbgEn
+                0x0002c9a6                OSDbg_ArgChkEn
+                0x0002c9a7                OSDbg_AppHooksEn
+                0x0002c9a8                OSDbg_EndiannessTest
+                0x0002c9ac                OSDbg_CalledFromISRChkEn
+                0x0002c9ad                OSDbg_FlagEn
+                0x0002c9b0                OSDbg_FlagGrp
+                0x0002c9d8                OSDbg_FlagDelEn
+                0x0002c9d9                OSDbg_FlagModeClrEn
+                0x0002c9da                OSDbg_FlagPendAbortEn
+                0x0002c9dc                OSDbg_FlagGrpSize
+                0x0002c9de                OSDbg_FlagWidth
+                0x0002c9e0                OSDbg_IntQ
+                0x0002c9e2                OSDbg_ISRPostDeferredEn
+                0x0002c9e4                OSDbg_Mem
+                0x0002ca04                OSDbg_MemEn
+                0x0002ca06                OSDbg_MemSize
+                0x0002ca08                OSDbg_MsgEn
+                0x0002ca0a                OSDbg_MsgSize
+                0x0002ca0c                OSDbg_MsgPoolSize
+                0x0002ca0e                OSDbg_MsgQSize
+                0x0002ca10                OSDbg_Mutex
+                0x0002ca3c                OSDbg_MutexEn
+                0x0002ca3d                OSDbg_MutexDelEn
+                0x0002ca3e                OSDbg_MutexPendAbortEn
+                0x0002ca40                OSDbg_MutexSize
+                0x0002ca42                OSDbg_ObjTypeChkEn
+                0x0002ca43                OSDbg_PendMultiEn
+                0x0002ca44                OSDbg_PendDataSize
+                0x0002ca46                OSDbg_PendListSize
+                0x0002ca48                OSDbg_PendObjSize
+                0x0002ca4a                OSDbg_PrioMax
+                0x0002ca4c                OSDbg_PrioTblSize
+                0x0002ca4e                OSDbg_PtrSize
+                0x0002ca50                OSDbg_Q
+                0x0002ca80                OSDbg_QEn
+                0x0002ca81                OSDbg_QDelEn
+                0x0002ca82                OSDbg_QFlushEn
+                0x0002ca83                OSDbg_QPendAbortEn
+                0x0002ca84                OSDbg_QSize
+                0x0002ca86                OSDbg_SchedRoundRobinEn
+                0x0002ca88                OSDbg_Sem
+                0x0002cab0                OSDbg_SemEn
+                0x0002cab1                OSDbg_SemDelEn
+                0x0002cab2                OSDbg_SemPendAbortEn
+                0x0002cab3                OSDbg_SemSetEn
+                0x0002cab4                OSDbg_SemSize
+                0x0002cab6                OSDbg_RdyList
+                0x0002cab8                OSDbg_RdyListSize
+                0x0002cabc                OSDbg_StkWidth
+                0x0002cabd                OSDbg_StatTaskEn
+                0x0002cabe                OSDbg_StatTaskStkChkEn
+                0x0002cabf                OSDbg_TaskChangePrioEn
+                0x0002cac0                OSDbg_TaskDelEn
+                0x0002cac1                OSDbg_TaskQEn
+                0x0002cac2                OSDbg_TaskQPendAbortEn
+                0x0002cac3                OSDbg_TaskProfileEn
+                0x0002cac4                OSDbg_TaskRegTblSize
+                0x0002cac6                OSDbg_TaskSemPendAbortEn
+                0x0002cac7                OSDbg_TaskSuspendEn
+                0x0002cac8                OSDbg_TCBSize
+                0x0002caca                OSDbg_TickSpokeSize
+                0x0002cacc                OSDbg_TimeDlyHMSMEn
+                0x0002cacd                OSDbg_TimeDlyResumeEn
+                0x0002cad0                OSDbg_Tmr
+                0x0002cb04                OSDbg_TmrEn
+                0x0002cb05                OSDbg_TmrDelEn
+                0x0002cb06                OSDbg_TmrSize
+                0x0002cb08                OSDbg_TmrSpokeSize
+                0x0002cb0a                OSDbg_VersionNbr
+                0x0002cb0c                OSDbg_DataSize
+ .rodata        0x0002cb10       0x2c Libraries/uC-OSIII/os_core.o
+ .rodata        0x0002cb3c       0x14 Libraries/uC-OSIII/os_tick.o
+ .rodata        0x0002cb50       0x1c Libraries/uC-OSIII/os_int.o
+ .rodata        0x0002cb6c       0x18 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .rodata        0x0002cb84        0x8 Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+                0x0002cb84                EMAC_clkdiv
+ .rodata        0x0002cb8c       0x6c Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .rodata        0x0002cbf8        0x4 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-impure.o)
+                0x0002cbf8                _global_impure_ptr
+ .rodata.str1.4
+                0x0002cbfc        0x4 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-impure.o)
+ *(.ARM.extab* .gnu.linkonce.armextab.*)
+ .ARM.extab.cs3.reset
+                0x0002cc00        0x0 Libraries/CM3/src/startup_LPC17xx.o
+ .ARM.extab     0x0002cc00        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_divdi3.o)
+ .ARM.extab     0x0002cc00        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivdi3.o)
+ *(.gcc_except_table)
+ *(.eh_frame_hdr)
+ *(.eh_frame)
+                0x0002cc00                . = ALIGN (0x4)
+ *(.init)
+                0x0002cc00                . = ALIGN (0x4)
+                0x0002cc00                __preinit_array_start = .
+ *(.preinit_array)
+                0x0002cc00                __preinit_array_end = .
+                0x0002cc00                . = ALIGN (0x4)
+                0x0002cc00                __init_array_start = .
+ *(SORT(.init_array.*))
+ *(.init_array)
+                0x0002cc00                __init_array_end = .
+                0x0002cc00                . = ALIGN (0x4)
+ *crtbegin.o(.ctors)
+ *(EXCLUDE_FILE(*crtend.o) .ctors)
+ *(SORT(.ctors.*))
+ *crtend.o(.ctors)
+                0x0002cc00                . = ALIGN (0x4)
+ *(.fini)
+                0x0002cc00                . = ALIGN (0x4)
+                0x0002cc00                __fini_array_start = .
+ *(.fini_array)
+ *(SORT(.fini_array.*))
+                0x0002cc00                __fini_array_end = .
+ *crtbegin.o(.dtors)
+ *(EXCLUDE_FILE(*crtend.o) .dtors)
+ *(SORT(.dtors.*))
+ *crtend.o(.dtors)
+                0x0002cc00                . = ALIGN (0x4)
+                0x0002cc00                __cs3_regions = .
+                0x0002cc00        0x4 LONG 0x0
+                0x0002cc04        0x4 LONG 0x2cc20 __cs3_region_init_ram
+                0x0002cc08        0x4 LONG 0x10000000 __cs3_region_start_ram
+                0x0002cc0c        0x4 LONG 0x510 __cs3_region_init_size_ram
+                0x0002cc10        0x4 LONG 0x56c8 __cs3_region_zero_size_ram
+                0x0002cc14                __exidx_start = .
+
+.v4_bx          0x0002cc14        0x0
+ .v4_bx         0x00000000        0x0 linker stubs
+
+.iplt           0x0002cc14        0x0
+ .iplt          0x00000000        0x0 usb_app.o
+
+.ARM.exidx      0x0002cc14        0x8
+ *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+ .ARM.exidx.cs3.reset
+                0x0002cc14        0x8 Libraries/CM3/src/startup_LPC17xx.o
+ .ARM.exidx     0x0002cc1c        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_divdi3.o)
+                                  0x8 (size before relaxing)
+ .ARM.exidx     0x0002cc1c        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivdi3.o)
+                                  0x8 (size before relaxing)
+                0x0002cc1c                __exidx_end = .
+
+.rel.dyn        0x0002cc1c        0x0
+ .rel.iplt      0x00000000        0x0 usb_app.o
+
+.text.align     0x0002cc1c        0x4
+                0x0002cc20                . = ALIGN (0x8)
+ *fill*         0x0002cc1c        0x4 00
+                0x0002cc20                _etext = .
+                0x00080000                __cs3_region_size_rom = 0x80000
+                0x00000001                __cs3_region_num = 0x1
+
+.data           0x10000000      0x510 load address 0x0002cc20
+                0x10000000                __cs3_region_start_ram = .
+                0x10000000                _sdata = .
+ *(.cs3.region-head.ram)
+ *(.jcr)
+ *(.got.plt)
+ *(.got)
+ *(.shdata)
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x10000000        0x0 usb_app.o
+ .data          0x10000000        0x0 Libraries/uC-CPU/os_cpu_c.o
+ .data          0x10000000        0x0 Libraries/uC-CPU/cpu_c.o
+ .data          0x10000000        0x0 Libraries/uC-CPU/cpu_core.o
+ .data          0x10000000        0x0 Libraries/BSP/LCD/Images/img_tbl.o
+ .data          0x10000000        0x0 Libraries/BSP/LCD/Images/img_nxp_logo.o
+ .data          0x10000000        0x0 Libraries/BSP/LCD/Images/img_os_logo.o
+ .data          0x10000000        0x0 Libraries/BSP/LCD/Images/img_micirum_logo.o
+ .data          0x10000000        0x0 Libraries/BSP/LCD/Images/img_keil_logo.o
+ .data          0x10000000        0x0 Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+ .data          0x10000000        0x0 Libraries/BSP/LCD/Fonts/font_tbl.o
+ .data          0x10000000        0x0 Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+ .data          0x10000000        0x0 Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+ .data          0x10000000        0x0 Libraries/BSP/LCD/bsp_lcd.o
+ .data          0x10000000        0x0 Libraries/BSP/cpu_bsp.o
+ .data          0x10000000        0x0 Libraries/BSP/bsp.o
+ .data          0x10000000        0x0 Libraries/CM3/src/hw_timer.o
+ .data          0x10000000        0x0 Libraries/CM3/src/core_cm3.o
+ .data          0x10000000        0x0 Libraries/CM3/src/lpc17xx_nvic.o
+ .data          0x10000000        0x4 Libraries/CM3/src/system_LPC17xx.o
+                0x10000000                SystemCoreClock
+ .data          0x10000004        0x4 Libraries/CM3/src/libnosys_gnu.o
+                0x10000004                environ
+ .data          0x10000008        0x0 Libraries/CM3/src/NVICInit.o
+ .data          0x10000008        0x0 Libraries/uC-LIB/lib_math.o
+ .data          0x10000008        0x0 Libraries/uC-LIB/lib_ascii.o
+ .data          0x10000008        0x0 Libraries/uC-LIB/lib_str.o
+ .data          0x10000008        0x0 Libraries/uC-LIB/lib_mem.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_prio.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_tmr.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_var.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_pend_multi.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_task.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_time.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_sem.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_flag.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_stat.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_cfg_app.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_mutex.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_q.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_dbg.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_core.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_tick.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_msg.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_mem.o
+ .data          0x10000008        0x0 Libraries/uC-OSIII/os_int.o
+ .data          0x10000008        0x0 Libraries/CFG/os_app_hooks.o
+ .data          0x10000008        0x0 Libraries/serial_lite/os_serial_lite.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/os_csp.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/csp.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/csp_int.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .data          0x10000008        0x0 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+ .data          0x10000008        0x0 Libraries/CM3/src/startup_LPC17xx.o
+ .data          0x10000008        0x0 Libraries/uC-CPU/cpu_a.o
+ .data          0x10000008        0x0 Libraries/uC-CPU/os_cpu_a.o
+ .data          0x10000008        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_aeabi_uldivmod.o)
+ .data          0x10000008        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(bpabi.o)
+ .data          0x10000008        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_dvmd_tls.o)
+ .data          0x10000008        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_divdi3.o)
+ .data          0x10000008        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivdi3.o)
+ .data          0x10000008        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivsi3.o)
+ .data          0x10000008        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-reent.o)
+ .data          0x10000008        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strcpy.o)
+ .data          0x10000008        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strlen.o)
+ .data          0x10000008        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-freer.o)
+ .data          0x10000008       0xf4 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-impure.o)
+                0x10000008                _impure_ptr
+ .data          0x100000fc      0x410 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mallocr.o)
+                0x100000fc                __malloc_av_
+                0x10000504                __malloc_sbrk_base
+                0x10000508                __malloc_trim_threshold
+ .data          0x1000050c        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mlock.o)
+ .data          0x1000050c        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-sbrkr.o)
+ *(.ram)
+                0x10000510                . = ALIGN (0x8)
+ *fill*         0x1000050c        0x4 00
+                0x10000510                _edata = .
+
+.igot.plt       0x10000510        0x0 load address 0x0002d130
+ .igot.plt      0x00000000        0x0 usb_app.o
+
+.bss            0x10000510     0x56c8 load address 0x0002d130
+                0x10000510                _sbss = .
+ *(.shbss)
+ *(.bss .bss.* .gnu.linkonce.b.*)
+ .bss           0x10000510      0x6c0 usb_app.o
+ .bss           0x10000bd0        0x0 Libraries/uC-CPU/os_cpu_c.o
+ .bss           0x10000bd0        0x0 Libraries/uC-CPU/cpu_c.o
+ .bss           0x10000bd0        0x0 Libraries/uC-CPU/cpu_core.o
+ .bss           0x10000bd0        0x0 Libraries/BSP/LCD/Images/img_tbl.o
+ .bss           0x10000bd0        0x0 Libraries/BSP/LCD/Images/img_nxp_logo.o
+ .bss           0x10000bd0        0x0 Libraries/BSP/LCD/Images/img_os_logo.o
+ .bss           0x10000bd0        0x0 Libraries/BSP/LCD/Images/img_micirum_logo.o
+ .bss           0x10000bd0        0x0 Libraries/BSP/LCD/Images/img_keil_logo.o
+ .bss           0x10000bd0        0x0 Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+ .bss           0x10000bd0        0x0 Libraries/BSP/LCD/Fonts/font_tbl.o
+ .bss           0x10000bd0        0x0 Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+ .bss           0x10000bd0        0x0 Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+ .bss           0x10000bd0       0x48 Libraries/BSP/LCD/bsp_lcd.o
+ .bss           0x10000c18        0x0 Libraries/BSP/cpu_bsp.o
+ .bss           0x10000c18        0x0 Libraries/BSP/bsp.o
+ .bss           0x10000c18        0x0 Libraries/CM3/src/hw_timer.o
+ .bss           0x10000c18        0x0 Libraries/CM3/src/core_cm3.o
+ .bss           0x10000c18        0x0 Libraries/CM3/src/lpc17xx_nvic.o
+ .bss           0x10000c18        0x0 Libraries/CM3/src/system_LPC17xx.o
+ .bss           0x10000c18        0x8 Libraries/CM3/src/libnosys_gnu.o
+                0x10000c18                __env
+ .bss           0x10000c20        0x0 Libraries/CM3/src/NVICInit.o
+ .bss           0x10000c20        0x0 Libraries/uC-LIB/lib_math.o
+ .bss           0x10000c20        0x0 Libraries/uC-LIB/lib_ascii.o
+ .bss           0x10000c20        0x0 Libraries/uC-LIB/lib_str.o
+ .bss           0x10000c20        0x0 Libraries/uC-LIB/lib_mem.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_prio.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_tmr.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_var.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_pend_multi.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_task.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_time.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_sem.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_flag.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_stat.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_cfg_app.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_mutex.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_q.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_dbg.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_core.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_tick.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_msg.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_mem.o
+ .bss           0x10000c20        0x0 Libraries/uC-OSIII/os_int.o
+ .bss           0x10000c20        0x0 Libraries/CFG/os_app_hooks.o
+ .bss           0x10000c20        0x0 Libraries/serial_lite/os_serial_lite.o
+ .bss           0x10000c20        0x0 Libraries/uC-CSP/os_csp.o
+ .bss           0x10000c20        0x0 Libraries/uC-CSP/csp.o
+ .bss           0x10000c20        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .bss           0x10000c20        0x0 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .bss           0x10000c20        0x0 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .bss           0x10000c20        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .bss           0x10000c20        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .bss           0x10000c20     0x2a68 Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .bss           0x10003688        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .bss           0x10003688        0x0 Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .bss           0x10003688      0x230 Libraries/uC-CSP/LPC17xx/csp_int.o
+ .bss           0x100038b8        0x0 Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .bss           0x100038b8       0x60 Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .bss           0x10003918        0x0 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .bss           0x10003918       0x34 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .bss           0x1000394c       0x48 Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .bss           0x10003994        0x8 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .bss           0x1000399c        0x0 Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .bss           0x1000399c        0xc Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+ .bss           0x100039a8        0x0 Libraries/CM3/src/startup_LPC17xx.o
+ .bss           0x100039a8        0x0 Libraries/uC-CPU/cpu_a.o
+ .bss           0x100039a8        0x0 Libraries/uC-CPU/os_cpu_a.o
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_aeabi_uldivmod.o)
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(bpabi.o)
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_dvmd_tls.o)
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_divdi3.o)
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivdi3.o)
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivsi3.o)
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-reent.o)
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strcpy.o)
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strlen.o)
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-freer.o)
+ .bss           0x100039a8        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-impure.o)
+ .bss           0x100039a8       0x34 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mallocr.o)
+                0x100039a8                __malloc_top_pad
+                0x100039ac                __malloc_current_mallinfo
+                0x100039d4                __malloc_max_sbrked_mem
+                0x100039d8                __malloc_max_total_mem
+ .bss           0x100039dc        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mlock.o)
+ .bss           0x100039dc        0x0 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-sbrkr.o)
+ *(COMMON)
+ COMMON         0x100039dc      0x2e8 usb_app.o
+                0x100039dc                com_context
+                0x100039ec                BulkInSize
+                0x100039f0                abBulkOutBuf
+                0x10003b58                BulkOutSize
+                0x10003b5c                abBulkInBuf
+ COMMON         0x10003cc4        0x4 Libraries/uC-CPU/os_cpu_c.o
+                0x10003cc4                OS_CPU_ExceptStkBase
+ COMMON         0x10003cc8       0x30 Libraries/uC-CPU/cpu_core.o
+                0x10003cc8                CPU_IntDisMeasMax_cnts
+                0x10003ccc                CPU_TS_TmrFreq_Hz
+                0x10003cd0                CPU_IntDisMeasStart_cnts
+                0x10003cd4                CPU_IntDisNestCtr
+                0x10003cd8                CPU_IntDisMeasStop_cnts
+                0x10003cdc                CPU_IntDisMeasMaxCur_cnts
+                0x10003ce0                CPU_IntDisMeasCtr
+                0x10003ce4                CPU_IntDisMeasOvrhd_cnts
+                0x10003ce8                CPU_Name
+ COMMON         0x10003cf8        0x4 Libraries/uC-LIB/lib_math.o
+                0x10003cf8                Math_RandSeedCur
+ COMMON         0x10003cfc       0x48 Libraries/uC-LIB/lib_mem.o
+                0x10003cfc                Mem_PoolHeap
+                0x10003d40                Mem_PoolTbl
+ COMMON         0x10003d44        0x8 Libraries/uC-OSIII/os_prio.o
+                0x10003d44                OSPrioTbl
+ *fill*         0x10003d4c        0x4 00
+ COMMON         0x10003d50      0x7f4 Libraries/uC-OSIII/os_var.o
+                0x10003d50                OSSchedLockNestingCtr
+                0x10003d54                OS_AppTaskReturnHookPtr
+                0x10003d58                OSStatTaskTimeMax
+                0x10003d5c                OSStatTaskCtr
+                0x10003d60                OSRunning
+                0x10003d64                OSRdyList
+                0x10004064                OSIntQInPtr
+                0x10004068                OSPrioHighRdy
+                0x10004069                OSStatTaskRdy
+                0x1000406c                OSSemDbgListPtr
+                0x10004070                OSIntQMaxNbrEntries
+                0x10004074                OS_AppTaskCreateHookPtr
+                0x10004078                OSPrioCur
+                0x10004080                OSTickTaskTCB
+                0x10004150                OSIntQTaskTimeMax
+                0x10004154                OSTmrTickCtr
+                0x10004158                OSSchedLockTimeBegin
+                0x1000415c                OSTCBCurPtr
+                0x10004160                OSQQty
+                0x10004162                OSPrioSaved
+                0x10004164                OSTCBHighRdyPtr
+                0x10004168                OSSchedLockTimeMaxCur
+                0x1000416c                OSTaskDbgListPtr
+                0x10004170                OSTmrTaskTimeMax
+                0x10004174                OS_AppTaskDelHookPtr
+                0x10004178                OS_AppTimeTickHookPtr
+                0x1000417c                OSTaskCtxSwCtr
+                0x10004180                OSStatTaskCPUUsage
+                0x10004181                OSIntNestingCtr
+                0x10004182                OSTaskQty
+                0x10004188                OSTmrTaskTCB
+                0x10004258                OSMsgPool
+                0x10004260                OSIntQOutPtr
+                0x10004268                OSIdleTaskTCB
+                0x10004338                OSQDbgListPtr
+                0x10004340                OSIntQTaskTCB
+                0x10004410                OSSemQty
+                0x10004414                OSMemDbgListPtr
+                0x10004418                OSSchedRoundRobinDfltTimeQuanta
+                0x1000441c                OS_AppIdleTaskHookPtr
+                0x10004420                OSStatTaskCtrMax
+                0x10004424                OSTickCtr
+                0x10004428                OS_AppTaskSwHookPtr
+                0x1000442c                OSTmrQty
+                0x10004430                OSIntDisTimeMax
+                0x10004434                OSIdleTaskCtr
+                0x10004438                OSStatTaskCtrRun
+                0x1000443c                OS_AppStatTaskHookPtr
+                0x10004440                OSFlagQty
+                0x10004442                OSIntQOvfCtr
+                0x10004444                OSFlagDbgListPtr
+                0x10004448                OSSchedLockTimeMax
+                0x1000444c                OSStatResetFlag
+                0x1000444e                OSMemQty
+                0x10004450                OSMutexQty
+                0x10004458                OSStatTaskTCB
+                0x10004528                OSTmrDbgListPtr
+                0x1000452c                OSTickTaskTimeMax
+                0x10004530                OSTmrUpdateCnt
+                0x10004534                OSSchedRoundRobinEn
+                0x10004538                OSMutexDbgListPtr
+                0x1000453c                OSIntQNbrEntries
+                0x10004540                OSTmrUpdateCtr
+ COMMON         0x10004544     0x1690 Libraries/uC-OSIII/os_cfg_app.o
+                0x10004544                OSCfg_IntQTaskStk
+                0x10004744                OSCfg_StatTaskStk
+                0x10004944                OSCfg_TickWheel
+                0x100049cc                OSCfg_MsgPool
+                0x1000500c                OSCfg_TmrTaskStk
+                0x1000520c                OSCfg_TmrWheel
+                0x10005294                OSCfg_ISRStk
+                0x10005694                OSCfg_TickTaskStk
+                0x10005894                OSCfg_IntQ
+                0x100059d4                OSCfg_IdleTaskStk
+ COMMON         0x10005bd4        0x4 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-reent.o)
+                0x10005bd4                errno
+ *(.ram.b)
+                0x10005bd8                . = ALIGN (0x8)
+                0x10005bd8                _ebss = .
+                0x10005bd8                _end = .
+                0x10005bd8                __end = .
+
+.heap           0x10005bd8      0x800 load address 0x0002d130
+ *(.heap)
+ .heap          0x10005bd8      0x800 Libraries/CM3/src/startup_LPC17xx.o
+                0x10005bd8                __cs3_heap_start
+                0x100063d8                __cs3_heap_end
+
+.stack          0x100058f0     0x2710
+ *(.stack)
+ .stack         0x100058f0     0x2710 Libraries/CM3/src/startup_LPC17xx.o
+                0x100058f0                __cs3_stack_mem
+                0x0002cc20                __cs3_region_init_ram = LOADADDR (.data)
+                0x00000510                __cs3_region_init_size_ram = (_edata - __cs3_region_start_ram)
+                0x000056c8                __cs3_region_zero_size_ram = (_end - _edata)
+                0x00008000                __cs3_region_size_ram = 0x8000
+                0x00000001                __cs3_region_num = 0x1
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000      0x728
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x20 usb_app.o
+ .debug_aranges
+                0x00000020       0x20 Libraries/uC-CPU/os_cpu_c.o
+ .debug_aranges
+                0x00000040       0x20 Libraries/uC-CPU/cpu_c.o
+ .debug_aranges
+                0x00000060       0x20 Libraries/uC-CPU/cpu_core.o
+ .debug_aranges
+                0x00000080       0x20 Libraries/BSP/LCD/bsp_lcd.o
+ .debug_aranges
+                0x000000a0       0x20 Libraries/BSP/cpu_bsp.o
+ .debug_aranges
+                0x000000c0       0x20 Libraries/BSP/bsp.o
+ .debug_aranges
+                0x000000e0       0x20 Libraries/CM3/src/hw_timer.o
+ .debug_aranges
+                0x00000100       0x20 Libraries/CM3/src/lpc17xx_nvic.o
+ .debug_aranges
+                0x00000120       0x20 Libraries/CM3/src/system_LPC17xx.o
+ .debug_aranges
+                0x00000140       0x20 Libraries/CM3/src/libnosys_gnu.o
+ .debug_aranges
+                0x00000160       0x20 Libraries/CM3/src/NVICInit.o
+ .debug_aranges
+                0x00000180       0x20 Libraries/uC-LIB/lib_math.o
+ .debug_aranges
+                0x000001a0       0x20 Libraries/uC-LIB/lib_ascii.o
+ .debug_aranges
+                0x000001c0       0x20 Libraries/uC-LIB/lib_str.o
+ .debug_aranges
+                0x000001e0       0x20 Libraries/uC-LIB/lib_mem.o
+ .debug_aranges
+                0x00000200       0x20 Libraries/uC-OSIII/os_prio.o
+ .debug_aranges
+                0x00000220       0x20 Libraries/uC-OSIII/os_tmr.o
+ .debug_aranges
+                0x00000240       0x20 Libraries/uC-OSIII/os_pend_multi.o
+ .debug_aranges
+                0x00000260       0x20 Libraries/uC-OSIII/os_task.o
+ .debug_aranges
+                0x00000280       0x20 Libraries/uC-OSIII/os_time.o
+ .debug_aranges
+                0x000002a0       0x20 Libraries/uC-OSIII/os_sem.o
+ .debug_aranges
+                0x000002c0       0x20 Libraries/uC-OSIII/os_flag.o
+ .debug_aranges
+                0x000002e0       0x20 Libraries/uC-OSIII/os_stat.o
+ .debug_aranges
+                0x00000300       0x20 Libraries/uC-OSIII/os_cfg_app.o
+ .debug_aranges
+                0x00000320       0x20 Libraries/uC-OSIII/os_mutex.o
+ .debug_aranges
+                0x00000340       0x20 Libraries/uC-OSIII/os_q.o
+ .debug_aranges
+                0x00000360       0x20 Libraries/uC-OSIII/os_dbg.o
+ .debug_aranges
+                0x00000380       0x20 Libraries/uC-OSIII/os_core.o
+ .debug_aranges
+                0x000003a0       0x20 Libraries/uC-OSIII/os_tick.o
+ .debug_aranges
+                0x000003c0       0x20 Libraries/uC-OSIII/os_msg.o
+ .debug_aranges
+                0x000003e0       0x20 Libraries/uC-OSIII/os_mem.o
+ .debug_aranges
+                0x00000400       0x20 Libraries/uC-OSIII/os_int.o
+ .debug_aranges
+                0x00000420       0x20 Libraries/CFG/os_app_hooks.o
+ .debug_aranges
+                0x00000440       0x20 Libraries/serial_lite/os_serial_lite.o
+ .debug_aranges
+                0x00000460       0x20 Libraries/uC-CSP/os_csp.o
+ .debug_aranges
+                0x00000480       0x20 Libraries/uC-CSP/csp.o
+ .debug_aranges
+                0x000004a0       0x20 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .debug_aranges
+                0x000004c0       0x20 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .debug_aranges
+                0x000004e0       0x20 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .debug_aranges
+                0x00000500       0x20 Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .debug_aranges
+                0x00000520       0x20 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .debug_aranges
+                0x00000540       0x20 Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .debug_aranges
+                0x00000560       0x20 Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .debug_aranges
+                0x00000580       0x20 Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .debug_aranges
+                0x000005a0       0x20 Libraries/uC-CSP/LPC17xx/csp_int.o
+ .debug_aranges
+                0x000005c0       0x20 Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .debug_aranges
+                0x000005e0       0x20 Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .debug_aranges
+                0x00000600       0x20 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .debug_aranges
+                0x00000620       0x20 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .debug_aranges
+                0x00000640       0x20 Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .debug_aranges
+                0x00000660       0x20 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .debug_aranges
+                0x00000680       0x20 Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .debug_aranges
+                0x000006a0       0x20 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+ .debug_aranges
+                0x000006c0       0x28 Libraries/CM3/src/startup_LPC17xx.o
+ .debug_aranges
+                0x000006e8       0x20 Libraries/uC-CPU/cpu_a.o
+ .debug_aranges
+                0x00000708       0x20 Libraries/uC-CPU/os_cpu_a.o
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x00000000    0x2001d
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x00000000      0xa24 usb_app.o
+ .debug_info    0x00000a24      0xa9c Libraries/uC-CPU/os_cpu_c.o
+ .debug_info    0x000014c0      0x3b6 Libraries/uC-CPU/cpu_c.o
+ .debug_info    0x00001876      0x514 Libraries/uC-CPU/cpu_core.o
+ .debug_info    0x00001d8a      0x165 Libraries/BSP/LCD/Images/img_tbl.o
+ .debug_info    0x00001eef      0x12f Libraries/BSP/LCD/Images/img_nxp_logo.o
+ .debug_info    0x0000201e      0x12f Libraries/BSP/LCD/Images/img_os_logo.o
+ .debug_info    0x0000214d      0x12f Libraries/BSP/LCD/Images/img_micirum_logo.o
+ .debug_info    0x0000227c      0x12f Libraries/BSP/LCD/Images/img_keil_logo.o
+ .debug_info    0x000023ab      0xaa5 Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+ .debug_info    0x00002e50      0x1e9 Libraries/BSP/LCD/Fonts/font_tbl.o
+ .debug_info    0x00003039      0xafe Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+ .debug_info    0x00003b37      0xabd Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+ .debug_info    0x000045f4     0x1605 Libraries/BSP/LCD/bsp_lcd.o
+ .debug_info    0x00005bf9      0x13c Libraries/BSP/cpu_bsp.o
+ .debug_info    0x00005d35      0x16c Libraries/BSP/bsp.o
+ .debug_info    0x00005ea1      0x24f Libraries/CM3/src/hw_timer.o
+ .debug_info    0x000060f0       0x70 Libraries/CM3/src/core_cm3.o
+ .debug_info    0x00006160      0x3fb Libraries/CM3/src/lpc17xx_nvic.o
+ .debug_info    0x0000655b      0x4f6 Libraries/CM3/src/system_LPC17xx.o
+ .debug_info    0x00006a51      0x6ce Libraries/CM3/src/libnosys_gnu.o
+ .debug_info    0x0000711f      0x2c9 Libraries/CM3/src/NVICInit.o
+ .debug_info    0x000073e8      0x17b Libraries/uC-LIB/lib_math.o
+ .debug_info    0x00007563      0x465 Libraries/uC-LIB/lib_ascii.o
+ .debug_info    0x000079c8      0xcca Libraries/uC-LIB/lib_str.o
+ .debug_info    0x00008692      0x9eb Libraries/uC-LIB/lib_mem.o
+ .debug_info    0x0000907d      0x1db Libraries/uC-OSIII/os_prio.o
+ .debug_info    0x00009258      0xf40 Libraries/uC-OSIII/os_tmr.o
+ .debug_info    0x0000a198     0x11f3 Libraries/uC-OSIII/os_var.o
+ .debug_info    0x0000b38b      0xb13 Libraries/uC-OSIII/os_pend_multi.o
+ .debug_info    0x0000be9e     0x1247 Libraries/uC-OSIII/os_task.o
+ .debug_info    0x0000d0e5      0xa83 Libraries/uC-OSIII/os_time.o
+ .debug_info    0x0000db68      0xcfe Libraries/uC-OSIII/os_sem.o
+ .debug_info    0x0000e866      0xe15 Libraries/uC-OSIII/os_flag.o
+ .debug_info    0x0000f67b      0xb29 Libraries/uC-OSIII/os_stat.o
+ .debug_info    0x000101a4      0xdba Libraries/uC-OSIII/os_cfg_app.o
+ .debug_info    0x00010f5e      0xc25 Libraries/uC-OSIII/os_mutex.o
+ .debug_info    0x00011b83      0xd2d Libraries/uC-OSIII/os_q.o
+ .debug_info    0x000128b0     0x1579 Libraries/uC-OSIII/os_dbg.o
+ .debug_info    0x00013e29     0x1542 Libraries/uC-OSIII/os_core.o
+ .debug_info    0x0001536b      0xaca Libraries/uC-OSIII/os_tick.o
+ .debug_info    0x00015e35      0x4cb Libraries/uC-OSIII/os_msg.o
+ .debug_info    0x00016300      0x3bf Libraries/uC-OSIII/os_mem.o
+ .debug_info    0x000166bf      0xd62 Libraries/uC-OSIII/os_int.o
+ .debug_info    0x00017421      0x93b Libraries/CFG/os_app_hooks.o
+ .debug_info    0x00017d5c      0x84d Libraries/serial_lite/os_serial_lite.o
+ .debug_info    0x000185a9      0x10a Libraries/uC-CSP/os_csp.o
+ .debug_info    0x000186b3      0x1e0 Libraries/uC-CSP/csp.o
+ .debug_info    0x00018893      0x6ae Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .debug_info    0x00018f41      0x3cd Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .debug_info    0x0001930e      0x5aa Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .debug_info    0x000198b8      0x4a7 Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .debug_info    0x00019d5f      0xe1b Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .debug_info    0x0001ab7a      0xd5a Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .debug_info    0x0001b8d4     0x103e Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .debug_info    0x0001c912      0x773 Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .debug_info    0x0001d085      0x46a Libraries/uC-CSP/LPC17xx/csp_int.o
+ .debug_info    0x0001d4ef      0x32d Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .debug_info    0x0001d81c      0x810 Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .debug_info    0x0001e02c      0x383 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .debug_info    0x0001e3af      0x35c Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .debug_info    0x0001e70b     0x1038 Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .debug_info    0x0001f743      0x118 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .debug_info    0x0001f85b      0x200 Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .debug_info    0x0001fa5b      0x468 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+ .debug_info    0x0001fec3       0x77 Libraries/CM3/src/startup_LPC17xx.o
+ .debug_info    0x0001ff3a       0x70 Libraries/uC-CPU/cpu_a.o
+ .debug_info    0x0001ffaa       0x73 Libraries/uC-CPU/os_cpu_a.o
+
+.debug_abbrev   0x00000000     0x49d6
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x16b usb_app.o
+ .debug_abbrev  0x0000016b      0x1b6 Libraries/uC-CPU/os_cpu_c.o
+ .debug_abbrev  0x00000321      0x10a Libraries/uC-CPU/cpu_c.o
+ .debug_abbrev  0x0000042b      0x150 Libraries/uC-CPU/cpu_core.o
+ .debug_abbrev  0x0000057b       0xa8 Libraries/BSP/LCD/Images/img_tbl.o
+ .debug_abbrev  0x00000623       0xa8 Libraries/BSP/LCD/Images/img_nxp_logo.o
+ .debug_abbrev  0x000006cb       0xa8 Libraries/BSP/LCD/Images/img_os_logo.o
+ .debug_abbrev  0x00000773       0xa8 Libraries/BSP/LCD/Images/img_micirum_logo.o
+ .debug_abbrev  0x0000081b       0xa8 Libraries/BSP/LCD/Images/img_keil_logo.o
+ .debug_abbrev  0x000008c3       0xa8 Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+ .debug_abbrev  0x0000096b       0xa8 Libraries/BSP/LCD/Fonts/font_tbl.o
+ .debug_abbrev  0x00000a13       0xa8 Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+ .debug_abbrev  0x00000abb       0xa8 Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+ .debug_abbrev  0x00000b63      0x177 Libraries/BSP/LCD/bsp_lcd.o
+ .debug_abbrev  0x00000cda       0xa5 Libraries/BSP/cpu_bsp.o
+ .debug_abbrev  0x00000d7f       0xae Libraries/BSP/bsp.o
+ .debug_abbrev  0x00000e2d       0xdf Libraries/CM3/src/hw_timer.o
+ .debug_abbrev  0x00000f0c       0x2c Libraries/CM3/src/core_cm3.o
+ .debug_abbrev  0x00000f38      0x10b Libraries/CM3/src/lpc17xx_nvic.o
+ .debug_abbrev  0x00001043       0xf3 Libraries/CM3/src/system_LPC17xx.o
+ .debug_abbrev  0x00001136      0x105 Libraries/CM3/src/libnosys_gnu.o
+ .debug_abbrev  0x0000123b      0x127 Libraries/CM3/src/NVICInit.o
+ .debug_abbrev  0x00001362       0xf1 Libraries/uC-LIB/lib_math.o
+ .debug_abbrev  0x00001453       0xcd Libraries/uC-LIB/lib_ascii.o
+ .debug_abbrev  0x00001520      0x10d Libraries/uC-LIB/lib_str.o
+ .debug_abbrev  0x0000162d      0x13a Libraries/uC-LIB/lib_mem.o
+ .debug_abbrev  0x00001767       0xc2 Libraries/uC-OSIII/os_prio.o
+ .debug_abbrev  0x00001829      0x19a Libraries/uC-OSIII/os_tmr.o
+ .debug_abbrev  0x000019c3       0xbd Libraries/uC-OSIII/os_var.o
+ .debug_abbrev  0x00001a80      0x168 Libraries/uC-OSIII/os_pend_multi.o
+ .debug_abbrev  0x00001be8      0x17c Libraries/uC-OSIII/os_task.o
+ .debug_abbrev  0x00001d64      0x15e Libraries/uC-OSIII/os_time.o
+ .debug_abbrev  0x00001ec2      0x18e Libraries/uC-OSIII/os_sem.o
+ .debug_abbrev  0x00002050      0x18e Libraries/uC-OSIII/os_flag.o
+ .debug_abbrev  0x000021de      0x136 Libraries/uC-OSIII/os_stat.o
+ .debug_abbrev  0x00002314       0xe8 Libraries/uC-OSIII/os_cfg_app.o
+ .debug_abbrev  0x000023fc      0x18e Libraries/uC-OSIII/os_mutex.o
+ .debug_abbrev  0x0000258a      0x18e Libraries/uC-OSIII/os_q.o
+ .debug_abbrev  0x00002718      0x100 Libraries/uC-OSIII/os_dbg.o
+ .debug_abbrev  0x00002818      0x18f Libraries/uC-OSIII/os_core.o
+ .debug_abbrev  0x000029a7      0x159 Libraries/uC-OSIII/os_tick.o
+ .debug_abbrev  0x00002b00      0x146 Libraries/uC-OSIII/os_msg.o
+ .debug_abbrev  0x00002c46      0x108 Libraries/uC-OSIII/os_mem.o
+ .debug_abbrev  0x00002d4e      0x154 Libraries/uC-OSIII/os_int.o
+ .debug_abbrev  0x00002ea2      0x107 Libraries/CFG/os_app_hooks.o
+ .debug_abbrev  0x00002fa9      0x19c Libraries/serial_lite/os_serial_lite.o
+ .debug_abbrev  0x00003145       0x84 Libraries/uC-CSP/os_csp.o
+ .debug_abbrev  0x000031c9       0xdd Libraries/uC-CSP/csp.o
+ .debug_abbrev  0x000032a6      0x195 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .debug_abbrev  0x0000343b      0x11c Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .debug_abbrev  0x00003557      0x147 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .debug_abbrev  0x0000369e      0x11d Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .debug_abbrev  0x000037bb      0x1c9 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .debug_abbrev  0x00003984      0x1fe Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .debug_abbrev  0x00003b82      0x1ce Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .debug_abbrev  0x00003d50      0x19b Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .debug_abbrev  0x00003eeb      0x12f Libraries/uC-CSP/LPC17xx/csp_int.o
+ .debug_abbrev  0x0000401a       0xef Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .debug_abbrev  0x00004109      0x13e Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .debug_abbrev  0x00004247       0xe8 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .debug_abbrev  0x0000432f      0x124 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .debug_abbrev  0x00004453      0x235 Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .debug_abbrev  0x00004688       0xb8 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .debug_abbrev  0x00004740       0xe9 Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .debug_abbrev  0x00004829      0x173 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+ .debug_abbrev  0x0000499c       0x12 Libraries/CM3/src/startup_LPC17xx.o
+ .debug_abbrev  0x000049ae       0x14 Libraries/uC-CPU/cpu_a.o
+ .debug_abbrev  0x000049c2       0x14 Libraries/uC-CPU/os_cpu_a.o
+
+.debug_line     0x00000000     0xa93f
+ *(.debug_line)
+ .debug_line    0x00000000      0x7a8 usb_app.o
+ .debug_line    0x000007a8      0x1a3 Libraries/uC-CPU/os_cpu_c.o
+ .debug_line    0x0000094b      0x21a Libraries/uC-CPU/cpu_c.o
+ .debug_line    0x00000b65      0x1d7 Libraries/uC-CPU/cpu_core.o
+ .debug_line    0x00000d3c      0x113 Libraries/BSP/LCD/Images/img_tbl.o
+ .debug_line    0x00000e4f      0x118 Libraries/BSP/LCD/Images/img_nxp_logo.o
+ .debug_line    0x00000f67      0x117 Libraries/BSP/LCD/Images/img_os_logo.o
+ .debug_line    0x0000107e      0x11c Libraries/BSP/LCD/Images/img_micirum_logo.o
+ .debug_line    0x0000119a      0x119 Libraries/BSP/LCD/Images/img_keil_logo.o
+ .debug_line    0x000012b3      0x11c Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+ .debug_line    0x000013cf      0x113 Libraries/BSP/LCD/Fonts/font_tbl.o
+ .debug_line    0x000014e2      0x11b Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+ .debug_line    0x000015fd      0x11b Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+ .debug_line    0x00001718      0x56c Libraries/BSP/LCD/bsp_lcd.o
+ .debug_line    0x00001c84      0x173 Libraries/BSP/cpu_bsp.o
+ .debug_line    0x00001df7      0x369 Libraries/BSP/bsp.o
+ .debug_line    0x00002160      0x1e0 Libraries/CM3/src/hw_timer.o
+ .debug_line    0x00002340      0x149 Libraries/CM3/src/core_cm3.o
+ .debug_line    0x00002489      0x21d Libraries/CM3/src/lpc17xx_nvic.o
+ .debug_line    0x000026a6      0x237 Libraries/CM3/src/system_LPC17xx.o
+ .debug_line    0x000028dd      0x3bb Libraries/CM3/src/libnosys_gnu.o
+ .debug_line    0x00002c98      0x1f1 Libraries/CM3/src/NVICInit.o
+ .debug_line    0x00002e89      0x115 Libraries/uC-LIB/lib_math.o
+ .debug_line    0x00002f9e      0x3fe Libraries/uC-LIB/lib_ascii.o
+ .debug_line    0x0000339c      0x425 Libraries/uC-LIB/lib_str.o
+ .debug_line    0x000037c1      0x33b Libraries/uC-LIB/lib_mem.o
+ .debug_line    0x00003afc      0x165 Libraries/uC-OSIII/os_prio.o
+ .debug_line    0x00003c61      0x304 Libraries/uC-OSIII/os_tmr.o
+ .debug_line    0x00003f65      0x11a Libraries/uC-OSIII/os_var.o
+ .debug_line    0x0000407f      0x205 Libraries/uC-OSIII/os_pend_multi.o
+ .debug_line    0x00004284      0x7b7 Libraries/uC-OSIII/os_task.o
+ .debug_line    0x00004a3b      0x2c7 Libraries/uC-OSIII/os_time.o
+ .debug_line    0x00004d02      0x31e Libraries/uC-OSIII/os_sem.o
+ .debug_line    0x00005020      0x4dc Libraries/uC-OSIII/os_flag.o
+ .debug_line    0x000054fc      0x236 Libraries/uC-OSIII/os_stat.o
+ .debug_line    0x00005732      0x168 Libraries/uC-OSIII/os_cfg_app.o
+ .debug_line    0x0000589a      0x3e3 Libraries/uC-OSIII/os_mutex.o
+ .debug_line    0x00005c7d      0x3aa Libraries/uC-OSIII/os_q.o
+ .debug_line    0x00006027      0x172 Libraries/uC-OSIII/os_dbg.o
+ .debug_line    0x00006199      0x4ce Libraries/uC-OSIII/os_core.o
+ .debug_line    0x00006667      0x278 Libraries/uC-OSIII/os_tick.o
+ .debug_line    0x000068df      0x1dc Libraries/uC-OSIII/os_msg.o
+ .debug_line    0x00006abb      0x1f4 Libraries/uC-OSIII/os_mem.o
+ .debug_line    0x00006caf      0x1ef Libraries/uC-OSIII/os_int.o
+ .debug_line    0x00006e9e      0x17a Libraries/CFG/os_app_hooks.o
+ .debug_line    0x00007018      0x5c5 Libraries/serial_lite/os_serial_lite.o
+ .debug_line    0x000075dd      0x1a1 Libraries/uC-CSP/os_csp.o
+ .debug_line    0x0000777e      0x16f Libraries/uC-CSP/csp.o
+ .debug_line    0x000078ed      0x276 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .debug_line    0x00007b63      0x284 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .debug_line    0x00007de7      0x26e Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .debug_line    0x00008055      0x228 Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .debug_line    0x0000827d      0x342 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .debug_line    0x000085bf      0x43a Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .debug_line    0x000089f9      0x483 Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .debug_line    0x00008e7c      0x34f Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .debug_line    0x000091cb      0x221 Libraries/uC-CSP/LPC17xx/csp_int.o
+ .debug_line    0x000093ec      0x1eb Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .debug_line    0x000095d7      0x2f6 Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .debug_line    0x000098cd      0x1e1 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .debug_line    0x00009aae      0x236 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .debug_line    0x00009ce4      0x34b Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .debug_line    0x0000a02f      0x1de Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .debug_line    0x0000a20d      0x325 Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .debug_line    0x0000a532      0x288 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+ .debug_line    0x0000a7ba       0xb2 Libraries/CM3/src/startup_LPC17xx.o
+ .debug_line    0x0000a86c       0x65 Libraries/uC-CPU/cpu_a.o
+ .debug_line    0x0000a8d1       0x6e Libraries/uC-CPU/os_cpu_a.o
+
+.debug_frame    0x00000000     0x467c
+ *(.debug_frame)
+ .debug_frame   0x00000000       0x74 usb_app.o
+ .debug_frame   0x00000074      0x160 Libraries/uC-CPU/os_cpu_c.o
+ .debug_frame   0x000001d4       0xe8 Libraries/uC-CPU/cpu_c.o
+ .debug_frame   0x000002bc      0x230 Libraries/uC-CPU/cpu_core.o
+ .debug_frame   0x000004ec      0x3f8 Libraries/BSP/LCD/bsp_lcd.o
+ .debug_frame   0x000008e4       0x68 Libraries/BSP/cpu_bsp.o
+ .debug_frame   0x0000094c       0x84 Libraries/BSP/bsp.o
+ .debug_frame   0x000009d0       0x80 Libraries/CM3/src/hw_timer.o
+ .debug_frame   0x00000a50       0x64 Libraries/CM3/src/lpc17xx_nvic.o
+ .debug_frame   0x00000ab4       0x48 Libraries/CM3/src/system_LPC17xx.o
+ .debug_frame   0x00000afc      0x224 Libraries/CM3/src/libnosys_gnu.o
+ .debug_frame   0x00000d20       0x48 Libraries/CM3/src/NVICInit.o
+ .debug_frame   0x00000d68       0x88 Libraries/uC-LIB/lib_math.o
+ .debug_frame   0x00000df0      0x1d4 Libraries/uC-LIB/lib_ascii.o
+ .debug_frame   0x00000fc4      0x2c0 Libraries/uC-LIB/lib_str.o
+ .debug_frame   0x00001284      0x174 Libraries/uC-LIB/lib_mem.o
+ .debug_frame   0x000013f8       0x84 Libraries/uC-OSIII/os_prio.o
+ .debug_frame   0x0000147c      0x1b8 Libraries/uC-OSIII/os_tmr.o
+ .debug_frame   0x00001634       0x8c Libraries/uC-OSIII/os_pend_multi.o
+ .debug_frame   0x000016c0      0x30c Libraries/uC-OSIII/os_task.o
+ .debug_frame   0x000019cc       0xd0 Libraries/uC-OSIII/os_time.o
+ .debug_frame   0x00001a9c      0x164 Libraries/uC-OSIII/os_sem.o
+ .debug_frame   0x00001c00      0x1a4 Libraries/uC-OSIII/os_flag.o
+ .debug_frame   0x00001da4       0x90 Libraries/uC-OSIII/os_stat.o
+ .debug_frame   0x00001e34       0x2c Libraries/uC-OSIII/os_cfg_app.o
+ .debug_frame   0x00001e60      0x124 Libraries/uC-OSIII/os_mutex.o
+ .debug_frame   0x00001f84      0x164 Libraries/uC-OSIII/os_q.o
+ .debug_frame   0x000020e8       0x2c Libraries/uC-OSIII/os_dbg.o
+ .debug_frame   0x00002114      0x4cc Libraries/uC-OSIII/os_core.o
+ .debug_frame   0x000025e0       0xe0 Libraries/uC-OSIII/os_tick.o
+ .debug_frame   0x000026c0       0xfc Libraries/uC-OSIII/os_msg.o
+ .debug_frame   0x000027bc       0xa8 Libraries/uC-OSIII/os_mem.o
+ .debug_frame   0x00002864       0x90 Libraries/uC-OSIII/os_int.o
+ .debug_frame   0x000028f4      0x130 Libraries/CFG/os_app_hooks.o
+ .debug_frame   0x00002a24       0xc8 Libraries/serial_lite/os_serial_lite.o
+ .debug_frame   0x00002aec       0x50 Libraries/uC-CSP/os_csp.o
+ .debug_frame   0x00002b3c       0x68 Libraries/uC-CSP/csp.o
+ .debug_frame   0x00002ba4       0xf4 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .debug_frame   0x00002c98      0x100 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .debug_frame   0x00002d98      0x128 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .debug_frame   0x00002ec0       0xbc Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .debug_frame   0x00002f7c      0x378 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .debug_frame   0x000032f4      0x2c4 Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .debug_frame   0x000035b8      0x31c Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .debug_frame   0x000038d4      0x218 Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .debug_frame   0x00003aec      0x14c Libraries/uC-CSP/LPC17xx/csp_int.o
+ .debug_frame   0x00003c38      0x138 Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .debug_frame   0x00003d70      0x110 Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .debug_frame   0x00003e80       0x80 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .debug_frame   0x00003f00       0xac Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .debug_frame   0x00003fac      0x27c Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .debug_frame   0x00004228       0x48 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .debug_frame   0x00004270       0xa4 Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .debug_frame   0x00004314      0x100 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+ .debug_frame   0x00004414       0x50 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(bpabi.o)
+ .debug_frame   0x00004464       0x38 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_divdi3.o)
+ .debug_frame   0x0000449c       0x38 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivdi3.o)
+ .debug_frame   0x000044d4       0x20 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivsi3.o)
+ .debug_frame   0x000044f4       0x64 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-reent.o)
+ .debug_frame   0x00004558       0x20 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strcpy.o)
+ .debug_frame   0x00004578       0x20 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strlen.o)
+ .debug_frame   0x00004598       0x50 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-freer.o)
+ .debug_frame   0x000045e8       0x38 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mallocr.o)
+ .debug_frame   0x00004620       0x30 /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mlock.o)
+ .debug_frame   0x00004650       0x2c /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-sbrkr.o)
+
+.debug_str      0x00000000     0x835b
+ *(.debug_str)
+ .debug_str     0x00000000      0x581 usb_app.o
+                                0x684 (size before relaxing)
+ .debug_str     0x00000581      0x263 Libraries/uC-CPU/os_cpu_c.o
+                                0x777 (size before relaxing)
+ .debug_str     0x000007e4       0xcc Libraries/uC-CPU/cpu_c.o
+                                0x1c5 (size before relaxing)
+ .debug_str     0x000008b0      0x26d Libraries/uC-CPU/cpu_core.o
+                                0x37b (size before relaxing)
+ .debug_str     0x00000b1d       0x8d Libraries/BSP/LCD/Images/img_tbl.o
+                                0x176 (size before relaxing)
+ .debug_str     0x00000baa       0x38 Libraries/BSP/LCD/Images/img_nxp_logo.o
+                                0x142 (size before relaxing)
+ .debug_str     0x00000be2       0x36 Libraries/BSP/LCD/Images/img_os_logo.o
+                                0x13f (size before relaxing)
+ .debug_str     0x00000c18       0x3f Libraries/BSP/LCD/Images/img_micirum_logo.o
+                                0x14c (size before relaxing)
+ .debug_str     0x00000c57       0x39 Libraries/BSP/LCD/Images/img_keil_logo.o
+                                0x143 (size before relaxing)
+ .debug_str     0x00000c90      0x8a1 Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+                                0x988 (size before relaxing)
+ .debug_str     0x00001531       0x51 Libraries/BSP/LCD/Fonts/font_tbl.o
+                                0x1de (size before relaxing)
+ .debug_str     0x00001582      0x851 Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+                                0x9c9 (size before relaxing)
+ .debug_str     0x00001dd3      0x7ae Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+                                0x926 (size before relaxing)
+ .debug_str     0x00002581      0x535 Libraries/BSP/LCD/bsp_lcd.o
+                                0xb71 (size before relaxing)
+ .debug_str     0x00002ab6       0x63 Libraries/BSP/cpu_bsp.o
+                                0x15a (size before relaxing)
+ .debug_str     0x00002b19       0x52 Libraries/BSP/bsp.o
+                                0x177 (size before relaxing)
+ .debug_str     0x00002b6b       0x7f Libraries/CM3/src/hw_timer.o
+                                0x15e (size before relaxing)
+ .debug_str     0x00002bea       0x1d Libraries/CM3/src/core_cm3.o
+                                 0xd9 (size before relaxing)
+ .debug_str     0x00002c07       0xeb Libraries/CM3/src/lpc17xx_nvic.o
+                                0x1e8 (size before relaxing)
+ .debug_str     0x00002cf2      0x162 Libraries/CM3/src/system_LPC17xx.o
+                                0x2ce (size before relaxing)
+ .debug_str     0x00002e54      0x1e4 Libraries/CM3/src/libnosys_gnu.o
+                                0x2f0 (size before relaxing)
+ .debug_str     0x00003038       0x77 Libraries/CM3/src/NVICInit.o
+                                0x1ac (size before relaxing)
+ .debug_str     0x000030af       0x77 Libraries/uC-LIB/lib_math.o
+                                0x143 (size before relaxing)
+ .debug_str     0x00003126      0x14a Libraries/uC-LIB/lib_ascii.o
+                                0x22f (size before relaxing)
+ .debug_str     0x00003270      0x436 Libraries/uC-LIB/lib_str.o
+                                0x56b (size before relaxing)
+ .debug_str     0x000036a6      0x466 Libraries/uC-LIB/lib_mem.o
+                                0x5aa (size before relaxing)
+ .debug_str     0x00003b0c       0x61 Libraries/uC-OSIII/os_prio.o
+                                0x14e (size before relaxing)
+ .debug_str     0x00003b6d      0x2e2 Libraries/uC-OSIII/os_tmr.o
+                                0x851 (size before relaxing)
+ .debug_str     0x00003e4f      0x38f Libraries/uC-OSIII/os_var.o
+                                0xac3 (size before relaxing)
+ .debug_str     0x000041de       0xae Libraries/uC-OSIII/os_pend_multi.o
+                                0x632 (size before relaxing)
+ .debug_str     0x0000428c      0x1f8 Libraries/uC-OSIII/os_task.o
+                                0x882 (size before relaxing)
+ .debug_str     0x00004484       0xb4 Libraries/uC-OSIII/os_time.o
+                                0x66a (size before relaxing)
+ .debug_str     0x00004538       0xdf Libraries/uC-OSIII/os_sem.o
+                                0x68d (size before relaxing)
+ .debug_str     0x00004617      0x10e Libraries/uC-OSIII/os_flag.o
+                                0x717 (size before relaxing)
+ .debug_str     0x00004725       0xde Libraries/uC-OSIII/os_stat.o
+                                0x7aa (size before relaxing)
+ .debug_str     0x00004803      0x2f8 Libraries/uC-OSIII/os_cfg_app.o
+                                0x9da (size before relaxing)
+ .debug_str     0x00004afb       0xd0 Libraries/uC-OSIII/os_mutex.o
+                                0x6df (size before relaxing)
+ .debug_str     0x00004bcb       0xb0 Libraries/uC-OSIII/os_q.o
+                                0x6ab (size before relaxing)
+ .debug_str     0x00004c7b      0x4bf Libraries/uC-OSIII/os_dbg.o
+                                0xe9b (size before relaxing)
+ .debug_str     0x0000513a      0x2ef Libraries/uC-OSIII/os_core.o
+                                0xb52 (size before relaxing)
+ .debug_str     0x00005429       0xc1 Libraries/uC-OSIII/os_tick.o
+                                0x711 (size before relaxing)
+ .debug_str     0x000054ea       0xb8 Libraries/uC-OSIII/os_msg.o
+                                0x2c2 (size before relaxing)
+ .debug_str     0x000055a2       0x81 Libraries/uC-OSIII/os_mem.o
+                                0x281 (size before relaxing)
+ .debug_str     0x00005623       0x6e Libraries/uC-OSIII/os_int.o
+                                0x77f (size before relaxing)
+ .debug_str     0x00005691       0xe0 Libraries/CFG/os_app_hooks.o
+                                0x6b4 (size before relaxing)
+ .debug_str     0x00005771      0x2fe Libraries/serial_lite/os_serial_lite.o
+                                0x49c (size before relaxing)
+ .debug_str     0x00005a6f       0x45 Libraries/uC-CSP/os_csp.o
+                                0x133 (size before relaxing)
+ .debug_str     0x00005ab4       0x86 Libraries/uC-CSP/csp.o
+                                0x195 (size before relaxing)
+ .debug_str     0x00005b3a       0xf6 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+                                0x394 (size before relaxing)
+ .debug_str     0x00005c30      0x143 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+                                0x278 (size before relaxing)
+ .debug_str     0x00005d73      0x130 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+                                0x25e (size before relaxing)
+ .debug_str     0x00005ea3      0x21b Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+                                0x36d (size before relaxing)
+ .debug_str     0x000060be      0x436 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+                                0x559 (size before relaxing)
+ .debug_str     0x000064f4      0x4b4 Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+                                0x6a2 (size before relaxing)
+ .debug_str     0x000069a8      0x64f Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+                                0xa02 (size before relaxing)
+ .debug_str     0x00006ff7      0x2a2 Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+                                0x3fb (size before relaxing)
+ .debug_str     0x00007299       0xf2 Libraries/uC-CSP/LPC17xx/csp_int.o
+                                0x26f (size before relaxing)
+ .debug_str     0x0000738b      0x101 Libraries/uC-CSP/LPC17xx/csp_pm.o
+                                0x23b (size before relaxing)
+ .debug_str     0x0000748c      0x2c3 Libraries/uC-CSP/LPC17xx/csp_dma.o
+                                0x479 (size before relaxing)
+ .debug_str     0x0000774f      0x274 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+                                0x3be (size before relaxing)
+ .debug_str     0x000079c3      0x133 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+                                0x233 (size before relaxing)
+ .debug_str     0x00007af6      0x610 Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+                                0x993 (size before relaxing)
+ .debug_str     0x00008106       0x5a Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+                                0x138 (size before relaxing)
+ .debug_str     0x00008160       0x7a Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+                                0x1a5 (size before relaxing)
+ .debug_str     0x000081da      0x181 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+                                0x2da (size before relaxing)
+
+.debug_loc      0x00000000     0x75a2
+ *(.debug_loc)
+ .debug_loc     0x00000000       0xa9 usb_app.o
+ .debug_loc     0x000000a9      0x244 Libraries/uC-CPU/os_cpu_c.o
+ .debug_loc     0x000002ed      0x188 Libraries/uC-CPU/cpu_c.o
+ .debug_loc     0x00000475      0x3a8 Libraries/uC-CPU/cpu_core.o
+ .debug_loc     0x0000081d      0x6a4 Libraries/BSP/LCD/bsp_lcd.o
+ .debug_loc     0x00000ec1       0xa8 Libraries/BSP/cpu_bsp.o
+ .debug_loc     0x00000f69       0xbc Libraries/BSP/bsp.o
+ .debug_loc     0x00001025       0xbc Libraries/CM3/src/hw_timer.o
+ .debug_loc     0x000010e1       0xa8 Libraries/CM3/src/lpc17xx_nvic.o
+ .debug_loc     0x00001189       0x58 Libraries/CM3/src/system_LPC17xx.o
+ .debug_loc     0x000011e1      0x404 Libraries/CM3/src/libnosys_gnu.o
+ .debug_loc     0x000015e5       0x64 Libraries/CM3/src/NVICInit.o
+ .debug_loc     0x00001649       0xd4 Libraries/uC-LIB/lib_math.o
+ .debug_loc     0x0000171d      0x380 Libraries/uC-LIB/lib_ascii.o
+ .debug_loc     0x00001a9d      0x4d4 Libraries/uC-LIB/lib_str.o
+ .debug_loc     0x00001f71      0x2a2 Libraries/uC-LIB/lib_mem.o
+ .debug_loc     0x00002213       0xe0 Libraries/uC-OSIII/os_prio.o
+ .debug_loc     0x000022f3      0x311 Libraries/uC-OSIII/os_tmr.o
+ .debug_loc     0x00002604       0xe0 Libraries/uC-OSIII/os_pend_multi.o
+ .debug_loc     0x000026e4      0x540 Libraries/uC-OSIII/os_task.o
+ .debug_loc     0x00002c24      0x150 Libraries/uC-OSIII/os_time.o
+ .debug_loc     0x00002d74      0x26b Libraries/uC-OSIII/os_sem.o
+ .debug_loc     0x00002fdf      0x2da Libraries/uC-OSIII/os_flag.o
+ .debug_loc     0x000032b9       0xe0 Libraries/uC-OSIII/os_stat.o
+ .debug_loc     0x00003399       0x38 Libraries/uC-OSIII/os_cfg_app.o
+ .debug_loc     0x000033d1      0x1fa Libraries/uC-OSIII/os_mutex.o
+ .debug_loc     0x000035cb      0x26a Libraries/uC-OSIII/os_q.o
+ .debug_loc     0x00003835       0x38 Libraries/uC-OSIII/os_dbg.o
+ .debug_loc     0x0000386d      0x8a8 Libraries/uC-OSIII/os_core.o
+ .debug_loc     0x00004115      0x188 Libraries/uC-OSIII/os_tick.o
+ .debug_loc     0x0000429d      0x1c0 Libraries/uC-OSIII/os_msg.o
+ .debug_loc     0x0000445d      0x118 Libraries/uC-OSIII/os_mem.o
+ .debug_loc     0x00004575       0xe1 Libraries/uC-OSIII/os_int.o
+ .debug_loc     0x00004656      0x1f4 Libraries/CFG/os_app_hooks.o
+ .debug_loc     0x0000484a      0x150 Libraries/serial_lite/os_serial_lite.o
+ .debug_loc     0x0000499a       0x70 Libraries/uC-CSP/os_csp.o
+ .debug_loc     0x00004a0a       0xa8 Libraries/uC-CSP/csp.o
+ .debug_loc     0x00004ab2      0x190 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .debug_loc     0x00004c42      0x1b4 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .debug_loc     0x00004df6      0x1f8 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .debug_loc     0x00004fee      0x150 Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .debug_loc     0x0000513e      0x620 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .debug_loc     0x0000575e      0x528 Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .debug_loc     0x00005c86      0x5b2 Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .debug_loc     0x00006238      0x3f0 Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .debug_loc     0x00006628      0x230 Libraries/uC-CSP/LPC17xx/csp_int.o
+ .debug_loc     0x00006858      0x224 Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .debug_loc     0x00006a7c      0x1c2 Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .debug_loc     0x00006c3e       0xc8 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .debug_loc     0x00006d06      0x118 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .debug_loc     0x00006e1e      0x454 Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .debug_loc     0x00007272       0x64 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .debug_loc     0x000072d6      0x10c Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .debug_loc     0x000073e2      0x1c0 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+
+.debug_macinfo  0x00000000   0x30ea5f
+ *(.debug_macinfo)
+ .debug_macinfo
+                0x00000000    0x1f691 usb_app.o
+ .debug_macinfo
+                0x0001f691     0xd8fe Libraries/uC-CPU/os_cpu_c.o
+ .debug_macinfo
+                0x0002cf8f     0xab5b Libraries/uC-CPU/cpu_c.o
+ .debug_macinfo
+                0x00037aea     0xaa3d Libraries/uC-CPU/cpu_core.o
+ .debug_macinfo
+                0x00042527     0xbd14 Libraries/BSP/LCD/Images/img_tbl.o
+ .debug_macinfo
+                0x0004e23b     0xbd14 Libraries/BSP/LCD/Images/img_nxp_logo.o
+ .debug_macinfo
+                0x00059f4f     0xbd14 Libraries/BSP/LCD/Images/img_os_logo.o
+ .debug_macinfo
+                0x00065c63     0xbd14 Libraries/BSP/LCD/Images/img_micirum_logo.o
+ .debug_macinfo
+                0x00071977     0xbd14 Libraries/BSP/LCD/Images/img_keil_logo.o
+ .debug_macinfo
+                0x0007d68b     0xbd14 Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+ .debug_macinfo
+                0x0008939f     0xbd1f Libraries/BSP/LCD/Fonts/font_tbl.o
+ .debug_macinfo
+                0x000950be     0xbd14 Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+ .debug_macinfo
+                0x000a0dd2     0xbd14 Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+ .debug_macinfo
+                0x000acae6    0x13440 Libraries/BSP/LCD/bsp_lcd.o
+ .debug_macinfo
+                0x000bff26     0xe1f9 Libraries/BSP/cpu_bsp.o
+ .debug_macinfo
+                0x000ce11f    0x13e65 Libraries/BSP/bsp.o
+ .debug_macinfo
+                0x000e1f84     0x7155 Libraries/CM3/src/hw_timer.o
+ .debug_macinfo
+                0x000e90d9     0x2b6e Libraries/CM3/src/core_cm3.o
+ .debug_macinfo
+                0x000ebc47     0x732e Libraries/CM3/src/lpc17xx_nvic.o
+ .debug_macinfo
+                0x000f2f75     0x7433 Libraries/CM3/src/system_LPC17xx.o
+ .debug_macinfo
+                0x000fa3a8     0x5b63 Libraries/CM3/src/libnosys_gnu.o
+ .debug_macinfo
+                0x000fff0b     0x7312 Libraries/CM3/src/NVICInit.o
+ .debug_macinfo
+                0x0010721d     0xaae6 Libraries/uC-LIB/lib_math.o
+ .debug_macinfo
+                0x00111d03     0x7f1b Libraries/uC-LIB/lib_ascii.o
+ .debug_macinfo
+                0x00119c1e     0x842c Libraries/uC-LIB/lib_str.o
+ .debug_macinfo
+                0x0012204a     0xaa3d Libraries/uC-LIB/lib_mem.o
+ .debug_macinfo
+                0x0012ca87     0xd8f2 Libraries/uC-OSIII/os_prio.o
+ .debug_macinfo
+                0x0013a379     0xd935 Libraries/uC-OSIII/os_tmr.o
+ .debug_macinfo
+                0x00147cae     0xd8fa Libraries/uC-OSIII/os_var.o
+ .debug_macinfo
+                0x001555a8     0xd8f2 Libraries/uC-OSIII/os_pend_multi.o
+ .debug_macinfo
+                0x00162e9a     0xd8f2 Libraries/uC-OSIII/os_task.o
+ .debug_macinfo
+                0x0017078c     0xd8f2 Libraries/uC-OSIII/os_time.o
+ .debug_macinfo
+                0x0017e07e     0xd8f2 Libraries/uC-OSIII/os_sem.o
+ .debug_macinfo
+                0x0018b970     0xd8f2 Libraries/uC-OSIII/os_flag.o
+ .debug_macinfo
+                0x00199262     0xd8f2 Libraries/uC-OSIII/os_stat.o
+ .debug_macinfo
+                0x001a6b54     0xdcf9 Libraries/uC-OSIII/os_cfg_app.o
+ .debug_macinfo
+                0x001b484d     0xd8f2 Libraries/uC-OSIII/os_mutex.o
+ .debug_macinfo
+                0x001c213f     0xd8f2 Libraries/uC-OSIII/os_q.o
+ .debug_macinfo
+                0x001cfa31     0xd8f2 Libraries/uC-OSIII/os_dbg.o
+ .debug_macinfo
+                0x001dd323     0xd8f2 Libraries/uC-OSIII/os_core.o
+ .debug_macinfo
+                0x001eac15     0xd8f2 Libraries/uC-OSIII/os_tick.o
+ .debug_macinfo
+                0x001f8507     0xd8f2 Libraries/uC-OSIII/os_msg.o
+ .debug_macinfo
+                0x00205df9     0xd8f2 Libraries/uC-OSIII/os_mem.o
+ .debug_macinfo
+                0x002136eb     0xd8f2 Libraries/uC-OSIII/os_int.o
+ .debug_macinfo
+                0x00220fdd     0xd924 Libraries/CFG/os_app_hooks.o
+ .debug_macinfo
+                0x0022e901    0x1af99 Libraries/serial_lite/os_serial_lite.o
+ .debug_macinfo
+                0x0024989a    0x11028 Libraries/uC-CSP/os_csp.o
+ .debug_macinfo
+                0x0025a8c2     0xe176 Libraries/uC-CSP/csp.o
+ .debug_macinfo
+                0x00268a38     0x8634 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .debug_macinfo
+                0x0027106c     0xe9b5 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .debug_macinfo
+                0x0027fa21     0xe497 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .debug_macinfo
+                0x0028deb8     0x780f Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .debug_macinfo
+                0x002956c7     0x76d8 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .debug_macinfo
+                0x0029cd9f     0xaa4c Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .debug_macinfo
+                0x002a77eb     0xa071 Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .debug_macinfo
+                0x002b185c     0x98e3 Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .debug_macinfo
+                0x002bb13f     0xe3ca Libraries/uC-CSP/LPC17xx/csp_int.o
+ .debug_macinfo
+                0x002c9509     0xe8a9 Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .debug_macinfo
+                0x002d7db2     0xe468 Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .debug_macinfo
+                0x002e621a     0x7141 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .debug_macinfo
+                0x002ed35b     0x36c0 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .debug_macinfo
+                0x002f0a1b     0x834b Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .debug_macinfo
+                0x002f8d66     0x3305 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .debug_macinfo
+                0x002fc06b     0xf26c Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .debug_macinfo
+                0x0030b2d7     0x3788 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+
+.comment        0x00000000       0x30
+ .comment       0x00000000       0x30 usb_app.o
+                                 0x31 (size before relaxing)
+ .comment       0x00000000       0x31 Libraries/uC-CPU/os_cpu_c.o
+ .comment       0x00000000       0x31 Libraries/uC-CPU/cpu_c.o
+ .comment       0x00000000       0x31 Libraries/uC-CPU/cpu_core.o
+ .comment       0x00000000       0x31 Libraries/BSP/LCD/Images/img_tbl.o
+ .comment       0x00000000       0x31 Libraries/BSP/LCD/Images/img_nxp_logo.o
+ .comment       0x00000000       0x31 Libraries/BSP/LCD/Images/img_os_logo.o
+ .comment       0x00000000       0x31 Libraries/BSP/LCD/Images/img_micirum_logo.o
+ .comment       0x00000000       0x31 Libraries/BSP/LCD/Images/img_keil_logo.o
+ .comment       0x00000000       0x31 Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+ .comment       0x00000000       0x31 Libraries/BSP/LCD/Fonts/font_tbl.o
+ .comment       0x00000000       0x31 Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+ .comment       0x00000000       0x31 Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+ .comment       0x00000000       0x31 Libraries/BSP/LCD/bsp_lcd.o
+ .comment       0x00000000       0x31 Libraries/BSP/cpu_bsp.o
+ .comment       0x00000000       0x31 Libraries/BSP/bsp.o
+ .comment       0x00000000       0x31 Libraries/CM3/src/hw_timer.o
+ .comment       0x00000000       0x31 Libraries/CM3/src/core_cm3.o
+ .comment       0x00000000       0x31 Libraries/CM3/src/lpc17xx_nvic.o
+ .comment       0x00000000       0x31 Libraries/CM3/src/system_LPC17xx.o
+ .comment       0x00000000       0x31 Libraries/CM3/src/libnosys_gnu.o
+ .comment       0x00000000       0x31 Libraries/CM3/src/NVICInit.o
+ .comment       0x00000000       0x31 Libraries/uC-LIB/lib_math.o
+ .comment       0x00000000       0x31 Libraries/uC-LIB/lib_ascii.o
+ .comment       0x00000000       0x31 Libraries/uC-LIB/lib_str.o
+ .comment       0x00000000       0x31 Libraries/uC-LIB/lib_mem.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_prio.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_tmr.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_var.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_pend_multi.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_task.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_time.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_sem.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_flag.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_stat.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_cfg_app.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_mutex.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_q.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_dbg.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_core.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_tick.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_msg.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_mem.o
+ .comment       0x00000000       0x31 Libraries/uC-OSIII/os_int.o
+ .comment       0x00000000       0x31 Libraries/CFG/os_app_hooks.o
+ .comment       0x00000000       0x31 Libraries/serial_lite/os_serial_lite.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/os_csp.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/csp.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/csp_int.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .comment       0x00000000       0x31 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.note.gnu.arm.ident
+ *(.note.gnu.arm.ident)
+
+.ARM.attributes
+                0x00000000       0x31
+ *(.ARM.attributes)
+ .ARM.attributes
+                0x00000000       0x33 usb_app.o
+ .ARM.attributes
+                0x00000033       0x33 Libraries/uC-CPU/os_cpu_c.o
+ .ARM.attributes
+                0x00000066       0x33 Libraries/uC-CPU/cpu_c.o
+ .ARM.attributes
+                0x00000099       0x33 Libraries/uC-CPU/cpu_core.o
+ .ARM.attributes
+                0x000000cc       0x33 Libraries/BSP/LCD/Images/img_tbl.o
+ .ARM.attributes
+                0x000000ff       0x33 Libraries/BSP/LCD/Images/img_nxp_logo.o
+ .ARM.attributes
+                0x00000132       0x33 Libraries/BSP/LCD/Images/img_os_logo.o
+ .ARM.attributes
+                0x00000165       0x33 Libraries/BSP/LCD/Images/img_micirum_logo.o
+ .ARM.attributes
+                0x00000198       0x33 Libraries/BSP/LCD/Images/img_keil_logo.o
+ .ARM.attributes
+                0x000001cb       0x33 Libraries/BSP/LCD/Fonts/font_terminal_8x8.o
+ .ARM.attributes
+                0x000001fe       0x33 Libraries/BSP/LCD/Fonts/font_tbl.o
+ .ARM.attributes
+                0x00000231       0x33 Libraries/BSP/LCD/Fonts/font_comic_18x18.o
+ .ARM.attributes
+                0x00000264       0x33 Libraries/BSP/LCD/Fonts/font_swiss_16x16.o
+ .ARM.attributes
+                0x00000297       0x33 Libraries/BSP/LCD/bsp_lcd.o
+ .ARM.attributes
+                0x000002ca       0x33 Libraries/BSP/cpu_bsp.o
+ .ARM.attributes
+                0x000002fd       0x33 Libraries/BSP/bsp.o
+ .ARM.attributes
+                0x00000330       0x33 Libraries/CM3/src/hw_timer.o
+ .ARM.attributes
+                0x00000363       0x33 Libraries/CM3/src/core_cm3.o
+ .ARM.attributes
+                0x00000396       0x33 Libraries/CM3/src/lpc17xx_nvic.o
+ .ARM.attributes
+                0x000003c9       0x33 Libraries/CM3/src/system_LPC17xx.o
+ .ARM.attributes
+                0x000003fc       0x33 Libraries/CM3/src/libnosys_gnu.o
+ .ARM.attributes
+                0x0000042f       0x33 Libraries/CM3/src/NVICInit.o
+ .ARM.attributes
+                0x00000462       0x33 Libraries/uC-LIB/lib_math.o
+ .ARM.attributes
+                0x00000495       0x33 Libraries/uC-LIB/lib_ascii.o
+ .ARM.attributes
+                0x000004c8       0x33 Libraries/uC-LIB/lib_str.o
+ .ARM.attributes
+                0x000004fb       0x33 Libraries/uC-LIB/lib_mem.o
+ .ARM.attributes
+                0x0000052e       0x33 Libraries/uC-OSIII/os_prio.o
+ .ARM.attributes
+                0x00000561       0x33 Libraries/uC-OSIII/os_tmr.o
+ .ARM.attributes
+                0x00000594       0x33 Libraries/uC-OSIII/os_var.o
+ .ARM.attributes
+                0x000005c7       0x33 Libraries/uC-OSIII/os_pend_multi.o
+ .ARM.attributes
+                0x000005fa       0x33 Libraries/uC-OSIII/os_task.o
+ .ARM.attributes
+                0x0000062d       0x33 Libraries/uC-OSIII/os_time.o
+ .ARM.attributes
+                0x00000660       0x33 Libraries/uC-OSIII/os_sem.o
+ .ARM.attributes
+                0x00000693       0x33 Libraries/uC-OSIII/os_flag.o
+ .ARM.attributes
+                0x000006c6       0x33 Libraries/uC-OSIII/os_stat.o
+ .ARM.attributes
+                0x000006f9       0x33 Libraries/uC-OSIII/os_cfg_app.o
+ .ARM.attributes
+                0x0000072c       0x33 Libraries/uC-OSIII/os_mutex.o
+ .ARM.attributes
+                0x0000075f       0x33 Libraries/uC-OSIII/os_q.o
+ .ARM.attributes
+                0x00000792       0x33 Libraries/uC-OSIII/os_dbg.o
+ .ARM.attributes
+                0x000007c5       0x33 Libraries/uC-OSIII/os_core.o
+ .ARM.attributes
+                0x000007f8       0x33 Libraries/uC-OSIII/os_tick.o
+ .ARM.attributes
+                0x0000082b       0x33 Libraries/uC-OSIII/os_msg.o
+ .ARM.attributes
+                0x0000085e       0x33 Libraries/uC-OSIII/os_mem.o
+ .ARM.attributes
+                0x00000891       0x33 Libraries/uC-OSIII/os_int.o
+ .ARM.attributes
+                0x000008c4       0x33 Libraries/CFG/os_app_hooks.o
+ .ARM.attributes
+                0x000008f7       0x33 Libraries/serial_lite/os_serial_lite.o
+ .ARM.attributes
+                0x0000092a       0x33 Libraries/uC-CSP/os_csp.o
+ .ARM.attributes
+                0x0000095d       0x33 Libraries/uC-CSP/csp.o
+ .ARM.attributes
+                0x00000990       0x33 Libraries/uC-CSP/LPC17xx/lpc17xx_clkpwr.o
+ .ARM.attributes
+                0x000009c3       0x33 Libraries/uC-CSP/LPC17xx/csp_gpio.o
+ .ARM.attributes
+                0x000009f6       0x33 Libraries/uC-CSP/LPC17xx/csp_tmr.o
+ .ARM.attributes
+                0x00000a29       0x33 Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.o
+ .ARM.attributes
+                0x00000a5c       0x33 Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.o
+ .ARM.attributes
+                0x00000a8f       0x33 Libraries/uC-CSP/LPC17xx/lpc17xx_emac.o
+ .ARM.attributes
+                0x00000ac2       0x33 Libraries/uC-CSP/LPC17xx/lpc17xx_uart.o
+ .ARM.attributes
+                0x00000af5       0x33 Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.o
+ .ARM.attributes
+                0x00000b28       0x33 Libraries/uC-CSP/LPC17xx/csp_int.o
+ .ARM.attributes
+                0x00000b5b       0x33 Libraries/uC-CSP/LPC17xx/csp_pm.o
+ .ARM.attributes
+                0x00000b8e       0x33 Libraries/uC-CSP/LPC17xx/csp_dma.o
+ .ARM.attributes
+                0x00000bc1       0x33 Libraries/uC-CSP/LPC17xx/USB/src/intenable.o
+ .ARM.attributes
+                0x00000bf4       0x33 Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.o
+ .ARM.attributes
+                0x00000c27       0x33 Libraries/uC-CSP/LPC17xx/USB/src/usbhw_lpc.o
+ .ARM.attributes
+                0x00000c5a       0x33 Libraries/uC-CSP/LPC17xx/USB/src/usbinit.o
+ .ARM.attributes
+                0x00000c8d       0x33 Libraries/uC-CSP/LPC17xx/USB/src/usblibs.o
+ .ARM.attributes
+                0x00000cc0       0x33 Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.o
+ .ARM.attributes
+                0x00000cf3       0x21 Libraries/CM3/src/startup_LPC17xx.o
+ .ARM.attributes
+                0x00000d14       0x21 Libraries/uC-CPU/cpu_a.o
+ .ARM.attributes
+                0x00000d35       0x21 Libraries/uC-CPU/os_cpu_a.o
+ .ARM.attributes
+                0x00000d56       0x1b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_aeabi_uldivmod.o)
+ .ARM.attributes
+                0x00000d71       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(bpabi.o)
+ .ARM.attributes
+                0x00000d9c       0x1b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_dvmd_tls.o)
+ .ARM.attributes
+                0x00000db7       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_divdi3.o)
+ .ARM.attributes
+                0x00000de2       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivdi3.o)
+ .ARM.attributes
+                0x00000e0d       0x1b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/thumb2/libgcc.a(_udivsi3.o)
+ .ARM.attributes
+                0x00000e28       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-reent.o)
+ .ARM.attributes
+                0x00000e53       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strcpy.o)
+ .ARM.attributes
+                0x00000e7e       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-strlen.o)
+ .ARM.attributes
+                0x00000ea9       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-freer.o)
+ .ARM.attributes
+                0x00000ed4       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-impure.o)
+ .ARM.attributes
+                0x00000eff       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mallocr.o)
+ .ARM.attributes
+                0x00000f2a       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-mlock.o)
+ .ARM.attributes
+                0x00000f55       0x2b /home/wimma/bin/codesourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin/../lib/gcc/arm-none-eabi/4.6.3/../../../../arm-none-eabi/lib/thumb2/libc.a(lib_a-sbrkr.o)
+
+/DISCARD/
+ *(.note.GNU-stack)
+
+.ethram         0x2007c000        0x0
+                0x2007c000                __ethram_beg__ = .
+ *(.ethram)
+                0x2007c000                __ethram_end__ = .
+
+.ethram_buf     0x20080000        0x0
+                0x20080000                __ethram_buf_beg__ = .
+ *(.ethram)
+                0x20080000                __ethram_buf_end__ = .
+OUTPUT(firmware.elf elf32-littlearm)
+
+.debug_ranges   0x00000000       0x20
+ .debug_ranges  0x00000000       0x20 Libraries/CM3/src/startup_LPC17xx.o
