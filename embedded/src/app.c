@@ -10,6 +10,7 @@
 
 #define HOMING_AMOUNT -1E9
 #define CALIBRATION_AMOUNT 1E6
+#define BUTTON_STEP_MM 5
 
 typedef enum {
     ApplicationState_Movement = 0u,
@@ -34,9 +35,9 @@ int32 stepsX;
 int32 stepsY;
 int32 stepsZ;
 
-const uint32 xCalibration = 5000u;
-const uint32 yCalibration = 5000u;
-const uint32 zCalibration = 5000u;
+const uint32 xCalibration = 2500u;
+const uint32 yCalibration = 2500u;
+const uint32 zCalibration = 2500u;
 
 ApplicationState applicationState = ApplicationState_Movement;
 
@@ -243,37 +244,37 @@ static void App_Button (void *p_arg)
                         int32 movement;
                         if (value.id == BUTTON_Xplus)
                         {
-                            movement = value.count * 10;
+                            movement = value.count * BUTTON_STEP_MM;
                             setXDirectionMM(movement);
                             Debug_printf(Debug_Level_2, "X: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Xminus)
                         {
-                            movement = -value.count * 10;
+                            movement = -value.count * BUTTON_STEP_MM;
                             setXDirectionMM(movement);
                             Debug_printf(Debug_Level_2, "X: %imm\n", movement);
                         }
                         if (value.id == BUTTON_Yplus)
                         {
-                            movement = value.count * 10;
+                            movement = value.count * BUTTON_STEP_MM;
                             setYDirectionMM(movement);
                             Debug_printf(Debug_Level_2, "Y: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Yminus)
                         {
-                            movement = -value.count * 10;
+                            movement = -value.count * BUTTON_STEP_MM;
                             setYDirectionMM(movement);
                             Debug_printf(Debug_Level_2, "Y: %imm\n", movement);
                         }
                         if (value.id == BUTTON_Zplus)
                         {
-                            movement = value.count * 10;
+                            movement = value.count * BUTTON_STEP_MM;
                             setZDirectionMM(movement);
                             Debug_printf(Debug_Level_2, "Z: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Zminus)
                         {
-                            movement = -value.count * 10;
+                            movement = -value.count * BUTTON_STEP_MM;
                             setZDirectionMM(movement);
                             Debug_printf(Debug_Level_2, "Z: %imm\n", movement);
                         }
@@ -692,7 +693,7 @@ bool testEndstops(void )
 
 void buttonInit ()
 {
-    Button_initialize2(10000, 30000);
+    Button_initialize2(1E4, 1E5);
     //+++++++++++++++++++++++++++++++++++++++++TASTER++++++++++++++++++++++++++++++++++++++++++++++++++
     //Taster x+
     Button_initializeButton(BUTTON_Xplus, TASTER_Xplus_PORT, TASTER_Xplus_PIN, ButtonTypeLowActive);
