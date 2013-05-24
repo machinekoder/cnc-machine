@@ -3,10 +3,7 @@
  *
  **/
 #include "app.h"
-<<<<<<< HEAD
-=======
-//#include <csp.h>
->>>>>>> 07a5ee24461812c089b6288972b020080b9445c9
+
 
 
 #define printfData(x) Debug_printf(Debug_Level_1,x)
@@ -410,11 +407,8 @@ static void App_MotorSteuerung (void *p_arg)
         BulkInSize = strlen((char *)str);                   /* calculate string length of outgoing data */
         abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);          /* Highbyte */
         abBulkInBuf[1]=0x00ff&(BulkInSize+1);               /* Lowbyte  */
-<<<<<<< HEAD
-        sprintf((char *)&abBulkInBuf[2],"%s",str);
-=======
+
        sprintf((char *)&abBulkInBuf[2],"%s",str);               /* write data to output buffer */
->>>>>>> 07a5ee24461812c089b6288972b020080b9445c9
         BulkInSize += 3;                                    /* HB + LB + \0 */
         BulkOutSize = 0;                                    /* reset the Message length of the incoming buffer */
    }
