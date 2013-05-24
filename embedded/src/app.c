@@ -13,6 +13,8 @@
 #define CALIBRATION_AMOUNT 1E6
 #define BUTTON_STEP_MM 5
 
+#define COMMAND_BUFFER_SIZE 200
+
 typedef enum {
     ApplicationState_Movement = 0u,
     ApplicationState_Working  = 1u,
@@ -56,7 +58,6 @@ bool endschalterYMinusTest = FALSE;
 bool endschalterZPlusTest  = FALSE;
 bool endschalterZMinusTest = FALSE;
 
-
 // For testing
 int8 testValue = 2;
 uint8 testPort = 2;
@@ -75,6 +76,9 @@ static void App_TMR2_IntHandler (void *p_arg);
 static void App_TaskStart (void  *p_arg);
 static void App_Button (void *p_arg);
 static void App_MotorSteuerung (void *p_arg);
+
+void commandSplitter(char* data, uint32 length);
+void processCommand(char *buffer);
 
 /*
 ************************************************************************************************
@@ -397,13 +401,18 @@ static void App_MotorSteuerung (void *p_arg)
     OS_ERR       err;
    (void)p_arg;                                             /* Prevent Compiler Warning */
 
-  uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
+  //uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
 
   (void)p_arg;                                              /* Prevent Compiler Warning */
   while(DEF_TRUE) 
   {
-   if(BulkOutSize > 0)
+   if(usbReceiveBufferSize > 0)
    {                                                        /* if a Message was received */
+<<<<<<< HEAD
+        USB_printf("I'm a LPC1758 %i\n",5);
+        commandSplitter((char*)&usbReceiveBuffer[2], usbReceiveBufferSize);
+        usbReceiveBufferSize = 0;                                    /* reset the Message length of the incoming buffer */
+=======
         BulkInSize = strlen((char *)str);                   /* calculate string length of outgoing data */
         abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);          /* Highbyte */
         abBulkInBuf[1]=0x00ff&(BulkInSize+1);               /* Lowbyte  */
@@ -411,6 +420,7 @@ static void App_MotorSteuerung (void *p_arg)
        sprintf((char *)&abBulkInBuf[2],"%s",str);               /* write data to output buffer */
         BulkInSize += 3;                                    /* HB + LB + \0 */
         BulkOutSize = 0;                                    /* reset the Message length of the incoming buffer */
+>>>>>>> db914363cab50030638fb4ee81591831c34a3c0d
    }
       OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &err);
  
@@ -422,8 +432,27 @@ static void App_MotorSteuerung (void *p_arg)
     }
   }
   
+}
 
-
+void commandSplitter(char* data, uint32 length)
+{
+    uint32 i;
+    uint32 commandBufferPos = 0;
+    static char commandBuffer[COMMAND_BUFFER_SIZE];
+    
+    for (i = 0; i < length; ++i)
+    {
+        if (data[i] == '\n')
+        {
+            processCommand(commandBuffer);
+            commandBufferPos = 0;
+        }
+        else
+        {
+            commandBuffer[commandBufferPos] = data[i];
+            commandBufferPos++;
+        }
+    }
 }
 
 void moveXDirection ()
@@ -447,6 +476,7 @@ void moveXDirection ()
     else
     {
         CSP_TmrStop(CSP_TMR_NBR_00);
+        stepsX = 0;
     }
 
 }
@@ -472,7 +502,7 @@ void moveYDirection ()
     else
     {
         CSP_TmrStop(CSP_TMR_NBR_01);
-
+        stepsY = 0;
     }
 }
 
@@ -497,7 +527,7 @@ void moveZDirection ()
     else
     {
         CSP_TmrStop(CSP_TMR_NBR_02);
-
+        stepsZ = 0;
     }
 }
 
@@ -546,8 +576,6 @@ bool setYDirection (int32 stepsY_local)
         Gpio_clear(MOTOR_Y_DIR_PORT,MOTOR_Y_DIR_PIN); // directionY
     }
 
-    CSP_TmrStart(CSP_TMR_NBR_01);
-
     if (stepsY == 0)
     {
         stepsY = stepsY_local * 2; // one cock has rising and falling edge
@@ -576,8 +604,6 @@ bool setZDirection (int32 stepsZ_local)
     {
         Gpio_set(MOTOR_Z_DIR_PORT,MOTOR_Z_DIR_PIN); // directionY
     }
-
-    CSP_TmrStart(CSP_TMR_NBR_02);
 
     if (stepsZ == 0)
     {
@@ -783,30 +809,30 @@ static void App_TMR2_IntHandler (void *p_arg)
 
 void printUnknownCommand(void)
 {
-    printfData("CMD?\r");
+    USB_printf("CMD?\r");
     Led_clear(2);
 }
 
 void printParameterMissing(void)
 {
-    printfData("Missing parameter.\r");
+    USB_printf("Missing parameter.\r");
     Led_clear(2);
 }
 
 void printAcknowledgement(void)
 {
-    printfData("ACK\r");
+    USB_printf("ACK\r");
     Led_clear(2);
 }
 
 void printError(char *message)
 {
-    printfData2("ERR: %s\r", message);
+    USB_printf("ERR: %s\r", message);
 }
 
 void printAliveMessage(void)
 {
-    printfData("yes\r");
+    USB_printf("yes\r");
     Led_clear(2);
 }
 
@@ -829,6 +855,78 @@ void processCommand(char *buffer)
     Led_set(Led1);  // set the yellow led to indicate incoming data status
     
     dataPointer = strtok_r(buffer, " ", &savePointer);
+    
+    if (compareBaseCommand("set", dataPointer))
+    {
+        dataPointer = strtok_r(NULL, " ", &savePointer);
+        if (compareExtendedCommand("x",dataPointer))
+        {
+            // We have a set command
+            dataPointer = strtok_r(NULL, " ", &savePointer);
+            if (dataPointer != NULL)
+            {
+                setXDirectionMM(atoi(dataPointer));
+            }
+        }
+        else if (compareExtendedCommand("y",dataPointer))
+        {
+            // We have a set command
+            dataPointer = strtok_r(NULL, " ", &savePointer);
+            if (dataPointer != NULL)
+            {
+                setYDirectionMM(atoi(dataPointer));
+            }
+        }
+        else if (compareExtendedCommand("z",dataPointer))
+        {
+            // We have a set command
+            dataPointer = strtok_r(NULL, " ", &savePointer);
+            if (dataPointer != NULL)
+            {
+                setZDirectionMM(atoi(dataPointer));
+                return;
+            }
+        }
+        else
+        {
+            printUnknownCommand();
+            return;
+        }
+    }
+    else if (compareBaseCommand("home", dataPointer))
+    {
+        dataPointer = strtok_r(NULL, " ", &savePointer);
+        if (compareExtendedCommand("x",dataPointer))
+        {
+            homeX();
+            return;
+        }
+        if (compareExtendedCommand("y",dataPointer))
+        {
+            homeY();
+            return;
+        }
+        if (compareExtendedCommand("z",dataPointer))
+        {
+            homeZ();
+            return;
+        }
+        if (compareExtendedCommand("all",dataPointer))
+        {
+            homeAll();
+            return;
+        }
+        else
+        {
+            printUnknownCommand();
+            return;
+        }
+    }
+    else
+    {
+        printUnknownCommand();
+    }
+    
 #if 0
     if (compareBaseCommand("alive", dataPointer))
     {

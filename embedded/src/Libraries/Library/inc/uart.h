@@ -9,7 +9,6 @@
  * @{
  */
 #pragma once
-#include <stdlib.h>
 
 /** Size of UARTs circular buffer for reading */
 #ifndef UART_READ_BUFFER_SIZE
@@ -64,6 +63,7 @@
 #include <types.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef enum {
     Uart0 = 0,

@@ -53,7 +53,7 @@ void BulkOut(uint8_t bEP, uint8_t bEPStatus)
 
 	USBHwEPRead(bEP, usbReceiveBuffer, sizeof(usbReceiveBuffer));
 
-	usbReceiveBufferSize = usbReceiveBuffer[0]<<8 | usbReceiveBuffer[1];
+	usbReceiveBufferSize = usbReceiveBuffer[1]<<8 | usbReceiveBuffer[2];
 	usbReceiveBufferSize = usbReceiveBufferSize - 1;
 }
 
@@ -70,34 +70,4 @@ void BulkIn(uint8_t bEP, uint8_t bEPStatus)
 		USBHwEPWrite(bEP, usbSendBuffer, usbSendBufferSize);
 		deleteBulkInBuf();
 	}
-}
-
-int8_t USB_printf(char *format, ...)
-{
-    va_list arg_ptr;
-    
-    va_start(arg_ptr,format);
-    vsnprintf((char *)(&usbSendBuffer[2]), USB_BUFFER_SIZE-2, format, arg_ptr);
-    va_end(arg_ptr);
-    
-    usbSendBufferSize = strlen((char *)(&usbSendBuffer[2])) + 3;                  // calculate string length of outgoing data 
-       
-    usbSendBuffer[0]=(uint8_t)(0x00ff & ((usbSendBufferSize-2)>>8));                 // Highbyte
-    usbSendBuffer[1]=(uint8_t)(0x00ff & (usbSendBufferSize-2));                      // Lowbyte
-    
-    /* static char buffer[USB_BUFFER_SIZE-2];
-    va_list arg_ptr;
-    
-    va_start(arg_ptr,format);
-    vsnprintf(buffer, USB_BUFFER_SIZE-2, format, arg_ptr);
-    va_end(arg_ptr);
-    
-    usbSendBufferSize = strlen(buffer);//strlen((char *)(&usbSendBuffer[2])) + 3;                  // calculate string length of outgoing data 
-    usbSendBuffer[0]=0x00ff&((usbSendBufferSize+1)>>8);                 // Highbyte
-    usbSendBuffer[1]=0x00ff&(usbSendBufferSize+1);                      // Lowbyte
-    snprintf((char*)&usbSendBuffer[2], USB_BUFFER_SIZE-2, "%s", buffer);
-    usbSendBufferSize += 3;
-    */
-    
-    return 0;
 }
