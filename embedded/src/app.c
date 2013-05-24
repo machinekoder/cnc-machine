@@ -3,9 +3,8 @@
  *
  **/
 #include "app.h"
-#include <csp.h>
-#include <usbapi.h>
-#include <usbdesc.h>
+//#include <csp.h>
+
 
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
@@ -94,8 +93,8 @@ static void App_MotorSteuerung (void *p_arg);
 ************************************************************************************************
 */
 
-#include "app.h"
-#include "Libraries/uC-CSP/csp.h"
+
+//#include "Libraries/uC-CSP/csp.h"
 
 int
 main (void)
@@ -408,6 +407,7 @@ static void App_MotorSteuerung (void *p_arg)
         BulkInSize = strlen((char *)str);                   /* calculate string length of outgoing data */
         abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);          /* Highbyte */
         abBulkInBuf[1]=0x00ff&(BulkInSize+1);               /* Lowbyte  */
+       sprintf((char *)&abBulkInBuf[2],"%s",str);               /* write data to output buffer */
         BulkInSize += 3;                                    /* HB + LB + \0 */
         BulkOutSize = 0;                                    /* reset the Message length of the incoming buffer */
    }

@@ -73,13 +73,19 @@
 #include <app_cfg.h>
 #include <bsp.h>
 #include <os_serial_lite.h>
-//#include <lpc17xx_ssp.h>
+#include <lpc17xx_ssp.h>
 #include <lpc17xx_dac.h>
 //#include <uart.h>
 #include <led.h>
 #include <dac.h>
 #include <gpio.h>
 #include <pincon.h>
+
+#include <usbapi.h>
+#include <usbdesc.h>
+#include <usbdebug.h>
+#include <usbhw_lpc.h>
+#include <usbstruct.h>
 
 /*
 *********************************************************************************************************
