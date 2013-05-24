@@ -199,13 +199,13 @@ App_TaskA (void *p_arg)
 
   (void)p_arg;                                              /* Prevent Compiler Warning */
   while(DEF_TRUE) {
-	  if(BulkOutSize > 0){									/* if a Message was received */
-		  BulkInSize = strlen((char *)str);					/* calculate string length of outgoing data */
-		  abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);		/* Highbyte */
-		  abBulkInBuf[1]=0x00ff&(BulkInSize+1);			    /* Lowbyte  */
-		  sprintf((char *)&abBulkInBuf[2],"%s",str);		/* write data to output buffer */
-		  BulkInSize += 3;									/* HB + LB + \0 */
-		  BulkOutSize = 0;									/* reset the Message length of the incoming buffer */
+	  if(usbReceiveBufferSize > 0){									/* if a Message was received */
+		  usbSendBufferSize = strlen((char *)str);					/* calculate string length of outgoing data */
+		  usbSendBuffer[0]=0x00ff&((usbSendBufferSize+1)>>8);		/* Highbyte */
+		  usbSendBuffer[1]=0x00ff&(usbSendBufferSize+1);			    /* Lowbyte  */
+		  sprintf((char *)&usbSendBuffer[2],"%s",str);		/* write data to output buffer */
+		  usbSendBufferSize += 3;									/* HB + LB + \0 */
+		  usbReceiveBufferSize = 0;									/* reset the Message length of the incoming buffer */
 	  }
 	  OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &err);
   }

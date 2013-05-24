@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <usb.h>
 
-#define DEBUG 1
+//#define DEBUG 1
 #define BULK_OUT_EP 0x05
 #define BULK_IN_EP 0x82
 #define DL 2
@@ -19,8 +19,10 @@ int main (int argc,char **argv)
   int rec_status;
   int transmit = 0;
   char send_data[20];
-  char string[] = "Hello World\n";
+  char string[100];// = "set x 10\n";
   unsigned char receive_data[20];
+  
+  snprintf(string, 100, "%s\n", argv[1]);
 
   usb_init();
   usb_set_debug(2);

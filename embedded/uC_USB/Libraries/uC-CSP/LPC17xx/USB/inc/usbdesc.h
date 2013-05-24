@@ -13,10 +13,10 @@
 #define BULK_IN_EP		0x82
 #define LE_WORD(x)		((x)&0xFF),((x)>>8)
 
-int BulkInSize;
-int BulkOutSize;
-uint8_t abBulkOutBuf[USB_BUFFER_SIZE];
-uint8_t abBulkInBuf[USB_BUFFER_SIZE];
+int usbSendBufferSize;
+int usbReceiveBufferSize;
+uint8_t usbReceiveBuffer[USB_BUFFER_SIZE];
+uint8_t usbSendBuffer[USB_BUFFER_SIZE];
 
 static const uint8_t abDescriptors[] = {
 

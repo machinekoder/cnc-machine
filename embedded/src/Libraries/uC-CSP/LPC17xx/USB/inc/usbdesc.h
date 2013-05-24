@@ -4,6 +4,9 @@
 #include <usbstruct.h>
 #include <usbapi.h>
 #include <stdint.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 
 #define ACK 1
 #define USB_BUFFER_SIZE 360
@@ -13,10 +16,10 @@
 #define BULK_IN_EP		0x82
 #define LE_WORD(x)		((x)&0xFF),((x)>>8)
 
-int BulkInSize;
-int BulkOutSize;
-uint8_t abBulkOutBuf[USB_BUFFER_SIZE];
-uint8_t abBulkInBuf[USB_BUFFER_SIZE];
+uint16_t usbSendBufferSize;
+uint16_t usbReceiveBufferSize;
+uint8_t usbReceiveBuffer[USB_BUFFER_SIZE];
+uint8_t usbSendBuffer[USB_BUFFER_SIZE];
 
 static const uint8_t abDescriptors[] = {
 
@@ -158,5 +161,7 @@ void deleteBulkInBuf();
 void enable_USB_interrupts(void);
 void disable_USB_interrupts(void);
 void USB_IRQHandler(void);
+
+int8_t USB_printf(char *format, ...);
 
 #endif

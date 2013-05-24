@@ -7,11 +7,11 @@ void deleteBulkOutBuf()
 	unsigned int count=0;
 	while(count<=USB_BUFFER_SIZE-1)
 	{
-		abBulkOutBuf[count] = 0;
+		usbReceiveBuffer[count] = 0;
 		count++;
 	}
 	count = 0;
-	BulkOutSize = 0;
+	usbReceiveBufferSize = 0;
 }
 
 void deleteBulkInBuf()
@@ -19,11 +19,11 @@ void deleteBulkInBuf()
 	unsigned int count=0;
 	while(count<=USB_BUFFER_SIZE-1)
 	{
-		abBulkInBuf[count] = 0;
+		usbSendBuffer[count] = 0;
 		count++;
 	}
 	count = 0;
-	BulkInSize = 0;
+	usbSendBufferSize = 0;
 }
 
 /*
@@ -48,13 +48,13 @@ void BulkOut(uint8_t bEP, uint8_t bEPStatus)
 	/* disable_USB_interrupts(); */
 	for(i=0;i<=USB_BUFFER_SIZE-1;i++)
 	{
-		abBulkOutBuf[i] = 0;
+		usbReceiveBuffer[i] = 0;
 	}
 
-	USBHwEPRead(bEP, abBulkOutBuf, sizeof(abBulkOutBuf));
+	USBHwEPRead(bEP, usbReceiveBuffer, sizeof(usbReceiveBuffer));
 
-	BulkOutSize = abBulkOutBuf[1]<<8 | abBulkOutBuf[2];
-	BulkOutSize = BulkOutSize - 1;
+	usbReceiveBufferSize = usbReceiveBuffer[1]<<8 | usbReceiveBuffer[2];
+	usbReceiveBufferSize = usbReceiveBufferSize - 1;
 }
 
 
@@ -65,9 +65,9 @@ void BulkOut(uint8_t bEP, uint8_t bEPStatus)
 */
 void BulkIn(uint8_t bEP, uint8_t bEPStatus)
 {
-	if(BulkInSize > 0)
+	if(usbSendBufferSize > 0)
 	{
-		USBHwEPWrite(bEP, abBulkInBuf, BulkInSize);
+		USBHwEPWrite(bEP, usbSendBuffer, usbSendBufferSize);
 		deleteBulkInBuf();
 	}
 }
