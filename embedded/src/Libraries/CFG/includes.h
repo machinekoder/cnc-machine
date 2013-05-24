@@ -82,8 +82,13 @@
 #include <pincon.h>
 
 #include <usbapi.h>
+<<<<<<< HEAD
+#include <usbdebug.h>
+#include <usbdesc.h>
+=======
 #include <usbdesc.h>
 #include <usbdebug.h>
+>>>>>>> 07a5ee24461812c089b6288972b020080b9445c9
 #include <usbhw_lpc.h>
 #include <usbstruct.h>
 
@@ -134,6 +139,8 @@
 #include "button.h"
 #include "gpio.h"
 #include "pincon.h"
+
+
 
 /*
 *********************************************************************************************************
