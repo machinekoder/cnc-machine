@@ -408,11 +408,10 @@ static void App_MotorSteuerung (void *p_arg)
   {
    if(usbReceiveBufferSize > 0)
    {                                                        /* if a Message was received */
-<<<<<<< HEAD
         USB_printf("I'm a LPC1758 %i\n",5);
         commandSplitter((char*)&usbReceiveBuffer[2], usbReceiveBufferSize);
         usbReceiveBufferSize = 0;                                    /* reset the Message length of the incoming buffer */
-=======
+#if 0
         BulkInSize = strlen((char *)str);                   /* calculate string length of outgoing data */
         abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);          /* Highbyte */
         abBulkInBuf[1]=0x00ff&(BulkInSize+1);               /* Lowbyte  */
@@ -420,7 +419,7 @@ static void App_MotorSteuerung (void *p_arg)
        sprintf((char *)&abBulkInBuf[2],"%s",str);               /* write data to output buffer */
         BulkInSize += 3;                                    /* HB + LB + \0 */
         BulkOutSize = 0;                                    /* reset the Message length of the incoming buffer */
->>>>>>> db914363cab50030638fb4ee81591831c34a3c0d
+#endif
    }
       OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &err);
  
