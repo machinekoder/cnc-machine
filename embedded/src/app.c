@@ -3,17 +3,14 @@
  *
  **/
 #include "app.h"
-<<<<<<< HEAD
-=======
-//#include <csp.h>
->>>>>>> 07a5ee24461812c089b6288972b020080b9445c9
+
 
 
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
 
 #define HOMING_AMOUNT -1E9     //52500
-#define CALIBRATION_AMOUNT 1E6
+#define CALIBRATION_AMOUNT 100
 #define BUTTON_STEP_MM 5
 
 #define COMMAND_BUFFER_SIZE 200
@@ -41,9 +38,9 @@ int32 stepsX;
 int32 stepsY;
 int32 stepsZ;
 
-const uint32 xCalibration = 2500u;
-const uint32 yCalibration = 2500u;
-const uint32 zCalibration = 2500u;
+uint32 xCalibration;
+uint32 yCalibration;
+uint32 zCalibration;
 
 ApplicationState applicationState = ApplicationState_Movement;
 
@@ -130,9 +127,13 @@ main (void)
     // DAC_Init(LPC_DAC);
     //  Led_initialize(1,29, Led>_LowActive_Yes);
     CSP_TmrInit();
-    CSP_TmrCfg (CSP_TMR_NBR_00,40000u);
-    CSP_TmrCfg (CSP_TMR_NBR_01,40000u);
-    CSP_TmrCfg (CSP_TMR_NBR_02,40000u);
+    CSP_TmrCfg (CSP_TMR_NBR_00,35000u);
+    CSP_TmrCfg (CSP_TMR_NBR_01,35000u);
+    CSP_TmrCfg (CSP_TMR_NBR_02,35000u);
+    
+           xCalibration = 2500u;    
+       yCalibration = 2500u;
+       zCalibration = 2500u;
 
     Debug_printf(Debug_Level_1, "Init finished");
 
@@ -259,6 +260,8 @@ static  void App_TaskStart (void *p_arg)
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
         Led_clear(Led1);
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
+        
+
         
     }
 }
@@ -411,22 +414,18 @@ static void App_MotorSteuerung (void *p_arg)
   {
    if(usbReceiveBufferSize > 0)
    {                                                        /* if a Message was received */
-<<<<<<< HEAD
         USB_printf("I'm a LPC1758 %i\n",5);
         commandSplitter((char*)&usbReceiveBuffer[2], usbReceiveBufferSize);
         usbReceiveBufferSize = 0;                                    /* reset the Message length of the incoming buffer */
-=======
+#if 0
         BulkInSize = strlen((char *)str);                   /* calculate string length of outgoing data */
         abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);          /* Highbyte */
         abBulkInBuf[1]=0x00ff&(BulkInSize+1);               /* Lowbyte  */
-<<<<<<< HEAD
-        sprintf((char *)&abBulkInBuf[2],"%s",str);
-=======
+
        sprintf((char *)&abBulkInBuf[2],"%s",str);               /* write data to output buffer */
->>>>>>> 07a5ee24461812c089b6288972b020080b9445c9
         BulkInSize += 3;                                    /* HB + LB + \0 */
         BulkOutSize = 0;                                    /* reset the Message length of the incoming buffer */
->>>>>>> db914363cab50030638fb4ee81591831c34a3c0d
+#endif
    }
       OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &err);
  
@@ -693,19 +692,31 @@ void homeAll()
     Debug_printf(Debug_Level_2, "Homing all axes finished\n");
 }
 
-bool cncCalibrateZentool (void)
+bool cncCalibrateZentool (uint8_t measuredDistanceX, uint8_t measuredDistanceY, uint8_t measuredDistanceZ)
 {
     Debug_printf(Debug_Level_2, "Starting calibration\n");
     
-    homeAll();                              // home all axes
-    setXDirection(CALIBRATION_AMOUNT);      // move all axes a defined amount
-    setYDirection(CALIBRATION_AMOUNT);
-    setZDirection(CALIBRATION_AMOUNT);
+   // homeAll();                              // home all axes
+    setXDirection(CALIBRATION_AMOUNT * xCalibration);      // move all axes a defined amount
+    while (stepsX > 0) { }
+    setYDirection(CALIBRATION_AMOUNT * yCalibration);
+    while (stepsY > 0) { }
+    setZDirection(measuredDistanceZ * zCalibration);
+    while (stepsZ > 0) { }
+    
+    homeAll();
     // now the user has to measure the distance
+    xCalibration = (CALIBRATION_AMOUNT / measuredDistanceX) * xCalibration;
+    yCalibration = (CALIBRATION_AMOUNT / measuredDistanceX) * yCalibration;
+    zCalibration = (CALIBRATION_AMOUNT / measuredDistanceZ) * zCalibration;
+    
+    Debug_printf(Debug_Level_2, "Distance should be 100mm in x+ und y+ \n if not Pleas measure Distances and run Again \n");
+    Debug_printf(Debug_Level_2, "values now: x: %d Steps/mm y: %d Steps/mm z: %d Steps/mm \n", xCalibration, yCalibration, zCalibration);
     Debug_printf(Debug_Level_2, "Calibration finished\n");
     
     return TRUE;
 }
+
 
 bool testButtons(void )
 {
@@ -856,6 +867,8 @@ bool compareExtendedCommand(char *original, char *received)
 void processCommand(char *buffer)
 {
     char *dataPointer;
+    char *dataPointer1;
+    char *dataPointer2;
     char *savePointer;
     
     Led_set(Led1);  // set the yellow led to indicate incoming data status
@@ -928,6 +941,16 @@ void processCommand(char *buffer)
             return;
         }
     }
+    else if (compareBaseCommand("calibrate", dataPointer))
+    {
+        dataPointer = strtok_r(NULL, " ", &savePointer);
+        dataPointer1 = strtok_r(NULL, " ", &savePointer);
+        dataPointer2 = strtok_r(NULL, " ", &savePointer);
+       
+        cncCalibrateZentool(dataPointer, dataPointer1, dataPointer2);
+           
+        return;
+    }    
     else
     {
         printUnknownCommand();
