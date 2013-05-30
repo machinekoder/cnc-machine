@@ -101,7 +101,7 @@ bool setZDirection (int32 stepsZ_local);
 bool setXDirectionMMM (int32 mmm);
 bool setYDirectionMMM (int32 mmm);
 bool setZDirectionMMM (int32 mmm);
-bool putIntoCommandPuffer (int32 Xmm, int32 Ymm, int32 Zmm, int8 speed);
+bool putIntoCommandPuffer (int32 newXum, int32 newYum, int32 newZum, uint32 feed);
 
 
 void buttonInit();

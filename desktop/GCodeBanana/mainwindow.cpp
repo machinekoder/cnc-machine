@@ -16,19 +16,25 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     loadSettings();
 
+    // initialize communicator
+    communicator = new Communicator(this);
+
     // initialize parser
     gcodeParser = new QGCodeParser(ui->textEdit, this);
+    connect(gcodeParser, SIGNAL(codeChanged(bool)),
+            this, SLOT(codeChanged(bool)));
 
     // initialize scene
     scene = new QGraphicsScene(this);
     scene->setBackgroundBrush(QBrush(Qt::black));
     ui->graphicsView->setScene(scene);
+    ui->graphicsView->setMouseTracking(true);
 
     // create markers
     hLine = scene->addLine(0,-10,1000,-10, QPen(QBrush(Qt::white), 0, Qt::SolidLine));
     vLine = scene->addLine(0,-10,1000,-10, QPen(QBrush(Qt::white), 0, Qt::SolidLine));
-    hLine->setZValue(1);
-    vLine->setZValue(1);
+    hLine->setZValue(2);
+    vLine->setZValue(2);
     hideCrosshair();
 
     applicationSettings.boardWidth = 200.0;
@@ -38,15 +44,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     drawGrid();
 
-    connect(gcodeParser, SIGNAL(codeChanged(bool)),
-            this, SLOT(codeChanged(bool)));
-
-    ui->graphicsView->setMouseTracking(true);
-
     ui->previewDock->installEventFilter(this);
     scene->installEventFilter(this);
 
-    QTimer::singleShot(200, this, SLOT(refreshPreview()));
+    QTimer::singleShot(200, Qt::VeryCoarseTimer,this, SLOT(refreshPreview()));
 }
 
 MainWindow::~MainWindow()
@@ -356,6 +357,17 @@ void MainWindow::clearPreview()
     previewItems.clear();
 }
 
+void MainWindow::sendCommand(QString command)
+{
+    communicator->sendData(command.toUtf8() + "\n");
+    logText(tr("Sent: ") + command);
+}
+
+void MainWindow::logText(QString text)
+{
+    ui->logEdit->appendPlainText(text);
+}
+
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj == ui->previewDock)
@@ -419,4 +431,155 @@ void MainWindow::on_loadFileButton_clicked()
         QString text(file.readAll());
         ui->textEdit->setPlainText(text);
     }
+}
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    communicator->connectUsb();
+}
+
+void MainWindow::on_sendButton_clicked()
+{
+    sendCommand(ui->sendCommandEdit->text());
+    ui->sendCommandEdit->clear();
+}
+
+void MainWindow::on_pushButton_11_clicked()
+{
+    sendCommand("set x 0.1");
+}
+
+void MainWindow::on_pushButton_12_clicked()
+{
+    sendCommand("set x 1");
+}
+
+void MainWindow::on_pushButton_21_clicked()
+{
+    sendCommand("set x 10");
+}
+
+void MainWindow::on_pushButton_8_clicked()
+{
+    sendCommand("set x 100");
+}
+
+void MainWindow::on_pushButton_13_clicked()
+{
+    sendCommand("set x -0.1");
+}
+
+void MainWindow::on_pushButton_14_clicked()
+{
+    sendCommand("set x -1");
+}
+
+void MainWindow::on_pushButton_15_clicked()
+{
+    sendCommand("set x -10");
+}
+
+void MainWindow::on_pushButton_16_clicked()
+{
+    sendCommand("set x -100");
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    sendCommand("set y 0.1");
+}
+
+void MainWindow::on_pushButton_10_clicked()
+{
+    sendCommand("set y 1");
+}
+
+void MainWindow::on_pushButton_9_clicked()
+{
+    sendCommand("set y 10");
+}
+
+void MainWindow::on_pushButton_7_clicked()
+{
+    sendCommand("set y 100");
+}
+
+void MainWindow::on_pushButton_22_clicked()
+{
+    sendCommand("set y -0.1");
+}
+
+void MainWindow::on_pushButton_23_clicked()
+{
+    sendCommand("set y -1");
+}
+
+void MainWindow::on_pushButton_24_clicked()
+{
+    sendCommand("set y -10");
+}
+
+void MainWindow::on_pushButton_25_clicked()
+{
+    sendCommand("set y -100");
+}
+
+void MainWindow::on_pushButton_31_clicked()
+{
+    sendCommand("set z 0.1");
+}
+
+void MainWindow::on_pushButton_32_clicked()
+{
+    sendCommand("set z 1");
+}
+
+void MainWindow::on_pushButton_33_clicked()
+{
+    sendCommand("set z 10");
+}
+
+void MainWindow::on_pushButton_29_clicked()
+{
+    sendCommand("set z -0.1");
+}
+
+void MainWindow::on_pushButton_30_clicked()
+{
+    sendCommand("set z -1");
+}
+
+void MainWindow::on_pushButton_26_clicked()
+{
+    sendCommand("set z -10");
+}
+
+void MainWindow::on_pushButton_18_clicked()
+{
+    sendCommand("home x");
+}
+
+void MainWindow::on_pushButton_20_clicked()
+{
+    sendCommand("home y");
+}
+
+void MainWindow::on_pushButton_19_clicked()
+{
+    sendCommand("home z");
+}
+
+void MainWindow::on_pushButton_28_clicked()
+{
+    sendCommand("home all");
+}
+
+void MainWindow::on_spinBox_valueChanged(int arg1)
+{
+    sendCommand(QString("set feed xy %1").arg(arg1));
+}
+
+void MainWindow::on_spinBox_2_valueChanged(int arg1)
+{
+    sendCommand(QString("set feed z %1").arg(arg1));
 }

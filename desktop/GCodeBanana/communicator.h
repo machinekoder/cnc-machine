@@ -1,14 +1,25 @@
 #ifndef COMMUNICATOR_H
 #define COMMUNICATOR_H
 
-#define SERIALPORT
+//#define SERIALPORT
+#define USB
+#define DEBUG
 
 #include <QObject>
 #include <QDebug>
+
 #ifdef SERIALPORT
 #include <QtAddOnSerialPort/serialport.h>
 #include <QtAddOnSerialPort/serialportinfo.h>
 QT_USE_NAMESPACE_SERIALPORT
+#endif
+
+#ifdef USB
+#define BULK_OUT_EP 0x05
+#define BULK_IN_EP 0x82
+#define DL 2
+#include <QTimer>
+#include <usb.h>
 #endif
 
 class Communicator : public QObject
@@ -20,7 +31,8 @@ public:
     enum ActiveConnection {
         NoConnection = 0x00,
         SerialConnection = 0x01,
-        NetworkConnection = 0x02
+        NetworkConnection = 0x02,
+        UsbConnection = 0x04
     };
     Q_DECLARE_FLAGS(ActiveConnections, ActiveConnection)
 
@@ -32,25 +44,44 @@ public:
     bool connectSerialPort(const QString &device);
     void closeSerialPort();
 #endif
+#ifdef USB
+    bool connectUsb();
+    void closeUsb();
+#endif
     
     bool isSerialPortConnected();
     void sendData(const QByteArray &data);
     void incomingByte(char byte);
+
 signals:
 
 #ifdef SERIALPORT
     void serialPortConnected();
     void serialPortDisconnected();
 #endif
+#ifdef USB
+    void usbConnected();
+    void usbDisconnected();
+#endif
 
 private slots:
 #ifdef SERIALPORT
     void incomingSerialData();
 #endif
+#ifdef USB
+    void incomingUsbData();
+    void usbTask();
+#endif
 
 private:
 #ifdef SERIALPORT
     SerialPort *serialPort;
+#endif
+#ifdef USB
+    struct usb_dev_handle *estickv2Handle;
+    QTimer *usbCheckTimer;
+
+    usb_dev_handle *locateEstickv2 (void);
 #endif
 
 ActiveConnections activeConnections;

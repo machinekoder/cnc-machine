@@ -13,15 +13,25 @@
 #define CALIBRATION_AMOUNT 100
 #define BUTTON_STEP_MMM 5000
 
-#define COMMAND_BUFFER_SIZE 200
-#define CNC_MM_COMMAND_BUFFER_SIZE 100
-#define CNC_MM_COMMAND_DATA_SIZE   50
+#define COMMAND_BUFFER_SIZE 200u
+#define CNC_MM_COMMAND_BUFFER_SIZE 100u
+#define CNC_MM_COMMAND_DATA_SIZE   50u
+
+#define MAX_FEED_RATE 200u
+#define MIN_FEED_RATE 10u
+#define COMMAND_DELAY 50u
 
 typedef enum {
     ApplicationState_Movement = 0u,
     ApplicationState_Working  = 1u,
     ApplicationState_Test     = 2u,
 } ApplicationState;
+
+typedef struct {
+    int16 stepsX;
+    int16 stepsY;
+    int16 stepsZ;
+} CommandBufferItem;
 
 /*
 ************************************************************************************************
@@ -45,6 +55,14 @@ int32 stepsZ;
 uint32 xCalibration = 25/10;
 uint32 yCalibration = 25/10;
 uint32 zCalibration = 25/10;
+
+int32 currentX = 0;     // current X pos in um
+int32 currentY = 0;     // current Y pos in um
+int32 currentZ = 0;     // current Z pos in um
+uint32 currentFeed = 10; // current Feed rate in mm/s
+
+CommandBufferItem cncCommandBufferData[CNC_MM_COMMAND_BUFFER_SIZE];
+CircularBuffer cncCommandPuffer;
 
 ApplicationState applicationState = ApplicationState_Movement;
 
@@ -129,6 +147,9 @@ main (void)
     cnc_initialize();
     buttonInit();
     Led_initialize(1,29,Led_LowActive_Yes); // onboard LED Led1
+    
+    // init command buffer
+    Cb_initialize(&cncCommandPuffer, CNC_MM_COMMAND_BUFFER_SIZE, sizeof(CommandBufferItem), (void*)&cncCommandBufferData);
     // DAC_Init(LPC_DAC);
     //  Led_initialize(1,29, Led>_LowActive_Yes);
     CSP_TmrInit();
@@ -136,8 +157,7 @@ main (void)
     CSP_TmrCfg (CSP_TMR_NBR_01,35000u);
     CSP_TmrCfg (CSP_TMR_NBR_02,35000u);
     
-
-
+    
     Debug_printf(Debug_Level_1, "Init finished");
 
     if(os_err != OS_ERR_NONE)
@@ -454,19 +474,23 @@ static void App_MotorSteuerung (void *p_arg)
     OS_ERR       err;
    (void)p_arg;                                             /* Prevent Compiler Warning */
 
-	  uint8 test=-1000;
+	  uint16 test=-1000;
 	  uint8 time=10;
   //uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
 
   (void)p_arg;                                              /* Prevent Compiler Warning */
   while(DEF_TRUE) 
   {
+      static CommandBufferItem item;
 
-
-      setXDirectionMMM(100);
-      setYDirectionMMM(0);
-      setZDirectionMMM(0);
-      OSTimeDlyHMSM(0u, 0u, 0u, time, OS_OPT_TIME_HMSM_STRICT, &err);
+      
+      if (Cb_get(&cncCommandPuffer, (void*)&item) != (int8)(-1))
+      {
+        setXDirectionMMM(item.stepsX);
+        setYDirectionMMM(item.stepsY);
+        setZDirectionMMM(item.stepsZ);
+      }
+      OSTimeDlyHMSM(0u, 0u, 0u, COMMAND_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
  
     if (testing == TRUE)
     {
@@ -477,11 +501,46 @@ static void App_MotorSteuerung (void *p_arg)
   }
 }
 
-bool putIntoCommandPuffer (int32 Xmm, int32 Ymm, int32 Zmm, int8 speed)
+bool putIntoCommandPuffer (int32 newXum, int32 newYum, int32 newZum, uint32 feed)
 {
-	CircularBuffer CncMMCommandPuffer[CNC_MM_COMMAND_BUFFER_SIZE];
-	Cb_initialize(CncMMCommandPuffer, CNC_MM_COMMAND_BUFFER_SIZE, CNC_MM_COMMAND_DATA_SIZE, NULL);
-	int32 XmMM;
+    int32 xOffset;
+    int32 yOffset;
+    int32 zOffset;
+    int32 stepTime;
+    int32 calls;
+    int32 feedSteps;
+    CommandBufferItem item;
+    
+    int32 xFeed = 0;
+    int32 yFeed = 0;
+    int32 zFeed = 0;
+    
+    xOffset = newXum - currentX;
+    yOffset = newYum - currentY;
+    zOffset = newZum - currentZ;
+    
+    stepTime = COMMAND_DELAY;
+    calls = 1E3/stepTime; 
+    feedSteps = (feed*1E3)/calls;
+    
+    while ((xOffset != 0) || (yOffset != 0) || (zOffset != 0))
+    {
+        xOffset = xOffset - xFeed;
+        yOffset = yOffset - yFeed;
+        zOffset = zOffset - zFeed;
+        
+        xFeed = (int32)(xOffset*feedSteps/(abs(xOffset)+abs(yOffset)+abs(zOffset)));
+        yFeed = (int32)(yOffset*feedSteps/(abs(xOffset)+abs(yOffset)+abs(zOffset)));
+        zFeed = (feedSteps - abs(xFeed) - abs(yFeed)) * ((zOffset)/abs(zOffset));
+        
+        item.stepsX = (int16)xFeed;
+        item.stepsY = (int16)yFeed;
+        item.stepsZ = (int16)zFeed;
+        
+        Cb_put(&cncCommandPuffer, (void*)&item);
+    }
+    
+	/*int32 XmMM;
 
 	XmMM = Xmm * 1000;
 
@@ -490,7 +549,7 @@ bool putIntoCommandPuffer (int32 Xmm, int32 Ymm, int32 Zmm, int8 speed)
 		XmMM = XmMM  - speed;
 		Cb_put(CncMMCommandPuffer, &speed);
 	}
-	Cb_put(CncMMCommandPuffer, &Xmm);
+	Cb_put(CncMMCommandPuffer, &Xmm);*/
 
 
   return TRUE;
@@ -923,18 +982,130 @@ bool compareExtendedCommand(char *original, char *received)
                 (strcmp(original,received) == 0));
 }
 
+bool parseParameter(char *rawData, int32 *x, int32 *y, int32 *z, uint32 *f)
+{
+    switch (rawData[0])
+    {
+        case 'X': *x = (int32)(atof(&rawData[1])*1000.0);
+                return TRUE;
+        case 'Y': *y = (int32)(atof(&rawData[1])*1000.0);
+                return TRUE;
+        case 'Z': *z = (int32)(atof(&rawData[1])*1000.0);
+                return TRUE;
+        case 'F': *f = (uint32)(atoi(&rawData[1]));
+                return TRUE;
+        default: return FALSE;
+    }
+    
+    return FALSE;
+}
+
 void processCommand(char *buffer)
 {
     char *dataPointer;
     char *dataPointer1;
     char *dataPointer2;
+    char *dataPointer3;
     char *savePointer;
     
     Led_set(Led1);  // set the yellow led to indicate incoming data status
     
     dataPointer = strtok_r(buffer, " ", &savePointer);
     
-    if (compareBaseCommand("set", dataPointer))
+    if (compareBaseCommand("G00", dataPointer))
+    {
+        uint8 commandCount = 0;
+        int32 x = currentX;
+        int32 y = currentY;
+        int32 z = currentZ;
+        
+        if ((dataPointer = strtok_r(NULL, " ", &savePointer)) == NULL)
+        {
+            printUnknownCommand();
+            return;
+        }
+        else if ((dataPointer1 = strtok_r(NULL, " ", &savePointer)) == NULL)
+        {
+            commandCount = 1;
+        }
+        else if ((dataPointer2 = strtok_r(NULL, " ", &savePointer)) == NULL)
+        {
+            commandCount = 2;
+        }
+        else if ((dataPointer3 = strtok_r(NULL, " ", &savePointer)) == NULL)
+        {
+            commandCount = 3;
+        }
+        else 
+        {
+            printUnknownCommand();
+            return;
+        }
+        
+        parseParameter(dataPointer, &x, &y, &z, NULL);
+        if (commandCount > 1)
+        {
+            parseParameter(dataPointer1, &x, &y, &z, NULL);
+        }
+        if (commandCount > 2)
+        {
+            parseParameter(dataPointer2, &x, &y, &z, NULL);
+        }
+        
+        putIntoCommandPuffer(x, y, z, currentFeed);
+        
+        return;
+    }
+    else if (compareBaseCommand("G00", dataPointer))
+    {
+        uint8 commandCount = 0;
+        int32 x = currentX;
+        int32 y = currentY;
+        int32 z = currentZ;
+        uint32 feed = currentFeed;
+        
+        if ((dataPointer = strtok_r(NULL, " ", &savePointer)) == NULL)
+        {
+            printUnknownCommand();
+            return;
+        }
+        else if ((dataPointer1 = strtok_r(NULL, " ", &savePointer)) == NULL)
+        {
+            commandCount = 1;
+        }
+        else if ((dataPointer2 = strtok_r(NULL, " ", &savePointer)) == NULL)
+        {
+            commandCount = 2;
+        }
+        else if ((dataPointer3 = strtok_r(NULL, " ", &savePointer)) == NULL)
+        {
+            commandCount = 3;
+        }
+        else 
+        {
+            commandCount = 4;
+            return;
+        }
+        
+        parseParameter(dataPointer, &x, &y, &z, &feed);
+        if (commandCount > 1)
+        {
+            parseParameter(dataPointer1, &x, &y, &z, &feed);
+        }
+        if (commandCount > 2)
+        {
+            parseParameter(dataPointer2, &x, &y, &z, &feed);
+        }
+        if (commandCount > 3)
+        {
+            parseParameter(dataPointer3, &x, &y, &z, &feed);
+        }
+        
+        putIntoCommandPuffer(x, y, z, feed);
+        
+        return;
+    }
+    else if (compareBaseCommand("set", dataPointer))
     {
         dataPointer = strtok_r(NULL, " ", &savePointer);
         if (compareExtendedCommand("x",dataPointer))
@@ -1002,9 +1173,9 @@ void processCommand(char *buffer)
     }
     else if (compareBaseCommand("calibrate", dataPointer))
     {
-        if ((dataPointer = strtok_r(NULL, " ", &savePointer) == NULL) || 
-        (dataPointer1 = strtok_r(NULL, " ", &savePointer) == NULL) || 
-        (dataPointer2 = strtok_r(NULL, " ", &savePointer) == NULL) )
+        if (((dataPointer = strtok_r(NULL, " ", &savePointer)) == NULL) || 
+        ((dataPointer1 = strtok_r(NULL, " ", &savePointer)) == NULL) || 
+        ((dataPointer2 = strtok_r(NULL, " ", &savePointer)) == NULL) )
             return;
        
         cncCalibrateZentool(atoi(dataPointer), atoi(dataPointer1), atoi(dataPointer2));
@@ -1015,92 +1186,5 @@ void processCommand(char *buffer)
     {
         printUnknownCommand();
     }
-    
-#if 0
-    if (compareBaseCommand("alive", dataPointer))
-    {
-        // We have a keep alive command
-        printAliveMessage();
-    }
-    else if (compareBaseCommand("run", dataPointer))
-    {
-        // We have a run command
-        dataPointer = strtok_r(NULL, " ", &savePointer);
-        if (dataPointer != NULL)
-        {
-            uint16 commandSize = strlen(dataPointer);
-            uint16 i;
-            for (i = 0; i < commandSize; i+=2)
-            {
-                ((char*)(&currentCommand))[i/2] = (char)hex2int(dataPointer+i,2);
-            }
-        }
-        startState(ApplicationState_RunCommand);
-    }
-    else if (compareBaseCommand("capture", dataPointer))
-    {
-        dataPointer = strtok_r(NULL, " ", &savePointer);
-        if (dataPointer == NULL)
-        {
-            printUnknownCommand();
-            return;
-        }
-        else if (compareExtendedCommand("ir",dataPointer))
-        {
-            startState(ApplicationState_CaptureIrCommand);
-        }
-        else if (compareExtendedCommand("radio433", dataPointer))
-        {
-            startState(ApplicationState_CaptureRadio433MhzCommand);
-        }
-        else if (compareExtendedCommand("radio868", dataPointer))
-        {
-            startState(ApplicationState_CaptureRadio868MhzCommand);
-        }
-        else
-        {
-            printUnknownCommand();
-            return;
-        }
-    }
-    else if (compareBaseCommand("stop", dataPointer))
-    {
-        startState(ApplicationState_Idle);
-    }
-    else if (compareBaseCommand("flash", dataPointer))
-    {
-        // We have a flash command
-        char buffer[100];
-        uint16 receivedChecksum;
-        uint16 calculatedChecksum;
-        
-        dataPointer = strtok_r(NULL, " ", &savePointer);
-        if (dataPointer != NULL)
-        {
-            uint16 commandSize = strlen(dataPointer);
-            uint16 i;
-            for (i = 0; i < commandSize; i+=2)
-            {
-                buffer[i/2] = (char)hex2int(dataPointer+i,2);
-            }
-            
-            dataPointer = strtok_r(NULL, " ", &savePointer);
-            if (dataPointer != NULL)
-            {
-                receivedChecksum = (uint16)hex2int(dataPointer,4);;
-                calculatedChecksum = Crc_fast(buffer, 100);
-                if (receivedChecksum == calculatedChecksum)
-                    printAcknowledgement();
-                else
-                    printfData("%u %u %u\r",commandSize,receivedChecksum,calculatedChecksum);
-            }
-        }
-        
-    }
-    else
-    {
-        printUnknownCommand();
-    }
-#endif
 }
 /*! EOF */

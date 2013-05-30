@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>984</width>
+    <width>1024</width>
     <height>862</height>
    </rect>
   </property>
@@ -77,15 +77,15 @@
      </layout>
     </item>
     <item>
-     <widget class="QPlainTextEdit" name="plainTextEdit"/>
+     <widget class="QPlainTextEdit" name="logEdit"/>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QLineEdit" name="lineEdit"/>
+       <widget class="QLineEdit" name="sendCommandEdit"/>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="sendButton">
         <property name="text">
          <string>Send</string>
         </property>
@@ -100,7 +100,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>984</width>
+     <width>1024</width>
      <height>20</height>
     </rect>
    </property>
@@ -1107,5 +1107,22 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>sendCommandEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>sendButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>824</x>
+     <y>843</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>980</x>
+     <y>847</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
