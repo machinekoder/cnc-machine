@@ -11,9 +11,11 @@
 
 #define HOMING_AMOUNT -1E9     //52500
 #define CALIBRATION_AMOUNT 100
-#define BUTTON_STEP_MM 5
+#define BUTTON_STEP_MMM 5000
 
 #define COMMAND_BUFFER_SIZE 200
+#define CNC_MM_COMMAND_BUFFER_SIZE 100
+#define CNC_MM_COMMAND_DATA_SIZE   50
 
 typedef enum {
     ApplicationState_Movement = 0u,
@@ -29,18 +31,20 @@ typedef enum {
 static OS_TCB App_TaskStartTCB;               /* Application Startup Task Control Block (TCB) */
 static OS_TCB App_ButtonTCB;
 static OS_TCB App_MotorSteuerungTCB;
+static OS_TCB App_USB_ConnectionTCB;
 
 static CPU_STK App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];             /* Start Task Stack */
 static CPU_STK App_ButtonStk[APP_STACK_SIZE];
 static CPU_STK App_MotorSteuerungStk[APP_STACK_SIZE];
+static CPU_STK App_USB_ConnectionStk[APP_STACK_SIZE];
 
 int32 stepsX;
 int32 stepsY;
 int32 stepsZ;
 
-uint32 xCalibration;
-uint32 yCalibration;
-uint32 zCalibration;
+uint32 xCalibration = 25/10;
+uint32 yCalibration = 25/10;
+uint32 zCalibration = 25/10;
 
 ApplicationState applicationState = ApplicationState_Movement;
 
@@ -76,6 +80,7 @@ static void App_TMR2_IntHandler (void *p_arg);
 static void App_TaskStart (void  *p_arg);
 static void App_Button (void *p_arg);
 static void App_MotorSteuerung (void *p_arg);
+static void App_USBConnection (void *p_arg);
 
 void commandSplitter(char* data, uint32 length);
 void processCommand(char *buffer);
@@ -131,9 +136,7 @@ main (void)
     CSP_TmrCfg (CSP_TMR_NBR_01,35000u);
     CSP_TmrCfg (CSP_TMR_NBR_02,35000u);
     
-           xCalibration = 2500u;    
-       yCalibration = 2500u;
-       zCalibration = 2500u;
+
 
     Debug_printf(Debug_Level_1, "Init finished");
 
@@ -255,6 +258,20 @@ static  void App_TaskStart (void *p_arg)
                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                  (OS_ERR     *)&err);
     
+    OSTaskCreate((OS_TCB     *)&App_USB_ConnectionTCB,
+                 (CPU_CHAR   *)"USB_Connection",
+                 (OS_TASK_PTR )App_USBConnection,
+                 (void       *)0,
+                 (OS_PRIO     )2,
+                 (CPU_STK    *)App_USB_ConnectionStk,
+                 (CPU_STK_SIZE)0,
+                 (CPU_STK_SIZE)APP_STACK_SIZE,
+                 (OS_MSG_QTY  )0,
+                 (OS_TICK     )0,
+                 (void       *)0,
+                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+                 (OS_ERR     *)&err);
+
     while (DEF_TRUE) {
         Led_set(Led1);
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
@@ -288,38 +305,38 @@ static void App_Button (void *p_arg)
                         int32 movement;
                         if (value.id == BUTTON_Xplus)
                         {
-                            movement = value.count * BUTTON_STEP_MM;
-                            setXDirectionMM(movement);
+                            movement = value.count * BUTTON_STEP_MMM;
+                            setXDirectionMMM(movement);
                             Debug_printf(Debug_Level_2, "X: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Xminus)
                         {
-                            movement = -value.count * BUTTON_STEP_MM;
-                            setXDirectionMM(movement);
+                            movement = -value.count * BUTTON_STEP_MMM;
+                            setXDirectionMMM(movement);
                             Debug_printf(Debug_Level_2, "X: %imm\n", movement);
                         }
                         if (value.id == BUTTON_Yplus)
                         {
-                            movement = value.count * BUTTON_STEP_MM;
-                            setYDirectionMM(movement);
+                            movement = value.count * BUTTON_STEP_MMM;
+                            setYDirectionMMM(movement);
                             Debug_printf(Debug_Level_2, "Y: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Yminus)
                         {
-                            movement = -value.count * BUTTON_STEP_MM;
-                            setYDirectionMM(movement);
+                            movement = -value.count * BUTTON_STEP_MMM;
+                            setYDirectionMMM(movement);
                             Debug_printf(Debug_Level_2, "Y: %imm\n", movement);
                         }
                         if (value.id == BUTTON_Zplus)
                         {
-                            movement = value.count * BUTTON_STEP_MM;
-                            setZDirectionMM(movement);
+                            movement = value.count * BUTTON_STEP_MMM;
+                            setZDirectionMMM(movement);
                             Debug_printf(Debug_Level_2, "Z: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Zminus)
                         {
-                            movement = -value.count * BUTTON_STEP_MM;
-                            setZDirectionMM(movement);
+                            movement = -value.count * BUTTON_STEP_MMM;
+                            setZDirectionMMM(movement);
                             Debug_printf(Debug_Level_2, "Z: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_OK)
@@ -402,7 +419,7 @@ static void App_Button (void *p_arg)
     }
 }
 
-static void App_MotorSteuerung (void *p_arg)
+static void App_USBConnection (void *p_arg)
 {
     OS_ERR       err;
    (void)p_arg;                                             /* Prevent Compiler Warning */
@@ -410,7 +427,7 @@ static void App_MotorSteuerung (void *p_arg)
   //uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
 
   (void)p_arg;                                              /* Prevent Compiler Warning */
-  while(DEF_TRUE) 
+  while(DEF_TRUE)
   {
    if(usbReceiveBufferSize > 0)
    {                                                        /* if a Message was received */
@@ -428,6 +445,28 @@ static void App_MotorSteuerung (void *p_arg)
 #endif
    }
       OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &err);
+
+  }
+}
+
+static void App_MotorSteuerung (void *p_arg)
+{
+    OS_ERR       err;
+   (void)p_arg;                                             /* Prevent Compiler Warning */
+
+	  uint8 test=-1000;
+	  uint8 time=10;
+  //uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
+
+  (void)p_arg;                                              /* Prevent Compiler Warning */
+  while(DEF_TRUE) 
+  {
+
+
+      setXDirectionMMM(100);
+      setYDirectionMMM(0);
+      setZDirectionMMM(0);
+      OSTimeDlyHMSM(0u, 0u, 0u, time, OS_OPT_TIME_HMSM_STRICT, &err);
  
     if (testing == TRUE)
     {
@@ -436,7 +475,40 @@ static void App_MotorSteuerung (void *p_arg)
         testing = FALSE;
     }
   }
+}
+
+bool putIntoCommandPuffer (int32 Xmm, int32 Ymm, int32 Zmm, int8 speed)
+{
+	CircularBuffer CncMMCommandPuffer[CNC_MM_COMMAND_BUFFER_SIZE];
+	Cb_initialize(CncMMCommandPuffer, CNC_MM_COMMAND_BUFFER_SIZE, CNC_MM_COMMAND_DATA_SIZE, NULL);
+	int32 XmMM;
+
+	XmMM = Xmm * 1000;
+
+	if(XmMM > speed)
+	{
+		XmMM = XmMM  - speed;
+		Cb_put(CncMMCommandPuffer, &speed);
+	}
+	Cb_put(CncMMCommandPuffer, &Xmm);
+
+
+  return TRUE;
+}
   
+bool setXDirectionMMM(int32 mmm)
+{
+    return setXDirection(mmm * xCalibration);
+}
+
+bool setYDirectionMMM(int32 mmm)
+{
+    return setYDirection(mmm * yCalibration);
+}
+
+bool setZDirectionMMM(int32 mmm)
+{
+    return setZDirection(mmm * zCalibration);
 }
 
 void commandSplitter(char* data, uint32 length)
@@ -623,20 +695,7 @@ bool setZDirection (int32 stepsZ_local)
     return TRUE;
 }
 
-bool setXDirectionMM(int32 mm)
-{
-    return setXDirection(mm * xCalibration);
-}
 
-bool setYDirectionMM(int32 mm)
-{
-    return setYDirection(mm * yCalibration);
-}
-
-bool setZDirectionMM(int32 mm)
-{
-    return setZDirection(mm * zCalibration);
-}
 
 void homeX()
 {
@@ -884,7 +943,7 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                setXDirectionMM(atoi(dataPointer));
+                setXDirectionMMM(atoi(dataPointer));
             }
         }
         else if (compareExtendedCommand("y",dataPointer))
@@ -893,7 +952,7 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                setYDirectionMM(atoi(dataPointer));
+                setYDirectionMMM(atoi(dataPointer));
             }
         }
         else if (compareExtendedCommand("z",dataPointer))
@@ -902,7 +961,7 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                setZDirectionMM(atoi(dataPointer));
+                setZDirectionMMM(atoi(dataPointer));
                 return;
             }
         }
@@ -943,11 +1002,12 @@ void processCommand(char *buffer)
     }
     else if (compareBaseCommand("calibrate", dataPointer))
     {
-        dataPointer = strtok_r(NULL, " ", &savePointer);
-        dataPointer1 = strtok_r(NULL, " ", &savePointer);
-        dataPointer2 = strtok_r(NULL, " ", &savePointer);
+        if ((dataPointer = strtok_r(NULL, " ", &savePointer) == NULL) || 
+        (dataPointer1 = strtok_r(NULL, " ", &savePointer) == NULL) || 
+        (dataPointer2 = strtok_r(NULL, " ", &savePointer) == NULL) )
+            return;
        
-        cncCalibrateZentool(dataPointer, dataPointer1, dataPointer2);
+        cncCalibrateZentool(atoi(dataPointer), atoi(dataPointer1), atoi(dataPointer2));
            
         return;
     }    
