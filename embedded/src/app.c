@@ -9,15 +9,15 @@
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
 
+#define TIMER_FREQ 35000u
 #define HOMING_AMOUNT -1E9     //52500
 #define CALIBRATION_AMOUNT 100
 #define BUTTON_STEP_MMM 5000
 
 #define COMMAND_BUFFER_SIZE 200u
 #define CNC_MM_COMMAND_BUFFER_SIZE 100u
-#define CNC_MM_COMMAND_DATA_SIZE   50u
 
-#define MAX_FEED_RATE 200u
+#define MAX_FEED_RATE 100u
 #define MIN_FEED_RATE 10u
 #define COMMAND_DELAY 50u
 
@@ -59,7 +59,10 @@ uint32 zCalibration = 25/10;
 int32 currentX = 0;     // current X pos in um
 int32 currentY = 0;     // current Y pos in um
 int32 currentZ = 0;     // current Z pos in um
-uint32 currentFeed = 10; // current Feed rate in mm/s
+int32 targetX = 0;     // current X pos in um
+int32 targetY = 0;     // current Y pos in um
+int32 targetZ = 0;     // current Z pos in um
+uint32 currentFeed = 5; // current Feed rate in mm/s
 
 CommandBufferItem cncCommandBufferData[CNC_MM_COMMAND_BUFFER_SIZE];
 CircularBuffer cncCommandPuffer;
@@ -102,6 +105,8 @@ static void App_USBConnection (void *p_arg);
 
 void commandSplitter(char* data, uint32 length);
 void processCommand(char *buffer);
+
+bool getSteps(CommandBufferItem *item);
 
 /*
 ************************************************************************************************
@@ -153,9 +158,9 @@ main (void)
     // DAC_Init(LPC_DAC);
     //  Led_initialize(1,29, Led>_LowActive_Yes);
     CSP_TmrInit();
-    CSP_TmrCfg (CSP_TMR_NBR_00,35000u);
-    CSP_TmrCfg (CSP_TMR_NBR_01,35000u);
-    CSP_TmrCfg (CSP_TMR_NBR_02,35000u);
+    CSP_TmrCfg (CSP_TMR_NBR_00,TIMER_FREQ);
+    CSP_TmrCfg (CSP_TMR_NBR_01,TIMER_FREQ);
+    CSP_TmrCfg (CSP_TMR_NBR_02,TIMER_FREQ);
     
     
     Debug_printf(Debug_Level_1, "Init finished");
@@ -474,8 +479,8 @@ static void App_MotorSteuerung (void *p_arg)
     OS_ERR       err;
    (void)p_arg;                                             /* Prevent Compiler Warning */
 
-	  uint16 test=-1000;
-	  uint8 time=10;
+	  //uint16 test=-1000;
+	  //uint8 time=10;
   //uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
 
   (void)p_arg;                                              /* Prevent Compiler Warning */
@@ -483,8 +488,8 @@ static void App_MotorSteuerung (void *p_arg)
   {
       static CommandBufferItem item;
 
-      
-      if (Cb_get(&cncCommandPuffer, (void*)&item) != (int8)(-1))
+      if (getSteps(&item) != FALSE)
+      //if (Cb_get(&cncCommandPuffer, (void*)&item) != (int8)(-1))
       {
         setXDirectionMMM(item.stepsX);
         setYDirectionMMM(item.stepsY);
@@ -503,70 +508,76 @@ static void App_MotorSteuerung (void *p_arg)
 
 bool putIntoCommandPuffer (int32 newXum, int32 newYum, int32 newZum, uint32 feed)
 {
+
+  targetX = newXum;
+  targetY = newYum;
+  targetZ = newZum;
+  currentFeed = feed;
+    
+  return TRUE;
+}
+
+bool getSteps(CommandBufferItem *item)
+{
     int32 xOffset;
     int32 yOffset;
     int32 zOffset;
     int32 stepTime;
     int32 calls;
     int32 feedSteps;
-    CommandBufferItem item;
     
     int32 xFeed = 0;
     int32 yFeed = 0;
     int32 zFeed = 0;
     
-    xOffset = newXum - currentX;
-    yOffset = newYum - currentY;
-    zOffset = newZum - currentZ;
+    xOffset = targetX - currentX;
+    yOffset = targetY - currentY;
+    zOffset = targetZ - currentZ;
     
     stepTime = COMMAND_DELAY;
     calls = 1E3/stepTime; 
-    feedSteps = (feed*1E3)/calls;
+    feedSteps = (currentFeed*1E3)/calls;
     
-    while ((xOffset != 0) || (yOffset != 0) || (zOffset != 0))
+    if (!((xOffset != 0) || (yOffset != 0) || (zOffset != 0)))
     {
-        xOffset = xOffset - xFeed;
-        yOffset = yOffset - yFeed;
-        zOffset = zOffset - zFeed;
+        return FALSE;
+    }
+    
+    //while ((xOffset != 0) || (yOffset != 0) || (zOffset != 0))
+    //{
+        //xOffset = xOffset - xFeed;
+        //yOffset = yOffset - yFeed;
+        //zOffset = zOffset - zFeed;
         
         xFeed = (int32)(xOffset*feedSteps/(abs(xOffset)+abs(yOffset)+abs(zOffset)));
         yFeed = (int32)(yOffset*feedSteps/(abs(xOffset)+abs(yOffset)+abs(zOffset)));
         zFeed = (feedSteps - abs(xFeed) - abs(yFeed)) * ((zOffset)/abs(zOffset));
         
-        item.stepsX = (int16)xFeed;
-        item.stepsY = (int16)yFeed;
-        item.stepsZ = (int16)zFeed;
+        item->stepsX = (int16)xFeed;
+        item->stepsY = (int16)yFeed;
+        item->stepsZ = (int16)zFeed;
         
-        Cb_put(&cncCommandPuffer, (void*)&item);
-    }
-    
-	/*int32 XmMM;
-
-	XmMM = Xmm * 1000;
-
-	if(XmMM > speed)
-	{
-		XmMM = XmMM  - speed;
-		Cb_put(CncMMCommandPuffer, &speed);
-	}
-	Cb_put(CncMMCommandPuffer, &Xmm);*/
-
-
-  return TRUE;
+        //Cb_put(&cncCommandPuffer, (void*)&item);
+    //}
+        
+    return TRUE;
 }
   
 bool setXDirectionMMM(int32 mmm)
 {
+    currentX += mmm;
     return setXDirection(mmm * xCalibration);
 }
 
 bool setYDirectionMMM(int32 mmm)
 {
+    currentY += mmm;
     return setYDirection(mmm * yCalibration);
 }
 
 bool setZDirectionMMM(int32 mmm)
 {
+    currentZ += mmm;
     return setZDirection(mmm * zCalibration);
 }
 
@@ -1114,7 +1125,7 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                setXDirectionMMM(atoi(dataPointer));
+                targetX += atoi(dataPointer)*1000;
             }
         }
         else if (compareExtendedCommand("y",dataPointer))
@@ -1123,7 +1134,7 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                setYDirectionMMM(atoi(dataPointer));
+                setYDirectionMMM(atoi(dataPointer)*1000);
             }
         }
         else if (compareExtendedCommand("z",dataPointer))
@@ -1132,7 +1143,7 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                setZDirectionMMM(atoi(dataPointer));
+                setZDirectionMMM(atoi(dataPointer)*1000);
                 return;
             }
         }
