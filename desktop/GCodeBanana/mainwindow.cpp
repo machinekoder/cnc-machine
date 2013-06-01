@@ -446,112 +446,112 @@ void MainWindow::on_sendButton_clicked()
 
 void MainWindow::on_pushButton_11_clicked()
 {
-    sendCommand("set x 0.1");
+    sendCommand("move x 0.1");
 }
 
 void MainWindow::on_pushButton_12_clicked()
 {
-    sendCommand("set x 1");
+    sendCommand("move x 1");
 }
 
 void MainWindow::on_pushButton_21_clicked()
 {
-    sendCommand("set x 10");
+    sendCommand("move x 10");
 }
 
 void MainWindow::on_pushButton_8_clicked()
 {
-    sendCommand("set x 100");
+    sendCommand("move x 100");
 }
 
 void MainWindow::on_pushButton_13_clicked()
 {
-    sendCommand("set x -0.1");
+    sendCommand("move x -0.1");
 }
 
 void MainWindow::on_pushButton_14_clicked()
 {
-    sendCommand("set x -1");
+    sendCommand("move x -1");
 }
 
 void MainWindow::on_pushButton_15_clicked()
 {
-    sendCommand("set x -10");
+    sendCommand("move x -10");
 }
 
 void MainWindow::on_pushButton_16_clicked()
 {
-    sendCommand("set x -100");
+    sendCommand("move x -100");
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-    sendCommand("set y 0.1");
+    sendCommand("move y 0.1");
 }
 
 void MainWindow::on_pushButton_10_clicked()
 {
-    sendCommand("set y 1");
+    sendCommand("move y 1");
 }
 
 void MainWindow::on_pushButton_9_clicked()
 {
-    sendCommand("set y 10");
+    sendCommand("move y 10");
 }
 
 void MainWindow::on_pushButton_7_clicked()
 {
-    sendCommand("set y 100");
+    sendCommand("move y 100");
 }
 
 void MainWindow::on_pushButton_22_clicked()
 {
-    sendCommand("set y -0.1");
+    sendCommand("move y -0.1");
 }
 
 void MainWindow::on_pushButton_23_clicked()
 {
-    sendCommand("set y -1");
+    sendCommand("move y -1");
 }
 
 void MainWindow::on_pushButton_24_clicked()
 {
-    sendCommand("set y -10");
+    sendCommand("move y -10");
 }
 
 void MainWindow::on_pushButton_25_clicked()
 {
-    sendCommand("set y -100");
+    sendCommand("move y -100");
 }
 
 void MainWindow::on_pushButton_31_clicked()
 {
-    sendCommand("set z 0.1");
+    sendCommand("move z 0.1");
 }
 
 void MainWindow::on_pushButton_32_clicked()
 {
-    sendCommand("set z 1");
+    sendCommand("move z 1");
 }
 
 void MainWindow::on_pushButton_33_clicked()
 {
-    sendCommand("set z 10");
+    sendCommand("move z 10");
 }
 
 void MainWindow::on_pushButton_29_clicked()
 {
-    sendCommand("set z -0.1");
+    sendCommand("move z -0.1");
 }
 
 void MainWindow::on_pushButton_30_clicked()
 {
-    sendCommand("set z -1");
+    sendCommand("move z -1");
 }
 
 void MainWindow::on_pushButton_26_clicked()
 {
-    sendCommand("set z -10");
+    sendCommand("move z -10");
 }
 
 void MainWindow::on_pushButton_18_clicked()
@@ -576,10 +576,10 @@ void MainWindow::on_pushButton_28_clicked()
 
 void MainWindow::on_spinBox_valueChanged(int arg1)
 {
-    sendCommand(QString("set feed xy %1").arg(arg1));
+    sendCommand(QString("move feed xy %1").arg(arg1));
 }
 
 void MainWindow::on_spinBox_2_valueChanged(int arg1)
 {
-    sendCommand(QString("set feed z %1").arg(arg1));
+    sendCommand(QString("move feed z %1").arg(arg1));
 }

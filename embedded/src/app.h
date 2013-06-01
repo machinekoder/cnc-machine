@@ -98,9 +98,9 @@ void moveZDirection ();
 bool setXDirection (int32 stepsX_local);
 bool setYDirection (int32 stepsY_local);
 bool setZDirection (int32 stepsZ_local);
-bool setXDirectionMMM (int32 mmm);
-bool setYDirectionMMM (int32 mmm);
-bool setZDirectionMMM (int32 mmm);
+bool setXDirectionUM (int32 mmm);
+bool setYDirectionUM (int32 mmm);
+bool setZDirectionUM (int32 mmm);
 bool putIntoCommandPuffer (int32 newXum, int32 newYum, int32 newZum, uint32 feed);
 
 

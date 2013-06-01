@@ -12,7 +12,7 @@
 #define TIMER_FREQ 35000u
 #define HOMING_AMOUNT -1E9     //52500
 #define CALIBRATION_AMOUNT 100
-#define BUTTON_STEP_MMM 5000
+#define BUTTON_STEP_UM 5000
 
 #define COMMAND_BUFFER_SIZE 200u
 #define CNC_MM_COMMAND_BUFFER_SIZE 100u
@@ -152,7 +152,7 @@ main (void)
     cnc_initialize();
     buttonInit();
     Led_initialize(1,29,Led_LowActive_Yes); // onboard LED Led1
-    
+
     // init command buffer
     Cb_initialize(&cncCommandPuffer, CNC_MM_COMMAND_BUFFER_SIZE, sizeof(CommandBufferItem), (void*)&cncCommandBufferData);
     // DAC_Init(LPC_DAC);
@@ -161,8 +161,8 @@ main (void)
     CSP_TmrCfg (CSP_TMR_NBR_00,TIMER_FREQ);
     CSP_TmrCfg (CSP_TMR_NBR_01,TIMER_FREQ);
     CSP_TmrCfg (CSP_TMR_NBR_02,TIMER_FREQ);
-    
-    
+
+
     Debug_printf(Debug_Level_1, "Init finished");
 
     if(os_err != OS_ERR_NONE)
@@ -198,32 +198,32 @@ static  void App_TaskStart (void *p_arg)
 
     USBInit();                                                                  /* USB Initialization */
 
-  /* register descriptors */
-  USBRegisterDescriptors(abDescriptors);                           /* USB Descriptor Initialization */
+    /* register descriptors */
+    USBRegisterDescriptors(abDescriptors);                           /* USB Descriptor Initialization */
 
-  /* register endpoint handlers */
-  USBHwRegisterEPIntHandler(BULK_IN_EP, BulkIn);          /* register BulkIn Handler for EP */
-  USBHwRegisterEPIntHandler(BULK_OUT_EP, BulkOut);       /* register BulkOut Handler for EP */
-  USBHwRegisterEPIntHandler(INT_IN_EP, NULL);
+    /* register endpoint handlers */
+    USBHwRegisterEPIntHandler(BULK_IN_EP, BulkIn);          /* register BulkIn Handler for EP */
+    USBHwRegisterEPIntHandler(BULK_OUT_EP, BulkOut);       /* register BulkOut Handler for EP */
+    USBHwRegisterEPIntHandler(INT_IN_EP, NULL);
 
-  USBHwEPConfig(BULK_IN_EP, MAX_PACKET_SIZE);   /* Configure Packet Size for outgoing Transfer */
-  USBHwEPConfig(BULK_OUT_EP, MAX_PACKET_SIZE);  /* Configure Packet Size for incoming Transfer */
+    USBHwEPConfig(BULK_IN_EP, MAX_PACKET_SIZE);   /* Configure Packet Size for outgoing Transfer */
+    USBHwEPConfig(BULK_OUT_EP, MAX_PACKET_SIZE);  /* Configure Packet Size for incoming Transfer */
 
 
-  /* enable bulk-in interrupts on NAKs */
-  USBHwNakIntEnable(INACK_BI);
+    /* enable bulk-in interrupts on NAKs */
+    USBHwNakIntEnable(INACK_BI);
 
-  if(CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
-                 (CSP_DEV_NBR   )CSP_INT_SRC_NBR_USB_00,
-                 (CPU_FNCT_PTR  )USB_IRQHandler,
-                 (void         *)0) != DEF_OK){
-          while(DEF_TRUE);
-  }                                                                                             /* register Interrupt Handler in RTOS */
+    if(CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
+                      (CSP_DEV_NBR   )CSP_INT_SRC_NBR_USB_00,
+                      (CPU_FNCT_PTR  )USB_IRQHandler,
+                      (void         *)0) != DEF_OK) {
+        while(DEF_TRUE);
+    }                                                                                             /* register Interrupt Handler in RTOS */
 
-  CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_USB_00);   /* Enable USB Interrupt. */
+    CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_USB_00);   /* Enable USB Interrupt. */
 
-  USBHwConnect(TRUE);           
-    
+    USBHwConnect(TRUE);
+
 #if (OS_CFG_STAT_TASK_EN > 0u)
     OSStatTaskCPUUsageInit(&err);
 #endif
@@ -282,7 +282,7 @@ static  void App_TaskStart (void *p_arg)
                  (void       *)0,
                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                  (OS_ERR     *)&err);
-    
+
     OSTaskCreate((OS_TCB     *)&App_USB_ConnectionTCB,
                  (CPU_CHAR   *)"USB_Connection",
                  (OS_TASK_PTR )App_USBConnection,
@@ -302,9 +302,9 @@ static  void App_TaskStart (void *p_arg)
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
         Led_clear(Led1);
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
-        
 
-        
+
+
     }
 }
 
@@ -330,38 +330,38 @@ static void App_Button (void *p_arg)
                         int32 movement;
                         if (value.id == BUTTON_Xplus)
                         {
-                            movement = value.count * BUTTON_STEP_MMM;
-                            setXDirectionMMM(movement);
+                            movement = value.count * BUTTON_STEP_UM;
+                            setXDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "X: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Xminus)
                         {
-                            movement = -value.count * BUTTON_STEP_MMM;
-                            setXDirectionMMM(movement);
+                            movement = -value.count * BUTTON_STEP_UM;
+                            setXDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "X: %imm\n", movement);
                         }
                         if (value.id == BUTTON_Yplus)
                         {
-                            movement = value.count * BUTTON_STEP_MMM;
-                            setYDirectionMMM(movement);
+                            movement = value.count * BUTTON_STEP_UM;
+                            setYDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "Y: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Yminus)
                         {
-                            movement = -value.count * BUTTON_STEP_MMM;
-                            setYDirectionMMM(movement);
+                            movement = -value.count * BUTTON_STEP_UM;
+                            setYDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "Y: %imm\n", movement);
                         }
                         if (value.id == BUTTON_Zplus)
                         {
-                            movement = value.count * BUTTON_STEP_MMM;
-                            setZDirectionMMM(movement);
+                            movement = value.count * BUTTON_STEP_UM;
+                            setZDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "Z: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Zminus)
                         {
-                            movement = -value.count * BUTTON_STEP_MMM;
-                            setZDirectionMMM(movement);
+                            movement = -value.count * BUTTON_STEP_UM;
+                            setZDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "Z: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_OK)
@@ -447,74 +447,87 @@ static void App_Button (void *p_arg)
 static void App_USBConnection (void *p_arg)
 {
     OS_ERR       err;
-   (void)p_arg;                                             /* Prevent Compiler Warning */
+    (void)p_arg;                                             /* Prevent Compiler Warning */
 
-  //uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
+    //uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
 
-  (void)p_arg;                                              /* Prevent Compiler Warning */
-  while(DEF_TRUE)
-  {
-   if(usbReceiveBufferSize > 0)
-   {                                                        /* if a Message was received */
-        USB_printf("I'm a LPC1758 %i\n",5);
-        commandSplitter((char*)&usbReceiveBuffer[2], usbReceiveBufferSize);
-        usbReceiveBufferSize = 0;                                    /* reset the Message length of the incoming buffer */
+    (void)p_arg;                                              /* Prevent Compiler Warning */
+    while(DEF_TRUE)
+    {
+        if(usbReceiveBufferSize > 0)
+        {   /* if a Message was received */
+            USB_printf("I'm a LPC1758 %i\n",5);
+            commandSplitter((char*)&usbReceiveBuffer[2], usbReceiveBufferSize);
+            usbReceiveBufferSize = 0;                                    /* reset the Message length of the incoming buffer */
 #if 0
-        BulkInSize = strlen((char *)str);                   /* calculate string length of outgoing data */
-        abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);          /* Highbyte */
-        abBulkInBuf[1]=0x00ff&(BulkInSize+1);               /* Lowbyte  */
+            BulkInSize = strlen((char *)str);                   /* calculate string length of outgoing data */
+            abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);          /* Highbyte */
+            abBulkInBuf[1]=0x00ff&(BulkInSize+1);               /* Lowbyte  */
 
-       sprintf((char *)&abBulkInBuf[2],"%s",str);               /* write data to output buffer */
-        BulkInSize += 3;                                    /* HB + LB + \0 */
-        BulkOutSize = 0;                                    /* reset the Message length of the incoming buffer */
+            sprintf((char *)&abBulkInBuf[2],"%s",str);               /* write data to output buffer */
+            BulkInSize += 3;                                    /* HB + LB + \0 */
+            BulkOutSize = 0;                                    /* reset the Message length of the incoming buffer */
 #endif
-   }
-      OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &err);
+        }
+        OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &err);
 
-  }
+    }
 }
 
 static void App_MotorSteuerung (void *p_arg)
 {
     OS_ERR       err;
-   (void)p_arg;                                             /* Prevent Compiler Warning */
+    (void)p_arg;                                             /* Prevent Compiler Warning */
 
-	  //uint16 test=-1000;
-	  //uint8 time=10;
-  //uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
+    //uint16 test=-1000;
+    //uint8 time=10;
+    //uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
 
-  (void)p_arg;                                              /* Prevent Compiler Warning */
-  while(DEF_TRUE) 
-  {
-      static CommandBufferItem item;
-
-      if (getSteps(&item) != FALSE)
-      //if (Cb_get(&cncCommandPuffer, (void*)&item) != (int8)(-1))
-      {
-        setXDirectionMMM(item.stepsX);
-        setYDirectionMMM(item.stepsY);
-        setZDirectionMMM(item.stepsZ);
-      }
-      OSTimeDlyHMSM(0u, 0u, 0u, COMMAND_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
- 
-    if (testing == TRUE)
+    (void)p_arg;                                              /* Prevent Compiler Warning */
+    while(DEF_TRUE)
     {
-        testButtons();
-        testEndstops();
-        testing = FALSE;
+        static CommandBufferItem item;
+
+        if (getSteps(&item) != FALSE)
+            //if (Cb_get(&cncCommandPuffer, (void*)&item) != (int8)(-1))
+        {
+            setXDirectionUM(item.stepsX);
+            setYDirectionUM(item.stepsY);
+            setZDirectionUM(item.stepsZ);
+        }
+        OSTimeDlyHMSM(0u, 0u, 0u, COMMAND_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
+
+        if (testing == TRUE)
+        {
+            testButtons();
+            testEndstops();
+            testing = FALSE;
+        }
     }
-  }
 }
 
 bool putIntoCommandPuffer (int32 newXum, int32 newYum, int32 newZum, uint32 feed)
 {
 
-  targetX = newXum;
-  targetY = newYum;
-  targetZ = newZum;
-  currentFeed = feed;
-    
-  return TRUE;
+    targetX = newXum;
+    targetY = newYum;
+    targetZ = newZum;
+    currentFeed = feed;
+
+    if (targetX < 0)
+    {
+        targetX = 0;
+    }
+    if (targetY < 0)
+    {
+        targetY = 0;
+    }
+    if (targetZ < 0)
+    {
+        targetZ = 0;
+    }
+
+    return TRUE;
 }
 
 bool getSteps(CommandBufferItem *item)
@@ -525,57 +538,70 @@ bool getSteps(CommandBufferItem *item)
     int32 stepTime;
     int32 calls;
     int32 feedSteps;
-    
+
     int32 xFeed = 0;
     int32 yFeed = 0;
     int32 zFeed = 0;
-    
+
     xOffset = targetX - currentX;
     yOffset = targetY - currentY;
     zOffset = targetZ - currentZ;
-    
+
     stepTime = COMMAND_DELAY;
-    calls = 1E3/stepTime; 
+    calls = 1E3/stepTime;
     feedSteps = (currentFeed*1E3)/calls;
-    
+
     if (!((xOffset != 0) || (yOffset != 0) || (zOffset != 0)))
     {
         return FALSE;
     }
-    
+
     //while ((xOffset != 0) || (yOffset != 0) || (zOffset != 0))
     //{
-        //xOffset = xOffset - xFeed;
-        //yOffset = yOffset - yFeed;
-        //zOffset = zOffset - zFeed;
-        
-        xFeed = (int32)(xOffset*feedSteps/(abs(xOffset)+abs(yOffset)+abs(zOffset)));
-        yFeed = (int32)(yOffset*feedSteps/(abs(xOffset)+abs(yOffset)+abs(zOffset)));
-        zFeed = (feedSteps - abs(xFeed) - abs(yFeed)) * ((zOffset)/abs(zOffset));
-        
-        item->stepsX = (int16)xFeed;
-        item->stepsY = (int16)yFeed;
-        item->stepsZ = (int16)zFeed;
-        
-        //Cb_put(&cncCommandPuffer, (void*)&item);
+    //xOffset = xOffset - xFeed;
+    //yOffset = yOffset - yFeed;
+    //zOffset = zOffset - zFeed;
+
+    xFeed = (int32)(xOffset*feedSteps/(abs(xOffset)+abs(yOffset)+abs(zOffset)));
+    yFeed = (int32)(yOffset*feedSteps/(abs(xOffset)+abs(yOffset)+abs(zOffset)));
+    zFeed = (feedSteps - abs(xFeed) - abs(yFeed)) * ((zOffset)/abs(zOffset));
+
+    if (abs(xFeed) > abs(xOffset))
+    {
+        xFeed = xOffset;
+    }
+    if (abs(yFeed) > abs(yOffset))
+    {
+        yFeed = yOffset;
+    }
+    if (abs(zFeed) > abs(zOffset))
+    {
+        zFeed = zOffset;
+    }
+
+    item->stepsX = (int16)xFeed;
+    item->stepsY = (int16)yFeed;
+    item->stepsZ = (int16)zFeed;
+
+    //Cb_put(&cncCommandPuffer, (void*)&item);
     //}
-        
+
     return TRUE;
 }
-  
-bool setXDirectionMMM(int32 mmm)
+
+bool setXDirectionUM(int32 mmm)
 {
     currentX += mmm;
     return setXDirection(mmm * xCalibration);
 }
 
-bool setYDirectionMMM(int32 mmm)
+bool setYDirectionUM(int32 mmm)
 {
     currentY += mmm;
     return setYDirection(mmm * yCalibration);
 }
 
-bool setZDirectionMMM(int32 mmm)
+bool setZDirectionUM(int32 mmm)
 {
     currentZ += mmm;
     return setZDirection(mmm * zCalibration);
@@ -586,7 +612,7 @@ void commandSplitter(char* data, uint32 length)
     uint32 i;
     uint32 commandBufferPos = 0;
     static char commandBuffer[COMMAND_BUFFER_SIZE];
-    
+
     for (i = 0; i < length; ++i)
     {
         if (data[i] == '\n')
@@ -713,7 +739,7 @@ bool setYDirection (int32 stepsY_local)
     {
         return FALSE;
     }
-    
+
     if (stepsY_local > 0)
     {
         Gpio_set(MOTOR_Y_DIR_PORT,MOTOR_Y_DIR_PIN); // directionY
@@ -770,46 +796,52 @@ bool setZDirection (int32 stepsZ_local)
 void homeX()
 {
     OS_ERR       err;
-    
+
     Debug_printf(Debug_Level_2, "Start homing x axis\n");
 
     setXDirection(HOMING_AMOUNT);
     while(stepsX != 0)
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
-    
+    currentX = 0;
+    targetX = 0;
+
     Debug_printf(Debug_Level_2, "Homing x axis finished\n");
 }
 
 void homeY()
 {
     OS_ERR       err;
-    
+
     Debug_printf(Debug_Level_2, "Start homing y axis\n");
 
     setYDirection(HOMING_AMOUNT);
     while(stepsY != 0)
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
-    
+    currentY = 0;
+    targetY = 0;
+
     Debug_printf(Debug_Level_2, "Homing y axis finished\n");
 }
 
 void homeZ()
 {
     OS_ERR       err;
-    
+
     Debug_printf(Debug_Level_2, "Start homing z axis\n");
 
     setZDirection(HOMING_AMOUNT);
     while(stepsZ != 0)
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
-    
+    currentZ = 0;
+    targetZ = 0;
+
     Debug_printf(Debug_Level_2, "Homing z axis finished\n");
 }
 
 void homeAll()
 {
     OS_ERR       err;
-    
+
     Debug_printf(Debug_Level_2, "Start homing all axes\n");
 
     setXDirection(HOMING_AMOUNT);
@@ -817,32 +849,38 @@ void homeAll()
     setZDirection(HOMING_AMOUNT);
     while((stepsX != 0) || (stepsY != 0) || (stepsZ != 0))
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
-    
+    currentX = 0;
+    currentY = 0;
+    currentZ = 0;
+    targetX = 0;
+    targetY = 0;
+    targetZ = 0;
+
     Debug_printf(Debug_Level_2, "Homing all axes finished\n");
 }
 
 bool cncCalibrateZentool (uint8_t measuredDistanceX, uint8_t measuredDistanceY, uint8_t measuredDistanceZ)
 {
     Debug_printf(Debug_Level_2, "Starting calibration\n");
-    
-   // homeAll();                              // home all axes
+
+    // homeAll();                              // home all axes
     setXDirection(CALIBRATION_AMOUNT * xCalibration);      // move all axes a defined amount
     while (stepsX > 0) { }
     setYDirection(CALIBRATION_AMOUNT * yCalibration);
     while (stepsY > 0) { }
     setZDirection(measuredDistanceZ * zCalibration);
     while (stepsZ > 0) { }
-    
+
     homeAll();
     // now the user has to measure the distance
     xCalibration = (CALIBRATION_AMOUNT / measuredDistanceX) * xCalibration;
     yCalibration = (CALIBRATION_AMOUNT / measuredDistanceX) * yCalibration;
     zCalibration = (CALIBRATION_AMOUNT / measuredDistanceZ) * zCalibration;
-    
+
     Debug_printf(Debug_Level_2, "Distance should be 100mm in x+ und y+ \n if not Pleas measure Distances and run Again \n");
     Debug_printf(Debug_Level_2, "values now: x: %d Steps/mm y: %d Steps/mm z: %d Steps/mm \n", xCalibration, yCalibration, zCalibration);
     Debug_printf(Debug_Level_2, "Calibration finished\n");
-    
+
     return TRUE;
 }
 
@@ -850,11 +888,11 @@ bool cncCalibrateZentool (uint8_t measuredDistanceX, uint8_t measuredDistanceY, 
 bool testButtons(void )
 {
     OS_ERR       err;
-    
+
     Debug_printf(Debug_Level_1, "Press all buttons\n");
-    
+
     applicationState = ApplicationState_Test;
-    
+
     buttonXPlusTest  = FALSE;
     buttonXMinusTest = FALSE;
     buttonYPlusTest  = FALSE;
@@ -862,46 +900,46 @@ bool testButtons(void )
     buttonZPlusTest  = FALSE;
     buttonZMinusTest = FALSE;
     buttonOkTest     = FALSE;
-    
+
     while(!(buttonXPlusTest && buttonXMinusTest
-         && buttonYPlusTest && buttonYMinusTest
-         && buttonZPlusTest && buttonZMinusTest
-         && buttonOkTest
-    ))
+            && buttonYPlusTest && buttonYMinusTest
+            && buttonZPlusTest && buttonZMinusTest
+            && buttonOkTest
+           ))
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
-        
+
     applicationState = ApplicationState_Movement;
-        
+
     Debug_printf(Debug_Level_1, "All buttons successfully tested\n");
-    
+
     return TRUE;
 }
 
 bool testEndstops(void )
 {
     OS_ERR       err;
-    
+
     Debug_printf(Debug_Level_1, "Test all endstops\n");
-    
+
     applicationState = ApplicationState_Test;
-    
+
     endschalterXPlusTest  = FALSE;
     endschalterXMinusTest = FALSE;
     endschalterYPlusTest  = FALSE;
     endschalterYMinusTest = FALSE;
     endschalterZPlusTest  = FALSE;
     endschalterZMinusTest = FALSE;
-    
+
     while(!(endschalterXPlusTest && endschalterXMinusTest
-         && endschalterYPlusTest && endschalterYMinusTest
-         && endschalterZPlusTest && endschalterZMinusTest
-    ))
+            && endschalterYPlusTest && endschalterYMinusTest
+            && endschalterZPlusTest && endschalterZMinusTest
+           ))
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
-        
+
     applicationState = ApplicationState_Movement;
-        
+
     Debug_printf(Debug_Level_1, "All endstops successfully tested\n");
-    
+
     return TRUE;
 }
 
@@ -990,24 +1028,29 @@ bool compareBaseCommand(char *original, char *received)
 bool compareExtendedCommand(char *original, char *received)
 {
     return (((strlen(received) == 1) && (strncmp(original,received,1) == 0)) ||
-                (strcmp(original,received) == 0));
+            (strcmp(original,received) == 0));
 }
 
 bool parseParameter(char *rawData, int32 *x, int32 *y, int32 *z, uint32 *f)
 {
     switch (rawData[0])
     {
-        case 'X': *x = (int32)(atof(&rawData[1])*1000.0);
-                return TRUE;
-        case 'Y': *y = (int32)(atof(&rawData[1])*1000.0);
-                return TRUE;
-        case 'Z': *z = (int32)(atof(&rawData[1])*1000.0);
-                return TRUE;
-        case 'F': *f = (uint32)(atoi(&rawData[1]));
-                return TRUE;
-        default: return FALSE;
+    case 'X':
+        *x = (int32)(atof(&rawData[1])*1000.0);
+        return TRUE;
+    case 'Y':
+        *y = (int32)(atof(&rawData[1])*1000.0);
+        return TRUE;
+    case 'Z':
+        *z = (int32)(atof(&rawData[1])*1000.0);
+        return TRUE;
+    case 'F':
+        *f = (uint32)(atoi(&rawData[1]));
+        return TRUE;
+    default:
+        return FALSE;
     }
-    
+
     return FALSE;
 }
 
@@ -1018,18 +1061,18 @@ void processCommand(char *buffer)
     char *dataPointer2;
     char *dataPointer3;
     char *savePointer;
-    
+
     Led_set(Led1);  // set the yellow led to indicate incoming data status
-    
+
     dataPointer = strtok_r(buffer, " ", &savePointer);
-    
+
     if (compareBaseCommand("G00", dataPointer))
     {
         uint8 commandCount = 0;
         int32 x = currentX;
         int32 y = currentY;
         int32 z = currentZ;
-        
+
         if ((dataPointer = strtok_r(NULL, " ", &savePointer)) == NULL)
         {
             printUnknownCommand();
@@ -1047,12 +1090,12 @@ void processCommand(char *buffer)
         {
             commandCount = 3;
         }
-        else 
+        else
         {
             printUnknownCommand();
             return;
         }
-        
+
         parseParameter(dataPointer, &x, &y, &z, NULL);
         if (commandCount > 1)
         {
@@ -1062,9 +1105,9 @@ void processCommand(char *buffer)
         {
             parseParameter(dataPointer2, &x, &y, &z, NULL);
         }
-        
+
         putIntoCommandPuffer(x, y, z, currentFeed);
-        
+
         return;
     }
     else if (compareBaseCommand("G00", dataPointer))
@@ -1074,7 +1117,7 @@ void processCommand(char *buffer)
         int32 y = currentY;
         int32 z = currentZ;
         uint32 feed = currentFeed;
-        
+
         if ((dataPointer = strtok_r(NULL, " ", &savePointer)) == NULL)
         {
             printUnknownCommand();
@@ -1092,12 +1135,12 @@ void processCommand(char *buffer)
         {
             commandCount = 3;
         }
-        else 
+        else
         {
             commandCount = 4;
             return;
         }
-        
+
         parseParameter(dataPointer, &x, &y, &z, &feed);
         if (commandCount > 1)
         {
@@ -1111,10 +1154,73 @@ void processCommand(char *buffer)
         {
             parseParameter(dataPointer3, &x, &y, &z, &feed);
         }
-        
+
         putIntoCommandPuffer(x, y, z, feed);
-        
+
         return;
+    }
+    else if (compareBaseCommand("move", dataPointer))
+    {
+        dataPointer = strtok_r(NULL, " ", &savePointer);
+        if (compareExtendedCommand("x",dataPointer))
+        {
+            // We have a set command
+            dataPointer = strtok_r(NULL, " ", &savePointer);
+            if (dataPointer != NULL)
+            {
+                targetX += (int32)(atof(dataPointer)*1000.0);
+                if (targetX < 0)
+                {
+                    targetX = 0;
+                }
+            }
+            else
+            {
+                printUnknownCommand();
+            }
+            return;
+        }
+        else if (compareExtendedCommand("y",dataPointer))
+        {
+            // We have a set command
+            dataPointer = strtok_r(NULL, " ", &savePointer);
+            if (dataPointer != NULL)
+            {
+                targetY += (int32)(atof(dataPointer)*1000.0);
+                if (targetY < 0)
+                {
+                    targetY = 0;
+                }
+            }
+            else
+            {
+                printUnknownCommand();
+            }
+            return;
+        }
+        else if (compareExtendedCommand("z",dataPointer))
+        {
+            // We have a set command
+            dataPointer = strtok_r(NULL, " ", &savePointer);
+            if (dataPointer != NULL)
+            {
+                targetZ += (int32)(atof(dataPointer)*1000.0);
+                if (targetZ < 0)
+                {
+                    targetZ = 0;
+                }
+            }
+            else
+            {
+                printUnknownCommand();
+            }
+            return;
+        }
+        else
+        {
+            printUnknownCommand();
+            return;
+        }
     }
     else if (compareBaseCommand("set", dataPointer))
     {
@@ -1125,8 +1231,17 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                targetX += atoi(dataPointer)*1000;
+                targetX = (int32)(atof(dataPointer)*1000.0);
+                if (targetX < 0)
+                {
+                    targetX = 0;
+                }
             }
+            else
+            {
+                printUnknownCommand();
+            }
+            return;
         }
         else if (compareExtendedCommand("y",dataPointer))
         {
@@ -1134,8 +1249,17 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                setYDirectionMMM(atoi(dataPointer)*1000);
+                targetY = (int32)(atof(dataPointer)*1000.0);
+                if (targetY < 0)
+                {
+                    targetY = 0;
+                }
             }
+            else
+            {
+                printUnknownCommand();
+            }
+            return;
         }
         else if (compareExtendedCommand("z",dataPointer))
         {
@@ -1143,9 +1267,17 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                setZDirectionMMM(atoi(dataPointer)*1000);
-                return;
+                targetZ = (int32)(atof(dataPointer)*1000.0);
+                if (targetZ < 0)
+                {
+                    targetZ = 0;
+                }
             }
+            else
+            {
+                printUnknownCommand();
+            }
+            return;
         }
         else
         {
@@ -1184,15 +1316,15 @@ void processCommand(char *buffer)
     }
     else if (compareBaseCommand("calibrate", dataPointer))
     {
-        if (((dataPointer = strtok_r(NULL, " ", &savePointer)) == NULL) || 
-        ((dataPointer1 = strtok_r(NULL, " ", &savePointer)) == NULL) || 
-        ((dataPointer2 = strtok_r(NULL, " ", &savePointer)) == NULL) )
+        if (((dataPointer = strtok_r(NULL, " ", &savePointer)) == NULL) ||
+                ((dataPointer1 = strtok_r(NULL, " ", &savePointer)) == NULL) ||
+                ((dataPointer2 = strtok_r(NULL, " ", &savePointer)) == NULL) )
             return;
-       
+
         cncCalibrateZentool(atoi(dataPointer), atoi(dataPointer1), atoi(dataPointer2));
-           
+
         return;
-    }    
+    }
     else
     {
         printUnknownCommand();
