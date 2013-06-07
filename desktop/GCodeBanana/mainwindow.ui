@@ -18,7 +18,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QComboBox" name="comboBox">
+       <widget class="QComboBox" name="serialDeviceCombo">
         <property name="editable">
          <bool>true</bool>
         </property>
@@ -40,7 +40,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_4">
+       <widget class="QPushButton" name="connectButton">
         <property name="text">
          <string>&amp;Connect</string>
         </property>
@@ -88,6 +88,13 @@
        <widget class="QPushButton" name="sendButton">
         <property name="text">
          <string>Send</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearButton">
+        <property name="text">
+         <string>Clear</string>
         </property>
        </widget>
       </item>
@@ -873,8 +880,27 @@
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
         <widget class="QPushButton" name="pushButton_17">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
-          <string>Motors &amp;off</string>
+          <string>&amp;Stop</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Test</string>
          </property>
         </widget>
        </item>
@@ -1119,8 +1145,24 @@
      <y>843</y>
     </hint>
     <hint type="destinationlabel">
-     <x>980</x>
-     <y>847</y>
+     <x>955</x>
+     <y>856</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>logEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>997</x>
+     <y>842</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>927</x>
+     <y>678</y>
     </hint>
    </hints>
   </connection>

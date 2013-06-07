@@ -15,7 +15,7 @@
 #define BUTTON_STEP_UM 5000
 
 #define COMMAND_BUFFER_SIZE 200u
-#define CNC_MM_COMMAND_BUFFER_SIZE 100u
+#define CNC_QUEUE_BUFFER_SIZE 10u
 
 #define MAX_FEED_RATE 100u
 #define MIN_FEED_RATE 10u
@@ -24,7 +24,8 @@
 typedef enum {
     ApplicationState_Movement = 0u,
     ApplicationState_Working  = 1u,
-    ApplicationState_Test     = 2u,
+    ApplicationState_Idle     = 2u,
+    ApplicationState_Test     = 3u,
 } ApplicationState;
 
 typedef struct {
@@ -32,6 +33,13 @@ typedef struct {
     int16 stepsY;
     int16 stepsZ;
 } CommandBufferItem;
+
+typedef struct {
+    int32 targetX;
+    int32 targetY;
+    int32 targetZ;
+    uint32 feed;
+} QueueItem;
 
 /*
 ************************************************************************************************
@@ -64,10 +72,10 @@ int32 targetY = 0;     // current Y pos in um
 int32 targetZ = 0;     // current Z pos in um
 uint32 currentFeed = 5; // current Feed rate in mm/s
 
-CommandBufferItem cncCommandBufferData[CNC_MM_COMMAND_BUFFER_SIZE];
-CircularBuffer cncCommandPuffer;
+CommandBufferItem cncQueueBufferData[CNC_QUEUE_BUFFER_SIZE];
+CircularBuffer cncQueueBuffer;
 
-ApplicationState applicationState = ApplicationState_Movement;
+ApplicationState applicationState = ApplicationState_Idle;
 
 bool buttonXPlusTest  = FALSE;
 bool buttonXMinusTest = FALSE;
@@ -102,6 +110,10 @@ static void App_TaskStart (void  *p_arg);
 static void App_Button (void *p_arg);
 static void App_MotorSteuerung (void *p_arg);
 static void App_USBConnection (void *p_arg);
+
+int8 enqueueCncCommand(int32 newXum, int32 newYum, int32 newZum, uint32 feed);
+int8 dequeueCncCommand(QueueItem *item);
+void processCncCommands();
 
 void commandSplitter(char* data, uint32 length);
 void processCommand(char *buffer);
@@ -154,7 +166,7 @@ main (void)
     Led_initialize(1,29,Led_LowActive_Yes); // onboard LED Led1
 
     // init command buffer
-    Cb_initialize(&cncCommandPuffer, CNC_MM_COMMAND_BUFFER_SIZE, sizeof(CommandBufferItem), (void*)&cncCommandBufferData);
+    Cb_initialize(&cncQueueBuffer, CNC_QUEUE_BUFFER_SIZE, sizeof(QueueItem), (void*)&cncQueueBufferData);
     // DAC_Init(LPC_DAC);
     //  Led_initialize(1,29, Led>_LowActive_Yes);
     CSP_TmrInit();
@@ -325,7 +337,7 @@ static void App_Button (void *p_arg)
             {
                 while (Button_getPress(&value) != (int8)(-1))
                 {
-                    if (applicationState == ApplicationState_Movement)
+                    if (applicationState == ApplicationState_Idle)
                     {
                         int32 movement;
                         if (value.id == BUTTON_Xplus)
@@ -488,19 +500,30 @@ static void App_MotorSteuerung (void *p_arg)
     {
         static CommandBufferItem item;
 
-        if (getSteps(&item) != FALSE)
-            //if (Cb_get(&cncCommandPuffer, (void*)&item) != (int8)(-1))
+        if (applicationState == ApplicationState_Working)
         {
-            setXDirectionUM(item.stepsX);
-            setYDirectionUM(item.stepsY);
-            setZDirectionUM(item.stepsZ);
+            if (getSteps(&item) != FALSE)
+            {
+                setXDirectionUM(item.stepsX);
+                setYDirectionUM(item.stepsY);
+                setZDirectionUM(item.stepsZ);
+            }
+            else    // we finished a command
+            {
+                USB_printf("ok\n");
+                applicationState = ApplicationState_Idle;
+                processCncCommands();
+            }
         }
         OSTimeDlyHMSM(0u, 0u, 0u, COMMAND_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
 
         if (testing == TRUE)
         {
             testButtons();
-            testEndstops();
+            if (testing == TRUE)
+            {
+                testEndstops();
+            }
             testing = FALSE;
         }
     }
@@ -508,26 +531,66 @@ static void App_MotorSteuerung (void *p_arg)
 
 bool putIntoCommandPuffer (int32 newXum, int32 newYum, int32 newZum, uint32 feed)
 {
-
-    targetX = newXum;
-    targetY = newYum;
-    targetZ = newZum;
-    currentFeed = feed;
-
-    if (targetX < 0)
-    {
-        targetX = 0;
-    }
-    if (targetY < 0)
-    {
-        targetY = 0;
-    }
-    if (targetZ < 0)
-    {
-        targetZ = 0;
-    }
+    enqueueCncCommand(newXum, newYum, newZum, feed);
+    processCncCommands();
 
     return TRUE;
+}
+
+int8 enqueueCncCommand(int32 newXum, int32 newYum, int32 newZum, uint32 feed)
+{
+    QueueItem item;
+    item.targetX = newXum;
+    item.targetY = newYum;
+    item.targetZ = newZum;
+    item.feed    = feed;
+    
+    return Cb_put(&cncQueueBuffer, (void*)&item);
+}
+
+int8 dequeueCncCommand(QueueItem *item)
+{
+    return Cb_get(&cncQueueBuffer, (void*)item);
+}
+
+void processCncCommands()
+{
+    QueueItem item;
+    
+    if (applicationState == ApplicationState_Working)    // we are already working
+    {
+        return;
+    }
+    
+    if (dequeueCncCommand(&item) != (int8)(-1))     // we have a command
+    {
+        targetX = item.targetX;
+        targetY = item.targetY;
+        targetZ = item.targetZ;
+        if (item.feed != 0)
+        {
+            currentFeed = item.feed;
+        }
+
+        if (targetX < 0)
+        {
+            targetX = 0;
+        }
+        if (targetY < 0)
+        {
+            targetY = 0;
+        }
+        if (targetZ < 0)
+        {
+            targetZ = 0;
+        }
+        
+        applicationState = ApplicationState_Working;
+    }
+    else
+    {
+        applicationState = ApplicationState_Idle;
+    }
 }
 
 bool getSteps(CommandBufferItem *item)
@@ -556,12 +619,6 @@ bool getSteps(CommandBufferItem *item)
         return FALSE;
     }
 
-    //while ((xOffset != 0) || (yOffset != 0) || (zOffset != 0))
-    //{
-    //xOffset = xOffset - xFeed;
-    //yOffset = yOffset - yFeed;
-    //zOffset = zOffset - zFeed;
-
     xFeed = (int32)(xOffset*feedSteps/(abs(xOffset)+abs(yOffset)+abs(zOffset)));
     yFeed = (int32)(yOffset*feedSteps/(abs(xOffset)+abs(yOffset)+abs(zOffset)));
     zFeed = (feedSteps - abs(xFeed) - abs(yFeed)) * ((zOffset)/abs(zOffset));
@@ -582,10 +639,7 @@ bool getSteps(CommandBufferItem *item)
     item->stepsX = (int16)xFeed;
     item->stepsY = (int16)yFeed;
     item->stepsZ = (int16)zFeed;
-
-    //Cb_put(&cncCommandPuffer, (void*)&item);
-    //}
-
+    
     return TRUE;
 }
 
@@ -859,6 +913,15 @@ void homeAll()
     Debug_printf(Debug_Level_2, "Homing all axes finished\n");
 }
 
+void stopMachine()
+{
+    targetX = currentX;
+    targetY = currentY;
+    targetZ = currentZ;
+    
+    testing = false;
+    applicationState = ApplicationState_Idle;
+}
 bool cncCalibrateZentool (uint8_t measuredDistanceX, uint8_t measuredDistanceY, uint8_t measuredDistanceZ)
 {
     Debug_printf(Debug_Level_2, "Starting calibration\n");
@@ -904,7 +967,7 @@ bool testButtons(void )
     while(!(buttonXPlusTest && buttonXMinusTest
             && buttonYPlusTest && buttonYMinusTest
             && buttonZPlusTest && buttonZMinusTest
-            && buttonOkTest
+            && buttonOkTest && (applicationState == ApplicationState_Test)
            ))
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
 
@@ -933,6 +996,7 @@ bool testEndstops(void )
     while(!(endschalterXPlusTest && endschalterXMinusTest
             && endschalterYPlusTest && endschalterYMinusTest
             && endschalterZPlusTest && endschalterZMinusTest
+            && (applicationState == ApplicationState_Test)
            ))
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
 
@@ -1106,17 +1170,17 @@ void processCommand(char *buffer)
             parseParameter(dataPointer2, &x, &y, &z, NULL);
         }
 
-        putIntoCommandPuffer(x, y, z, currentFeed);
+        putIntoCommandPuffer(x, y, z, MAX_FEED_RATE);
 
         return;
     }
-    else if (compareBaseCommand("G00", dataPointer))
+    else if (compareBaseCommand("G01", dataPointer))
     {
         uint8 commandCount = 0;
         int32 x = currentX;
         int32 y = currentY;
         int32 z = currentZ;
-        uint32 feed = currentFeed;
+        uint32 feed = 0;    // makes it current speed at the time of execution
 
         if ((dataPointer = strtok_r(NULL, " ", &savePointer)) == NULL)
         {
@@ -1323,6 +1387,16 @@ void processCommand(char *buffer)
 
         cncCalibrateZentool(atoi(dataPointer), atoi(dataPointer1), atoi(dataPointer2));
 
+        return;
+    }
+    else if (compareBaseCommand("stop", dataPointer))
+    {
+        stopMachine();
+        return;
+    }
+    else if (compareBaseCommand("test", dataPointer))
+    {
+        testing = TRUE;
         return;
     }
     else

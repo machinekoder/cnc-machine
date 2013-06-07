@@ -47,10 +47,11 @@ public:
 #ifdef USB
     bool connectUsb();
     void closeUsb();
+    bool isUsbConnected();
 #endif
     
     bool isSerialPortConnected();
-    void sendData(const QByteArray &data);
+    bool sendData(const QByteArray &data);
     void incomingByte(char byte);
 
 signals:

@@ -68,10 +68,11 @@ protected:
 private slots:
     void codeChanged(bool valid);
     void refreshPreview();
+    void usbConnected();
+    void usbDisconnected();
 
     void on_loadFileButton_clicked();
-    void on_refreshButton_clicked();
-    void on_pushButton_4_clicked();
+    void on_connectButton_clicked();
     void on_pushButton_11_clicked();
     void on_sendButton_clicked();
     void on_pushButton_12_clicked();
@@ -101,6 +102,8 @@ private slots:
     void on_pushButton_28_clicked();
     void on_spinBox_valueChanged(int arg1);
     void on_spinBox_2_valueChanged(int arg1);
+    void on_pushButton_17_clicked();
+    void on_pushButton_2_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -18,6 +18,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // initialize communicator
     communicator = new Communicator(this);
+    connect(communicator, SIGNAL(usbConnected()),
+            this, SLOT(usbConnected()));
+    connect(communicator, SIGNAL(usbDisconnected()),
+            this, SLOT(usbDisconnected()));
 
     // initialize parser
     gcodeParser = new QGCodeParser(ui->textEdit, this);
@@ -48,6 +52,12 @@ MainWindow::MainWindow(QWidget *parent) :
     scene->installEventFilter(this);
 
     QTimer::singleShot(200, Qt::VeryCoarseTimer,this, SLOT(refreshPreview()));
+
+    // disable unnecessary visuals
+    ui->serialDeviceCombo->setVisible(false);
+
+    // autoconnect
+    communicator->connectUsb();
 }
 
 MainWindow::~MainWindow()
@@ -321,6 +331,18 @@ void MainWindow::refreshPreview()
     //ui->graphicsView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
+void MainWindow::usbConnected()
+{
+    ui->connectButton->setText(tr("Disconnect"));
+    ui->connectButton->setStyleSheet("background-color:green");
+}
+
+void MainWindow::usbDisconnected()
+{
+    ui->connectButton->setText(tr("Connect"));
+    ui->connectButton->setStyleSheet("background-color:red");
+}
+
 void MainWindow::drawGrid()
 {
     QPen gridPen(QColor(50, 50, 50));
@@ -359,8 +381,14 @@ void MainWindow::clearPreview()
 
 void MainWindow::sendCommand(QString command)
 {
-    communicator->sendData(command.toUtf8() + "\n");
-    logText(tr("Sent: ") + command);
+    if (communicator->sendData(command.toUtf8() + "\n"))
+    {
+        logText(tr("Sent: ") + command);
+    }
+    else
+    {
+        logText(tr("Not connected"));
+    }
 }
 
 void MainWindow::logText(QString text)
@@ -417,10 +445,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     }
     return QMainWindow::eventFilter(obj, event);
 }
-void MainWindow::on_refreshButton_clicked()
-{
-    refreshPreview();
-}
 
 void MainWindow::on_loadFileButton_clicked()
 {
@@ -433,13 +457,25 @@ void MainWindow::on_loadFileButton_clicked()
     }
 }
 
-void MainWindow::on_pushButton_4_clicked()
+void MainWindow::on_connectButton_clicked()
 {
-    communicator->connectUsb();
+    if (communicator->isUsbConnected())
+    {
+        communicator->closeUsb();
+    }
+    else
+    {
+        communicator->connectUsb();
+    }
 }
 
 void MainWindow::on_sendButton_clicked()
 {
+    if (ui->sendCommandEdit->text().isEmpty())
+    {
+        return;
+    }
+
     sendCommand(ui->sendCommandEdit->text());
     ui->sendCommandEdit->clear();
 }
@@ -582,4 +618,14 @@ void MainWindow::on_spinBox_valueChanged(int arg1)
 void MainWindow::on_spinBox_2_valueChanged(int arg1)
 {
     sendCommand(QString("move feed z %1").arg(arg1));
+}
+
+void MainWindow::on_pushButton_17_clicked()
+{
+    sendCommand("stop");
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    sendCommand("test");
 }

@@ -21,6 +21,11 @@ bool Communicator::connectUsb()
 {
     int usbCheckTimerInterval = 50;
 
+    if (activeConnections & UsbConnection)  // We are already connected
+    {
+        return true;
+    }
+
     usb_init();
 #ifdef DEBUG
     usb_set_debug(2);
@@ -32,8 +37,14 @@ bool Communicator::connectUsb()
       return false;
     }
 
-    usb_set_configuration(estickv2Handle, 1);
-    usb_claim_interface(estickv2Handle, 0);
+    if (usb_set_configuration(estickv2Handle, 1) < 0)
+    {
+        return false;
+    }
+    if (usb_claim_interface(estickv2Handle, 0) < 0)
+    {
+        return false;
+    }
 
     activeConnections |= UsbConnection;
     emit usbConnected();
@@ -51,10 +62,16 @@ bool Communicator::connectUsb()
 
 void Communicator::closeUsb()
 {
+    usbCheckTimer->stop();
     usb_release_interface(estickv2Handle, 0);
     usb_close(estickv2Handle);
     activeConnections &= ~UsbConnection;
     emit usbDisconnected();
+}
+
+bool Communicator::isUsbConnected()
+{
+    return (activeConnections & UsbConnection);
 }
 #endif
 
@@ -177,7 +194,7 @@ void Communicator::usbTask()
 
 #endif
 
-void Communicator::sendData(const QByteArray &data)
+bool Communicator::sendData(const QByteArray &data)
 {
     if (activeConnections & NetworkConnection)
     {
@@ -206,14 +223,31 @@ void Communicator::sendData(const QByteArray &data)
 
         sendStatus = usb_bulk_write(estickv2Handle, BULK_OUT_EP, sendData.data(), transmit+DL, transmitTimeout);
 
-#ifdef DEBUG
+
         if (sendStatus == (transmit+DL))
+        {
+#ifdef DEBUG
             qDebug() << "sending succeded";
+#endif
+            return true;
+        }
         else
+        {
+#ifdef DEBUG
             qDebug() << "error sending data";
 #endif
+            closeUsb();
+            return false;
+        }
+
     }
 #endif
+    else
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void Communicator::incomingByte(char byte)
