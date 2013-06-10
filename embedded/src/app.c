@@ -9,7 +9,7 @@
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
 
-#define TIMER_FREQ 35000u
+#define TIMER_FREQ 10000u
 #define HOMING_AMOUNT -1E9     //52500
 #define CALIBRATION_AMOUNT 100
 #define BUTTON_STEP_UM 5000
@@ -19,7 +19,7 @@
 
 #define MAX_FEED_RATE 100u
 #define MIN_FEED_RATE 10u
-#define COMMAND_DELAY 50u
+#define COMMAND_DELAY 5u
 
 typedef enum {
     ApplicationState_Movement = 0u,
@@ -468,7 +468,6 @@ static void App_USBConnection (void *p_arg)
     {
         if(usbReceiveBufferSize > 0)
         {   /* if a Message was received */
-            USB_printf("I'm a LPC1758 %i\n",5);
             commandSplitter((char*)&usbReceiveBuffer[2], usbReceiveBufferSize);
             usbReceiveBufferSize = 0;                                    /* reset the Message length of the incoming buffer */
 #if 0

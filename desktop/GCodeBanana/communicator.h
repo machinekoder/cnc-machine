@@ -65,12 +65,13 @@ signals:
     void usbDisconnected();
 #endif
 
+    void commandReceived(const QByteArray command);
+
 private slots:
 #ifdef SERIALPORT
     void incomingSerialData();
 #endif
 #ifdef USB
-    void incomingUsbData();
     void usbTask();
 #endif
 
@@ -82,10 +83,16 @@ private:
     struct usb_dev_handle *estickv2Handle;
     QTimer *usbCheckTimer;
 
+    QByteArray dataBuffer;
+    QString receivedData;
+    bool waitingForRespose;
+
     usb_dev_handle *locateEstickv2 (void);
 #endif
 
-ActiveConnections activeConnections;
+    ActiveConnections activeConnections;
+
+    void receivedCommand(QByteArray command);
     
 };
 

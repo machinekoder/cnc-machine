@@ -139,10 +139,6 @@ void Communicator::incomingSerialData()
 #endif
 
 #ifdef USB
-void Communicator::incomingUsbData()
-{
-
-}
 
 usb_dev_handle *Communicator::locateEstickv2()
 {
@@ -179,6 +175,16 @@ usb_dev_handle *Communicator::locateEstickv2()
     else return (device_handle);
 }
 
+void Communicator::receivedCommand(QByteArray command)
+{
+    if (command.size() == 0)
+    {
+        return;
+    }
+
+    emit commandReceived(command);
+}
+
 void Communicator::usbTask()
 {
     char receiveData[100];
@@ -189,6 +195,10 @@ void Communicator::usbTask()
     if (receiveStatus > 0)
     {
         data = QByteArray::fromRawData(&receiveData[DL], receiveStatus-DL);
+        for (int i = 0; i < data.length(); ++i)
+        {
+            incomingByte(data.at(i));
+        }
     }
 }
 
@@ -252,4 +262,49 @@ bool Communicator::sendData(const QByteArray &data)
 
 void Communicator::incomingByte(char byte)
 {
+    /*if (waitingForRespose)
+    {
+        responseTimer->stop();
+        responseTimer->start();
+
+        dataBuffer.append(byte);    // save the received data
+
+        if (byte != responseString.at(responseOffset))
+        {
+            responseOffset = 0;
+
+            if (byte != responseString.at(0))
+            {
+                responseOffset = -1;
+            }
+        }
+
+        if (responseOffset < (responseString.length()-1))
+            responseOffset++;
+        else    // matched
+        {
+            // clear the data buffer
+            dataBuffer.chop(responseString.length()); // remove the response message from the data
+            dataBuffer.append('\0');
+            receivedData = QString(dataBuffer);
+            dataBuffer.clear();
+
+            responseTimer->stop();
+            waitingForRespose = false;
+            responseReceived(currentCommand.type);
+            return;
+        }
+
+        return;
+    }*/
+
+    if (byte != '\0')
+    {
+        dataBuffer.append(byte);
+    }
+    else
+    {
+        receivedCommand(dataBuffer.trimmed());
+        dataBuffer.clear();
+    }
 }

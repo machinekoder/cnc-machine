@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
+    <width>1044</width>
     <height>862</height>
    </rect>
   </property>
@@ -54,23 +54,29 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_27">
+       <widget class="QPushButton" name="startButton">
         <property name="text">
          <string>&amp;Start</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_5">
+       <widget class="QPushButton" name="resetButton">
         <property name="text">
          <string>&amp;Reset</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_6">
+       <widget class="QPushButton" name="previewButton">
         <property name="text">
          <string>&amp;Preview</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -107,7 +113,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1024</width>
+     <width>1044</width>
      <height>20</height>
     </rect>
    </property>
