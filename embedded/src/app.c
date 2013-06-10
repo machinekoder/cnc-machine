@@ -480,7 +480,7 @@ static void App_USBConnection (void *p_arg)
             BulkOutSize = 0;                                    /* reset the Message length of the incoming buffer */
 #endif
         }
-        OSTimeDlyHMSM(0u, 0u, 0u, 500u, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
 
     }
 }

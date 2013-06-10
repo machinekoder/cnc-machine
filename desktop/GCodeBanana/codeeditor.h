@@ -62,6 +62,7 @@ public:
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
     void setLineError(int lineNumber, bool error);
+    void setCurrentLine(int lineNumber);
 
 protected:
     void resizeEvent(QResizeEvent *event);

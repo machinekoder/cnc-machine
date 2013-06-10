@@ -19,7 +19,7 @@ Communicator::~Communicator()
 #ifdef USB
 bool Communicator::connectUsb()
 {
-    int usbCheckTimerInterval = 50;
+    int usbCheckTimerInterval = 150;
 
     if (activeConnections & UsbConnection)  // We are already connected
     {
@@ -200,6 +200,41 @@ void Communicator::usbTask()
             incomingByte(data.at(i));
         }
     }
+
+    if (!dataQueue.isEmpty())
+    {
+        int transmitTimeout = 10;
+        int transmit = 0;
+        int sendStatus;
+        QByteArray sendData;
+
+
+        data = dataQueue.dequeue();
+        transmit = data.size();
+
+        sendData.append(0x00ff & ((transmit+1) >> 8));  // Highbyte
+        sendData.append(0x00ff & (transmit+1));         // Lowbyte
+        sendData.append(data);
+
+        sendStatus = usb_bulk_write(estickv2Handle, BULK_OUT_EP, sendData.data(), transmit+DL, transmitTimeout);
+
+
+        if (sendStatus == (transmit+DL))
+        {
+#ifdef DEBUG
+            qDebug() << "sending succeded";
+#endif
+            //return true;
+        }
+        else
+        {
+#ifdef DEBUG
+            qDebug() << "error sending data";
+#endif
+            closeUsb();
+            //return false;
+        }
+    }
 }
 
 #endif
@@ -220,36 +255,8 @@ bool Communicator::sendData(const QByteArray &data)
 #ifdef USB
     else if (activeConnections & UsbConnection)
     {
-        int transmitTimeout = 10;
-        int transmit = 0;
-        int sendStatus;
-        QByteArray sendData;
-
-        transmit = data.size();
-
-        sendData.append(0x00ff & ((transmit+1) >> 8));  // Highbyte
-        sendData.append(0x00ff & (transmit+1));         // Lowbyte
-        sendData.append(data);
-
-        sendStatus = usb_bulk_write(estickv2Handle, BULK_OUT_EP, sendData.data(), transmit+DL, transmitTimeout);
-
-
-        if (sendStatus == (transmit+DL))
-        {
-#ifdef DEBUG
-            qDebug() << "sending succeded";
-#endif
-            return true;
-        }
-        else
-        {
-#ifdef DEBUG
-            qDebug() << "error sending data";
-#endif
-            closeUsb();
-            return false;
-        }
-
+        dataQueue.enqueue(data);
+        return true;
     }
 #endif
     else

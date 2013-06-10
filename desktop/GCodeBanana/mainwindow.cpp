@@ -23,6 +23,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(communicator, SIGNAL(usbDisconnected()),
             this, SLOT(usbDisconnected()));
 
+    // initialize worker
+    worker = new Worker(communicator, this);
+    connect(worker, SIGNAL(finished()),
+            this, SLOT(workerFinished()));
+    connect(worker, SIGNAL(currentLineChanged(int)),
+            this, SLOT(workerCurrentLineChanged(int)));
+    connect(worker, SIGNAL(readyChanged(bool)),
+            ui->startButton, SLOT(setEnabled(bool)));
+    connect(worker, SIGNAL(currentStateChanged(Worker::WorkingStates)),
+            this, SLOT(workerCurrentStateChanged(Worker::WorkingStates)));
+
     // initialize parser
     gcodeParser = new QGCodeParser(ui->textEdit, this);
     connect(gcodeParser, SIGNAL(codeChanged(bool)),
@@ -341,6 +352,43 @@ void MainWindow::usbDisconnected()
 {
     ui->connectButton->setText(tr("Connect"));
     ui->connectButton->setStyleSheet("background-color:red");
+}
+
+void MainWindow::workerCurrentLineChanged(int arg)
+{
+    ui->textEdit->setCurrentLine(arg);
+}
+
+void MainWindow::workerCurrentStateChanged(Worker::WorkingStates state)
+{
+    switch (state)
+    {
+    case Worker::StoppedState: ui->startButton->setText(tr("Start"));
+        break;
+    case Worker::RunningState: ui->startButton->setText(tr("Pause"));
+        break;
+    case Worker::PausedState: ui->startButton->setText(tr("Resume"));
+        break;
+    }
+}
+
+void MainWindow::workerFinished()
+{
+    logText(tr("Machine: finished"));
+}
+
+void MainWindow::on_startButton_clicked()
+{
+    switch (worker->currentState())
+    {
+    case Worker::StoppedState: worker->setCommandList(ui->textEdit->toPlainText().split('\n'));
+        worker->start();
+        break;
+    case Worker::RunningState: worker->pause();
+        break;
+    case Worker::PausedState: worker->start();
+        break;
+    }
 }
 
 void MainWindow::drawGrid()

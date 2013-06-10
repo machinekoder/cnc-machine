@@ -11,6 +11,7 @@
 #include "qgcodeparser.h"
 #include "codeeditor.h"
 #include "communicator.h"
+#include "worker.h"
 #include <math.h>
 
 typedef struct {
@@ -46,6 +47,7 @@ private:
     ApplicationSettings applicationSettings;
 
     Communicator *communicator;
+    Worker       *worker;
 
     //setting loading and saving to ini
     void loadSettings();
@@ -70,6 +72,10 @@ private slots:
     void refreshPreview();
     void usbConnected();
     void usbDisconnected();
+
+    void workerCurrentLineChanged(int arg);
+    void workerCurrentStateChanged(Worker::WorkingStates state);
+    void workerFinished();
 
     void on_loadFileButton_clicked();
     void on_connectButton_clicked();
@@ -104,6 +110,7 @@ private slots:
     void on_spinBox_2_valueChanged(int arg1);
     void on_pushButton_17_clicked();
     void on_pushButton_2_clicked();
+    void on_startButton_clicked();
 };
 
 #endif // MAINWINDOW_H

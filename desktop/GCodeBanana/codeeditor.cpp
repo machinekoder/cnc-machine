@@ -83,12 +83,33 @@ void CodeEditor::setLineError(int lineNumber, bool error)
     lineError[lineNumber] = error;
 }
 
+void CodeEditor::setCurrentLine(int lineNumber)
+{
+    QTextCursor textCursor;
+    QTextBlock block;
+    int currentLine = 0;
+
+    block = document()->begin();
+
+    if ((lineNumber < 1) || (lineNumber > blockCount()))
+    {
+        lineNumber = 1;
+    }
+
+    while ((lineNumber-1) != currentLine)
+    {
+        block = block.next();
+        currentLine++;
+    }
+
+    textCursor = QTextCursor(block);
+    setTextCursor(textCursor);
+}
+
 void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
-
-
 
 void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
 {
@@ -157,7 +178,6 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
             {
                 painter.setPen(Qt::red);
                 painter.setBrush(QBrush(Qt::red));
-
 
             }
             painter.drawRect(0, top, lineNumberArea->width(), fontMetrics().height());

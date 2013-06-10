@@ -19,6 +19,7 @@ QT_USE_NAMESPACE_SERIALPORT
 #define BULK_IN_EP 0x82
 #define DL 2
 #include <QTimer>
+#include <QQueue>
 #include <usb.h>
 #endif
 
@@ -38,7 +39,6 @@ public:
 
     explicit Communicator(QObject *parent = 0);
     ~Communicator();
-
 
 #ifdef SERIALPORT
     bool connectSerialPort(const QString &device);
@@ -84,6 +84,7 @@ private:
     QTimer *usbCheckTimer;
 
     QByteArray dataBuffer;
+    QQueue<QByteArray> dataQueue;
     QString receivedData;
     bool waitingForRespose;
 
