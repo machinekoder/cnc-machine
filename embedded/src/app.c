@@ -4,28 +4,28 @@
  **/
 #include "app.h"
 
-
-
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
 
-#define TIMER_FREQ 10000u
+#define TIMER_FREQ 35000u
 #define HOMING_AMOUNT -1E9     //52500
-#define CALIBRATION_AMOUNT 100
+#define CALIBRATION_AMOUNT 1E4
+#define CALIBRATION_AMOUNT_Z 5E3
 #define BUTTON_STEP_UM 5000
 
 #define COMMAND_BUFFER_SIZE 200u
 #define CNC_QUEUE_BUFFER_SIZE 10u
 
-#define MAX_FEED_RATE 100u
-#define MIN_FEED_RATE 10u
-#define COMMAND_DELAY 5u
+#define MAX_FEED_RATE 500u
+#define MIN_FEED_RATE 1u
+//#define COMMAND_DELAY 5u
+uint32 commandDelay = 5u;
 
 typedef enum {
-    ApplicationState_Movement = 0u,
     ApplicationState_Working  = 1u,
     ApplicationState_Idle     = 2u,
     ApplicationState_Test     = 3u,
+    ApplicationState_Homing   = 4u
 } ApplicationState;
 
 typedef struct {
@@ -60,9 +60,9 @@ int32 stepsX;
 int32 stepsY;
 int32 stepsZ;
 
-uint32 xCalibration = 25/10;
-uint32 yCalibration = 25/10;
-uint32 zCalibration = 25/10;
+int32 xCalibration = 3;//25;//25/10;
+int32 yCalibration = 3;//25;//25/10;
+int32 zCalibration = 3;//25;//25/10;
 
 int32 currentX = 0;     // current X pos in um
 int32 currentY = 0;     // current Y pos in um
@@ -70,7 +70,7 @@ int32 currentZ = 0;     // current Z pos in um
 int32 targetX = 0;     // current X pos in um
 int32 targetY = 0;     // current Y pos in um
 int32 targetZ = 0;     // current Z pos in um
-uint32 currentFeed = 5; // current Feed rate in mm/s
+uint32 currentFeed = MAX_FEED_RATE; // current Feed rate in mm/s
 
 CommandBufferItem cncQueueBufferData[CNC_QUEUE_BUFFER_SIZE];
 CircularBuffer cncQueueBuffer;
@@ -167,8 +167,7 @@ main (void)
 
     // init command buffer
     Cb_initialize(&cncQueueBuffer, CNC_QUEUE_BUFFER_SIZE, sizeof(QueueItem), (void*)&cncQueueBufferData);
-    // DAC_Init(LPC_DAC);
-    //  Led_initialize(1,29, Led>_LowActive_Yes);
+    
     CSP_TmrInit();
     CSP_TmrCfg (CSP_TMR_NBR_00,TIMER_FREQ);
     CSP_TmrCfg (CSP_TMR_NBR_01,TIMER_FREQ);
@@ -310,13 +309,43 @@ static  void App_TaskStart (void *p_arg)
                  (OS_ERR     *)&err);
 
     while (DEF_TRUE) {
-        Led_set(Led1);
-        OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
-        Led_clear(Led1);
-        OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
-
-
-
+        
+        if (applicationState == ApplicationState_Idle)
+        {
+            Led_set(Led1);
+            OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
+            Led_clear(Led1);
+            OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        else if (applicationState == ApplicationState_Homing)
+        {
+            Led_set(Led1);
+            OSTimeDlyHMSM(0u, 0u, 0u, 300u,OS_OPT_TIME_HMSM_STRICT,&err);
+            Led_clear(Led1);
+            OSTimeDlyHMSM(0u, 0u, 0u, 300u,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        else if (applicationState == ApplicationState_Test)
+        {
+            Led_set(Led1);
+            OSTimeDlyHMSM(0u, 0u, 0u, 100u,OS_OPT_TIME_HMSM_STRICT,&err);
+            Led_clear(Led1);
+            OSTimeDlyHMSM(0u, 0u, 0u, 100u,OS_OPT_TIME_HMSM_STRICT,&err);
+            Led_set(Led1);
+            OSTimeDlyHMSM(0u, 0u, 0u, 100u,OS_OPT_TIME_HMSM_STRICT,&err);
+            Led_clear(Led1);
+            OSTimeDlyHMSM(0u, 0u, 0u, 100u,OS_OPT_TIME_HMSM_STRICT,&err);
+            Led_set(Led1);
+            OSTimeDlyHMSM(0u, 0u, 0u, 100u,OS_OPT_TIME_HMSM_STRICT,&err);
+            Led_clear(Led1);
+            OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
+        else if (applicationState == ApplicationState_Working)
+        {
+            Led_set(Led1);
+            OSTimeDlyHMSM(0u, 0u, 0u, 100u,OS_OPT_TIME_HMSM_STRICT,&err);
+            Led_clear(Led1);
+            OSTimeDlyHMSM(0u, 0u, 0u, 100u,OS_OPT_TIME_HMSM_STRICT,&err);
+        }
     }
 }
 
@@ -331,7 +360,6 @@ static void App_Button (void *p_arg)
         for(count=0; count<=10; count++)
         {
             Button_task();        // reads the button values
-            //testValue = Gpio_read(testPort,testPin);
             OSTimeDlyHMSM(0u, 0u, 0u, 10u, OS_OPT_TIME_HMSM_STRICT, &err);
             if(count==10)
             {
@@ -470,15 +498,6 @@ static void App_USBConnection (void *p_arg)
         {   /* if a Message was received */
             commandSplitter((char*)&usbReceiveBuffer[2], usbReceiveBufferSize);
             usbReceiveBufferSize = 0;                                    /* reset the Message length of the incoming buffer */
-#if 0
-            BulkInSize = strlen((char *)str);                   /* calculate string length of outgoing data */
-            abBulkInBuf[0]=0x00ff&((BulkInSize+1)>>8);          /* Highbyte */
-            abBulkInBuf[1]=0x00ff&(BulkInSize+1);               /* Lowbyte  */
-
-            sprintf((char *)&abBulkInBuf[2],"%s",str);               /* write data to output buffer */
-            BulkInSize += 3;                                    /* HB + LB + \0 */
-            BulkOutSize = 0;                                    /* reset the Message length of the incoming buffer */
-#endif
         }
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
 
@@ -489,10 +508,6 @@ static void App_MotorSteuerung (void *p_arg)
 {
     OS_ERR       err;
     (void)p_arg;                                             /* Prevent Compiler Warning */
-
-    //uint16 test=-1000;
-    //uint8 time=10;
-    //uint8_t str[] = "I'm a LPC1758\n";                        /* Setup string for transmitting */
 
     (void)p_arg;                                              /* Prevent Compiler Warning */
     while(DEF_TRUE)
@@ -514,7 +529,7 @@ static void App_MotorSteuerung (void *p_arg)
                 processCncCommands();
             }
         }
-        OSTimeDlyHMSM(0u, 0u, 0u, COMMAND_DELAY, OS_OPT_TIME_HMSM_STRICT, &err);
+        OSTimeDlyHMSM(0u, 0u, 0u, commandDelay, OS_OPT_TIME_HMSM_STRICT, &err);
 
         if (testing == TRUE)
         {
@@ -566,7 +581,7 @@ void processCncCommands()
         targetX = item.targetX;
         targetY = item.targetY;
         targetZ = item.targetZ;
-        if (item.feed != 0)
+        if ((item.feed != 0u) && (item.feed != 6u))
         {
             currentFeed = item.feed;
         }
@@ -604,14 +619,22 @@ bool getSteps(CommandBufferItem *item)
     int32 xFeed = 0;
     int32 yFeed = 0;
     int32 zFeed = 0;
+    
+    if ((stepsX != 0) || (stepsY != 0) || (stepsZ != 0))
+    {
+        item->stepsX = 0;
+        item->stepsY = 0;
+        item->stepsZ = 0;
+        return TRUE;
+    }
 
     xOffset = targetX - currentX;
     yOffset = targetY - currentY;
     zOffset = targetZ - currentZ;
 
-    stepTime = COMMAND_DELAY;
-    calls = 1E3/stepTime;
-    feedSteps = (currentFeed*1E3)/calls;
+    stepTime = commandDelay;
+    calls = (int32)(1E3/stepTime);
+    feedSteps = (int32)((int32)(currentFeed*1E2)/calls);
 
     if (!((xOffset != 0) || (yOffset != 0) || (zOffset != 0)))
     {
@@ -642,22 +665,61 @@ bool getSteps(CommandBufferItem *item)
     return TRUE;
 }
 
-bool setXDirectionUM(int32 mmm)
+bool setXDirectionUM(int32 um)
 {
-    currentX += mmm;
-    return setXDirection(mmm * xCalibration);
+    /*int32 newUm;
+    
+    if (um >= 10)
+    {
+        newUm = (int32)(um / 10);
+        currentX += newUm*10;
+        return setXDirection(newUm * xCalibration);
+    }
+    else
+    {
+        currentX += um;
+        return setXDirection(um * (int32)(xCalibration/10));
+    }*/
+    currentX += um;
+    return setXDirection(um * xCalibration);
 }
 
-bool setYDirectionUM(int32 mmm)
+bool setYDirectionUM(int32 um)
 {
-    currentY += mmm;
-    return setYDirection(mmm * yCalibration);
+    /*int32 newUm;
+    
+    if (um >= 10)
+    {
+        newUm = (int32)(um / 10);
+        currentY += newUm*10;
+        return setYDirection(newUm * yCalibration);
+    }
+    else
+    {
+        currentY += um;
+        return setYDirection(um * (int32)(yCalibration/10));
+    }*/
+    currentY += um;
+    return setYDirection(um * yCalibration);
 }
 
-bool setZDirectionUM(int32 mmm)
+bool setZDirectionUM(int32 um)
 {
-    currentZ += mmm;
-    return setZDirection(mmm * zCalibration);
+    /*int32 newUm;
+    
+    if (um >= 10)
+    {
+        newUm = (int32)(um / 10);
+        currentZ += newUm*10;
+        return setZDirection(newUm * zCalibration);
+    }
+    else
+    {
+        currentZ += um;
+        return setZDirection(um * (int32)(zCalibration/10));
+    }*/
+    currentZ += um;
+    return setZDirection(um * zCalibration);
 }
 
 void commandSplitter(char* data, uint32 length)
@@ -844,21 +906,23 @@ bool setZDirection (int32 stepsZ_local)
     return TRUE;
 }
 
-
-
 void homeX()
 {
     OS_ERR       err;
 
     Debug_printf(Debug_Level_2, "Start homing x axis\n");
+    applicationState = ApplicationState_Homing;
 
     setXDirection(HOMING_AMOUNT);
     while(stepsX != 0)
+    {
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
     currentX = 0;
     targetX = 0;
 
     Debug_printf(Debug_Level_2, "Homing x axis finished\n");
+    applicationState = ApplicationState_Idle;
 }
 
 void homeY()
@@ -866,14 +930,18 @@ void homeY()
     OS_ERR       err;
 
     Debug_printf(Debug_Level_2, "Start homing y axis\n");
+    applicationState = ApplicationState_Homing;
 
     setYDirection(HOMING_AMOUNT);
     while(stepsY != 0)
+    {
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
     currentY = 0;
     targetY = 0;
 
     Debug_printf(Debug_Level_2, "Homing y axis finished\n");
+    applicationState = ApplicationState_Idle;
 }
 
 void homeZ()
@@ -881,14 +949,18 @@ void homeZ()
     OS_ERR       err;
 
     Debug_printf(Debug_Level_2, "Start homing z axis\n");
+    applicationState = ApplicationState_Homing;
 
     setZDirection(HOMING_AMOUNT);
     while(stepsZ != 0)
+    {
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
     currentZ = 0;
     targetZ = 0;
 
     Debug_printf(Debug_Level_2, "Homing z axis finished\n");
+    applicationState = ApplicationState_Idle;
 }
 
 void homeAll()
@@ -896,12 +968,21 @@ void homeAll()
     OS_ERR       err;
 
     Debug_printf(Debug_Level_2, "Start homing all axes\n");
+    applicationState = ApplicationState_Homing;
 
     setXDirection(HOMING_AMOUNT);
     setYDirection(HOMING_AMOUNT);
-    setZDirection(HOMING_AMOUNT);
-    while((stepsX != 0) || (stepsY != 0) || (stepsZ != 0))
+    
+    while((stepsX != 0) || (stepsY != 0))
+    {
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
+    
+    setZDirection(HOMING_AMOUNT);
+    while (stepsZ != 0)
+    {
+        OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
+    }
     currentX = 0;
     currentY = 0;
     currentZ = 0;
@@ -910,6 +991,7 @@ void homeAll()
     targetZ = 0;
 
     Debug_printf(Debug_Level_2, "Homing all axes finished\n");
+    applicationState = ApplicationState_Idle;
 }
 
 void stopMachine()
@@ -921,23 +1003,25 @@ void stopMachine()
     testing = false;
     applicationState = ApplicationState_Idle;
 }
-bool cncCalibrateZentool (uint8_t measuredDistanceX, uint8_t measuredDistanceY, uint8_t measuredDistanceZ)
+
+bool cncCalibrateZentool (double measuredDistanceX, double measuredDistanceY, double measuredDistanceZ)
 {
     Debug_printf(Debug_Level_2, "Starting calibration\n");
 
-    // homeAll();                              // home all axes
+    xCalibration = (int32)(((double)(CALIBRATION_AMOUNT) / (measuredDistanceX*100.0)) * (double)xCalibration);
+    yCalibration = (int32)(((double)(CALIBRATION_AMOUNT) / (measuredDistanceY*100.0)) * (double)yCalibration);
+    zCalibration = (int32)(((double)(CALIBRATION_AMOUNT_Z) / (measuredDistanceZ*100.0)) * (double)zCalibration);
+    
+    homeAll();                              // home all axes
     setXDirection(CALIBRATION_AMOUNT * xCalibration);      // move all axes a defined amount
     while (stepsX > 0) { }
     setYDirection(CALIBRATION_AMOUNT * yCalibration);
     while (stepsY > 0) { }
-    setZDirection(measuredDistanceZ * zCalibration);
+    setZDirection(CALIBRATION_AMOUNT_Z * zCalibration);
     while (stepsZ > 0) { }
 
     homeAll();
-    // now the user has to measure the distance
-    xCalibration = (CALIBRATION_AMOUNT / measuredDistanceX) * xCalibration;
-    yCalibration = (CALIBRATION_AMOUNT / measuredDistanceX) * yCalibration;
-    zCalibration = (CALIBRATION_AMOUNT / measuredDistanceZ) * zCalibration;
+    // now the user has to measure the distance;
 
     Debug_printf(Debug_Level_2, "Distance should be 100mm in x+ und y+ \n if not Pleas measure Distances and run Again \n");
     Debug_printf(Debug_Level_2, "values now: x: %d Steps/mm y: %d Steps/mm z: %d Steps/mm \n", xCalibration, yCalibration, zCalibration);
@@ -970,7 +1054,7 @@ bool testButtons(void )
            ))
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
 
-    applicationState = ApplicationState_Movement;
+    applicationState = ApplicationState_Idle;
 
     Debug_printf(Debug_Level_1, "All buttons successfully tested\n");
 
@@ -999,7 +1083,7 @@ bool testEndstops(void )
            ))
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
 
-    applicationState = ApplicationState_Movement;
+    applicationState = ApplicationState_Idle;
 
     Debug_printf(Debug_Level_1, "All endstops successfully tested\n");
 
@@ -1056,31 +1140,32 @@ static void App_TMR2_IntHandler (void *p_arg)
 
 void printUnknownCommand(void)
 {
-    USB_printf("CMD?\r");
-    Led_clear(2);
+    USB_printf("CMD?\n");
 }
 
 void printParameterMissing(void)
 {
-    USB_printf("Missing parameter.\r");
-    Led_clear(2);
+    USB_printf("Missing parameter.\n");
 }
 
 void printAcknowledgement(void)
 {
-    USB_printf("ACK\r");
-    Led_clear(2);
+    USB_printf("ACK\n");
 }
 
 void printError(char *message)
 {
-    USB_printf("ERR: %s\r", message);
+    USB_printf("ERR: %s\n", message);
 }
 
 void printAliveMessage(void)
 {
-    USB_printf("yes\r");
-    Led_clear(2);
+    USB_printf("yes\n");
+}
+
+void printOk(void)
+{
+    USB_printf("ok\n");
 }
 
 bool compareBaseCommand(char *original, char *received)
@@ -1124,8 +1209,6 @@ void processCommand(char *buffer)
     char *dataPointer2;
     char *dataPointer3;
     char *savePointer;
-
-    Led_set(Led1);  // set the yellow led to indicate incoming data status
 
     dataPointer = strtok_r(buffer, " ", &savePointer);
 
@@ -1179,7 +1262,7 @@ void processCommand(char *buffer)
         int32 x = currentX;
         int32 y = currentY;
         int32 z = currentZ;
-        uint32 feed = 0;    // makes it current speed at the time of execution
+        uint32 feed = 0u;    // makes it current speed at the time of execution
 
         if ((dataPointer = strtok_r(NULL, " ", &savePointer)) == NULL)
         {
@@ -1231,10 +1314,16 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                targetX += (int32)(atof(dataPointer)*1000.0);
-                if (targetX < 0)
+                int32 movement = (int32)(atof(dataPointer)*1000.0);
+                
+                if (movement != 0) 
                 {
-                    targetX = 0;
+                    targetX += movement;
+                    if (targetX < 0)
+                    {
+                        targetX = 0;
+                    }
+                    applicationState = ApplicationState_Working;
                 }
             }
             else
@@ -1249,10 +1338,16 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                targetY += (int32)(atof(dataPointer)*1000.0);
-                if (targetY < 0)
+                int32 movement = (int32)(atof(dataPointer)*1000.0);
+                
+                if (movement != 0) 
                 {
-                    targetY = 0;
+                    targetY += movement;
+                    if (targetY < 0)
+                    {
+                        targetY = 0;
+                    }
+                    applicationState = ApplicationState_Working;
                 }
             }
             else
@@ -1267,10 +1362,16 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                targetZ += (int32)(atof(dataPointer)*1000.0);
-                if (targetZ < 0)
+                int32 movement = (int32)(atof(dataPointer)*1000.0);
+                
+                if (movement != 0) 
                 {
-                    targetZ = 0;
+                    targetZ += movement;
+                    if (targetZ < 0)
+                    {
+                        targetZ = 0;
+                    }
+                    applicationState = ApplicationState_Working;
                 }
             }
             else
@@ -1294,10 +1395,16 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                targetX = (int32)(atof(dataPointer)*1000.0);
-                if (targetX < 0)
+                int32 newTarget = (int32)(atof(dataPointer)*1000.0);;
+                
+                if (targetX != newTarget)
                 {
-                    targetX = 0;
+                    targetX = newTarget;
+                    if (targetX < 0)
+                    {
+                        targetX = 0;
+                    }
+                    applicationState = ApplicationState_Working;
                 }
             }
             else
@@ -1312,10 +1419,16 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                targetY = (int32)(atof(dataPointer)*1000.0);
-                if (targetY < 0)
+                int32 newTarget = (int32)(atof(dataPointer)*1000.0);;
+                
+                if (targetY != newTarget)
                 {
-                    targetY = 0;
+                    targetY = newTarget;
+                    if (targetY < 0)
+                    {
+                        targetY = 0;
+                    }
+                    applicationState = ApplicationState_Working;
                 }
             }
             else
@@ -1330,10 +1443,16 @@ void processCommand(char *buffer)
             dataPointer = strtok_r(NULL, " ", &savePointer);
             if (dataPointer != NULL)
             {
-                targetZ = (int32)(atof(dataPointer)*1000.0);
-                if (targetZ < 0)
+                int32 newTarget = (int32)(atof(dataPointer)*1000.0);;
+                
+                if (targetZ != newTarget)
                 {
-                    targetZ = 0;
+                    targetZ = newTarget;
+                    if (targetZ < 0)
+                    {
+                        targetZ = 0;
+                    }
+                    applicationState = ApplicationState_Working;
                 }
             }
             else
@@ -1353,22 +1472,34 @@ void processCommand(char *buffer)
         dataPointer = strtok_r(NULL, " ", &savePointer);
         if (compareExtendedCommand("x",dataPointer))
         {
-            homeX();
+            if (applicationState == ApplicationState_Idle)
+            {
+                homeX();
+            }
             return;
         }
-        if (compareExtendedCommand("y",dataPointer))
+        else if (compareExtendedCommand("y",dataPointer))
         {
-            homeY();
+            if (applicationState == ApplicationState_Idle)
+            {
+                homeY();
+            }
             return;
         }
-        if (compareExtendedCommand("z",dataPointer))
+        else if (compareExtendedCommand("z",dataPointer))
         {
-            homeZ();
+            if (applicationState == ApplicationState_Idle)
+            {
+                homeZ();
+            }
             return;
         }
-        if (compareExtendedCommand("all",dataPointer))
+        else if (compareExtendedCommand("all",dataPointer))
         {
-            homeAll();
+            if (applicationState == ApplicationState_Idle)
+            {
+                homeAll();
+            }
             return;
         }
         else
@@ -1383,8 +1514,11 @@ void processCommand(char *buffer)
                 ((dataPointer1 = strtok_r(NULL, " ", &savePointer)) == NULL) ||
                 ((dataPointer2 = strtok_r(NULL, " ", &savePointer)) == NULL) )
             return;
-
-        cncCalibrateZentool(atoi(dataPointer), atoi(dataPointer1), atoi(dataPointer2));
+        
+        if (applicationState == ApplicationState_Idle)
+        {
+            cncCalibrateZentool(atof(dataPointer), atof(dataPointer1), atof(dataPointer2));
+        }
 
         return;
     }

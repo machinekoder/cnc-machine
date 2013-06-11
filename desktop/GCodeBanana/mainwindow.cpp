@@ -535,17 +535,17 @@ void MainWindow::on_pushButton_11_clicked()
 
 void MainWindow::on_pushButton_12_clicked()
 {
-    sendCommand("move x 1");
+    sendCommand("move x 1.0");
 }
 
 void MainWindow::on_pushButton_21_clicked()
 {
-    sendCommand("move x 10");
+    sendCommand("move x 10.0");
 }
 
 void MainWindow::on_pushButton_8_clicked()
 {
-    sendCommand("move x 100");
+    sendCommand("move x 100.0");
 }
 
 void MainWindow::on_pushButton_13_clicked()
@@ -555,17 +555,17 @@ void MainWindow::on_pushButton_13_clicked()
 
 void MainWindow::on_pushButton_14_clicked()
 {
-    sendCommand("move x -1");
+    sendCommand("move x -1.0");
 }
 
 void MainWindow::on_pushButton_15_clicked()
 {
-    sendCommand("move x -10");
+    sendCommand("move x -10.0");
 }
 
 void MainWindow::on_pushButton_16_clicked()
 {
-    sendCommand("move x -100");
+    sendCommand("move x -100.0");
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -575,17 +575,17 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::on_pushButton_10_clicked()
 {
-    sendCommand("move y 1");
+    sendCommand("move y 1.0");
 }
 
 void MainWindow::on_pushButton_9_clicked()
 {
-    sendCommand("move y 10");
+    sendCommand("move y 10.0");
 }
 
 void MainWindow::on_pushButton_7_clicked()
 {
-    sendCommand("move y 100");
+    sendCommand("move y 100.0");
 }
 
 void MainWindow::on_pushButton_22_clicked()
@@ -595,17 +595,17 @@ void MainWindow::on_pushButton_22_clicked()
 
 void MainWindow::on_pushButton_23_clicked()
 {
-    sendCommand("move y -1");
+    sendCommand("move y -1.0");
 }
 
 void MainWindow::on_pushButton_24_clicked()
 {
-    sendCommand("move y -10");
+    sendCommand("move y -10.0");
 }
 
 void MainWindow::on_pushButton_25_clicked()
 {
-    sendCommand("move y -100");
+    sendCommand("move y -100.0");
 }
 
 void MainWindow::on_pushButton_31_clicked()
@@ -615,12 +615,12 @@ void MainWindow::on_pushButton_31_clicked()
 
 void MainWindow::on_pushButton_32_clicked()
 {
-    sendCommand("move z 1");
+    sendCommand("move z 1.0");
 }
 
 void MainWindow::on_pushButton_33_clicked()
 {
-    sendCommand("move z 10");
+    sendCommand("move z 10.0");
 }
 
 void MainWindow::on_pushButton_29_clicked()
@@ -630,12 +630,12 @@ void MainWindow::on_pushButton_29_clicked()
 
 void MainWindow::on_pushButton_30_clicked()
 {
-    sendCommand("move z -1");
+    sendCommand("move z -1.0");
 }
 
 void MainWindow::on_pushButton_26_clicked()
 {
-    sendCommand("move z -10");
+    sendCommand("move z -10.0");
 }
 
 void MainWindow::on_pushButton_18_clicked()

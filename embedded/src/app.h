@@ -110,7 +110,7 @@ void homeY();
 void homeZ();
 void homeAll();
 void stopMachine();
-bool cncCalibrateZentool (uint8_t measuredDistanceX, uint8_t measuredDistanceY, uint8_t measuredDistanceZ);
+bool cncCalibrateZentool (double measuredDistanceX, double measuredDistanceY, double measuredDistanceZ);
 
 bool testButtons(void);
 bool testEndstops(void);
