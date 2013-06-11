@@ -80,14 +80,15 @@ private:
     SerialPort *serialPort;
 #endif
 #ifdef USB
-    struct usb_dev_handle *estickv2Handle;
-    QTimer *usbCheckTimer;
+    struct usb_dev_handle   *estickv2Handle;
+    QTimer                  *usbCheckTimer;
 
-    QByteArray dataBuffer;
-    QQueue<QByteArray> dataQueue;
-    QString receivedData;
-    bool waitingForRespose;
+    QByteArray          dataBuffer;
+    QQueue<QByteArray>  dataQueue;
+    QString             receivedData;
+    bool                waitingForRespose;
 
+    /** This function tries to locate the estick using the device id*/
     usb_dev_handle *locateEstickv2 (void);
 #endif
 

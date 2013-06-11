@@ -1104,6 +1104,13 @@
      <item row="0" column="0">
       <widget class="CodeEditor" name="textEdit"/>
      </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="timeLabel">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>

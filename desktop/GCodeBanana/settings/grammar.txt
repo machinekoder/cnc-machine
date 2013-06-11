@@ -32,11 +32,11 @@ xyz=X|real| Z|real| F|real|
 xyz=Y|real| Z|real| F|real|
 xyz=X|real| Y|real| Z|real| F|real|
 
-mcodes=M5
-mcodes=M2
-mcodes=M3
+#mcodes=M5
+#mcodes=M2
+#mcodes=M3
 
-gcodes=G21
+#gcodes=G21
 
 gmove=G00
 gmove=G01

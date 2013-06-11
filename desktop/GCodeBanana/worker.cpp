@@ -12,12 +12,19 @@ Worker::Worker(Communicator *communicator, QObject *parent) :
     m_currentState = StoppedState;
     m_bufferSize = 3;
 
+    aliveTimer = new QTimer(this);
+    aliveTimer->setInterval(1000); // 1s
+    aliveTimer->start();
+
     connect(m_communicator, SIGNAL(usbConnected()),
             this, SLOT(usbConnected()));
     connect(m_communicator, SIGNAL(usbDisconnected()),
             this, SLOT(usbDisconnected()));
     connect(m_communicator, SIGNAL(commandReceived(QByteArray)),
             this, SLOT(commandReceived(QByteArray)));
+
+    connect(aliveTimer, SIGNAL(timeout()),
+            this, SLOT(aliveTimerTick()));
 }
 
 void Worker::start()
@@ -94,6 +101,11 @@ void Worker::commandReceived(const QByteArray command)
             emit finished();
         }
     }
+}
+
+void Worker::aliveTimerTick()
+{
+    sendCommand("alive\n");
 }
 
 void Worker::startQueue()

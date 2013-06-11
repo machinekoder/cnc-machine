@@ -49,6 +49,7 @@ bool Communicator::connectUsb()
     activeConnections |= UsbConnection;
     emit usbConnected();
 
+    // Create the timer necessary for cyclically checking the usb port
     usbCheckTimer = new QTimer(this);
     usbCheckTimer->setInterval(usbCheckTimerInterval);
     usbCheckTimer->setTimerType(Qt::PreciseTimer);
@@ -63,8 +64,11 @@ bool Communicator::connectUsb()
 void Communicator::closeUsb()
 {
     usbCheckTimer->stop();
+    usbCheckTimer->deleteLater();
+
     usb_release_interface(estickv2Handle, 0);
     usb_close(estickv2Handle);
+
     activeConnections &= ~UsbConnection;
     emit usbDisconnected();
 }
@@ -311,7 +315,7 @@ void Communicator::incomingByte(char byte)
     }
     else
     {
-        receivedCommand(dataBuffer.trimmed());
+        receivedCommand(dataBuffer.trimmed());  // We trim the \n from the received code
         dataBuffer.clear();
     }
 }

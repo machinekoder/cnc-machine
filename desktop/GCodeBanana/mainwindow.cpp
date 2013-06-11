@@ -68,6 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->serialDeviceCombo->setVisible(false);
 
     // autoconnect
+    usbDisconnected();  // for creating the red button
     communicator->connectUsb();
 }
 
@@ -121,7 +122,7 @@ void MainWindow::setCrosshairPos(QPointF point)
 
 void MainWindow::codeChanged(bool valid)
 {
-    if (valid)
+    if (valid && ui->previewButton->isChecked())
     {
         previewGCode(ui->textEdit->toPlainText());
     }
@@ -236,6 +237,7 @@ void MainWindow::previewGCode(QString code)
 
     qDebug() << time << "min";
     qDebug() << length << "mm";
+    ui->timeLabel->setText(tr("length=%1mm, time=%2min").arg(length).arg(time));
     refreshPreview();
 }
 
@@ -310,15 +312,15 @@ QString MainWindow::translateGCode(QString code, double x, double y, double z)
 
             if (oldX != 0.0)
             {
-                newLine.append(QString(" X%1").arg(oldX));
+                newLine.append(" X" + QString::number(oldX, 'f', 4));
             }
             if (oldY != 0.0)
             {
-                newLine.append(QString(" Y%1").arg(oldY));
+                newLine.append(" Y" + QString::number(oldY, 'f', 4));
             }
             if (oldZ != 0.0)
             {
-                newLine.append(QString(" Z%1").arg(oldZ));
+                newLine.append(" Z" + QString::number(oldZ, 'f', 4));
             }
             if (oldF != 0.0)
             {
@@ -381,9 +383,16 @@ void MainWindow::on_startButton_clicked()
 {
     switch (worker->currentState())
     {
-    case Worker::StoppedState: worker->setCommandList(ui->textEdit->toPlainText().split('\n'));
+    case Worker::StoppedState: {
+        if (gcodeParser->hasError())
+        {
+            QMessageBox::warning(this, tr("Error"), tr("Your code has an error"));
+            return;
+        }
+        worker->setCommandList(gcodeParser->strippedCode().split('\n'));
         worker->start();
         break;
+    }
     case Worker::RunningState: worker->pause();
         break;
     case Worker::PausedState: worker->start();

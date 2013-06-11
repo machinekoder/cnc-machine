@@ -8,6 +8,7 @@
 #include <QFileInfo>
 #include <QTimer>
 #include <QGraphicsSceneMouseEvent>
+#include <QMessageBox>
 #include "qgcodeparser.h"
 #include "codeeditor.h"
 #include "communicator.h"

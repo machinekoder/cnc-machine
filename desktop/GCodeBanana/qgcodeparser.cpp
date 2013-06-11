@@ -10,8 +10,25 @@ QGCodeParser::QGCodeParser(CodeEditor *editor, QObject *parent) :
             this, SLOT(evaluateCode()));
 }
 
+QString QGCodeParser::strippedCode()
+{
+    QStringList newLines = codeEditor->toPlainText().split("\n");
+    for (int i = 0; i < newLines.size(); ++i)
+    {
+        newLines.replace(i, stripComments(newLines.at(i)));
+    }
+}
+
+bool QGCodeParser::hasError()
+{
+    return m_hasError;
+}
+
 void QGCodeParser::initialize()
 {
+    // initialize variables
+    m_hasError = false;
+
     // create earley parser
     earleyParser = new QEarleyParser(this);
 
@@ -159,6 +176,7 @@ void QGCodeParser::evaluateCode()
     }
 
     oldLines = newLines;
+    m_hasError = !globalResult;
 
     emit codeChanged(globalResult);
 }

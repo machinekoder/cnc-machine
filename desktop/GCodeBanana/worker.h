@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QStringList>
-#include <QTime>
+#include <QTimer>
 #include "communicator.h"
 
 class Worker : public QObject
@@ -84,24 +84,33 @@ void setBufferSize(int arg)
 }
 
 private:
-    int m_waitingCount;
-    Communicator *m_communicator;
-    QStringList m_commandList;
-    int m_currentLine;
-    bool m_ready;
-    WorkingStates m_currentState;
-    int m_bufferSize;
+    QTimer          *aliveTimer;
+    int             m_waitingCount;
+    Communicator    *m_communicator;
+    QStringList     m_commandList;
+    int             m_currentLine;
+    bool            m_ready;
+    WorkingStates   m_currentState;
+    int             m_bufferSize;
 
+    /** Starts the Queue from the beginning */
     void startQueue();
+    /** Resumes a paused Queue */
     void resumeQueue();
+    /** Stops a running Queue */
     void stopQueue();
+    /** Send a command to the machine */
     void sendCommand(const QByteArray data);
+    /** Sends one line of code from the list */
     void sendLine();
 
 private slots:
     void usbConnected();
     void usbDisconnected();
     void commandReceived(const QByteArray command);
+
+    /** This function sends a message to the machine to check wheter it is connected or not */
+    void aliveTimerTick();
 };
 
 #endif // WORKER_H

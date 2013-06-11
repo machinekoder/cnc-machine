@@ -16,6 +16,11 @@ class QGCodeParser : public QObject
 public:
     explicit QGCodeParser(CodeEditor *editor, QObject *parent = 0);
 
+    /** returns the code stripped from all comments */
+    QString strippedCode();
+    /** returns wheter the code has an error or not */
+    bool hasError();
+
 private:
     QEarleyParser               *earleyParser;                                  /// the earley parser
     QList<int>                  expressionWhitespaceList;                       /// this list holds count of removed whitespace for each character of the expression
@@ -23,6 +28,8 @@ private:
     QStringList                 oldLines;
 
     CodeEditor                  *codeEditor;
+
+    bool m_hasError;
 
     /** initializes the parser */
     void initialize();
