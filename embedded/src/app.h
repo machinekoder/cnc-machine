@@ -5,6 +5,25 @@
 *                                             INCLUDE FILES
 ************************************************************************************************
 */
+
+#include <defines.h>
+#include <includes.h>
+#include <sys/stat.h>
+#include <timer.h>
+#include <zentoolworksDriver.h>
+#include "taskStart.h"
+#include "taskButton.h"
+#include "taskLed.h"
+#include "taskMotorSteuerung.h"
+#include "taskUsbConnection.h"
+#include "debug.h"
+
+/*
+************************************************************************************************
+*                                             GLOBAL DEFINES
+************************************************************************************************
+*/
+
 #define BUTTON_Xplus 0
 #define BUTTON_Xminus 1
 #define BUTTON_Yplus 2
@@ -48,70 +67,43 @@
 #define ENDSCHALTER_Zplus_PIN           17
 #define ENDSCHALTER_Zminus_PIN          22
 
-#include <defines.h>
-#include <includes.h>
-#include <sys/stat.h>
-#include <timer.h>
-#include "taskMachine.h"
-#include "zentoolworksDriver.h"
-#include "debug.h"
+#define MAX_FEED_RATE 500u
+#define MIN_FEED_RATE 1u
 
-/*
-************************************************************************************************
-*                                             GLOBAL DEFINES
-************************************************************************************************
-*/
-
-#define OUTPUT_MEMORY_SIZE 50
+typedef enum {
+    ApplicationState_Working  = 1u,
+    ApplicationState_Idle     = 2u,
+    ApplicationState_Test     = 3u,
+    ApplicationState_Homing   = 4u
+} ApplicationState;
 
 typedef struct {
-    uint8  taskId;
-    uint32 producedGoods;
-} App_TaskMachine_ServiceRequest;
+    int16 stepsX;
+    int16 stepsY;
+    int16 stepsZ;
+} CommandBufferItem;
 
-OS_SEM UartSem;
-OS_SEM DacSem;
-OS_SEM ButtonSem;
+typedef struct {
+    int32 targetX;
+    int32 targetY;
+    int32 targetZ;
+    uint32 feed;
+} QueueItem;
 
-OS_MEM OutputMemory;
-OS_MEM ServiceRequestMemory;
-OS_MEM RawMaterialMemory;
-
- char                           OutputMemoryStorage[10][OUTPUT_MEMORY_SIZE];
- App_TaskMachine_ServiceRequest ServiceRequestMemoryStorage[20];
- uint32                         RawMaterialMemoryStorage[20];
-
-//uint8 wakeup = 0;
+extern ApplicationState applicationState;
+extern bool testing;
+extern const uint32 commandDelay;
+extern int32 currentX;     // current X pos in um
+extern int32 currentY;     // current Y pos in um
+extern int32 currentZ;     // current Z pos in um
+extern int32 targetX;     // current X pos in um
+extern int32 targetY;     // current Y pos in um
+extern int32 targetZ;     // current Z pos in um
 
 /*
 ************************************************************************************************
 *                                         FUNCTION PROTOTYPES
 ************************************************************************************************
 */
-
-/** starts moving in Direction X.
- *  @param stepsX are the steps >0= +  <0= -
- */
-void moveXDirection ();
-void moveYDirection ();
-void moveZDirection ();
-bool setXDirection (int32 stepsX_local);
-bool setYDirection (int32 stepsY_local);
-bool setZDirection (int32 stepsZ_local);
-bool setXDirectionUM (int32 mmm);
-bool setYDirectionUM (int32 mmm);
-bool setZDirectionUM (int32 mmm);
-bool putIntoCommandPuffer (int32 newXum, int32 newYum, int32 newZum, uint32 feed);
-
-
-void buttonInit();
-void homeX();
-void homeY();
-void homeZ();
-void homeAll();
-void stopMachine();
-bool cncCalibrateZentool (double measuredDistanceX, double measuredDistanceY, double measuredDistanceZ);
-
-bool testButtons(void);
-bool testEndstops(void);
+bool App_putIntoCommandPuffer (int32 newXum, int32 newYum, int32 newZum, uint32 feed);
 

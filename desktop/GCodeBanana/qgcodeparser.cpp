@@ -17,6 +17,8 @@ QString QGCodeParser::strippedCode()
     {
         newLines.replace(i, stripComments(newLines.at(i)));
     }
+
+    return newLines.join('\n');
 }
 
 bool QGCodeParser::hasError()

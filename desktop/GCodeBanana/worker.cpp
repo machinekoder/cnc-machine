@@ -105,7 +105,10 @@ void Worker::commandReceived(const QByteArray command)
 
 void Worker::aliveTimerTick()
 {
-    sendCommand("alive\n");
+    if (m_currentState == StoppedState)
+    {
+        sendCommand("alive\n");
+    }
 }
 
 void Worker::startQueue()
@@ -117,6 +120,7 @@ void Worker::startQueue()
 
     // send the first 3 commands
     m_currentLine = 0;
+    m_waitingCount = 0;
     for (int i = 0; i < m_bufferSize; ++i)
     {
         sendLine();
@@ -166,5 +170,7 @@ void Worker::sendLine()
 
         m_currentLine++;
         emit currentLineChanged(m_currentLine - m_waitingCount + 1);
+
+        qDebug() << line;
     }
 }

@@ -1,9 +1,10 @@
-/*
 #pragma once
 #include "app.h"
+#include "taskLed.h"
+#include "taskUsbConnection.h"
+#include "taskMotorSteuerung.h"
 
-OS_TCB App_TaskStartTCB;              / / Application Startup Task Control Block (TCB) 
-CPU_STK App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];             // Start Task Stack 
+static OS_TCB App_TaskStartTCB;               /* Application Startup Task Control Block (TCB) */
+static CPU_STK App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];             /* Start Task Stack */
 
 void App_TaskStart (void  *p_arg);
-*/

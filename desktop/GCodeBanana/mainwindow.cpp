@@ -318,7 +318,7 @@ QString MainWindow::translateGCode(QString code, double x, double y, double z)
             {
                 newLine.append(" Y" + QString::number(oldY, 'f', 4));
             }
-            if (oldZ != 0.0)
+            //if (oldZ != 0.0)
             {
                 newLine.append(" Z" + QString::number(oldZ, 'f', 4));
             }
@@ -348,12 +348,14 @@ void MainWindow::usbConnected()
 {
     ui->connectButton->setText(tr("Disconnect"));
     ui->connectButton->setStyleSheet("background-color:green");
+    logText(tr("Machine connected"));
 }
 
 void MainWindow::usbDisconnected()
 {
     ui->connectButton->setText(tr("Connect"));
     ui->connectButton->setStyleSheet("background-color:red");
+    logText(tr("Machine disconnected"));
 }
 
 void MainWindow::workerCurrentLineChanged(int arg)
@@ -391,11 +393,14 @@ void MainWindow::on_startButton_clicked()
         }
         worker->setCommandList(gcodeParser->strippedCode().split('\n'));
         worker->start();
+        logText(tr("Machine started"));
         break;
     }
     case Worker::RunningState: worker->pause();
+        logText(tr("Machine paused"));
         break;
     case Worker::PausedState: worker->start();
+        logText(tr("Machine resumed"));
         break;
     }
 }
@@ -511,6 +516,7 @@ void MainWindow::on_loadFileButton_clicked()
     {
         QString text(file.readAll());
         ui->textEdit->setPlainText(text);
+        logText(tr("File loaded"));
     }
 }
 
@@ -685,4 +691,10 @@ void MainWindow::on_pushButton_17_clicked()
 void MainWindow::on_pushButton_2_clicked()
 {
     sendCommand("test");
+}
+
+void MainWindow::on_resetButton_clicked()
+{
+    worker->stop();
+    logText(tr("Machine reset"));
 }

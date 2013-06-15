@@ -8,11 +8,11 @@ SCRIPTPATH = buildscripts
 ################################################################################
 # Sytem files
 SRC = $(SOURCEPATH)/app.c
-SRC += $(SOURCEPATH)/taskMachine.c
-#SRC += $(SOURCEPATH)/taskSupervisor.c
 SRC += $(SOURCEPATH)/taskStart.c
-SRC += $(SOURCEPATH)/taskBlink.c
+SRC += $(SOURCEPATH)/taskLed.c
 SRC += $(SOURCEPATH)/taskButton.c
+SRC += $(SOURCEPATH)/taskUsbConnection.c
+SRC += $(SOURCEPATH)/taskMotorSteuerung.c
 
 ################################################################################
 #don't edit below
@@ -125,10 +125,10 @@ SSRC += $(LIBRARYPATH)/circularbuffer.c
 #SSRC += $(LIBRARYPATH)/pwm.c
 SSRC += $(LIBRARYPATH)/gpio.c
 SSRC += $(LIBRARYPATH)/pincon.c
-SSRC += $(LIBRARYPATH)/iap.c
+#SSRC += $(LIBRARYPATH)/iap.c
 #SSRC += $(LIBRARYPATH)/wifly.c
 SSRC += $(LIBRARYPATH)/button.c
-SSRC += $(LIBRARYPATH)/crc.c
+#SSRC += $(LIBRARYPATH)/crc.c
 #SSRC += $(LIBRARYPATH)/ssp.c
 #SSRC += $(LIBRARYPATH)/rfm12.c
 SSRC += $(LIBRARYPATH)/debug.c
