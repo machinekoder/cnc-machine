@@ -49,7 +49,7 @@
       <item>
        <widget class="QPushButton" name="loadFileButton">
         <property name="text">
-         <string>&amp;Load File</string>
+         <string>&amp;Load Test</string>
         </property>
        </widget>
       </item>
