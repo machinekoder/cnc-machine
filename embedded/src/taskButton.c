@@ -1,4 +1,5 @@
 #include "taskButton.h"
+#include "app.h"
 
 #define BUTTON_STEP_UM 5000
 
@@ -42,37 +43,37 @@ void App_TaskButton (void *p_arg)
                         if (value.id == BUTTON_Xplus)
                         {
                             movement = value.count * BUTTON_STEP_UM;
-                            setXDirectionUM(movement);
+                            App_setXDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "X: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Xminus)
                         {
                             movement = -value.count * BUTTON_STEP_UM;
-                            setXDirectionUM(movement);
+                            App_setXDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "X: %imm\n", movement);
                         }
                         if (value.id == BUTTON_Yplus)
                         {
                             movement = value.count * BUTTON_STEP_UM;
-                            setYDirectionUM(movement);
+                            App_setYDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "Y: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Yminus)
                         {
                             movement = -value.count * BUTTON_STEP_UM;
-                            setYDirectionUM(movement);
+                            App_setYDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "Y: %imm\n", movement);
                         }
                         if (value.id == BUTTON_Zplus)
                         {
                             movement = value.count * BUTTON_STEP_UM;
-                            setZDirectionUM(movement);
+                            App_setZDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "Z: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_Zminus)
                         {
                             movement = -value.count * BUTTON_STEP_UM;
-                            setZDirectionUM(movement);
+                            App_setZDirectionUM(movement);
                             Debug_printf(Debug_Level_2, "Z: %imm\n", movement);
                         }
                         else if (value.id == BUTTON_OK)

@@ -52,23 +52,6 @@ bool testing = FALSE;
 
 int8 enqueueCncCommand(int32 newXum, int32 newYum, int32 newZum, uint32 feed);
 int8 dequeueCncCommand(QueueItem *item);
-void processCncCommands();
-
-bool getSteps(CommandBufferItem *item);
-
-/** starts moving in Direction X.
- *  @param stepsX are the steps >0= +  <0= -
- */
-bool setXDirectionUM (int32 mmm);
-bool setYDirectionUM (int32 mmm);
-bool setZDirectionUM (int32 mmm);
-
-void homeX();
-void homeY();
-void homeZ();
-void homeAll();
-void stopMachine();
-bool cncCalibrateZentool (double measuredDistanceX, double measuredDistanceY, double measuredDistanceZ);
 
 /*
 ************************************************************************************************
@@ -180,7 +163,7 @@ int main (void)
 bool App_putIntoCommandPuffer (int32 newXum, int32 newYum, int32 newZum, uint32 feed)
 {
     enqueueCncCommand(newXum, newYum, newZum, feed);
-    processCncCommands();
+    App_processCncCommands();
 
     return TRUE;
 }
@@ -201,7 +184,7 @@ int8 dequeueCncCommand(QueueItem *item)
     return Cb_get(&cncQueueBuffer, (void*)item);
 }
 
-void processCncCommands()
+void App_processCncCommands()
 {
     QueueItem item;
     
@@ -241,7 +224,7 @@ void processCncCommands()
     }
 }
 
-bool getSteps(CommandBufferItem *item)
+bool App_getSteps(CommandBufferItem *item)
 {
     int32 xOffset;
     int32 yOffset;
@@ -299,25 +282,25 @@ bool getSteps(CommandBufferItem *item)
     return TRUE;
 }
 
-bool setXDirectionUM(int32 um)
+bool App_setXDirectionUM(int32 um)
 {
     currentX += um;
     return App_setXDirection(um * xCalibration);
 }
 
-bool setYDirectionUM(int32 um)
+bool App_setYDirectionUM(int32 um)
 {
     currentY += um;
     return App_setYDirection(um * yCalibration);
 }
 
-bool setZDirectionUM(int32 um)
+bool App_setZDirectionUM(int32 um)
 {
     currentZ += um;
     return App_setZDirection(um * zCalibration);
 }
 
-void homeX()
+void App_homeX()
 {
     OS_ERR       err;
 
@@ -336,7 +319,7 @@ void homeX()
     applicationState = ApplicationState_Idle;
 }
 
-void homeY()
+void App_homeY()
 {
     OS_ERR       err;
 
@@ -355,7 +338,7 @@ void homeY()
     applicationState = ApplicationState_Idle;
 }
 
-void homeZ()
+void App_homeZ()
 {
     OS_ERR       err;
 
@@ -374,7 +357,7 @@ void homeZ()
     applicationState = ApplicationState_Idle;
 }
 
-void homeAll()
+void App_homeAll()
 {
     OS_ERR       err;
 
@@ -405,7 +388,7 @@ void homeAll()
     applicationState = ApplicationState_Idle;
 }
 
-void stopMachine()
+void App_stopMachine()
 {
     targetX = currentX;
     targetY = currentY;
@@ -415,7 +398,7 @@ void stopMachine()
     applicationState = ApplicationState_Idle;
 }
 
-bool cncCalibrateZentool (double measuredDistanceX, double measuredDistanceY, double measuredDistanceZ)
+bool App_cncCalibrateZentool (double measuredDistanceX, double measuredDistanceY, double measuredDistanceZ)
 {
     OS_ERR       err;
     
@@ -425,7 +408,7 @@ bool cncCalibrateZentool (double measuredDistanceX, double measuredDistanceY, do
     yCalibration = (int32)(((double)(CALIBRATION_AMOUNT) / (measuredDistanceY*100.0)) * (double)yCalibration);
     zCalibration = (int32)(((double)(CALIBRATION_AMOUNT_Z) / (measuredDistanceZ*100.0)) * (double)zCalibration);
     
-    homeAll();                              // home all axes
+    App_homeAll();                              // home all axes
     App_setXDirection(CALIBRATION_AMOUNT * xCalibration);      // move all axes a defined amount
     while (stepsX > 0) { 
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
@@ -439,7 +422,7 @@ bool cncCalibrateZentool (double measuredDistanceX, double measuredDistanceY, do
         OSTimeDlyHMSM(0u, 0u, 0u, 100u, OS_OPT_TIME_HMSM_STRICT, &err);
     }
 
-    homeAll();
+    App_homeAll();
     // now the user has to measure the distance;
 
     Debug_printf(Debug_Level_2, "Distance should be 100mm in x+ und y+ \n if not Pleas measure Distances and run Again \n");

@@ -23,17 +23,17 @@ void App_TaskMotorSteuerung (void *p_arg)
 
         if (applicationState == ApplicationState_Working)
         {
-            if (getSteps(&item) != FALSE)
+            if (App_getSteps(&item) != FALSE)
             {
-                setXDirectionUM(item.stepsX);
-                setYDirectionUM(item.stepsY);
-                setZDirectionUM(item.stepsZ);
+                App_setXDirectionUM(item.stepsX);
+                App_setYDirectionUM(item.stepsY);
+                App_setZDirectionUM(item.stepsZ);
             }
             else    // we finished a command
             {
                 USB_printf("ok\n");
                 applicationState = ApplicationState_Idle;
-                processCncCommands();
+                App_processCncCommands();
             }
         }
         OSTimeDlyHMSM(0u, 0u, 0u, commandDelay, OS_OPT_TIME_HMSM_STRICT, &err);

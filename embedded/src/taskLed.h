@@ -1,4 +1,5 @@
 #pragma once
+#include <led.h>
 #include "app.h"
 
 #define APP_LED_STACK_SIZE 10

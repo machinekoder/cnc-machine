@@ -392,7 +392,7 @@ void processCommand(char *buffer)
         {
             if (applicationState == ApplicationState_Idle)
             {
-                homeX();
+                App_homeX();
             }
             return;
         }
@@ -400,7 +400,7 @@ void processCommand(char *buffer)
         {
             if (applicationState == ApplicationState_Idle)
             {
-                homeY();
+                App_homeY();
             }
             return;
         }
@@ -408,7 +408,7 @@ void processCommand(char *buffer)
         {
             if (applicationState == ApplicationState_Idle)
             {
-                homeZ();
+                App_homeZ();
             }
             return;
         }
@@ -416,7 +416,7 @@ void processCommand(char *buffer)
         {
             if (applicationState == ApplicationState_Idle)
             {
-                homeAll();
+                App_homeAll();
             }
             return;
         }
@@ -435,14 +435,14 @@ void processCommand(char *buffer)
         
         if (applicationState == ApplicationState_Idle)
         {
-            cncCalibrateZentool(atof(dataPointer), atof(dataPointer1), atof(dataPointer2));
+            App_cncCalibrateZentool(atof(dataPointer), atof(dataPointer1), atof(dataPointer2));
         }
 
         return;
     }
     else if (compareBaseCommand("stop", dataPointer))
     {
-        stopMachine();
+        App_stopMachine();
         return;
     }
     else if (compareBaseCommand("test", dataPointer))

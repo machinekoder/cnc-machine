@@ -13,6 +13,7 @@ SRC += $(SOURCEPATH)/taskLed.c
 SRC += $(SOURCEPATH)/taskButton.c
 SRC += $(SOURCEPATH)/taskUsbConnection.c
 SRC += $(SOURCEPATH)/taskMotorSteuerung.c
+SRC += $(SOURCEPATH)/control.c
 
 ################################################################################
 #don't edit below

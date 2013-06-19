@@ -9,14 +9,12 @@
 #include <defines.h>
 #include <includes.h>
 #include <sys/stat.h>
-#include <timer.h>
 #include <zentoolworksDriver.h>
 #include "taskStart.h"
 #include "taskButton.h"
 #include "taskLed.h"
 #include "taskMotorSteuerung.h"
 #include "taskUsbConnection.h"
-#include "debug.h"
 
 /*
 ************************************************************************************************
@@ -106,4 +104,19 @@ extern int32 targetZ;     // current Z pos in um
 ************************************************************************************************
 */
 bool App_putIntoCommandPuffer (int32 newXum, int32 newYum, int32 newZum, uint32 feed);
+bool App_cncCalibrateZentool (double measuredDistanceX, double measuredDistanceY, double measuredDistanceZ);
 
+/** starts moving in Direction X.
+ *  @param stepsX are the steps >0= +  <0= -
+ */
+void App_homeX();
+void App_homeY();
+void App_homeZ();
+void App_homeAll();
+bool App_setXDirectionUM (int32 mmm);
+bool App_setYDirectionUM (int32 mmm);
+bool App_setZDirectionUM (int32 mmm);
+void App_stopMachine();
+
+bool App_getSteps(CommandBufferItem *item);
+void App_processCncCommands();

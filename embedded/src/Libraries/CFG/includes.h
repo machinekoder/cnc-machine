@@ -46,7 +46,7 @@
 #include  <stdarg.h>
 #include  <stdio.h>
 #include  <stdlib.h>
-#include <stdint.h>
+#include  <stdint.h>
 #include  <math.h>
 
 
@@ -58,7 +58,7 @@
 
 #include  <cpu.h>
 #include  <lib_def.h>
-#include  <lib_ascii.h>
+//#include  <lib_ascii.h>
 #include  <lib_math.h>
 #include  <lib_mem.h>
 #include  <lib_str.h>
@@ -72,21 +72,16 @@
 
 #include <app_cfg.h>
 #include <bsp.h>
-#include <os_serial_lite.h>
 #include <lpc17xx_ssp.h>
-#include <lpc17xx_dac.h>
-//#include <uart.h>
-#include <led.h>
-#include <dac.h>
 #include <gpio.h>
 #include <pincon.h>
-
+#include <circularbuffer.h>
 #include <usbapi.h>
 #include <usbdebug.h>
 #include <usbdesc.h>
-
 #include <usbhw_lpc.h>
 #include <usbstruct.h>
+#include <debug.h>
 
 /*
 *********************************************************************************************************
@@ -112,7 +107,7 @@
 *********************************************************************************************************
 */
 
-#include  <app_probe.h>
+//#include  <app_probe.h>
 
 
 /*
@@ -121,22 +116,13 @@
 *********************************************************************************************************
 */
 
-#include  <app_serial.h>
+//#include  <app_serial.h>
 
 /*
 *********************************************************************************************************
 *                                                  OWN
 *********************************************************************************************************
 */
-
-#include "taskStart.h"
-#include "timer.h"
-#include "gpio.h"
-#include "button.h"
-#include "gpio.h"
-#include "pincon.h"
-
-
 
 /*
 *********************************************************************************************************

@@ -1,5 +1,6 @@
 #pragma once
 #include "app.h"
+#include <button.h>
 
 static OS_TCB App_TaskButtonTCB;
 static CPU_STK App_TaskButtonStk[APP_STACK_SIZE];
