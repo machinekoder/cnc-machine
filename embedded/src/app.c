@@ -242,6 +242,9 @@ bool App_getSteps(CommandBufferItem *item)
         item->stepsX = 0;
         item->stepsY = 0;
         item->stepsZ = 0;
+        CSP_TmrStart(CSP_TMR_NBR_00);   // Workaround
+        CSP_TmrStart(CSP_TMR_NBR_01);
+        CSP_TmrStart(CSP_TMR_NBR_02);
         return TRUE;
     }
 
