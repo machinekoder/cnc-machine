@@ -153,7 +153,7 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 FLASHTOOL = flash_lpc1343.sh
 
-OPT = 0
+OPT = 1
 DEBUG = dwarf-2
 
 OPTFLAGS = -O$(OPT)

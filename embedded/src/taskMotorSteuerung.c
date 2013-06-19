@@ -97,8 +97,9 @@ void moveXDirection ()
     }
     else
     {
-        CSP_TmrStop(CSP_TMR_NBR_00);
         stepsX = 0;
+        Gpio_clear(MOTOR_X_CLK_PORT,MOTOR_X_CLK_PIN);
+        CSP_TmrStop(CSP_TMR_NBR_00);
     }
 
 }
@@ -123,8 +124,10 @@ void moveYDirection ()
     }
     else
     {
-        CSP_TmrStop(CSP_TMR_NBR_01);
         stepsY = 0;
+        Gpio_clear(MOTOR_Y_CLK_PORT,MOTOR_Y_CLK_PIN);
+        CSP_TmrStop(CSP_TMR_NBR_01);
+
     }
 }
 
@@ -148,8 +151,9 @@ void moveZDirection ()
     }
     else
     {
-        CSP_TmrStop(CSP_TMR_NBR_02);
         stepsZ = 0;
+        Gpio_clear(MOTOR_Z_CLK_PORT,MOTOR_Z_CLK_PIN);
+        CSP_TmrStop(CSP_TMR_NBR_02);
     }
 }
 
