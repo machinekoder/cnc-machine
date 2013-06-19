@@ -103,11 +103,11 @@
 % Name der Autorin/des Autors eingeben:
 \put(-30,-450){\large Ausgeführt von:\ Alexander Rössler }
 \put(+54,-470){\large \ Johannes Wimmer}
-\put(+204,-450){\large \ Koroosh }
+\put(+204,-450){\large \ Koroosh Pirghaibi }
 \put(+204,-470){\large \ }
 \put(-30,-490){\large Matrikelnummer: 1110254020}
-\put(+63,-510){\large 11102540??}
-\put(+210,-490){\large 1110254002}
+\put(+63,-510){\large 1110254023}
+\put(+210,-490){\large 1110254003}
 \put(+210,-510){\large }
 
 \put(-30,-550){\large Begutachter: Dr. Martin Horauer}
@@ -129,9 +129,29 @@
 
 %=====================================================================================================================%
 \section{Ziel}
-Ziel des Projekts ist es sowohl Steuer als auch Embedded Software für eine CNC-Maschine zu entwickeln.
+Das Ziel dieses Projekts ist der Entwurf, Implementierung, und der Test einer Embedded Software mit der Hilfe von einem „eStick“  und einem „Embedded Artists LPCXpresso baseboard“ für eine CNC-Maschine. Die Maschine, welche im Rahmen dieses Projekts verwendet wurde, ist die Zentoolworks mit der Microschritt-Leistungsendstufe SMC11.
 
 \section{Funktionsweise}
+Über eine graphische Oberfläche werden Befehle und Koordinatendaten des abzuarbeitenden Musters über USB an einen LPC1758 gesendet. Der Microcontroller steuert die Treiberstuffen (SMC11G) der Schrittmotoren.\\\\
+Die SMC11 ist eine kompakte Mikroschritt-Leistungsendstufe zur Ansteuerung von 4-, 6- und 8-Leiter-Schrittmotoren.  
+Die SMC11 bietet folgende Funktionen: 
+
+\begin{itemize}
+\item Ansteuerung der Eingänge „Takt“, „Richtung“, „Enable“ und „Stromabsenkung“ 
+über 3,5 V Low Voltage Prozessoren oder über ein 3,5 V bzw. 5 V TTL-Signal 
+möglich. 
+\item Automatische Stromabsenkung: um die thermische Belastung des 
+Motors und der Endstufe im Stillstand zu reduzieren. Wird der Phasenstrom nach
+einer Taktpause von maximal 1,5 sek. automatisch auf < 50 Prozent des  eingestellten Wertes abgesenkt. 
+\end{itemize}
+Bei der Implementierung wurden insgesamt 4 Tasks angelegt:
+\begin{itemize}
+\item Start-Task
+\item Button-Task
+\item Motorsteuerung-Task
+\item USB-Connection-Task
+
+\end{itemize}
 
 \chapter{Umsetzung}
 
@@ -151,7 +171,7 @@ Ziel des Projekts ist es sowohl Steuer als auch Embedded Software für eine CNC-
 
 \subsection{GUI}
 Die GUI wird in zwei Fenstern implementiert. Das Hauptfenster enthält alle Elemente um die Maschine anzusteuern und Ausgaben zu loggen.
-Das Preview Window diehnt nur zur Visualisierung des Pfades.
+Das Preview Window dient nur zur Visualisierung des Pfades.
 \subsubsection{Mockup}
     \begin{figure}[H]
     \centering
@@ -172,11 +192,17 @@ Das Preview Window diehnt nur zur Visualisierung des Pfades.
         \caption{\label{lm324}{Kommunikation}}
 \end{figure}
 \section{Kommunikation zwischen dem PC und dem Microcontroller}
-\section{Kommunikation zwischen dem Microcontroller und der Fraesmaschine}
+Die Kommunikation zwischen dem PC (GUI-Aplikation) und dem Microcontroller erfolgt über USB. Drei G-Code Befehle werden jeweils von der graphischen Oberfläche an den Microcontroller geschickt. Nach dem Abarbeiten der ersten drei Befehle werden drei neue Befehle an den Microcontroller geschickt. Der Microcontroller liefert einen Finish-Befehl an die graphische Oberfläche, wenn er am Ende von dem G-Code angekommen ist.\\\\
+Das Steuerkreuz sendet je nach Button 0.1, 1, 10 oder 100 mm Schritte an den Microcontroller.
+\section{Kommunikation zwischen dem Microcontroller und der Motorsteuerung}
+Wenn der USB-Empfangspuffer nicht leer ist, wird der empfangene Befehl in Einzelbefehle, die durch Leerzeichen getrennt sind, aufgesplaten. Die Koordinatenwerte und die Geschwindigkeitswerte der einzelnen Befehle werden in einem Puffer gespeichert. Der regelmäßig aufgerufene Task Motorsteuerung ruft während des Zustands „working“ eine Funktion auf, die je nach eingestellter Geschwindigkeit auf allen Achsen eine gewisse Anzahl an Schritten abfaehrt. \\
+\\Andere Befehle wie homing, calibration, oder Abbruch werden direkt nach dem Empfang von USB-Task aufgerufen.
 
+\section{Kommunikation zwischen der Motorsteuerung und der Fraesmaschine}
+Die von der Motorsteuerung aufgerufene Funktion holt die aktuellen Werte aus dem Puffer, startet den Timer, und setzt die Richtung. Beim Ablauf des Timers wird jedes Mal die Taktflanke für den Schrittmotor getoggelt. Nach dem die Schritte, welche zu fahren sind, abgearbeitet sind, wird der Timer und somit der Motor gestoppt.
 
  %\begin{figure}[!ht]
- %   \centering
+ %   \centeringe
  %       \includegraphics[width=260pt]{./picture/LM324_triangle.png}
         % LM324_triangle.png: 0x0 pixel, 250dpi, 0.00x0.00 cm, bb=
  %       \caption{\label{lm324}{Ausgangssignal LM324}}
@@ -202,8 +228,10 @@ Das Preview Window diehnt nur zur Visualisierung des Pfades.
 % \addsec{Abk"urzungsverzeichnis} zu ersetzen
 \addchap{Abk"urzungsverzeichnis}
 \hspace{-17mm}\begin{tabular}{>{\raggedleft}p{0.2\linewidth} p{0.75\linewidth} p{0.1\linewidth}}
-PWM & Pulsweitenmodulation \\
-OPV & Operationsverstärker
+CNC  & Computerized Numercial Control \\
+GUI  & Graphical User Interface \\
+USB  & Universal Serial Bus \\
+
 \end{tabular}
 
 % Anh"ange
